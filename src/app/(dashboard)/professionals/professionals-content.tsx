@@ -1,25 +1,38 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Pencil, Plus, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ProfessionalModal } from "@/components/professionals/professional-modal"
-import { DeleteProfessionalModal } from "@/components/professionals/delete-professional-modal"
-import { formatPhoneNumber } from "@/lib/utils"
-import { Pagination } from "@/components/ui/pagination"
-import { useProfessionals } from "./use-professionals"
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ProfessionalModal } from "@/components/professionals/professional-modal";
+import { DeleteProfessionalModal } from "@/components/professionals/delete-professional-modal";
+import { formatPhoneNumber } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
+import { useProfessionals } from "./use-professionals";
+import { Professional } from "@prisma/client";
 
-export function ClientsContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const page = Number(searchParams.get("page") || "1")
-  const { professionals, totalPages, isLoading, mutate } = useProfessionals(page)
+export function ProfessionalsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const page = Number(searchParams.get("page") || "1");
+  const { professionals, totalPages, isLoading, mutate } =
+    useProfessionals(page);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [editingProfessional, setEditingProfessional] = useState<any | null>(null)
-  const [deletingProfessional, setDeletingProfessional] = useState<any | null>(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingProfessional, setEditingProfessional] = useState<any | null>(
+    null
+  );
+  const [deletingProfessional, setDeletingProfessional] = useState<any | null>(
+    null
+  );
 
   async function handleCreateProfessional(data: any) {
     try {
@@ -29,68 +42,77 @@ export function ClientsContent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to create professional")
+        throw new Error("Failed to create professional");
       }
 
-      mutate()
-      setIsCreateModalOpen(false)
+      mutate();
+      setIsCreateModalOpen(false);
     } catch (error) {
-      console.error("Error creating professional:", error)
-      throw error
+      console.error("Error creating professional:", error);
+      throw error;
     }
   }
 
   async function handleUpdateProfessional(data: any) {
     try {
-      const response = await fetch(`/api/professionals/${editingProfessional.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
+      const response = await fetch(
+        `/api/professionals/${editingProfessional.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to update professional")
+        throw new Error("Failed to update professional");
       }
 
-      mutate()
-      setEditingProfessional(null)
+      mutate();
+      setEditingProfessional(null);
     } catch (error) {
-      console.error("Error updating professional:", error)
-      throw error
+      console.error("Error updating professional:", error);
+      throw error;
     }
   }
 
   async function handleDeleteProfessional() {
     try {
-      const response = await fetch(`/api/professionals/${deletingProfessional.id}`, {
-        method: "DELETE",
-      })
+      const response = await fetch(
+        `/api/professionals/${deletingProfessional.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to delete professional")
+        throw new Error("Failed to delete professional");
       }
 
-      mutate()
-      setDeletingProfessional(null)
+      mutate();
+      setDeletingProfessional(null);
     } catch (error) {
-      console.error("Error deleting professional:", error)
-      throw error
+      console.error("Error deleting professional:", error);
+      throw error;
     }
   }
 
   function handlePageChange(newPage: number) {
-    router.push(`/clients?page=${newPage}`)
+    router.push(`/clients?page=${newPage}`);
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-green-600 hover:bg-green-700">
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="bg-green-600 hover:bg-green-700"
+        >
           <Plus className="mr-2 h-4 w-4" /> Novo profissional
         </Button>
       </div>
@@ -119,14 +141,18 @@ export function ClientsContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              professionals.map((professional) => (
+              professionals.map((professional: Professional) => (
                 <TableRow key={professional.id}>
                   <TableCell>{professional.name}</TableCell>
                   <TableCell>{formatPhoneNumber(professional.phone)}</TableCell>
                   <TableCell>{professional.company}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="icon" onClick={() => setEditingProfessional(professional)}>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setEditingProfessional(professional)}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -146,7 +172,13 @@ export function ClientsContent() {
         </Table>
       </div>
 
-      {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
 
       <ProfessionalModal
         isOpen={isCreateModalOpen}
@@ -180,5 +212,5 @@ export function ClientsContent() {
         />
       )}
     </div>
-  )
+  );
 }

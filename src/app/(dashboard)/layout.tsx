@@ -1,5 +1,5 @@
 import type React from "react";
-import { Navbar } from "@/components/layout/navbar";
+import { Sidebar } from "@/components/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -8,7 +8,7 @@ export default async function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      <Sidebar />
       <main className="flex-1 container py-6 mx-auto">{children}</main>
     </div>
   );
