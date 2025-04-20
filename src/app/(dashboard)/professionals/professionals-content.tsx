@@ -23,8 +23,7 @@ export function ProfessionalsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { professionals, totalPages, isLoading, mutate } =
-    useProfessionals(page);
+  const { professionals, totalPages, isLoading, mutate } = useProfessionals(page);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<any | null>(
@@ -103,7 +102,7 @@ export function ProfessionalsContent() {
   }
 
   function handlePageChange(newPage: number) {
-    router.push(`/clients?page=${newPage}`);
+    router.push(`/professionals?page=${newPage}`);
   }
 
   return (
@@ -177,6 +176,7 @@ export function ProfessionalsContent() {
           currentPage={page}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          isLoading={isLoading}
         />
       )}
 
