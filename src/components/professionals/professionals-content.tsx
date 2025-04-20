@@ -16,14 +16,15 @@ import { ProfessionalModal } from "@/components/professionals/professional-modal
 import { DeleteProfessionalModal } from "@/components/professionals/delete-professional-modal";
 import { formatPhoneNumber } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
-import { useProfessionals } from "./use-professionals";
+import { useProfessionals } from "@/hooks/use-professionals";
 import { Professional } from "@prisma/client";
 
 export function ProfessionalsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { professionals, totalPages, isLoading, mutate } = useProfessionals(page);
+  const { professionals, totalPages, isLoading, mutate } =
+    useProfessionals(page);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<any | null>(
@@ -171,14 +172,12 @@ export function ProfessionalsContent() {
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          isLoading={isLoading}
-        />
-      )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        isLoading={isLoading}
+      />
 
       <ProfessionalModal
         isOpen={isCreateModalOpen}

@@ -16,7 +16,7 @@ import { AudioModal } from "@/components/audio/audio-modal";
 import { DeleteAudioModal } from "@/components/audio/delete-audio-modal";
 import { createAudioUrl, truncateText } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
-import { useAudios } from "./use-audios";
+import { useAudios } from "@/hooks/use-audios";
 
 export function AudiosContent() {
   const router = useRouter();

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { ProfessionalsContent } from "./professionals-content";
+import { ProfessionalsContent } from "../../../components/professionals/professionals-content";
+import { LoaderCircle } from "lucide-react";
 
 export default function ProfessionalsPage() {
   return (
@@ -10,7 +11,7 @@ export default function ProfessionalsPage() {
           Gerencie os profissionais cadastrados no sistema.
         </p>
       </div>
-      <Suspense fallback={<div>Carregando...</div>}>
+      <Suspense fallback={<LoaderCircle className="animate-spin" />}>
         <ProfessionalsContent />
       </Suspense>
     </div>
