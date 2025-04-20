@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { currentUser } from "@clerk/nextjs/server";
-import { SignInButton } from "@clerk/nextjs";
 
 export async function Navbar() {
   const user = await currentUser();
@@ -20,7 +19,9 @@ export async function Navbar() {
               <Link href="/dashboard">Dashboard</Link>
             </Button>
           ) : (
-            <SignInButton />
+            <Button asChild>
+              <Link href="/sign-in">Entrar</Link>
+            </Button>
           )}
         </div>
       </div>
