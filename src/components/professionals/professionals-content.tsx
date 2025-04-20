@@ -109,10 +109,7 @@ export function ProfessionalsContent() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-green-600 hover:bg-green-700"
-        >
+        <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Novo profissional
         </Button>
       </div>
