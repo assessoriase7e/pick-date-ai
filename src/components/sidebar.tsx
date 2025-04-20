@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Music, User } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Sidebar() {
   const { isSignedIn } = useUser();
@@ -30,7 +31,8 @@ export function Sidebar() {
       />
 
       {/* Add more items as needed */}
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-2 w-full items-center justify-center">
+        <ThemeToggle />
         <UserButton />
       </div>
     </aside>
