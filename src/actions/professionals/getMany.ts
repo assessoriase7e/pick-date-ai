@@ -44,8 +44,6 @@ export async function listProfessionals(
     });
     const total = await prisma.professional.count();
 
-    console.log(professionals);
-
     return {
       success: true,
       data: {

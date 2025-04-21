@@ -26,9 +26,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
 import { ApiKey } from "@prisma/client"; // Importe o tipo ApiKey
 import { useApiKeys } from "@/hooks/use-api-keys";
+import { toast } from "sonner";
 
 // Interface para o tipo de dado retornado pelo hook/API, incluindo a chave na criação
 interface ApiKeyWithKey extends ApiKey {
@@ -40,7 +40,6 @@ export function ApiKeysContent() {
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
   const { apiKeys, totalPages, isLoading, mutate } = useApiKeys(page);
-  const { toast } = useToast();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingApiKey, setEditingApiKey] = useState<ApiKey | null>(null);
@@ -66,14 +65,10 @@ export function ApiKeysContent() {
       setNewlyGeneratedKey(newKeyData.key); // Armazena a chave gerada para mostrar uma vez
       mutate(); // Revalida os dados
       setIsCreateModalOpen(false);
-      toast({ title: "Chave de API criada com sucesso!" });
+      toast("Chave de API criada com sucesso!");
     } catch (error) {
       console.error("Erro ao criar chave:", error);
-      toast({
-        title: "Erro ao criar chave",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      toast("Erro ao criar chave");
     }
   }
 
@@ -92,14 +87,10 @@ export function ApiKeysContent() {
 
       mutate();
       setEditingApiKey(null);
-      toast({ title: "Chave de API atualizada com sucesso!" });
+      toast("Chave de API atualizada com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar chave:", error);
-      toast({
-        title: "Erro ao atualizar chave",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      toast("Erro ao atualizar chave");
     }
   }
 
@@ -116,14 +107,10 @@ export function ApiKeysContent() {
 
       mutate();
       setDeletingApiKey(null);
-      toast({ title: "Chave de API excluída com sucesso!" });
+      toast("Chave de API excluída com sucesso!");
     } catch (error) {
       console.error("Erro ao excluir chave:", error);
-      toast({
-        title: "Erro ao excluir chave",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      toast("Erro ao excluir chave");
     }
   }
 
@@ -131,11 +118,11 @@ export function ApiKeysContent() {
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        toast({ title: "Chave copiada para a área de transferência!" });
+        toast("Chave copiada para a área de transferência!");
       })
       .catch((err) => {
         console.error("Erro ao copiar:", err);
-        toast({ title: "Erro ao copiar chave", variant: "destructive" });
+        toast("Erro ao copiar chave");
       });
   }
 

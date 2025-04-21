@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 const professionalSchema = z.object({
   name: z.string().min(2, {
@@ -64,11 +64,7 @@ export function ProfessionalForm({
       await onSubmit(formattedData);
       form.reset();
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o profissional.",
-      });
+      toast("Ocorreu um erro ao salvar o profissional.");
       console.error(error);
     } finally {
       setIsLoading(false);

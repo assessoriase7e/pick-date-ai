@@ -18,9 +18,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
 import { ProfessionalCombobox } from "./professional-combobox";
 import { blobToBase64 } from "@/lib/utils";
+import { toast } from "sonner";
 
 const audioSchema = z.object({
   professionalId: z.string({
@@ -90,11 +90,7 @@ export function AudioForm({ initialData, onSubmit, onCancel }: AudioFormProps) {
       form.reset();
       setAudioPreview(null);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o áudio.",
-      });
+      toast("Ocorreu um erro ao salvar o áudio.");
       console.error(error);
     } finally {
       setIsLoading(false);
