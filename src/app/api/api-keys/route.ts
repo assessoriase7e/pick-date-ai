@@ -38,7 +38,7 @@ export async function GET(req: Request) {
 // POST: Criar uma nova chave de API
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
+    const { userId } = await auth(); // Obtém o userId da sessão do Clerk
     const { description } = await req.json();
 
     if (!userId) {
@@ -48,8 +48,9 @@ export async function POST(req: Request) {
     const apiKey = generateApiKey(); // Gera uma chave segura
 
     const newApiKey = await prisma.apiKey.create({
+      // O erro ocorre aqui
       data: {
-        userId,
+        userId, // Este userId não existe na tabela User
         key: apiKey,
         description,
       },
