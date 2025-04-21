@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/db";
 import { AudioRecord } from "@prisma/client";
 import { revalidatePath } from "next/cache";

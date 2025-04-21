@@ -1,11 +1,5 @@
 import { prisma } from "@/lib/db";
-import { ImageRecord } from "@prisma/client";
-
-type ImageWithProfessional = ImageRecord & {
-  professional: {
-    name: string;
-  };
-};
+import { ImageWithProfessional } from "@/types/professionals";
 
 type ListImagesSuccess = {
   success: true;
