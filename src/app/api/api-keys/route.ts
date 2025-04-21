@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { generateApiKey } from "@/lib/api-key-utils";
 
-// GET: Listar chaves de API do usuário logado
 export async function GET(req: Request) {
   try {
     const { userId } = await auth();
@@ -12,10 +11,9 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Paginação (opcional, mas recomendado para muitas chaves)
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const limit = 10; // Ou outro valor desejado
+    const limit = 10;
     const skip = (page - 1) * limit;
 
     const apiKeys = await prisma.apiKey.findMany({
@@ -35,28 +33,25 @@ export async function GET(req: Request) {
   }
 }
 
-// POST: Criar uma nova chave de API
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth(); // Obtém o userId da sessão do Clerk
+    const { userId } = await auth();
     const { description } = await req.json();
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const apiKey = generateApiKey(); // Gera uma chave segura
+    const apiKey = generateApiKey();
 
     const newApiKey = await prisma.apiKey.create({
-      // O erro ocorre aqui
       data: {
-        userId, // Este userId não existe na tabela User
+        userId,
         key: apiKey,
         description,
       },
     });
 
-    // Retorne a chave completa APENAS na criação. Não a exponha novamente.
     return NextResponse.json(newApiKey, { status: 201 });
   } catch (error) {
     console.error("[API_KEYS_POST]", error);
