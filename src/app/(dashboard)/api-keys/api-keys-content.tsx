@@ -160,23 +160,25 @@ export function ApiKeysContent() {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Chave de API Criada!</AlertDialogTitle>
-              <AlertDialogDescription>
-                Sua nova chave de API foi gerada. Copie-a e guarde-a em um local
-                seguro.
-                <strong className="block my-2">
-                  Você não poderá vê-la novamente.
-                </strong>
-                <div className="flex items-center gap-2 mt-2 p-2 border rounded bg-muted">
-                  <code className="flex-grow break-all">
-                    {newlyGeneratedKey}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => copyToClipboard(newlyGeneratedKey)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+              <AlertDialogDescription asChild>
+                <div>
+                  Sua nova chave de API foi gerada. Copie-a e guarde-a em um
+                  local seguro.
+                  <strong className="block my-2">
+                    Você não poderá vê-la novamente.
+                  </strong>
+                  <div className="flex items-center gap-2 mt-2 p-2 border rounded bg-muted">
+                    <code className="flex-grow break-all">
+                      {newlyGeneratedKey}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => copyToClipboard(newlyGeneratedKey)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
