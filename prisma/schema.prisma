@@ -7,38 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model professional {
+model Professional {
   id        String        @id @default(cuid())
   name      String
   phone     String
   company   String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  audios    audioRecord[]
-  images    imageRecord[]
+  audios    AudioRecord[]
+  images    ImageRecord[]
+
+  @@map("professional")
 }
 
-model audioRecord {
+model AudioRecord {
   id             String       @id @default(cuid())
   audioBase64    String       @db.Text
   description    String       @db.Text
-  professional   professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   professionalId String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+
+  @@map("audiorecord")
 }
 
-model imageRecord {
+model ImageRecord {
   id             String       @id @default(cuid())
   imageBase64    String       @db.Text
   description    String       @db.Text
-  professional   professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   professionalId String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+
+  @@map("imagerecord")
 }
 
-model user {
+model User {
   id        String   @id
   email     String   @unique
   firstName String?
@@ -47,10 +53,12 @@ model user {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ApiKey apiKey[]
+  ApiKey ApiKey[]
+
+  @@map("user")
 }
 
-model appointments {
+model Appointments {
   id            BigInt   @id @default(autoincrement())
   phone         Decimal? @db.Decimal
   business_name String?
@@ -58,31 +66,38 @@ model appointments {
   end_time      String?
   event_id      String?
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("appointments")
 }
 
-model clients {
+model Clients {
   id            BigInt   @id @default(autoincrement())
   full_name     String?
   phone         String?
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   business_name String?
+
+  @@map("clients")
 }
 
-model documents {
+model Documents {
   id        BigInt                 @id @default(autoincrement())
   content   String?
   metadata  Json?
   embedding Unsupported("vector")?
+
+  @@map("documents")
 }
 
-model apiKey {
+model ApiKey {
   id          String   @id @default(cuid())
   key         String   @unique
   description String?
   userId      String
-  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+  @@map("apikey")
 }
