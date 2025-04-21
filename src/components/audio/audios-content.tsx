@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,33 +16,48 @@ import { AudioModal } from "@/components/audio/audio-modal";
 import { DeleteAudioModal } from "@/components/audio/delete-audio-modal";
 import { createAudioUrl, truncateText } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
-import { useAudios } from "@/hooks/use-audios";
+import { createAudio } from "@/actions/audios/create";
+import { updateAudio } from "@/actions/audios/update";
+import { deleteAudio } from "@/actions/audios/delete";
+import { listAudios } from "@/actions/audios/getMany";
 
 export function AudiosContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { audios, totalPages, isLoading, mutate } = useAudios(page, 20);
+
+  const [audios, setAudios] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingAudio, setEditingAudio] = useState<any | null>(null);
   const [deletingAudio, setDeletingAudio] = useState<any | null>(null);
 
+  async function loadAudios() {
+    setIsLoading(true);
+    const result = await listAudios(page, 20);
+
+    if (result.success) {
+      setAudios(result.data.audios);
+      setTotalPages(result.data.totalPages);
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    loadAudios();
+  }, [page]);
+
   async function handleCreateAudio(data: any) {
     try {
-      const response = await fetch("/api/audios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await createAudio(data);
 
-      if (!response.ok) {
-        throw new Error("Failed to create audio");
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      mutate();
+      loadAudios();
       setIsCreateModalOpen(false);
     } catch (error) {
       console.error("Error creating audio:", error);
@@ -52,19 +67,15 @@ export function AudiosContent() {
 
   async function handleUpdateAudio(data: any) {
     try {
-      const response = await fetch(`/api/audios/${editingAudio.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      if (!editingAudio) return;
 
-      if (!response.ok) {
-        throw new Error("Failed to update audio");
+      const result = await updateAudio(editingAudio.id, data);
+
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      mutate();
+      loadAudios();
       setEditingAudio(null);
     } catch (error) {
       console.error("Error updating audio:", error);
@@ -74,15 +85,15 @@ export function AudiosContent() {
 
   async function handleDeleteAudio() {
     try {
-      const response = await fetch(`/api/audios/${deletingAudio.id}`, {
-        method: "DELETE",
-      });
+      if (!deletingAudio) return;
 
-      if (!response.ok) {
-        throw new Error("Failed to delete audio");
+      const result = await deleteAudio(deletingAudio.id);
+
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      mutate();
+      loadAudios();
       setDeletingAudio(null);
     } catch (error) {
       console.error("Error deleting audio:", error);
