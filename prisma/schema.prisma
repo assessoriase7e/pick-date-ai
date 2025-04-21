@@ -62,3 +62,27 @@ model documents {
   metadata  Json?
   embedding Unsupported("vector")?
 }
+
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  key         String   @unique // A chave de API gerada
+  description String?  // Descrição opcional para a chave
+  userId      String   // Relacionamento com o usuário que criou a chave
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Adicione a relação no modelo User existente
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String
+  company     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  apiKeys ApiKey[] // Relação um-para-muitos com ApiKey
+}
