@@ -1,6 +1,10 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ImageModal } from "./image-modal";
+import { Pagination } from "@/components/ui/pagination";
+import { ImagePlus, Eye, Pencil, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -9,93 +13,110 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Pagination } from "@/components/ui/pagination";
-import { useImages } from "@/hooks/use-images"; // You'll need to create this hook
-import { ImageModal } from "./image-modal"; // You'll need to create this component
-import { DeleteImageModal } from "./delete-image-modal"; // You'll need to create this component
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { createImage } from "@/actions/images/create";
+import { updateImage } from "@/actions/images/update";
+import { deleteImage } from "@/actions/images/delete";
+import { listImages } from "@/actions/images/getMany";
+import { ImageWithProfessional } from "@/types/professionals";
 
 export function ImagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { images, totalPages, isLoading, mutate } = useImages(page);
 
+  const [images, setImages] = useState<ImageWithProfessional[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingImage, setEditingImage] = useState<any | null>(null);
-  const [deletingImage, setDeletingImage] = useState<any | null>(null);
+  const [editingImage, setEditingImage] =
+    useState<ImageWithProfessional | null>(null);
+  const [deletingImage, setDeletingImage] =
+    useState<ImageWithProfessional | null>(null);
+  const [viewingImage, setViewingImage] =
+    useState<ImageWithProfessional | null>(null);
+
+  async function loadImages() {
+    setIsLoading(true);
+    try {
+      const result = await listImages(page);
+      if (result.success) {
+        setImages(result.data!.images);
+        setTotalPages(result.data!.totalPages);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar imagens:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadImages();
+  }, [page]);
 
   async function handleCreateImage(data: any) {
     try {
-      const response = await fetch("/api/images", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create image");
+      const result = await createImage(data);
+      if (result.success) {
+        loadImages();
+        setIsCreateModalOpen(false);
       }
-
-      mutate();
-      setIsCreateModalOpen(false);
     } catch (error) {
-      console.error("Error creating image:", error);
-      throw error;
+      console.error("Erro ao criar imagem:", error);
     }
   }
 
   async function handleUpdateImage(data: any) {
+    if (!editingImage) return;
     try {
-      const response = await fetch(`/api/images/${editingImage.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update image");
+      const result = await updateImage(editingImage.id, data);
+      if (result.success) {
+        loadImages();
+        setEditingImage(null);
       }
-
-      mutate();
-      setEditingImage(null);
     } catch (error) {
-      console.error("Error updating image:", error);
-      throw error;
+      console.error("Erro ao atualizar imagem:", error);
     }
   }
 
   async function handleDeleteImage() {
+    if (!deletingImage) return;
     try {
-      const response = await fetch(`/api/images/${deletingImage.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete image");
+      const result = await deleteImage(deletingImage.id);
+      if (result.success) {
+        loadImages();
+        setDeletingImage(null);
       }
-
-      mutate();
-      setDeletingImage(null);
     } catch (error) {
-      console.error("Error deleting image:", error);
-      throw error;
+      console.error("Erro ao excluir imagem:", error);
     }
-  }
-
-  function handlePageChange(newPage: number) {
-    router.push(`/images?page=${newPage}`);
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <h1 className="text-xl font-bold">Imagens</h1>
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Nova imagem
+          <ImagePlus className="h-4 w-4 mr-2" />
+          Nova Imagem
         </Button>
       </div>
 
@@ -103,100 +124,129 @@ export function ImagesContent() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Imagem</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Profissional</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>Data de Criação</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
-                  Carregando...
+            {images?.map((image) => (
+              <TableRow key={image.id}>
+                <TableCell>{image.description}</TableCell>
+                <TableCell>{image.professional.name}</TableCell>
+                <TableCell>
+                  {format(new Date(image.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                    locale: ptBR,
+                  })}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setViewingImage(image)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setEditingImage(image)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setDeletingImage(image)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
-            ) : images.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
-                  Nenhuma imagem encontrada.
-                </TableCell>
-              </TableRow>
-            ) : (
-              images.map((image: any) => (
-                <TableRow key={image.id}>
-                  <TableCell>
-                    <img
-                      src={image.imageBase64}
-                      alt={image.description}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                  </TableCell>
-                  <TableCell>{image.description}</TableCell>
-                  <TableCell>{image.professional.name}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setEditingImage(image)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => setDeletingImage(image)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </div>
 
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        isLoading={isLoading}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(newPage: number) => {
+            router.push(`/images?page=${newPage}`);
+          }}
+          isLoading={isLoading}
+        />
+      )}
 
       <ImageModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Nova imagem"
-        description="Adicione uma nova imagem ao sistema."
-        onSubmit={handleCreateImage}
+        onSubmit={async (data) => {
+          try {
+            await handleCreateImage(data);
+
+            setIsCreateModalOpen(false);
+          } catch (error) {
+            console.error("Error creating image:", error);
+          }
+        }}
       />
 
       {editingImage && (
         <ImageModal
           isOpen={!!editingImage}
           onClose={() => setEditingImage(null)}
-          title="Editar imagem"
-          description="Edite as informações da imagem."
-          initialData={{
-            description: editingImage.description,
-            imageBase64: editingImage.imageBase64,
-            professionalId: editingImage.professionalId,
-          }}
           onSubmit={handleUpdateImage}
+          initialData={editingImage}
         />
       )}
 
       {deletingImage && (
-        <DeleteImageModal
-          isOpen={!!deletingImage}
-          onClose={() => setDeletingImage(null)}
-          onConfirm={handleDeleteImage}
-          imageDescription={deletingImage.description}
-        />
+        <AlertDialog
+          open={!!deletingImage}
+          onOpenChange={() => setDeletingImage(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Isso excluirá permanentemente a
+                imagem e removerá seus dados de nossos servidores.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteImage}>
+                Continuar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {viewingImage && (
+        <Dialog
+          open={!!viewingImage}
+          onOpenChange={() => setViewingImage(null)}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle></DialogTitle>
+            </DialogHeader>
+            <div className="relative">
+              <img
+                src={viewingImage.imageBase64}
+                alt={viewingImage.description}
+                className="rounded object-contain"
+              />
+            </div>
+            <p>{viewingImage.description}</p>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
