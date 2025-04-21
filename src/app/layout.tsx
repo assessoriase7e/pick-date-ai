@@ -10,7 +10,7 @@ import { ThemeProvider } from "next-themes";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Se7e Audio Base",
+  title: "Se7e Assets",
   description: "Sistema de gerenciamento de áudios",
   generator: "v0.dev",
 };

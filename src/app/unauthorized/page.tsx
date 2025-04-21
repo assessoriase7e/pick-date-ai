@@ -26,7 +26,7 @@ export default function UnauthorizedPage() {
         </h1>
         <p className="text-center text-muted-foreground">
           Você não tem permissão para acessar esta aplicação. Apenas usuários
-          com função de administrador podem acessar o Se7e Audio Base.
+          com função de administrador podem acessar o Se7e Assets.
         </p>
         <p className="text-center text-muted-foreground">
           Entre em contato com o administrador do sistema para solicitar acesso.

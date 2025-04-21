@@ -10,7 +10,7 @@ export async function Navbar() {
       <div className="flex h-16 items-center px-4 container mx-auto">
         <div className="flex items-center space-x-4">
           <Link href="/" className="font-bold text-xl">
-            Se7e Audio Base
+            Se7e Assets
           </Link>
         </div>
         <div className="ml-auto flex items-center space-x-4">

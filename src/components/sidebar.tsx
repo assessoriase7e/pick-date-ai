@@ -1,7 +1,7 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Music, User } from "lucide-react";
+import { Music, User, Image } from "lucide-react"; // Importe o ícone Image
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -28,6 +28,12 @@ export function Sidebar() {
         icon={User}
         label="Profissionais"
         isActive={pathname === "/professionals"}
+      />
+      <SidebarItem // Adicione este item para a página de imagens
+        href="/images"
+        icon={Image}
+        label="Imagens"
+        isActive={pathname === "/images"}
       />
 
       {/* Add more items as needed */}

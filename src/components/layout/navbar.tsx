@@ -9,7 +9,7 @@ export function Navbar() {
       <div className="container flex h-14 items-center justify-between mx-auto">
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold">Se7e Audio Base</span>
+            <span className="font-bold">Se7e Assets</span>
           </Link>
           <nav className="flex items-center space-x-4 lg:space-x-6">
             <Link
