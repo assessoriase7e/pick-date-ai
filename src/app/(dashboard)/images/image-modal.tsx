@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProfessionals } from "@/hooks/use-professionals";
 import Image from "next/image";
 import { ImageRecord, Professional } from "@prisma/client";
+import { listProfessionals } from "@/actions/professionals/getMany";
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -29,16 +29,40 @@ interface ImageModalProps {
     description: string;
     professionalId: string;
   }) => Promise<void>;
-  initialData?: ImageRecord; // Add this line to support editing mode
+  initialData?: ImageRecord;
 }
 
-export function ImageModal({ isOpen, onClose, onSubmit }: ImageModalProps) {
+export function ImageModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+}: ImageModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [description, setDescription] = useState("");
-  const [professionalId, setProfessionalId] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [professionalId, setProfessionalId] = useState(
+    initialData?.professionalId || ""
+  );
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    initialData?.imageBase64 || null
+  );
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
 
-  const { professionals } = useProfessionals();
+  useEffect(() => {
+    async function loadProfessionals() {
+      try {
+        const result = await listProfessionals();
+        if (result.success) {
+          setProfessionals(result.data.professionals);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar profissionais:", error);
+      }
+    }
+    loadProfessionals();
+  }, []);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

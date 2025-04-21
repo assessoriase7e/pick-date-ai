@@ -1,10 +1,8 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ImageModal } from "./image-modal";
-import { useImages } from "@/hooks/use-images";
 import { Pagination } from "@/components/ui/pagination";
 import { ImagePlus, Eye, Pencil, Trash2 } from "lucide-react";
 import {
@@ -33,54 +31,82 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageRecord } from "@prisma/client";
+import { createImage } from "@/actions/images/create";
+import { updateImage } from "@/actions/images/update";
+import { deleteImage } from "@/actions/images/delete";
+import { listImages } from "@/actions/images/getMany";
+import { ImageWithProfessional } from "@/types/professionals";
 
 export function ImagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { images, totalPages, isLoading, mutate } = useImages(page);
 
+  const [images, setImages] = useState<ImageWithProfessional[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingImage, setEditingImage] = useState<ImageRecord | null>(null);
-  const [deletingImage, setDeletingImage] = useState<ImageRecord | null>(null);
-  const [viewingImage, setViewingImage] = useState<ImageRecord | null>(null);
+  const [editingImage, setEditingImage] =
+    useState<ImageWithProfessional | null>(null);
+  const [deletingImage, setDeletingImage] =
+    useState<ImageWithProfessional | null>(null);
+  const [viewingImage, setViewingImage] =
+    useState<ImageWithProfessional | null>(null);
+
+  async function loadImages() {
+    setIsLoading(true);
+    try {
+      const result = await listImages(page);
+      if (result.success) {
+        setImages(result.data!.images);
+        setTotalPages(result.data!.totalPages);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar imagens:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadImages();
+  }, [page]);
+
+  async function handleCreateImage(data: any) {
+    try {
+      const result = await createImage(data);
+      if (result.success) {
+        loadImages();
+        setIsCreateModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Erro ao criar imagem:", error);
+    }
+  }
 
   async function handleUpdateImage(data: any) {
+    if (!editingImage) return;
     try {
-      const response = await fetch(`/api/images/${editingImage?.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update image");
+      const result = await updateImage(editingImage.id, data);
+      if (result.success) {
+        loadImages();
+        setEditingImage(null);
       }
-
-      mutate();
-      setEditingImage(null);
     } catch (error) {
-      console.error("Error updating image:", error);
+      console.error("Erro ao atualizar imagem:", error);
     }
   }
 
   async function handleDeleteImage() {
+    if (!deletingImage) return;
     try {
-      const response = await fetch(`/api/images/${deletingImage?.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete image");
+      const result = await deleteImage(deletingImage.id);
+      if (result.success) {
+        loadImages();
+        setDeletingImage(null);
       }
-
-      mutate();
-      setDeletingImage(null);
     } catch (error) {
-      console.error("Error deleting image:", error);
+      console.error("Erro ao excluir imagem:", error);
     }
   }
 
@@ -161,19 +187,8 @@ export function ImagesContent() {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={async (data) => {
           try {
-            const response = await fetch("/api/images", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
-            });
+            await handleCreateImage(data);
 
-            if (!response.ok) {
-              throw new Error("Failed to create image");
-            }
-
-            mutate();
             setIsCreateModalOpen(false);
           } catch (error) {
             console.error("Error creating image:", error);
