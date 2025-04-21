@@ -1,10 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Validar API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   try {
     const image = await prisma.imageRecord.findUnique({
       where: { id: params.id },
@@ -35,6 +43,13 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Validar API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { description, imageBase64, professionalId } = body;
@@ -77,6 +92,13 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Validar API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   try {
     await prisma.imageRecord.delete({
       where: { id: params.id },
