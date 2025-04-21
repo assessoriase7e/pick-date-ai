@@ -1,7 +1,15 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/db"
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
 
 export async function GET(req: NextRequest) {
+  // Validar API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url)
   const page = Number.parseInt(searchParams.get("page") || "1")
   const limit = Number.parseInt(searchParams.get("limit") || "10")
@@ -31,6 +39,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Validar API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   try {
     const body = await req.json()
     const { name, phone, company } = body
