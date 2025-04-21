@@ -7,38 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Professional {
+model professional {
   id        String        @id @default(cuid())
   name      String
   phone     String
   company   String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  audios    AudioRecord[]
-  images    ImageRecord[]
+  audios    audioRecord[]
+  images    imageRecord[]
 }
 
-model AudioRecord {
+model audioRecord {
   id             String       @id @default(cuid())
   audioBase64    String       @db.Text
   description    String       @db.Text
-  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professional   professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   professionalId String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
 
-model ImageRecord {
+model imageRecord {
   id             String       @id @default(cuid())
   imageBase64    String       @db.Text
   description    String       @db.Text
-  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professional   professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   professionalId String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
 
-model User {
+model user {
   id        String   @id
   email     String   @unique
   firstName String?
@@ -47,7 +47,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ApiKey ApiKey[]
+  ApiKey apiKey[]
 }
 
 model appointments {
@@ -75,12 +75,12 @@ model documents {
   embedding Unsupported("vector")?
 }
 
-model ApiKey {
+model apiKey {
   id          String   @id @default(cuid())
   key         String   @unique
   description String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
