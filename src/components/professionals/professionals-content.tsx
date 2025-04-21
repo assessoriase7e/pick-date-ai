@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,95 +16,78 @@ import { ProfessionalModal } from "@/components/professionals/professional-modal
 import { DeleteProfessionalModal } from "@/components/professionals/delete-professional-modal";
 import { formatPhoneNumber } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
-import { useProfessionals } from "@/hooks/use-professionals";
 import { Professional } from "@prisma/client";
+import { createProfessional } from "@/actions/professionals/create";
+import { updateProfessional } from "@/actions/professionals/update";
+import { deleteProfessional } from "@/actions/professionals/delete";
+import { listProfessionals } from "@/actions/professionals/getMany";
 
 export function ProfessionalsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { professionals, totalPages, isLoading, mutate } =
-    useProfessionals(page);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingProfessional, setEditingProfessional] = useState<any | null>(
-    null
-  );
-  const [deletingProfessional, setDeletingProfessional] = useState<any | null>(
-    null
-  );
+  const [editingProfessional, setEditingProfessional] =
+    useState<Professional | null>(null);
+  const [deletingProfessional, setDeletingProfessional] =
+    useState<Professional | null>(null);
+
+  async function loadProfessionals() {
+    setIsLoading(true);
+    const result = await listProfessionals(page);
+
+    if (result.success) {
+      setProfessionals(result.data.professionals);
+      setTotalPages(result.data.totalPages);
+    }
+    setIsLoading(false);
+  }
 
   async function handleCreateProfessional(data: any) {
-    try {
-      const response = await fetch("/api/professionals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create professional");
-      }
-
-      mutate();
+    const result = await createProfessional(data);
+    if (result.success) {
+      loadProfessionals();
       setIsCreateModalOpen(false);
-    } catch (error) {
-      console.error("Error creating professional:", error);
-      throw error;
+    } else {
+      throw new Error(result.error);
     }
   }
 
   async function handleUpdateProfessional(data: any) {
-    try {
-      const response = await fetch(
-        `/api/professionals/${editingProfessional.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+    if (!editingProfessional) return;
 
-      if (!response.ok) {
-        throw new Error("Failed to update professional");
-      }
-
-      mutate();
+    const result = await updateProfessional(editingProfessional.id, data);
+    if (result.success) {
+      loadProfessionals();
       setEditingProfessional(null);
-    } catch (error) {
-      console.error("Error updating professional:", error);
-      throw error;
+    } else {
+      throw new Error(result.error);
     }
   }
 
   async function handleDeleteProfessional() {
-    try {
-      const response = await fetch(
-        `/api/professionals/${deletingProfessional.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+    if (!deletingProfessional) return;
 
-      if (!response.ok) {
-        throw new Error("Failed to delete professional");
-      }
-
-      mutate();
+    const result = await deleteProfessional(deletingProfessional.id);
+    if (result.success) {
+      loadProfessionals();
       setDeletingProfessional(null);
-    } catch (error) {
-      console.error("Error deleting professional:", error);
-      throw error;
+    } else {
+      throw new Error(result.error);
     }
   }
 
   function handlePageChange(newPage: number) {
     router.push(`/professionals?page=${newPage}`);
   }
+
+  useEffect(() => {
+    loadProfessionals();
+  }, [page]);
 
   return (
     <div className="space-y-4">

@@ -1,5 +1,4 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { Professional } from "@prisma/client";
 
@@ -30,22 +29,22 @@ export async function listProfessionals(
   try {
     const skip = (page - 1) * limit;
 
-    const [professionals, total] = await Promise.all([
-      prisma.professional.findMany({
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          _count: {
-            select: {
-              audios: true,
-              images: true,
-            },
+    const professionals = await prisma.professional.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: {
+            audios: true,
+            images: true,
           },
         },
-      }),
-      prisma.professional.count(),
-    ]);
+      },
+    });
+    const total = await prisma.professional.count();
+
+    console.log(professionals);
 
     return {
       success: true,
