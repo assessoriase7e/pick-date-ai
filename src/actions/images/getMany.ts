@@ -18,7 +18,7 @@ type ListImagesError = {
 
 export async function listImages(
   page: number = 1,
-  limit: number = 10
+  limit: number = 50
 ): Promise<ListImagesSuccess | ListImagesError> {
   try {
     const skip = (page - 1) * limit;

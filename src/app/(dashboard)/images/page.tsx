@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import { ImagesContent } from "./images-content";
+
 import { LoaderCircle } from "lucide-react";
+import { ImagesContent } from "@/components/images/images-content";
 
 export default function ImagesPage() {
   return (
