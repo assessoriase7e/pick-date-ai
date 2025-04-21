@@ -4,10 +4,11 @@ import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de 
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const paramsResolved = await params;
+
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -15,7 +16,7 @@ export async function GET(
 
   try {
     const image = await prisma.imageRecord.findUnique({
-      where: { id: params.id },
+      where: { id: paramsResolved.id },
       include: {
         professional: {
           select: {
@@ -41,10 +42,10 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const paramsResolved = await params;
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -67,7 +68,7 @@ export async function PATCH(
     if (professionalId) updateData.professionalId = professionalId;
 
     const image = await prisma.imageRecord.update({
-      where: { id: params.id },
+      where: { id: paramsResolved.id },
       data: updateData,
       include: {
         professional: {
@@ -93,7 +94,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });

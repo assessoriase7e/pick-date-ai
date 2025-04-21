@@ -4,8 +4,9 @@ import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { phone: string } }
+  { params }: { params: Promise<{ phone: string }> }
 ) {
+  const paramsResolved = await params;
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -14,7 +15,7 @@ export async function GET(
 
   try {
     const professional = await prisma.professional.findFirst({
-      where: { phone: params.phone },
+      where: { phone: paramsResolved.phone },
     });
 
     if (!professional) {
