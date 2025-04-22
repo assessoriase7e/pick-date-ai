@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: "Sistema de gerenciamento de áudios",
 };
 
+import { ThemeProvider } from "next-themes";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,10 +23,12 @@ export default function RootLayout({
   return (
     <ClerkProvider localization={ptBR}>
       <html lang="pt-BR" suppressHydrationWarning>
-        <body className={inter.className}>
-          <Toaster />
-          {children}
-        </body>
+        <ThemeProvider attribute="class">
+          <body className={inter.className}>
+            <Toaster />
+            {children}
+          </body>
+        </ThemeProvider>
       </html>
     </ClerkProvider>
   );
