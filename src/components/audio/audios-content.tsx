@@ -117,7 +117,6 @@ export function AudiosContent() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome da empresa</TableHead>
               <TableHead>Nome do profissional</TableHead>
               <TableHead>Áudio</TableHead>
               <TableHead>Descrição</TableHead>
@@ -140,7 +139,6 @@ export function AudiosContent() {
             ) : (
               audios.map((audio: any) => (
                 <TableRow key={audio.id}>
-                  <TableCell>{audio.professional.company}</TableCell>
                   <TableCell>{audio.professional.name}</TableCell>
                   <TableCell>
                     <audio controls className="w-full max-w-[200px]">
