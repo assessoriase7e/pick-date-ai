@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,23 +14,21 @@ export const metadata: Metadata = {
   description: "Sistema de gerenciamento de áudios",
 };
 
-import { ThemeProvider } from "next-themes";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider localization={ptBR}>
-      <html lang="pt-BR" suppressHydrationWarning>
-        <ThemeProvider attribute="class">
-          <body className={inter.className}>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ClerkProvider localization={ptBR}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Toaster />
             {children}
-          </body>
-        </ThemeProvider>
-      </html>
-    </ClerkProvider>
+          </ThemeProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
