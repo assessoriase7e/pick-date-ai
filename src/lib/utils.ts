@@ -84,3 +84,36 @@ export function blobToBase64(blob: Blob): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
+
+// Add these functions to your existing utils.ts file
+
+export function createDocumentUrl(base64String: string, fileType: string): string {
+  const mimeType = fileType === 'pdf' ? 'application/pdf' : 
+                  fileType === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 
+                  'application/octet-stream';
+  return `data:${mimeType};base64,${base64String}`;
+}
+
+export async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      } else {
+        reject(new Error('Failed to convert file to base64'));
+      }
+    };
+    reader.onerror = error => reject(error);
+  });
+}
+
+export function getFileTypeFromName(fileName: string): string {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  if (extension === 'pdf') return 'pdf';
+  if (extension === 'docx') return 'docx';
+  return 'unknown';
+}

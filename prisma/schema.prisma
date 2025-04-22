@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Professional {
-  id        String        @id @default(cuid())
+  id        String           @id @default(cuid())
   name      String
   phone     String
   company   String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   audios    AudioRecord[]
   images    ImageRecord[]
+  documents DocumentRecord[] // Add this line to link documents to professionals
 
   @@map("professional")
 }
@@ -100,4 +101,19 @@ model ApiKey {
 
   @@index([userId])
   @@map("apikey")
+}
+
+// New model for document records
+model DocumentRecord {
+  id             String       @id @default(cuid())
+  documentBase64 String       @db.Text
+  fileName       String // Store the original filename
+  fileType       String // Store the file type (PDF/DOCX)
+  description    String       @db.Text
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("documentrecord")
 }

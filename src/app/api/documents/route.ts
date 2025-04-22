@@ -1,0 +1,87 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { validateApiKey } from "@/lib/api-key-utils";
+
+export async function GET(req: NextRequest) {
+  // Validate API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const page = Number.parseInt(searchParams.get("page") || "1");
+  const limit = Number.parseInt(searchParams.get("limit") || "10");
+  const skip = (page - 1) * limit;
+
+  try {
+    const [documents, totalCount] = await Promise.all([
+      prisma.documentRecord.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          professional: true,
+        },
+      }),
+      prisma.documentRecord.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return NextResponse.json({
+      documents,
+      totalPages,
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch documents" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  // Validate API Key
+  const apiKeyHeader = req.headers.get('Authorization');
+  const validationResult = await validateApiKey(apiKeyHeader);
+  if (!validationResult.isValid) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { professionalId, description, documentBase64, fileName, fileType } = body;
+
+    if (!professionalId || !description || !documentBase64 || !fileName || !fileType) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const document = await prisma.documentRecord.create({
+      data: {
+        documentBase64,
+        fileName,
+        fileType,
+        description,
+        professionalId,
+      },
+      include: {
+        professional: true,
+      },
+    });
+
+    return NextResponse.json(document, { status: 201 });
+  } catch (error) {
+    console.error("Error creating document:", error);
+    return NextResponse.json(
+      { error: "Failed to create document" },
+      { status: 500 }
+    );
+  }
+}

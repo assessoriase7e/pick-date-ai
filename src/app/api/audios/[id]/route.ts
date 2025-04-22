@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
