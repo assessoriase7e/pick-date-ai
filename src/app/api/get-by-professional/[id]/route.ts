@@ -17,6 +17,11 @@ export async function GET(
 
   try {
     const { id: professionalId } = await params;
+    
+    // Get fields from query parameters
+    const url = new URL(req.url);
+    const fieldsParam = url.searchParams.get('fields');
+    const fields = fieldsParam ? fieldsParam.split(',') : null;
 
     const unifiedRecords: any[] = [];
 
@@ -31,23 +36,44 @@ export async function GET(
           records.forEach((record: any) => {
             const standardizedRecord = { ...record };
 
-            // Find any base64 field and standardize it
             for (const key in standardizedRecord) {
               if (
                 key.endsWith("Base64") ||
                 key.toLowerCase().includes("base64")
               ) {
-                // Create the standardized base64 field
                 standardizedRecord.base64 = standardizedRecord[key];
-                // Remove the original field to avoid duplication
                 delete standardizedRecord[key];
               }
             }
-
-            unifiedRecords.push({
-              ...standardizedRecord,
-              type: modelName,
-            });
+            
+            // Filter fields if specified in query
+            if (fields) {
+              const filteredRecord: any = {};
+              
+              // Always include id and type
+              filteredRecord.id = standardizedRecord.id;
+              filteredRecord.type = modelName;
+              
+              // Add requested fields
+              fields.forEach(field => {
+                if (field in standardizedRecord) {
+                  filteredRecord[field] = standardizedRecord[field];
+                }
+              });
+              
+              // Always include base64 if it was requested or if no fields were specified
+              if (fields.includes('base64') && standardizedRecord.base64) {
+                filteredRecord.base64 = standardizedRecord.base64;
+              }
+              
+              unifiedRecords.push(filteredRecord);
+            } else {
+              // No fields specified, include all
+              unifiedRecords.push({
+                ...standardizedRecord,
+                type: modelName,
+              });
+            }
           });
         } catch (queryError: any) {
           if (
