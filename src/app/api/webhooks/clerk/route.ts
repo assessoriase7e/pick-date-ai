@@ -1,7 +1,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db"; // Certifique-se que o caminho para seu cliente Prisma está correto
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -62,11 +62,11 @@ export async function POST(req: Request) {
     try {
       const newUser = await prisma.user.create({
         data: {
-          id: id,
+          clerkId: id,
           email: primaryEmail,
-          firstName: first_name,
-          lastName: last_name,
-          imageUrl: image_url,
+          firstName: first_name || "",
+          lastName: last_name || "",
+          imageUrl: image_url || "",
         },
       });
 
@@ -76,13 +76,11 @@ export async function POST(req: Request) {
       );
     } catch (error) {
       console.error("Error creating user in database:", error);
-      // Verifica se o erro é de violação de chave única (usuário já existe)
+
       if (
         (error as any).code === "P2002" &&
         (error as any).meta?.target?.includes("email")
       ) {
-        console.warn(`User with email ${primaryEmail} already exists.`);
-        // Retorna sucesso mesmo se o usuário já existir para tornar o webhook idempotente
         return NextResponse.json(
           { success: true, message: "User already exists" },
           { status: 200 }
@@ -93,7 +91,7 @@ export async function POST(req: Request) {
         (error as any).meta?.target?.includes("id")
       ) {
         console.warn(`User with id ${id} already exists.`);
-        // Retorna sucesso mesmo se o usuário já existir para tornar o webhook idempotente
+
         return NextResponse.json(
           { success: true, message: "User already exists" },
           { status: 200 }
@@ -105,6 +103,5 @@ export async function POST(req: Request) {
     }
   }
 
-  // Se for outro tipo de evento, apenas confirme o recebimento
   return new Response("", { status: 200 });
 }
