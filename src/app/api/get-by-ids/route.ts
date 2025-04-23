@@ -22,21 +22,41 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const requestedFields = Array.from(searchParams.keys()).filter(
-      (key) => key !== "id"
-    );
+    const fieldsParam = searchParams.get("fields");
+    const requestedFields = fieldsParam
+      ? fieldsParam.split(",")
+      : Array.from(searchParams.keys()).filter((key) => key !== "id");
 
     const recordsPromises = modelNames.map(async (modelName) => {
-      // @ts-ignore: acesso dinâmico ao Prisma
-      const records = await prisma[modelName].findMany({
-        where: { id: { in: ids } },
-        include: { professional: true },
-      });
+      try {
+        // @ts-ignore
+        const records = await prisma[modelName].findMany({
+          where: { id: { in: ids } },
+          include: { professional: true },
+        });
 
-      return records.map((record: any) => ({
-        ...record,
-        type: modelName,
-      }));
+        return records.map((record: any) => {
+          const standardizedRecord = { ...record };
+
+          for (const key in standardizedRecord) {
+            if (
+              key.endsWith("Base64") ||
+              key.toLowerCase().includes("base64")
+            ) {
+              standardizedRecord.base64 = standardizedRecord[key];
+              delete standardizedRecord[key];
+            }
+          }
+
+          return {
+            ...standardizedRecord,
+            type: modelName,
+          };
+        });
+      } catch (error) {
+        console.error(`Error fetching ${modelName}:`, error);
+        return [];
+      }
     });
 
     const results = await Promise.all(recordsPromises);
@@ -49,29 +69,31 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Aplica filtros se solicitado
     let filtered = allRecordsFlat;
     if (requestedFields.length > 0) {
       filtered = allRecordsFlat.map((record: any) => {
         const filteredRecord: any = {};
+
+        filteredRecord.id = record.id;
+        filteredRecord.type = record.type;
+
         requestedFields.forEach((field) => {
           if (field in record) {
             filteredRecord[field] = record[field];
           }
         });
-        if (!requestedFields.includes("id") && "id" in record) {
-          filteredRecord.id = record.id;
+
+        if (requestedFields.includes("base64") && record.base64) {
+          filteredRecord.base64 = record.base64;
         }
-        if (!requestedFields.includes("type")) {
-          filteredRecord.type = record.type;
-        }
+
         return filteredRecord;
       });
     }
 
     return NextResponse.json({
-      total: allRecordsFlat.length,
-      records: filtered,
+      data: filtered,
+      total: filtered.length,
     });
   } catch (error) {
     console.error("Error fetching records by IDs:", error);
