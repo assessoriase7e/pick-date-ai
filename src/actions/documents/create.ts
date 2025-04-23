@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { DocumentRecord } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function createDocument(
   data: Pick<
@@ -11,6 +12,9 @@ export async function createDocument(
   >
 ) {
   try {
+    const user = await currentUser();
+    data.userId = user!.id;
+
     const document = await prisma.documentRecord.create({ data });
 
     revalidatePath("/documents");

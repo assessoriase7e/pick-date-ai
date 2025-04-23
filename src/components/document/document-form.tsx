@@ -87,7 +87,6 @@ export function DocumentForm({
           documentFile: undefined,
         }
       : {
-          userId: user?.id,
           description: "",
           documentFile: undefined,
         },

@@ -17,14 +17,12 @@ interface DeleteDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  professionalName: string;
 }
 
 export function DeleteDocumentModal({
   isOpen,
   onClose,
   onConfirm,
-  professionalName,
 }: DeleteDocumentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,8 +46,8 @@ export function DeleteDocumentModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir documento</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir o documento do profissional{" "}
-            {professionalName}? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir o documento do profissional ? Esta
+            ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
