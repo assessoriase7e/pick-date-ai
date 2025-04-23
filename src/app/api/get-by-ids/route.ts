@@ -83,7 +83,8 @@ export async function GET(req: NextRequest) {
           }
         });
 
-        if (requestedFields.includes("base64") && record.base64) {
+        // Always include base64 if it exists, regardless of whether it was requested
+        if (record.base64) {
           filteredRecord.base64 = record.base64;
         }
 

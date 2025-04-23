@@ -61,8 +61,8 @@ export async function GET(
                 }
               });
               
-              // Always include base64 if it was requested or if no fields were specified
-              if (fields.includes('base64') && standardizedRecord.base64) {
+              // Always include base64 if it exists, regardless of whether it was requested
+              if (standardizedRecord.base64) {
                 filteredRecord.base64 = standardizedRecord.base64;
               }
               

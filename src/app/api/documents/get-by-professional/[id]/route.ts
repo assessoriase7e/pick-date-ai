@@ -14,25 +14,27 @@ export async function GET(
   }
 
   try {
-    const document = await prisma.documentRecord.findMany({
+    const documents = await prisma.documentRecord.findMany({
       where: { professionalId: params.id },
-      include: {
-        professional: true,
-      },
     });
 
-    if (!document) {
+    if (!documents || documents.length === 0) {
       return NextResponse.json(
-        { error: "Document not found" },
+        { error: "No documents found for this professional" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(document);
+    const responseDocuments = documents.map((doc) => ({
+      ...doc,
+      base64: doc.documentBase64,
+    }));
+
+    return NextResponse.json(responseDocuments);
   } catch (error) {
-    console.error("Error fetching document:", error);
+    console.error("Error fetching documents:", error);
     return NextResponse.json(
-      { error: "Failed to fetch document" },
+      { error: "Failed to fetch documents" },
       { status: 500 }
     );
   }

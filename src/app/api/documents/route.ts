@@ -30,8 +30,14 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit);
 
+    // Add standardized base64 field to each document
+    const responseDocuments = documents.map(doc => ({
+      ...doc,
+      base64: doc.documentBase64
+    }));
+
     return NextResponse.json({
-      documents,
+      documents: responseDocuments,
       totalPages,
       currentPage: page,
     });

@@ -22,7 +22,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    return NextResponse.json(document);
+    // Add standardized base64 field
+    const responseDocument = {
+      ...document,
+      base64: document.documentBase64
+    };
+
+    return NextResponse.json(responseDocument);
   } catch (error) {
     console.error("Error fetching document:", error);
     return NextResponse.json({ error: "Failed to fetch document" }, { status: 500 });
