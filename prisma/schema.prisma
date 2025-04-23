@@ -85,3 +85,14 @@ model DocumentRecord {
 
   @@map("documentrecord")
 }
+
+model Link {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("link")
+}

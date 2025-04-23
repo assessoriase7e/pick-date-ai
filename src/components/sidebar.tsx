@@ -1,7 +1,7 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Music, User, Image, KeyRound, FileIcon } from "lucide-react"; // Importe KeyRound
+import { Music, User, Image, KeyRound, FileIcon, Link } from "lucide-react"; // Importe KeyRound
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -25,12 +25,7 @@ export function Sidebar() {
         label="Áudios"
         isActive={pathname.startsWith("/audios")} // Use startsWith para sub-rotas
       />
-      <SidebarItem
-        href="/professionals"
-        icon={User}
-        label="Profissionais"
-        isActive={pathname.startsWith("/professionals")}
-      />
+
       <SidebarItem
         href="/images"
         icon={Image}
@@ -43,6 +38,20 @@ export function Sidebar() {
         icon={FileIcon}
         label="Documents"
         isActive={pathname.startsWith("/documents")}
+      />
+
+      <SidebarItem
+        href="/links"
+        icon={Link}
+        label="Links"
+        isActive={pathname === "/links"}
+      />
+
+      <SidebarItem
+        href="/professionals"
+        icon={User}
+        label="Profissionais"
+        isActive={pathname.startsWith("/professionals")}
       />
 
       <SidebarItem // Adicione este item para Chaves de API

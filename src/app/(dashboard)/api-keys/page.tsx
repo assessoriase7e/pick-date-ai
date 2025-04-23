@@ -14,6 +14,7 @@ import { audioRoutes } from "@/mocked/docs/audio";
 import { imageRoutes } from "@/mocked/docs/images";
 import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
 import { getByProfessionalRoutes } from "@/mocked/docs/get-by-professional";
+import { linksRoutes } from "@/mocked/docs/links";
 
 export default function ApiKeysPage() {
   return (
@@ -38,6 +39,8 @@ export default function ApiKeysPage() {
               <ApiDocsAccordion doc={getByProfessionalRoutes} />
               <Separator />
               <ApiDocsAccordion doc={imageRoutes} />
+              <Separator />
+              <ApiDocsAccordion doc={linksRoutes} />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
