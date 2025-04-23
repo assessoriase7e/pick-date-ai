@@ -26,12 +26,26 @@ export async function GET(
           // @ts-ignore
           const records = await prisma[modelName].findMany({
             where: { professionalId },
-            include: { professional: true },
           });
 
           records.forEach((record: any) => {
+            const standardizedRecord = { ...record };
+
+            // Find any base64 field and standardize it
+            for (const key in standardizedRecord) {
+              if (
+                key.endsWith("Base64") ||
+                key.toLowerCase().includes("base64")
+              ) {
+                // Create the standardized base64 field
+                standardizedRecord.base64 = standardizedRecord[key];
+                // Remove the original field to avoid duplication
+                delete standardizedRecord[key];
+              }
+            }
+
             unifiedRecords.push({
-              ...record,
+              ...standardizedRecord,
               type: modelName,
             });
           });
@@ -50,8 +64,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      records: unifiedRecords,
-      total: unifiedRecords.length,
+      data: unifiedRecords,
     });
   } catch (error) {
     console.error("Error fetching professional records:", error);
