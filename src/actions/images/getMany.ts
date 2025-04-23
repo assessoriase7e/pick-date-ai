@@ -29,9 +29,9 @@ export async function listImages(
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          professional: {
+          user: {
             select: {
-              name: true,
+              id: true,
             },
           },
         },

@@ -4,15 +4,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { AudioRecord } from "@prisma/client";
 
-export async function createAudio(data: AudioRecord) {
+export async function createAudio(
+  data: Pick<AudioRecord, "description" | "audioBase64" | "userId">
+) {
   try {
-    const audio = await prisma.audioRecord.create({
-      data: {
-        audioBase64: data.audioBase64,
-        description: data.description,
-        professionalId: data.professionalId,
-      },
-    });
+    const audio = await prisma.audioRecord.create({ data });
 
     revalidatePath("/audios");
     return { success: true, data: audio };

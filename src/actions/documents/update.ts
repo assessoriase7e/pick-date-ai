@@ -2,16 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { DocumentRecord } from "@prisma/client";
 
 export async function updateDocument(
   id: string,
-  data: {
-    description?: string;
-    professionalId?: string;
-    documentBase64?: string;
-    fileName?: string;
-    fileType?: string;
-  }
+  data: Partial<DocumentRecord>
 ) {
   try {
     const document = await prisma.documentRecord.update({

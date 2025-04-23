@@ -8,14 +8,7 @@ export async function updateAudio(id: string, data: Partial<AudioRecord>) {
   try {
     const audio = await prisma.audioRecord.update({
       where: { id },
-      data: {
-        ...(data.audioBase64 && { audioBase64: data.audioBase64 }),
-        ...(data.description && { description: data.description }),
-        ...(data.professionalId && { professionalId: data.professionalId }),
-      },
-      include: {
-        professional: true,
-      },
+      data,
     });
 
     revalidatePath("/audios");

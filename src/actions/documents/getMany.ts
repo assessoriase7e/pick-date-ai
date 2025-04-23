@@ -28,10 +28,9 @@ export async function listDocuments(
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          professional: {
+          user: {
             select: {
-              name: true,
-              company: true,
+              id: true,
             },
           },
         },

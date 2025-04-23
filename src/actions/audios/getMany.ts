@@ -3,16 +3,16 @@
 import { prisma } from "@/lib/db";
 import { AudioRecord } from "@prisma/client";
 
-type AudioWithProfessional = AudioRecord & {
-  professional: {
-    name: string;
+type AudioWithUser = AudioRecord & {
+  user: {
+    email: string;
   };
 };
 
 type ListAudiosSuccess = {
   success: true;
   data: {
-    audios: AudioWithProfessional[];
+    audios: AudioWithUser[];
     totalPages: number;
   };
 };
@@ -35,9 +35,9 @@ export async function listAudios(
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          professional: {
+          user: {
             select: {
-              name: true,
+              email: true,
             },
           },
         },

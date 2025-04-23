@@ -7,7 +7,7 @@ export async function getImage(id: string) {
     const image = await prisma.imageRecord.findUnique({
       where: { id },
       include: {
-        professional: true,
+        user: true,
       },
     });
 

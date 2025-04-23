@@ -1,10 +1,18 @@
-"use server"
+"use server";
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function deleteAudio(id: string) {
   try {
+    const audio = await prisma.audioRecord.findUnique({
+      where: { id },
+    });
+
+    if (!audio) {
+      return { success: false, error: "Áudio não encontrado" };
+    }
+
     await prisma.audioRecord.delete({
       where: { id },
     });

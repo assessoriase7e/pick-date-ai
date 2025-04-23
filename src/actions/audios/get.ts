@@ -7,7 +7,11 @@ export async function getAudio(id: string) {
     const audio = await prisma.audioRecord.findUnique({
       where: { id },
       include: {
-        professional: true,
+        user: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 

@@ -4,15 +4,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { ImageRecord } from "@prisma/client";
 
-export async function createImage(data: ImageRecord) {
+export async function createImage(
+  data: Pick<ImageRecord, "description" | "imageBase64" | "userId">
+) {
   try {
-    const image = await prisma.imageRecord.create({
-      data: {
-        imageBase64: data.imageBase64,
-        description: data.description,
-        professionalId: data.professionalId,
-      },
-    });
+    const image = await prisma.imageRecord.create({ data });
 
     revalidatePath("/images");
     return { success: true, data: image };

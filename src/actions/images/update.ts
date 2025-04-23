@@ -8,13 +8,13 @@ export async function updateImage(id: string, data: Partial<ImageRecord>) {
   try {
     const image = await prisma.imageRecord.update({
       where: { id },
-      data: {
-        ...(data.imageBase64 && { imageBase64: data.imageBase64 }),
-        ...(data.description && { description: data.description }),
-        ...(data.professionalId && { professionalId: data.professionalId }),
-      },
+      data,
       include: {
-        professional: true,
+        user: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
