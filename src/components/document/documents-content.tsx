@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Plus, Trash2, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,79 +19,88 @@ import { Pagination } from "@/components/ui/pagination";
 import { createDocument } from "@/actions/documents/create";
 import { updateDocument } from "@/actions/documents/update";
 import { deleteDocument } from "@/actions/documents/delete";
-import { useDocuments } from "@/hooks/use-documents";
+import { listDocuments } from "@/actions/documents/getMany";
+import { DocumentRecord, User } from "@prisma/client";
+
+type DocumentWithUser = DocumentRecord & {
+  user: User;
+};
 
 export function DocumentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { documents, totalPages, isLoading, mutate } = useDocuments(page, 10);
 
+  const [documents, setDocuments] = useState<DocumentWithUser[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<any | null>(null);
   const [deletingDocument, setDeletingDocument] = useState<any | null>(null);
 
+  async function loadDocuments() {
+    setIsLoading(true);
+    try {
+      const result = await listDocuments(page);
+      if (result.success) {
+        setDocuments(result.data!.documents);
+        setTotalPages(result.data!.totalPages);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar documentos:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDocuments();
+  }, [page]);
+
   async function handleCreateDocument(data: any) {
     try {
       const result = await createDocument(data);
-
-      if (!result.success) {
-        throw new Error(result.error);
+      if (result.success) {
+        loadDocuments();
+        setIsCreateModalOpen(false);
       }
-
-      mutate();
-      setIsCreateModalOpen(false);
     } catch (error) {
-      console.error("Error creating document:", error);
-      throw error;
+      console.error("Erro ao criar documento:", error);
     }
   }
 
   async function handleUpdateDocument(data: any) {
+    if (!editingDocument) return;
     try {
-      if (!editingDocument) return;
-
       const result = await updateDocument(editingDocument.id, data);
-
-      if (!result.success) {
-        throw new Error(result.error);
+      if (result.success) {
+        loadDocuments();
+        setEditingDocument(null);
       }
-
-      mutate();
-      setEditingDocument(null);
     } catch (error) {
-      console.error("Error updating document:", error);
-      throw error;
+      console.error("Erro ao atualizar documento:", error);
     }
   }
 
   async function handleDeleteDocument() {
+    if (!deletingDocument) return;
     try {
-      if (!deletingDocument) return;
-
       const result = await deleteDocument(deletingDocument.id);
-
-      if (!result.success) {
-        throw new Error(result.error);
+      if (result.success) {
+        loadDocuments();
+        setDeletingDocument(null);
       }
-
-      mutate();
-      setDeletingDocument(null);
     } catch (error) {
-      console.error("Error deleting document:", error);
-      throw error;
+      console.error("Erro ao excluir documento:", error);
     }
-  }
-
-  function handlePageChange(newPage: number) {
-    router.push(`/documents?page=${newPage}`);
   }
 
   function handleDownloadDocument(document: any) {
     const url = createDocumentUrl(document.documentBase64, document.fileType);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = document.fileName || `document-${document.id}.${document.fileType}`;
+    a.download =
+      document.fileName || `document-${document.id}.${document.fileType}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -99,9 +108,11 @@ export function DocumentsContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <h1 className="text-xl font-bold">Documentos</h1>
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Documento
         </Button>
       </div>
 
@@ -109,8 +120,6 @@ export function DocumentsContent() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome da empresa</TableHead>
-              <TableHead>Nome do profissional</TableHead>
               <TableHead>Arquivo</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="w-[150px]">Ações</TableHead>
@@ -130,27 +139,26 @@ export function DocumentsContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              documents.map((document: any) => (
+              documents.map((document) => (
                 <TableRow key={document.id}>
-                  <TableCell>{document.professional.company}</TableCell>
-                  <TableCell>{document.professional.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <FileText className="h-4 w-4 mr-2" />
-                      {document.fileName ? truncateText(document.fileName, 20) : "Documento"}
+                      {truncateText(document.fileName || "Documento", 20)}
                       <span className="ml-2 text-xs text-muted-foreground uppercase">
                         ({document.fileType})
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{truncateText(document.description, 30)}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    {truncateText(document.description, 30)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDownloadDocument(document)}
-                        title="Baixar documento"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -158,7 +166,6 @@ export function DocumentsContent() {
                         variant="outline"
                         size="icon"
                         onClick={() => setEditingDocument(document)}
-                        title="Editar documento"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -167,7 +174,6 @@ export function DocumentsContent() {
                         size="icon"
                         className="text-destructive"
                         onClick={() => setDeletingDocument(document)}
-                        title="Excluir documento"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -180,32 +186,33 @@ export function DocumentsContent() {
         </Table>
       </div>
 
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        isLoading={isLoading}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(newPage: number) => {
+            router.push(`/documents?page=${newPage}`);
+          }}
+          isLoading={isLoading}
+        />
+      )}
 
       <DocumentModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateDocument}
         title="Novo documento"
         description="Adicione um novo documento ao sistema."
-        onSubmit={handleCreateDocument}
       />
 
       {editingDocument && (
         <DocumentModal
           isOpen={!!editingDocument}
           onClose={() => setEditingDocument(null)}
+          onSubmit={handleUpdateDocument}
+          initialData={editingDocument}
           title="Editar documento"
           description="Edite as informações do documento."
-          initialData={{
-            professionalId: editingDocument.professionalId,
-            description: editingDocument.description,
-          }}
-          onSubmit={handleUpdateDocument}
         />
       )}
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 
 type ListDocumentsSuccess = {
   success: true;
@@ -22,18 +23,14 @@ export async function listDocuments(
   try {
     const skip = (page - 1) * limit;
 
+    const user = await currentUser();
+
     const [documents, total] = await Promise.all([
       prisma.documentRecord.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              id: true,
-            },
-          },
-        },
+        where: { userId: user?.id },
       }),
       prisma.documentRecord.count(),
     ]);

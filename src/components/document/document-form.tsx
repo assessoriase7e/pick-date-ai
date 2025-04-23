@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,12 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ProfessionalCombobox } from "../audio/professional-combobox";
 import { fileToBase64, getFileTypeFromName } from "@/lib/utils";
 import { toast } from "sonner";
+import { DocumentRecord } from "@prisma/client";
+import { useUser } from "@clerk/nextjs";
 
 const documentSchema = z.object({
-  professionalId: z.string({
+  userId: z.string({
     required_error: "Por favor, selecione um profissional.",
   }),
   description: z.string().min(1, {
@@ -28,16 +28,20 @@ const documentSchema = z.object({
   }),
   documentFile: z
     .instanceof(File, { message: "O arquivo é obrigatório." })
-    .refine((file) => {
-      // Limit file size to 1MB for PDFs
-      if (file.type === "application/pdf") {
-        return file.size <= 1 * 1024 * 1024; // 1MB
+    .refine(
+      (file) => {
+        // Limit file size to 1MB for PDFs
+        if (file.type === "application/pdf") {
+          return file.size <= 1 * 1024 * 1024; // 1MB
+        }
+        // Keep the original 10MB limit for other file types
+        return file.size <= 10 * 1024 * 1024;
+      },
+      {
+        message:
+          "Arquivos PDF devem ter no máximo 1MB. Outros tipos de arquivo podem ter até 10MB.",
       }
-      // Keep the original 10MB limit for other file types
-      return file.size <= 10 * 1024 * 1024;
-    }, {
-      message: "Arquivos PDF devem ter no máximo 1MB. Outros tipos de arquivo podem ter até 10MB.",
-    })
+    )
     .refine(
       (file) => {
         const type = file.type;
@@ -57,10 +61,10 @@ const documentSchema = z.object({
 type DocumentFormValues = z.infer<typeof documentSchema>;
 
 interface DocumentFormProps {
-  initialData?: {
-    professionalId: string;
-    description: string;
-  };
+  initialData?: Pick<
+    DocumentRecord,
+    "description" | "fileName" | "documentBase64" | "fileType"
+  >;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }
@@ -73,6 +77,7 @@ export function DocumentForm({
   const [isLoading, setIsLoading] = useState(false);
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const { user } = useUser();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -82,7 +87,7 @@ export function DocumentForm({
           documentFile: undefined,
         }
       : {
-          professionalId: "",
+          userId: user?.id,
           description: "",
           documentFile: undefined,
         },
@@ -99,7 +104,7 @@ export function DocumentForm({
       }
 
       let documentData = {
-        professionalId: data.professionalId,
+        userId: data.userId,
         description: data.description,
         documentBase64: "",
         fileName: "",
@@ -138,7 +143,7 @@ export function DocumentForm({
     // Check file size for PDFs
     if (file.type === "application/pdf" && file.size > 1 * 1024 * 1024) {
       toast("O arquivo PDF excede o limite de 1MB.");
-      e.target.value = ''; // Clear the input
+      e.target.value = ""; // Clear the input
       return;
     }
 
@@ -154,7 +159,6 @@ export function DocumentForm({
         URL.revokeObjectURL(documentUrl);
       };
     } else {
-      // For DOCX files, we can't preview directly
       setDocumentPreview(null);
     }
   }
@@ -162,23 +166,6 @@ export function DocumentForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="professionalId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profissional</FormLabel>
-              <FormControl>
-                <ProfessionalCombobox
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="documentFile"
