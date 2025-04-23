@@ -48,18 +48,24 @@ const audioSchema = z.object({
 
 type AudioFormValues = z.infer<typeof audioSchema>;
 
+// Update the interface to include audioUrl in initialData
 interface AudioFormProps {
   initialData?: {
     professionalId: string;
     description: string;
+    audioUrl?: string; // Add this field to store the current audio URL
   };
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }
 
+// In the component function, update to handle the audio preview
 export function AudioForm({ initialData, onSubmit, onCancel }: AudioFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [audioPreview, setAudioPreview] = useState<string | null>(null);
+
+  const [audioPreview, setAudioPreview] = useState<string | null>(
+    initialData?.audioUrl || null
+  );
 
   const form = useForm<AudioFormValues>({
     resolver: zodResolver(audioSchema),
@@ -75,16 +81,23 @@ export function AudioForm({ initialData, onSubmit, onCancel }: AudioFormProps) {
         },
   });
 
+  // Update the handleSubmit function to handle preserving the original audio
   const handleSubmit: SubmitHandler<AudioFormValues> = async (data) => {
     try {
       setIsLoading(true);
 
-      const audioBase64 = await blobToBase64(data.audioFile!);
+      let audioBase64 = null;
+
+      // Only convert to base64 if a new file was selected
+      if (data.audioFile) {
+        audioBase64 = await blobToBase64(data.audioFile);
+      }
 
       await onSubmit({
         professionalId: data.professionalId,
         description: data.description,
         audioBase64,
+        preserveAudio: !data.audioFile, // Flag to indicate if we should keep the original audio
       });
 
       form.reset();
@@ -147,10 +160,15 @@ export function AudioForm({ initialData, onSubmit, onCancel }: AudioFormProps) {
                     {...fieldProps}
                   />
                   {audioPreview && (
-                    <audio controls className="w-full mt-2">
-                      <source src={audioPreview} />
-                      Seu navegador não suporta o elemento de áudio.
-                    </audio>
+                    <div className="space-y-1">
+                      <div className="text-sm text-muted-foreground">
+                        Pré-visualização do áudio
+                      </div>
+                      <audio controls className="w-full mt-1">
+                        <source src={audioPreview} />
+                        Seu navegador não suporta o elemento de áudio.
+                      </audio>
+                    </div>
                   )}
                 </div>
               </FormControl>

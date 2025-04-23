@@ -11,6 +11,7 @@ interface AudioModalProps {
   initialData?: {
     professionalId: string
     description: string
+    audioUrl?: string // Add this field
   }
   onSubmit: (data: any) => Promise<void>
 }
