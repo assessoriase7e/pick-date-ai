@@ -10,58 +10,49 @@ export async function GET(
   const modelNames = getPrismaModelNames();
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
+
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
   try {
-    const paramsResolved = await params;
-    const professionalId = paramsResolved.id;
+    const { id: professionalId } = await params;
 
-    const recordsPromises = modelNames.map(async (modelName) => {
+    const unifiedRecords: any[] = [];
+
+    for (const modelName of modelNames) {
       try {
-        // Check if the model has a professionalId field
-        const dmmf = (prisma as any)._baseDmmf.modelMap[modelName];
-        const hasProfessionalId = dmmf?.fields?.some(
-          (field: any) => field.name === "professionalId"
-        );
+        try {
+          // @ts-ignore
+          const records = await prisma[modelName].findMany({
+            where: { professionalId },
+            include: { professional: true },
+          });
 
-        if (!hasProfessionalId) {
-          return []; // Skip models without professionalId
+          records.forEach((record: any) => {
+            unifiedRecords.push({
+              ...record,
+              type: modelName,
+            });
+          });
+        } catch (queryError: any) {
+          if (
+            queryError.message &&
+            queryError.message.includes("professionalId")
+          ) {
+          } else {
+            throw queryError;
+          }
         }
-
-        // @ts-ignore: acesso dinâmico ao Prisma
-        const records = await prisma[modelName].findMany({
-          where: { professionalId },
-          include: { professional: true },
-        });
-
-        return records.map((record: any) => ({
-          ...record,
-          type: modelName,
-        }));
       } catch (error) {
         console.error(`Error fetching ${modelName}:`, error);
-        return []; // Return empty array for failed models
       }
+    }
+
+    return NextResponse.json({
+      records: unifiedRecords,
+      total: unifiedRecords.length,
     });
-
-    const results = await Promise.all(recordsPromises);
-
-    const allRecordsFlat = results.flat();
-
-    const allRecordsGrouped = results.reduce(
-      (acc: any, curr: any, i: number) => {
-        acc[modelNames[i]] = curr;
-        return acc;
-      },
-      {} as Record<string, any[]>
-    );
-
-    allRecordsGrouped.total = allRecordsFlat.length;
-    allRecordsGrouped.records = allRecordsFlat;
-
-    return NextResponse.json(allRecordsGrouped);
   } catch (error) {
     console.error("Error fetching professional records:", error);
     return NextResponse.json(
