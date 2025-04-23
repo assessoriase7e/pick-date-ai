@@ -5,7 +5,7 @@ import { getPrismaModelNames } from "@/mocked/models";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const modelNames = getPrismaModelNames();
   const apiKeyHeader = req.headers.get("Authorization");
@@ -15,19 +15,35 @@ export async function GET(
   }
 
   try {
-    const professionalId = params.id;
+    const paramsResolved = await params;
+    const professionalId = paramsResolved.id;
 
     const recordsPromises = modelNames.map(async (modelName) => {
-      // @ts-ignore: acesso dinâmico ao Prisma
-      const records = await prisma[modelName].findMany({
-        where: { professionalId },
-        include: { professional: true },
-      });
+      try {
+        // Check if the model has a professionalId field
+        const dmmf = (prisma as any)._baseDmmf.modelMap[modelName];
+        const hasProfessionalId = dmmf?.fields?.some(
+          (field: any) => field.name === "professionalId"
+        );
 
-      return records.map((record: any) => ({
-        ...record,
-        type: modelName,
-      }));
+        if (!hasProfessionalId) {
+          return []; // Skip models without professionalId
+        }
+
+        // @ts-ignore: acesso dinâmico ao Prisma
+        const records = await prisma[modelName].findMany({
+          where: { professionalId },
+          include: { professional: true },
+        });
+
+        return records.map((record: any) => ({
+          ...record,
+          type: modelName,
+        }));
+      } catch (error) {
+        console.error(`Error fetching ${modelName}:`, error);
+        return []; // Return empty array for failed models
+      }
     });
 
     const results = await Promise.all(recordsPromises);
@@ -44,13 +60,6 @@ export async function GET(
 
     allRecordsGrouped.total = allRecordsFlat.length;
     allRecordsGrouped.records = allRecordsFlat;
-
-    if (allRecordsFlat.length === 0) {
-      return NextResponse.json(
-        { error: "No records found for this professional" },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json(allRecordsGrouped);
   } catch (error) {

@@ -73,7 +73,6 @@ export async function PATCH(
 
     return NextResponse.json(audio);
   } catch (error) {
-    console.error("Error updating audio:", error);
     return NextResponse.json(
       { error: "Failed to update audio" },
       { status: 500 }
