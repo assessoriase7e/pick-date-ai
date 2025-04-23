@@ -4,7 +4,7 @@ import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de 
 
 export async function GET(req: NextRequest) {
   // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          professional: true,
+          user: true,
         },
       }),
       prisma.audioRecord.count(),
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -54,9 +54,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { professionalId, description, audioBase64 } = body;
+    const { userId, description, audioBase64 } = body;
 
-    if (!professionalId || !description || !audioBase64) {
+    if (!userId || !description || !audioBase64) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -67,10 +67,10 @@ export async function POST(req: NextRequest) {
       data: {
         audioBase64,
         description,
-        professionalId,
+        userId,
       },
       include: {
-        professional: true,
+        user: true,
       },
     });
 

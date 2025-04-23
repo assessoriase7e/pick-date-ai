@@ -15,12 +15,12 @@ export async function GET(
 
   try {
     const documents = await prisma.documentRecord.findMany({
-      where: { professionalId: params.id },
+      where: { userId: params.id },
     });
 
     if (!documents || documents.length === 0) {
       return NextResponse.json(
-        { error: "No documents found for this professional" },
+        { error: "No documents found for this user" },
         { status: 404 }
       );
     }
@@ -53,14 +53,12 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { description, professionalId, documentBase64, fileName, fileType } =
-      body;
+    const { description, userId, documentBase64, fileName, fileType } = body;
 
     // Create an update object with only the fields that are provided
     const updateData: any = {};
     if (description !== undefined) updateData.description = description;
-    if (professionalId !== undefined)
-      updateData.professionalId = professionalId;
+    if (userId !== undefined) updateData.userId = userId;
     if (documentBase64 !== undefined)
       updateData.documentBase64 = documentBase64;
     if (fileName !== undefined) updateData.fileName = fileName;
@@ -78,7 +76,7 @@ export async function PATCH(
       where: { id: params.id },
       data: updateData,
       include: {
-        professional: true,
+        user: true,
       },
     });
 

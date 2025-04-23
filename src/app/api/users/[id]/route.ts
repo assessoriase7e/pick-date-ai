@@ -7,6 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const paramsResolved = await params;
+
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -14,22 +15,19 @@ export async function GET(
   }
 
   try {
-    const audio = await prisma.audioRecord.findMany({
-      where: { professionalId: paramsResolved.id },
-      include: {
-        professional: true,
-      },
+    const user = await prisma.user.findUnique({
+      where: { id: paramsResolved.id },
     });
 
-    if (!audio) {
-      return NextResponse.json({ error: "Audio not found" }, { status: 404 });
+    if (!user) {
+      return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
 
-    return NextResponse.json(audio);
+    return NextResponse.json(user);
   } catch (error) {
-    console.error("Error fetching audio:", error);
+    console.error("Error fetching user:", error);
     return NextResponse.json(
-      { error: "Failed to fetch audio" },
+      { error: "Failed to fetch user" },
       { status: 500 }
     );
   }
@@ -49,33 +47,29 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { professionalId, description, audioBase64 } = body;
+    const { name, phone, company } = body;
 
-    if (!professionalId && !description && !audioBase64) {
+    if (!name && !phone && !company) {
       return NextResponse.json(
         { error: "At least one field must be provided" },
         { status: 400 }
       );
     }
 
-    const updateData: any = {};
-    if (professionalId) updateData.professionalId = professionalId;
-    if (description) updateData.description = description;
-    if (audioBase64) updateData.audioBase64 = audioBase64;
-
-    const audio = await prisma.audioRecord.update({
+    const user = await prisma.user.update({
       where: { id: paramsResolved.id },
-      data: updateData,
-      include: {
-        professional: true,
+      data: {
+        ...(name && { name }),
+        ...(phone && { phone }),
+        ...(company && { company }),
       },
     });
 
-    return NextResponse.json(audio);
+    return NextResponse.json(user);
   } catch (error) {
-    console.error("Error updating audio:", error);
+    console.error("Error updating user:", error);
     return NextResponse.json(
-      { error: "Failed to update audio" },
+      { error: "Failed to update user" },
       { status: 500 }
     );
   }
@@ -83,9 +77,9 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const paramsResolved = await params;
+  // Validar API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -93,15 +87,15 @@ export async function DELETE(
   }
 
   try {
-    await prisma.audioRecord.delete({
-      where: { id: paramsResolved.id },
+    await prisma.user.delete({
+      where: { id: params.id },
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting audio:", error);
+    console.error("Error deleting user:", error);
     return NextResponse.json(
-      { error: "Failed to delete audio" },
+      { error: "Failed to delete user" },
       { status: 500 }
     );
   }

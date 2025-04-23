@@ -47,7 +47,7 @@ export function Sidebar() {
         isActive={pathname === "/links"}
       />
 
-      <SidebarItem // Adicione este item para Chaves de API
+      <SidebarItem
         href="/api-keys"
         icon={KeyRound}
         label="API Keys"

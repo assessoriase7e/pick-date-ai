@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
   // Validar API Key
@@ -22,9 +22,10 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          professional: {
+          user: {
             select: {
-              name: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
@@ -55,9 +56,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { imageBase64, description, professionalId } = body;
+    const { imageBase64, description, userId } = body;
 
-    if (!imageBase64 || !description || !professionalId) {
+    if (!imageBase64 || !description || !userId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
       data: {
         imageBase64,
         description,
-        professionalId,
+        userId,
       },
     });
 

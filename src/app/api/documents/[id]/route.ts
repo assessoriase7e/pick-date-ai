@@ -2,9 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   // Validate API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -14,30 +17,39 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const document = await prisma.documentRecord.findUnique({
       where: { id: params.id },
       include: {
-        professional: true,
+        user: true,
       },
     });
 
     if (!document) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
     }
 
     // Add standardized base64 field
     const responseDocument = {
       ...document,
-      base64: document.documentBase64
+      base64: document.documentBase64,
     };
 
     return NextResponse.json(responseDocument);
   } catch (error) {
     console.error("Error fetching document:", error);
-    return NextResponse.json({ error: "Failed to fetch document" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch document" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   // Validate API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -45,13 +57,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   try {
     const body = await req.json();
-    const { description, professionalId, documentBase64, fileName, fileType } = body;
+    const { description, userId, documentBase64, fileName, fileType } = body;
 
     // Create an update object with only the fields that are provided
     const updateData: any = {};
     if (description !== undefined) updateData.description = description;
-    if (professionalId !== undefined) updateData.professionalId = professionalId;
-    if (documentBase64 !== undefined) updateData.documentBase64 = documentBase64;
+    if (userId !== undefined) updateData.userId = userId;
+    if (documentBase64 !== undefined)
+      updateData.documentBase64 = documentBase64;
     if (fileName !== undefined) updateData.fileName = fileName;
     if (fileType !== undefined) updateData.fileType = fileType;
 
@@ -67,7 +80,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       where: { id: params.id },
       data: updateData,
       include: {
-        professional: true,
+        user: true,
       },
     });
 
@@ -81,9 +94,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   // Validate API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });

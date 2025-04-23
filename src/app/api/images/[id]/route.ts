@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
@@ -18,9 +18,10 @@ export async function GET(
     const image = await prisma.imageRecord.findUnique({
       where: { id: paramsResolved.id },
       include: {
-        professional: {
+        user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -53,9 +54,9 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { description, imageBase64, professionalId } = body;
+    const { description, imageBase64, userId } = body;
 
-    if (!description && !imageBase64 && !professionalId) {
+    if (!description && !imageBase64 && !userId) {
       return NextResponse.json(
         { error: "At least one field must be provided" },
         { status: 400 }
@@ -65,15 +66,16 @@ export async function PATCH(
     const updateData: any = {};
     if (description) updateData.description = description;
     if (imageBase64) updateData.imageBase64 = imageBase64;
-    if (professionalId) updateData.professionalId = professionalId;
+    if (userId) updateData.userId = userId;
 
     const image = await prisma.imageRecord.update({
       where: { id: paramsResolved.id },
       data: updateData,
       include: {
-        professional: {
+        user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },

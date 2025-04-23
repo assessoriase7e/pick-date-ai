@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
@@ -16,11 +16,12 @@ export async function GET(
 
   try {
     const image = await prisma.imageRecord.findMany({
-      where: { professionalId: paramsResolved.id },
+      where: { userId: paramsResolved.id },
       include: {
-        professional: {
+        user: {
           select: {
-            name: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },

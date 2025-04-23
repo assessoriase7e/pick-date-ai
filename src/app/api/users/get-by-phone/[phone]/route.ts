@@ -14,22 +14,19 @@ export async function GET(
   }
 
   try {
-    const professional = await prisma.professional.findFirst({
+    const user = await prisma.user.findFirst({
       where: { phone: paramsResolved.phone },
     });
 
-    if (!professional) {
-      return NextResponse.json(
-        { error: "Professional not found" },
-        { status: 404 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
 
-    return NextResponse.json(professional);
+    return NextResponse.json(user);
   } catch (error) {
-    console.error("Error fetching professional:", error);
+    console.error("Error fetching user:", error);
     return NextResponse.json(
-      { error: "Failed to fetch professional" },
+      { error: "Failed to fetch user" },
       { status: 500 }
     );
   }

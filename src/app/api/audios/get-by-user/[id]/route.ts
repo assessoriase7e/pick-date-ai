@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const paramsResolved = await params;
-
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -15,22 +14,22 @@ export async function GET(
   }
 
   try {
-    const professional = await prisma.professional.findUnique({
-      where: { id: paramsResolved.id },
+    const audio = await prisma.audioRecord.findMany({
+      where: { userId: paramsResolved.id },
+      include: {
+        user: true,
+      },
     });
 
-    if (!professional) {
-      return NextResponse.json(
-        { error: "Professional not found" },
-        { status: 404 }
-      );
+    if (!audio) {
+      return NextResponse.json({ error: "Audio not found" }, { status: 404 });
     }
 
-    return NextResponse.json(professional);
+    return NextResponse.json(audio);
   } catch (error) {
-    console.error("Error fetching professional:", error);
+    console.error("Error fetching audio:", error);
     return NextResponse.json(
-      { error: "Failed to fetch professional" },
+      { error: "Failed to fetch audio" },
       { status: 500 }
     );
   }
@@ -50,29 +49,33 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { name, phone, company } = body;
+    const { userId, description, audioBase64 } = body;
 
-    if (!name && !phone && !company) {
+    if (!userId && !description && !audioBase64) {
       return NextResponse.json(
         { error: "At least one field must be provided" },
         { status: 400 }
       );
     }
 
-    const professional = await prisma.professional.update({
+    const updateData: any = {};
+    if (userId) updateData.userId = userId;
+    if (description) updateData.description = description;
+    if (audioBase64) updateData.audioBase64 = audioBase64;
+
+    const audio = await prisma.audioRecord.update({
       where: { id: paramsResolved.id },
-      data: {
-        ...(name && { name }),
-        ...(phone && { phone }),
-        ...(company && { company }),
+      data: updateData,
+      include: {
+        user: true,
       },
     });
 
-    return NextResponse.json(professional);
+    return NextResponse.json(audio);
   } catch (error) {
-    console.error("Error updating professional:", error);
+    console.error("Error updating audio:", error);
     return NextResponse.json(
-      { error: "Failed to update professional" },
+      { error: "Failed to update audio" },
       { status: 500 }
     );
   }
@@ -80,9 +83,9 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // Validar API Key
+  const paramsResolved = await params;
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -90,15 +93,15 @@ export async function DELETE(
   }
 
   try {
-    await prisma.professional.delete({
-      where: { id: params.id },
+    await prisma.audioRecord.delete({
+      where: { id: paramsResolved.id },
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting professional:", error);
+    console.error("Error deleting audio:", error);
     return NextResponse.json(
-      { error: "Failed to delete professional" },
+      { error: "Failed to delete audio" },
       { status: 500 }
     );
   }

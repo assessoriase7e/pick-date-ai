@@ -17,7 +17,7 @@ export async function GET(
     const audio = await prisma.audioRecord.findUnique({
       where: { id: paramsResolved.id },
       include: {
-        professional: true,
+        user: true,
       },
     });
 
@@ -49,9 +49,9 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { professionalId, description, audioBase64 } = body;
+    const { userId, description, audioBase64 } = body;
 
-    if (!professionalId && !description && !audioBase64) {
+    if (!userId && !description && !audioBase64) {
       return NextResponse.json(
         { error: "At least one field must be provided" },
         { status: 400 }
@@ -59,7 +59,7 @@ export async function PATCH(
     }
 
     const updateData: any = {};
-    if (professionalId) updateData.professionalId = professionalId;
+    if (userId) updateData.userId = userId;
     if (description) updateData.description = description;
     if (audioBase64) updateData.audioBase64 = audioBase64;
 
@@ -67,7 +67,7 @@ export async function PATCH(
       where: { id: paramsResolved.id },
       data: updateData,
       include: {
-        professional: true,
+        user: true,
       },
     });
 
