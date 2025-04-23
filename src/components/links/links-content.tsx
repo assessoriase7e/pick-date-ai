@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
@@ -15,22 +15,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useLinks } from "@/hooks/use-links";
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
 import { deleteLink } from "@/actions/links/delete";
+import { listLinks } from "@/actions/links/getMany";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
+import { useProfessionals } from "@/hooks/use-professionals";
 
 export function LinksContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { links, totalPages, isLoading, mutate } = useLinks(page, 10);
+
+  const [links, setLinks] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<any | null>(null);
   const [deletingLink, setDeletingLink] = useState<any | null>(null);
+
+  const { data: professionals = [] } = useProfessionals();
+
+  // Fetch links using server action
+  useEffect(() => {
+    async function fetchLinks() {
+      setIsLoading(true);
+      try {
+        const result = await listLinks(page, 10);
+        if (result.success && result.data) {
+          setLinks(result.data.links);
+          setTotalPages(result.data.totalPages);
+        } else {
+          toast.error("Erro ao carregar links");
+        }
+      } catch (error) {
+        console.error("Error fetching links:", error);
+        toast.error("Erro ao carregar links");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLinks();
+  }, [page]);
 
   async function handleCreateLink(data: any) {
     try {
@@ -40,12 +69,18 @@ export function LinksContent() {
         throw new Error(result.error);
       }
 
-      mutate();
+      // Refresh links after creating
+      const linksResult = await listLinks(page, 10);
+      if (linksResult.success && linksResult.data) {
+        setLinks(linksResult.data.links);
+        setTotalPages(linksResult.data.totalPages);
+      }
+
       setIsCreateModalOpen(false);
       toast("Link criado com sucesso!");
     } catch (error) {
       console.error("Error creating link:", error);
-      throw error;
+      toast.error("Erro ao criar link");
     }
   }
 
@@ -59,12 +94,18 @@ export function LinksContent() {
         throw new Error(result.error);
       }
 
-      mutate();
+      // Refresh links after updating
+      const linksResult = await listLinks(page, 10);
+      if (linksResult.success && linksResult.data) {
+        setLinks(linksResult.data.links);
+        setTotalPages(linksResult.data.totalPages);
+      }
+
       setEditingLink(null);
       toast("Link atualizado com sucesso!");
     } catch (error) {
       console.error("Error updating link:", error);
-      throw error;
+      toast.error("Erro ao atualizar link");
     }
   }
 
@@ -78,12 +119,18 @@ export function LinksContent() {
         throw new Error(result.error);
       }
 
-      mutate();
+      // Refresh links after deleting
+      const linksResult = await listLinks(page, 10);
+      if (linksResult.success && linksResult.data) {
+        setLinks(linksResult.data.links);
+        setTotalPages(linksResult.data.totalPages);
+      }
+
       setDeletingLink(null);
       toast("Link excluído com sucesso!");
     } catch (error) {
       console.error("Error deleting link:", error);
-      throw error;
+      toast.error("Erro ao excluir link");
     }
   }
 
@@ -108,6 +155,7 @@ export function LinksContent() {
           <TableHeader>
             <TableRow>
               <TableHead>Título</TableHead>
+              <TableHead>Profissional</TableHead>
               <TableHead>URL</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="w-[150px]">Ações</TableHead>
@@ -116,13 +164,13 @@ export function LinksContent() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
+                <TableCell colSpan={5} className="text-center py-10">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : links.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
+                <TableCell colSpan={5} className="text-center py-10">
                   Nenhum link encontrado.
                 </TableCell>
               </TableRow>
@@ -131,11 +179,15 @@ export function LinksContent() {
                 <TableRow key={link.id}>
                   <TableCell>{link.title}</TableCell>
                   <TableCell>
+                    {link.professional?.name || "Não associado"}
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center">
                       <span className="truncate max-w-[200px]">{link.url}</span>
                     </div>
                   </TableCell>
                   <TableCell>{truncateText(link.description, 30)}</TableCell>
+
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
@@ -182,7 +234,7 @@ export function LinksContent() {
       <LinkModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Novo link"
+        title="Criar Link"
         description="Adicione um novo link ao sistema."
         onSubmit={handleCreateLink}
       />
@@ -191,12 +243,13 @@ export function LinksContent() {
         <LinkModal
           isOpen={!!editingLink}
           onClose={() => setEditingLink(null)}
-          title="Editar link"
-          description="Edite as informações do link."
+          title="Editar Link"
+          description="Atualize as informações do link."
           initialData={{
             url: editingLink.url,
             title: editingLink.title,
             description: editingLink.description,
+            professionalId: editingLink.professionalId,
           }}
           onSubmit={handleUpdateLink}
         />

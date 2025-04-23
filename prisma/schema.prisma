@@ -17,6 +17,7 @@ model Professional {
   audios    AudioRecord[]
   images    ImageRecord[]
   documents DocumentRecord[]
+  links     Link[]
 
   @@map("professional")
 }
@@ -46,7 +47,7 @@ model ImageRecord {
 }
 
 model User {
-  id        String   @id @map("_id")  // Changed to use Clerk ID directly as primary key
+  id        String   @id @map("_id")
   email     String   @unique
   firstName String?
   lastName  String?
@@ -63,7 +64,7 @@ model ApiKey {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   key         String   @unique
   description String?
-  userId      String   // No need for @db.ObjectId since userId references Clerk ID
+  userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -87,12 +88,14 @@ model DocumentRecord {
 }
 
 model Link {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  url         String
-  title       String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  url            String
+  title          String
+  description    String
+  professional   Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalId String?      @db.ObjectId
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@map("link")
 }

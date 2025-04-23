@@ -24,6 +24,7 @@ export async function GET(
     const fields = fieldsParam ? fieldsParam.split(',') : null;
 
     const unifiedRecords: any[] = [];
+    const links: any[] = []; // New array to store links
 
     for (const modelName of modelNames) {
       try {
@@ -35,6 +36,23 @@ export async function GET(
 
           records.forEach((record: any) => {
             const standardizedRecord = { ...record };
+            
+            // Extract links from description or other fields if they contain URLs
+            if (record.description) {
+              const urlRegex = /(https?:\/\/[^\s]+)/g;
+              const foundLinks = record.description.match(urlRegex);
+              
+              if (foundLinks) {
+                foundLinks.forEach((link: string) => {
+                  links.push({
+                    url: link,
+                    sourceId: record.id,
+                    sourceType: modelName,
+                    description: `Link found in ${modelName} description`
+                  });
+                });
+              }
+            }
 
             for (const key in standardizedRecord) {
               if (
@@ -43,6 +61,24 @@ export async function GET(
               ) {
                 standardizedRecord.base64 = standardizedRecord[key];
                 delete standardizedRecord[key];
+              }
+              
+              // Check if any other field contains URLs
+              if (typeof standardizedRecord[key] === 'string' && key !== 'description') {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const foundLinks = standardizedRecord[key].match(urlRegex);
+                
+                if (foundLinks) {
+                  foundLinks.forEach((link: string) => {
+                    links.push({
+                      url: link,
+                      sourceId: record.id,
+                      sourceType: modelName,
+                      fieldName: key,
+                      description: `Link found in ${modelName}.${key}`
+                    });
+                  });
+                }
               }
             }
             
@@ -91,6 +127,7 @@ export async function GET(
 
     return NextResponse.json({
       data: unifiedRecords,
+      links: links, // Include the links array in the response
     });
   } catch (error) {
     console.error("Error fetching professional records:", error);

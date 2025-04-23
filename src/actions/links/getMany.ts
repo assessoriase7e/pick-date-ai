@@ -15,10 +15,7 @@ type ListLinksError = {
   error: string;
 };
 
-export async function listLinks(
-  page: number = 1,
-  limit: number = 10
-): Promise<ListLinksSuccess | ListLinksError> {
+export async function listLinks(page: number = 1, limit: number = 10) {
   try {
     const skip = (page - 1) * limit;
 
@@ -27,6 +24,14 @@ export async function listLinks(
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        include: {
+          professional: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       }),
       prisma.link.count(),
     ]);

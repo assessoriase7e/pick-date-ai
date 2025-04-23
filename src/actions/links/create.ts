@@ -11,6 +11,7 @@ export async function createLink(data: Omit<Link, "id" | "createdAt" | "updatedA
         url: data.url,
         title: data.title,
         description: data.description,
+        professionalId: data.professionalId,
       },
     });
 
