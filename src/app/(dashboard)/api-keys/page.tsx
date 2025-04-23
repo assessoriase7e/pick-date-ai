@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { ApiKeysContent } from "./api-keys-content";
 import { LoaderCircle } from "lucide-react";
 import { ApiDocsAccordion } from "@/components/docs/AudioAccordion";
-import { professionalRoutes } from "@/mocked/docs/professionals";
 import {
   Accordion,
   AccordionContent,
@@ -15,6 +14,7 @@ import { imageRoutes } from "@/mocked/docs/images";
 import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
 import { getByProfessionalRoutes } from "@/mocked/docs/get-by-user";
 import { linksRoutes } from "@/mocked/docs/links";
+import { userRoutes } from "@/mocked/docs/professionals";
 
 export default function ApiKeysPage() {
   return (
@@ -30,7 +30,7 @@ export default function ApiKeysPage() {
               <h3 className="text-xl font-semibold">Documentação</h3>
             </AccordionTrigger>
             <AccordionContent>
-              <ApiDocsAccordion doc={professionalRoutes} />
+              <ApiDocsAccordion doc={userRoutes} />
               <Separator />
               <ApiDocsAccordion doc={audioRoutes} />
               <Separator />
