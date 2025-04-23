@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -33,6 +33,7 @@ export function AudiosContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingAudio, setEditingAudio] = useState<any | null>(null);
   const [deletingAudio, setDeletingAudio] = useState<any | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   async function loadAudios() {
     setIsLoading(true);
@@ -105,6 +106,22 @@ export function AudiosContent() {
     router.push(`/audios?page=${newPage}`);
   }
 
+  function handlePlayPause(audioId: string, audioElement: HTMLAudioElement) {
+    if (playingAudio === audioId) {
+      audioElement.pause();
+      setPlayingAudio(null);
+    } else {
+      // Pause any currently playing audio
+      if (playingAudio) {
+        const currentAudio = document.getElementById(playingAudio) as HTMLAudioElement;
+        if (currentAudio) currentAudio.pause();
+      }
+      
+      audioElement.play();
+      setPlayingAudio(audioId);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -141,13 +158,33 @@ export function AudiosContent() {
                 <TableRow key={audio.id}>
                   <TableCell>{audio.professional.name}</TableCell>
                   <TableCell>
-                    <audio controls className="w-full max-w-[200px]">
-                      <source
-                        src={createAudioUrl(audio.audioBase64)}
-                        type="audio/mpeg"
-                      />
-                      Seu navegador não suporta o elemento de áudio.
-                    </audio>
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => {
+                          const audioElement = document.getElementById(`audio-${audio.id}`) as HTMLAudioElement;
+                          handlePlayPause(`audio-${audio.id}`, audioElement);
+                        }}
+                      >
+                        {playingAudio === `audio-${audio.id}` ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <audio 
+                        id={`audio-${audio.id}`}
+                        className="hidden"
+                        onEnded={() => setPlayingAudio(null)}
+                      >
+                        <source
+                          src={createAudioUrl(audio.audioBase64)}
+                          type="audio/mpeg"
+                        />
+                        Seu navegador não suporta o elemento de áudio.
+                      </audio>
+                    </div>
                   </TableCell>
                   <TableCell>{truncateText(audio.description, 10)}</TableCell>
                   <TableCell>
