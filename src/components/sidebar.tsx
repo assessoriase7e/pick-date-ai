@@ -1,7 +1,7 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Music, User, Image, KeyRound, FileIcon, Link } from "lucide-react"; // Importe KeyRound
+import { Music, Image, KeyRound, FileIcon, Link } from "lucide-react"; // Importe KeyRound
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -45,13 +45,6 @@ export function Sidebar() {
         icon={Link}
         label="Links"
         isActive={pathname === "/links"}
-      />
-
-      <SidebarItem
-        href="/professionals"
-        icon={User}
-        label="Profissionais"
-        isActive={pathname.startsWith("/professionals")}
       />
 
       <SidebarItem // Adicione este item para Chaves de API
