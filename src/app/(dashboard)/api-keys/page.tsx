@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { audioRoutes } from "@/mocked/docs/audio";
 import { imageRoutes } from "@/mocked/docs/images";
 import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
+import { getByProfessionalRoutes } from "@/mocked/docs/get-by-professional";
 
 export default function ApiKeysPage() {
   return (
@@ -33,6 +34,8 @@ export default function ApiKeysPage() {
               <ApiDocsAccordion doc={audioRoutes} />
               <Separator />
               <ApiDocsAccordion doc={getByIdsRoutes} />
+              <Separator />
+              <ApiDocsAccordion doc={getByProfessionalRoutes} />
               <Separator />
               <ApiDocsAccordion doc={imageRoutes} />
             </AccordionContent>
