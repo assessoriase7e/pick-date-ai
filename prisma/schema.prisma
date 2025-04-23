@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Professional {
-  id        String           @id @default(cuid())
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   phone     String
   company   String
@@ -16,17 +16,17 @@ model Professional {
   updatedAt DateTime         @updatedAt
   audios    AudioRecord[]
   images    ImageRecord[]
-  documents DocumentRecord[] // Add this line to link documents to professionals
+  documents DocumentRecord[]
 
   @@map("professional")
 }
 
 model AudioRecord {
-  id             String       @id @default(cuid())
-  audioBase64    String       @db.Text
-  description    String       @db.Text
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  audioBase64    String
+  description    String
   professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  professionalId String
+  professionalId String       @db.ObjectId
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -34,11 +34,11 @@ model AudioRecord {
 }
 
 model ImageRecord {
-  id             String       @id @default(cuid())
-  imageBase64    String       @db.Text
-  description    String       @db.Text
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  imageBase64    String
+  description    String
   professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  professionalId String
+  professionalId String       @db.ObjectId
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -46,7 +46,7 @@ model ImageRecord {
 }
 
 model User {
-  id        String   @id
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   firstName String?
   lastName  String?
@@ -59,42 +59,11 @@ model User {
   @@map("user")
 }
 
-model Appointments {
-  id            BigInt   @id @default(autoincrement())
-  phone         Decimal? @db.Decimal
-  business_name String?
-  start_time    String?
-  end_time      String?
-  event_id      String?
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-
-  @@map("appointments")
-}
-
-model Clients {
-  id            BigInt   @id @default(autoincrement())
-  full_name     String?
-  phone         String?
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-  business_name String?
-
-  @@map("clients")
-}
-
-model Documents {
-  id        BigInt                 @id @default(autoincrement())
-  content   String?
-  metadata  Json?
-  embedding Unsupported("vector")?
-
-  @@map("documents")
-}
-
 model ApiKey {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   key         String   @unique
   description String?
-  userId      String
+  userId      String   @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -103,15 +72,14 @@ model ApiKey {
   @@map("apikey")
 }
 
-// New model for document records
 model DocumentRecord {
-  id             String       @id @default(cuid())
-  documentBase64 String       @db.Text
-  fileName       String // Store the original filename
-  fileType       String // Store the file type (PDF/DOCX)
-  description    String       @db.Text
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  documentBase64 String
+  fileName       String
+  fileType       String
+  description    String
   professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  professionalId String
+  professionalId String       @db.ObjectId
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

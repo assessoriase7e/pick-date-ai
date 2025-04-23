@@ -17,22 +17,7 @@ export async function GET(
   try {
     const professionalId = params.id;
 
-    // First check if the professional exists
-    const professional = await prisma.professional.findUnique({
-      where: { id: professionalId },
-    });
-
-    if (!professional) {
-      return NextResponse.json(
-        { error: "Professional not found" },
-        { status: 404 }
-      );
-    }
-
-    // Filter out the 'professional' model from the modelNames
-    const recordModelNames = modelNames.filter(name => name !== 'professional');
-
-    const recordsPromises = recordModelNames.map(async (modelName) => {
+    const recordsPromises = modelNames.map(async (modelName) => {
       // @ts-ignore: acesso dinâmico ao Prisma
       const records = await prisma[modelName].findMany({
         where: { professionalId },
@@ -51,7 +36,7 @@ export async function GET(
 
     const allRecordsGrouped = results.reduce(
       (acc: any, curr: any, i: number) => {
-        acc[recordModelNames[i]] = curr;
+        acc[modelNames[i]] = curr;
         return acc;
       },
       {} as Record<string, any[]>
