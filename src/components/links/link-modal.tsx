@@ -44,7 +44,6 @@ export function LinkModal({
           initialData={initialData}
           onSubmit={onSubmit}
           onCancel={onClose}
-          professionals={professionals} // Pass the professionals prop
         />
       </DialogContent>
     </Dialog>

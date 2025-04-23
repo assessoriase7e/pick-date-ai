@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 
 type ListLinksSuccess = {
   success: true;
@@ -17,6 +18,8 @@ type ListLinksError = {
 
 export async function listLinks(page: number = 1, limit: number = 10) {
   try {
+    const user = await currentUser();
+
     const skip = (page - 1) * limit;
 
     const [links, total] = await Promise.all([
@@ -24,14 +27,7 @@ export async function listLinks(page: number = 1, limit: number = 10) {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          professional: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
+        where: { userId: user?.id as string },
       }),
       prisma.link.count(),
     ]);

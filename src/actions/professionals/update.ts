@@ -1,26 +1,18 @@
-"use server"
-
+"use server";
 import { prisma } from "@/lib/db";
-import { Professional } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { User } from "@prisma/client";
 
-export async function updateProfessional(id: string, data: Partial<Professional>) {
+export async function updateProfessional(
+  id: string,
+  data: Pick<User, "email" | "firstName" | "imageUrl" | "lastName">
+) {
   try {
-    const professional = await prisma.professional.update({
+    const user = await prisma.user.update({
       where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.phone && { phone: data.phone }),
-        ...(data.company && { company: data.company }),
-      },
-      include: {
-        audios: true,
-        images: true,
-      },
+      data,
     });
 
-    revalidatePath("/professionals");
-    return { success: true, data: professional };
+    return { success: true, data: user };
   } catch (error) {
     console.error("Erro ao atualizar profissional:", error);
     return { success: false, error: "Falha ao atualizar profissional" };

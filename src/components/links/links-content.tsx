@@ -22,6 +22,7 @@ import { listLinks } from "@/actions/links/getMany";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { useProfessionals } from "@/hooks/use-professionals";
+import { Link } from "@prisma/client";
 
 export function LinksContent() {
   const router = useRouter();
@@ -155,7 +156,6 @@ export function LinksContent() {
           <TableHeader>
             <TableRow>
               <TableHead>Título</TableHead>
-              <TableHead>Profissional</TableHead>
               <TableHead>URL</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="w-[150px]">Ações</TableHead>
@@ -175,12 +175,10 @@ export function LinksContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              links.map((link: any) => (
+              links.map((link: Link) => (
                 <TableRow key={link.id}>
                   <TableCell>{link.title}</TableCell>
-                  <TableCell>
-                    {link.professional?.name || "Não associado"}
-                  </TableCell>
+
                   <TableCell>
                     <div className="flex items-center">
                       <span className="truncate max-w-[200px]">{link.url}</span>

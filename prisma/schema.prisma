@@ -64,15 +64,14 @@ model DocumentRecord {
 }
 
 model Link {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  url            String
-  title          String
-  description    String
-  professionalId String?  @db.ObjectId
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  title       String
+  description String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("link")
 }

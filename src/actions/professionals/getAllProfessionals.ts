@@ -4,9 +4,9 @@ import { prisma } from "@/lib/db";
 
 export async function getAllProfessionals() {
   try {
-    const professionals = await prisma.professional.findMany({
+    const professionals = await prisma.user.findMany({
       orderBy: {
-        name: "asc",
+        firstName: "asc",
       },
     });
 

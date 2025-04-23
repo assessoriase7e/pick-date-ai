@@ -1,8 +1,8 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { Professional } from "@prisma/client";
+import { User } from "@prisma/client";
 
-type ProfessionalWithRelations = Professional & {
+type UserWithRelations = User & {
   _count: {
     audios: number;
     images: number;
@@ -12,7 +12,7 @@ type ProfessionalWithRelations = Professional & {
 type ListProfessionalsSuccess = {
   success: true;
   data: {
-    professionals: ProfessionalWithRelations[];
+    professionals: UserWithRelations[];
     totalPages: number;
   };
 };
@@ -29,7 +29,7 @@ export async function listProfessionals(
   try {
     const skip = (page - 1) * limit;
 
-    const professionals = await prisma.professional.findMany({
+    const professionals = await prisma.user.findMany({
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
@@ -42,7 +42,7 @@ export async function listProfessionals(
         },
       },
     });
-    const total = await prisma.professional.count();
+    const total = await prisma.user.count();
 
     return {
       success: true,

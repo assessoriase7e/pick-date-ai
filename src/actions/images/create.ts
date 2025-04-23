@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { ImageRecord } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function createImage(
   data: Pick<ImageRecord, "description" | "imageBase64" | "userId">
 ) {
   try {
+    const user = await currentUser();
+    data.userId = user!.id;
+
     const image = await prisma.imageRecord.create({ data });
 
     revalidatePath("/images");

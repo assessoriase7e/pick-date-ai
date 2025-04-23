@@ -3,15 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Link } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server";
 
-export async function createLink(data: Omit<Link, "id" | "createdAt" | "updatedAt">) {
+export async function createLink(
+  data: Pick<Link, "url" | "title" | "description">
+) {
   try {
+    const user = await currentUser();
     const link = await prisma.link.create({
       data: {
-        url: data.url,
-        title: data.title,
-        description: data.description,
-        professionalId: data.professionalId,
+        ...data,
+        userId: user!.id,
       },
     });
 
