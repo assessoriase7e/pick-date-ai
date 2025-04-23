@@ -125,48 +125,66 @@ export function ImagesContent() {
           <TableHeader>
             <TableRow>
               <TableHead>Descrição</TableHead>
-              <TableHead>Profissional</TableHead>
               <TableHead>Data de Criação</TableHead>
               <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {images?.map((image) => (
-              <TableRow key={image.id}>
-                <TableCell>{image.description}</TableCell>
-                <TableCell>{image.professional.name}</TableCell>
-                <TableCell>
-                  {format(new Date(image.createdAt), "dd/MM/yyyy 'às' HH:mm", {
-                    locale: ptBR,
-                  })}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setViewingImage(image)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setEditingImage(image)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setDeletingImage(image)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-10">
+                  Carregando...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : images.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-10">
+                  Nenhuma imagem encontrada.
+                </TableCell>
+              </TableRow>
+            ) : (
+              <>
+                {images?.map((image) => (
+                  <TableRow key={image.id}>
+                    <TableCell>{image.description}</TableCell>
+                    <TableCell>
+                      {format(
+                        new Date(image.createdAt),
+                        "dd/MM/yyyy 'às' HH:mm",
+                        {
+                          locale: ptBR,
+                        }
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setViewingImage(image)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setEditingImage(image)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setDeletingImage(image)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
           </TableBody>
         </Table>
       </div>

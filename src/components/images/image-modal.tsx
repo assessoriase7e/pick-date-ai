@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,25 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import Image from "next/image";
-import { ImageRecord, Professional } from "@prisma/client";
-import { listProfessionals } from "@/actions/professionals/getMany";
+import { ImageRecord } from "@prisma/client";
+import { useUser } from "@clerk/nextjs";
 
 interface ImageModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: {
-    imageBase64: string;
-    description: string;
-    professionalId: string;
-  }) => Promise<void>;
+  onSubmit: (data: Partial<ImageRecord>) => Promise<void>;
   initialData?: ImageRecord;
 }
 
@@ -42,27 +30,11 @@ export function ImageModal({
   const [description, setDescription] = useState(
     initialData?.description || ""
   );
-  const [professionalId, setProfessionalId] = useState(
-    initialData?.professionalId || ""
-  );
+  const { user } = useUser();
+
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.imageBase64 || null
   );
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
-
-  useEffect(() => {
-    async function loadProfessionals() {
-      try {
-        const result = await listProfessionals();
-        if (result.success) {
-          setProfessionals(result.data.professionals);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar profissionais:", error);
-      }
-    }
-    loadProfessionals();
-  }, []);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -82,17 +54,16 @@ export function ImageModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!imagePreview || !description || !professionalId) return;
+    if (!imagePreview || !description) return;
 
     try {
       setIsLoading(true);
       await onSubmit({
         imageBase64: imagePreview,
         description,
-        professionalId,
+        userId: user?.id,
       });
       setDescription("");
-      setProfessionalId("");
       setImagePreview(null);
     } catch (error) {
       console.error("Error submitting image:", error);
@@ -134,23 +105,6 @@ export function ImageModal({
             disabled={isLoading}
           />
 
-          <Select
-            value={professionalId}
-            onValueChange={setProfessionalId}
-            disabled={isLoading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um profissional" />
-            </SelectTrigger>
-            <SelectContent>
-              {professionals?.map((professional: Professional) => (
-                <SelectItem key={professional.id} value={professional.id}>
-                  {professional.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <div className="flex justify-end space-x-2">
             <Button
               type="button"
@@ -162,9 +116,7 @@ export function ImageModal({
             </Button>
             <Button
               type="submit"
-              disabled={
-                isLoading || !imagePreview || !description || !professionalId
-              }
+              disabled={isLoading || !imagePreview || !description}
             >
               {isLoading ? "Enviando..." : "Enviar"}
             </Button>

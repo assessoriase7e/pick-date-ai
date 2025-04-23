@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { ImageWithProfessional } from "@/types/professionals";
+import { currentUser } from "@clerk/nextjs/server";
 
 type ListImagesSuccess = {
   success: true;
@@ -23,17 +24,15 @@ export async function listImages(
   try {
     const skip = (page - 1) * limit;
 
+    const user = await currentUser();
+
     const [images, total] = await Promise.all([
       prisma.imageRecord.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              id: true,
-            },
-          },
+        where: {
+          userId: user?.id,
         },
       }),
       prisma.imageRecord.count(),
