@@ -20,19 +20,20 @@ import { createAudio } from "@/actions/audios/create";
 import { updateAudio } from "@/actions/audios/update";
 import { deleteAudio } from "@/actions/audios/delete";
 import { listAudios } from "@/actions/audios/getMany";
+import { AudioRecord } from "@prisma/client";
 
 export function AudiosContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
 
-  const [audios, setAudios] = useState<any[]>([]);
+  const [audios, setAudios] = useState<AudioRecord[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingAudio, setEditingAudio] = useState<any | null>(null);
-  const [deletingAudio, setDeletingAudio] = useState<any | null>(null);
+  const [editingAudio, setEditingAudio] = useState<AudioRecord | null>(null);
+  const [deletingAudio, setDeletingAudio] = useState<AudioRecord | null>(null);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   async function loadAudios() {
@@ -113,10 +114,12 @@ export function AudiosContent() {
     } else {
       // Pause any currently playing audio
       if (playingAudio) {
-        const currentAudio = document.getElementById(playingAudio) as HTMLAudioElement;
+        const currentAudio = document.getElementById(
+          playingAudio
+        ) as HTMLAudioElement;
         if (currentAudio) currentAudio.pause();
       }
-      
+
       audioElement.play();
       setPlayingAudio(audioId);
     }
@@ -134,8 +137,7 @@ export function AudiosContent() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome do profissional</TableHead>
-              <TableHead>Áudio</TableHead>
+              <TableHead className="w-[1%]">Áudio</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
@@ -154,16 +156,17 @@ export function AudiosContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              audios.map((audio: any) => (
+              audios.map((audio: AudioRecord) => (
                 <TableRow key={audio.id}>
-                  <TableCell>{audio.professional.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={(e) => {
-                          const audioElement = document.getElementById(`audio-${audio.id}`) as HTMLAudioElement;
+                          const audioElement = document.getElementById(
+                            `audio-${audio.id}`
+                          ) as HTMLAudioElement;
                           handlePlayPause(`audio-${audio.id}`, audioElement);
                         }}
                       >
@@ -173,7 +176,7 @@ export function AudiosContent() {
                           <Play className="h-4 w-4" />
                         )}
                       </Button>
-                      <audio 
+                      <audio
                         id={`audio-${audio.id}`}
                         className="hidden"
                         onEnded={() => setPlayingAudio(null)}
@@ -234,10 +237,7 @@ export function AudiosContent() {
           onClose={() => setEditingAudio(null)}
           title="Editar áudio"
           description="Edite as informações do áudio."
-          initialData={{
-            professionalId: editingAudio.professionalId,
-            description: editingAudio.description,
-          }}
+          initialData={editingAudio}
           onSubmit={handleUpdateAudio}
         />
       )}
@@ -247,7 +247,6 @@ export function AudiosContent() {
           isOpen={!!deletingAudio}
           onClose={() => setDeletingAudio(null)}
           onConfirm={handleDeleteAudio}
-          professionalName={deletingAudio.professional.name}
         />
       )}
     </div>

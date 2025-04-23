@@ -17,14 +17,12 @@ interface DeleteAudioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  professionalName: string;
 }
 
 export function DeleteAudioModal({
   isOpen,
   onClose,
   onConfirm,
-  professionalName,
 }: DeleteAudioModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,8 +46,8 @@ export function DeleteAudioModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir áudio</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir o áudio do profissional{" "}
-            {professionalName}? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir o áudio do profissional? Esta ação
+            não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

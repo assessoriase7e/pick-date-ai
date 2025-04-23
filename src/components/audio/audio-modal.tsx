@@ -1,22 +1,34 @@
-"use client"
+"use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { AudioForm } from "./audio-form"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AudioForm } from "./audio-form";
+import { AudioRecord } from "@prisma/client";
 
 interface AudioModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  description: string
-  initialData?: {
-    professionalId: string
-    description: string
-    audioUrl?: string // Add this field
-  }
-  onSubmit: (data: any) => Promise<void>
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description: string;
+  initialData?: Pick<AudioRecord, "description" | "audioBase64">;
+  onSubmit: (
+    data: Pick<AudioRecord, "description" | "audioBase64">
+  ) => Promise<void>;
 }
 
-export function AudioModal({ isOpen, onClose, title, description, initialData, onSubmit }: AudioModalProps) {
+export function AudioModal({
+  isOpen,
+  onClose,
+  title,
+  description,
+  initialData,
+  onSubmit,
+}: AudioModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -24,8 +36,12 @@ export function AudioModal({ isOpen, onClose, title, description, initialData, o
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <AudioForm initialData={initialData} onSubmit={onSubmit} onCancel={onClose} />
+        <AudioForm
+          initialData={initialData}
+          onSubmit={onSubmit}
+          onCancel={onClose}
+        />
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,18 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 import { AudioRecord } from "@prisma/client";
-
-type AudioWithUser = AudioRecord & {
-  user: {
-    email: string;
-  };
-};
 
 type ListAudiosSuccess = {
   success: true;
   data: {
-    audios: AudioWithUser[];
+    audios: AudioRecord[];
     totalPages: number;
   };
 };
@@ -27,6 +22,8 @@ export async function listAudios(
   limit: number = 10
 ): Promise<ListAudiosSuccess | ListAudiosError> {
   try {
+    const user = await currentUser();
+
     const skip = (page - 1) * limit;
 
     const [audios, total] = await Promise.all([
@@ -34,12 +31,8 @@ export async function listAudios(
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              email: true,
-            },
-          },
+        where: {
+          userId: user?.id,
         },
       }),
       prisma.audioRecord.count(),
