@@ -28,8 +28,15 @@ const documentSchema = z.object({
   }),
   documentFile: z
     .instanceof(File, { message: "O arquivo é obrigatório." })
-    .refine((file) => file.size <= 10 * 1024 * 1024, {
-      message: "O arquivo deve ter no máximo 10MB.",
+    .refine((file) => {
+      // Limit file size to 1MB for PDFs
+      if (file.type === "application/pdf") {
+        return file.size <= 1 * 1024 * 1024; // 1MB
+      }
+      // Keep the original 10MB limit for other file types
+      return file.size <= 10 * 1024 * 1024;
+    }, {
+      message: "Arquivos PDF devem ter no máximo 1MB. Outros tipos de arquivo podem ter até 10MB.",
     })
     .refine(
       (file) => {
@@ -127,6 +134,13 @@ export function DocumentForm({
   function handleDocumentChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Check file size for PDFs
+    if (file.type === "application/pdf" && file.size > 1 * 1024 * 1024) {
+      toast("O arquivo PDF excede o limite de 1MB.");
+      e.target.value = ''; // Clear the input
+      return;
+    }
 
     form.setValue("documentFile", file, { shouldValidate: true });
     setFileName(file.name);
