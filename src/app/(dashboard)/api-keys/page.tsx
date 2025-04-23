@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { audioRoutes } from "@/mocked/docs/audio";
 import { imageRoutes } from "@/mocked/docs/images";
 import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
-import { getByProfessionalRoutes } from "@/mocked/docs/get-by-professional";
+import { getByProfessionalRoutes } from "@/mocked/docs/get-by-user";
 import { linksRoutes } from "@/mocked/docs/links";
 
 export default function ApiKeysPage() {

@@ -1,12 +1,12 @@
-// professionalRoutes.ts
+// userRoutes.ts
 
-export const professionalRoutes = {
-  title: "Documentação Rotas de Profissionais",
+export const userRoutes = {
+  title: "Documentação Rotas de Usuários",
   routes: [
     {
       method: "GET",
-      path: "/api/professional",
-      description: "Retorna uma lista paginada de profissionais.",
+      path: "/api/users",
+      description: "Retorna uma lista paginada de usuários.",
       query: [
         {
           name: "page",
@@ -22,92 +22,91 @@ export const professionalRoutes = {
         },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Lista paginada de profissionais" },
+        { code: 200, description: "Lista paginada de usuários" },
         { code: 401, description: "Não autorizado" },
-        { code: 500, description: "Erro ao buscar profissionais" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "POST",
-      path: "/api/professional",
-      description: "Cria um novo profissional.",
+      path: "/api/users",
+      description: "Cria um novo usuário.",
       body: [
         { name: "name", type: "string" },
         { name: "phone", type: "string" },
         { name: "company", type: "string" },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 201, description: "Profissional criado com sucesso" },
+        { code: 201, description: "Usuário criado com sucesso" },
         { code: 400, description: "Campos obrigatórios ausentes" },
         { code: 401, description: "Não autorizado" },
-        { code: 500, description: "Erro ao criar profissional" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "GET",
-      path: "/api/professional/:id",
-      description: "Retorna os dados de um profissional pelo ID.",
+      path: "/api/users/:id",
+      description: "Retorna os dados de um usuário pelo ID.",
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Profissional encontrado com sucesso" },
+        { code: 200, description: "Usuário encontrado com sucesso" },
         { code: 401, description: "Não autorizado" },
-        { code: 404, description: "Profissional não encontrado" },
-        { code: 500, description: "Erro ao buscar profissional" },
+        { code: 404, description: "Usuário não encontrado" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "GET",
-      path: "/api/professional/get-by-phone/:phone",
-      description:
-        "Retorna os dados de um profissional pelo número de telefone.",
+      path: "/api/users/get-by-phone/:phone",
+      description: "Retorna os dados de um usuário pelo número de telefone.",
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Profissional encontrado com sucesso" },
+        { code: 200, description: "Usuário encontrado com sucesso" },
         { code: 401, description: "Não autorizado" },
-        { code: 404, description: "Profissional não encontrado" },
-        { code: 500, description: "Erro ao buscar profissional" },
+        { code: 404, description: "Usuário não encontrado" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "PATCH",
-      path: "/api/professional/:id",
-      description: "Atualiza os dados de um profissional.",
+      path: "/api/users/:id",
+      description: "Atualiza os dados de um usuário.",
       body: [
         { name: "name", type: "string", optional: true },
         { name: "phone", type: "string", optional: true },
         { name: "company", type: "string", optional: true },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Profissional atualizado com sucesso" },
+        { code: 200, description: "Usuário atualizado com sucesso" },
         { code: 400, description: "Nenhum campo fornecido para atualização" },
         { code: 401, description: "Não autorizado" },
-        { code: 500, description: "Erro ao atualizar profissional" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "DELETE",
-      path: "/api/professional/:id",
-      description: "Exclui um profissional do sistema.",
+      path: "/api/users/:id",
+      description: "Exclui um usuário do sistema.",
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Profissional excluído com sucesso" },
+        { code: 200, description: "Usuário excluído com sucesso" },
         { code: 401, description: "Não autorizado" },
-        { code: 500, description: "Erro ao excluir profissional" },
+        { code: 500, description: "Erro interno do servidor" },
       ],
     },
   ],

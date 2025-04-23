@@ -18,14 +18,17 @@ export const linksRoutes = {
           name: "limit",
           type: "number",
           optional: true,
-          description: "Quantidade por página (default: 20)",
+          description: "Quantidade por página (default: 10)",
         },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Lista paginada de links" },
+        { 
+          code: 200, 
+          description: "Lista paginada de links (inclui dados do usuário)" 
+        },
         { code: 401, description: "Não autorizado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
@@ -38,12 +41,16 @@ export const linksRoutes = {
         { name: "url", type: "string" },
         { name: "title", type: "string" },
         { name: "description", type: "string" },
+        { name: "userId", type: "string" },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 201, description: "Registro criado com sucesso" },
+        { 
+          code: 201, 
+          description: "Registro criado com sucesso (inclui dados do usuário)" 
+        },
         { code: 400, description: "Campos obrigatórios ausentes" },
         { code: 401, description: "Não autorizado" },
         { code: 500, description: "Erro interno do servidor" },
@@ -54,10 +61,13 @@ export const linksRoutes = {
       path: "/api/links/:id",
       description: "Retorna os dados de um link específico.",
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Dados do link" },
+        { 
+          code: 200, 
+          description: "Dados do link (inclui dados do usuário)" 
+        },
         { code: 401, description: "Não autorizado" },
         { code: 404, description: "Link não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
@@ -73,12 +83,16 @@ export const linksRoutes = {
         { name: "description", type: "string", optional: true },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
-        { code: 200, description: "Registro atualizado" },
-        { code: 400, description: "Nenhum campo enviado" },
+        { 
+          code: 200, 
+          description: "Registro atualizado (inclui dados do usuário)" 
+        },
+        { code: 400, description: "Nenhum campo válido fornecido" },
         { code: 401, description: "Não autorizado" },
+        { code: 404, description: "Link não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
     },
@@ -87,11 +101,12 @@ export const linksRoutes = {
       path: "/api/links/:id",
       description: "Remove um registro de link do sistema.",
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        { name: "Authorization", type: "string", description: "Bearer Token" },
       ],
       responses: [
         { code: 200, description: "Exclusão bem-sucedida" },
         { code: 401, description: "Não autorizado" },
+        { code: 404, description: "Link não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
     },
