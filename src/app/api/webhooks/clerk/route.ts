@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  // Obtenha os headers
   const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
@@ -17,7 +16,6 @@ export async function POST(req: Request) {
     });
   }
 
-  // Obtenha o corpo da requisição
   const payload = await req.json();
   const body = JSON.stringify(payload);
 
@@ -39,7 +37,6 @@ export async function POST(req: Request) {
       "svix-signature": svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error("Error verifying webhook:", err);
     return new Response("Error occured", {
       status: 400,
     });
@@ -55,14 +52,26 @@ export async function POST(req: Request) {
     )?.email_address;
 
     if (!primaryEmail) {
-      console.error("Primary email not found for user:", id);
       return new Response("Primary email not found", { status: 400 });
     }
 
     try {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [{ id: id }, { email: primaryEmail }],
+        },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          { success: true, message: "User already exists", user: existingUser },
+          { status: 200 }
+        );
+      }
+
       const newUser = await prisma.user.create({
         data: {
-          clerkId: id,
+          id: id,
           email: primaryEmail,
           firstName: first_name || "",
           lastName: last_name || "",
@@ -75,8 +84,6 @@ export async function POST(req: Request) {
         { status: 201 }
       );
     } catch (error) {
-      console.error("Error creating user in database:", error);
-
       if (
         (error as any).code === "P2002" &&
         (error as any).meta?.target?.includes("email")
@@ -90,8 +97,6 @@ export async function POST(req: Request) {
         (error as any).code === "P2002" &&
         (error as any).meta?.target?.includes("id")
       ) {
-        console.warn(`User with id ${id} already exists.`);
-
         return NextResponse.json(
           { success: true, message: "User already exists" },
           { status: 200 }

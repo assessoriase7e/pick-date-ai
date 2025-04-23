@@ -46,8 +46,7 @@ model ImageRecord {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId   String   @unique
+  id        String   @id @map("_id")  // Changed to use Clerk ID directly as primary key
   email     String   @unique
   firstName String?
   lastName  String?
@@ -64,7 +63,7 @@ model ApiKey {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   key         String   @unique
   description String?
-  userId      String   @db.ObjectId
+  userId      String   // No need for @db.ObjectId since userId references Clerk ID
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
