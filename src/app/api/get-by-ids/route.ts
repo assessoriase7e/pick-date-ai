@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
+import { getPrismaModelNames } from "@/mocked/models";
 
 export async function GET(req: NextRequest) {
   const apiKeyHeader = req.headers.get("Authorization");
@@ -8,6 +9,7 @@ export async function GET(req: NextRequest) {
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+  const modelNames = getPrismaModelNames();
 
   const { searchParams } = new URL(req.url);
   const ids = searchParams.getAll("id");
@@ -24,51 +26,53 @@ export async function GET(req: NextRequest) {
       (key) => key !== "id"
     );
 
-    // Lista de buscas em múltiplas tabelas
-    const results = await Promise.all([
-      prisma.audioRecord.findMany({
+    const recordsPromises = modelNames.map(async (modelName) => {
+      // @ts-ignore: acesso dinâmico ao Prisma
+      const records = await prisma[modelName].findMany({
         where: { id: { in: ids } },
         include: { professional: true },
-      }),
-      prisma.documentRecord.findMany({
-        where: { id: { in: ids } },
-        include: { professional: true },
-      }),
-      prisma.imageRecord.findMany({
-        where: { id: { in: ids } },
-        include: { professional: true },
-      }),
-    ]);
+      });
 
-    const allRecords = results.flat();
+      return records.map((record: any) => ({
+        ...record,
+        type: modelName,
+      }));
+    });
 
-    if (!allRecords.length) {
+    const results = await Promise.all(recordsPromises);
+    const allRecordsFlat = results.flat();
+
+    if (!allRecordsFlat.length) {
       return NextResponse.json(
         { error: "No records found with the provided IDs" },
         { status: 404 }
       );
     }
 
-    // Filtrar os campos, se necessário
-    let filtered = allRecords;
+    // Aplica filtros se solicitado
+    let filtered = allRecordsFlat;
     if (requestedFields.length > 0) {
-      filtered = allRecords.map(
-        (record: { id: string; [key: string]: any }) => {
-          const filteredRecord: any = {};
-          requestedFields.forEach((field) => {
-            if (field in record) {
-              filteredRecord[field] = record[field as keyof typeof record];
-            }
-          });
-          if (!requestedFields.includes("id") && "id" in record) {
-            filteredRecord.id = record.id;
+      filtered = allRecordsFlat.map((record: any) => {
+        const filteredRecord: any = {};
+        requestedFields.forEach((field) => {
+          if (field in record) {
+            filteredRecord[field] = record[field];
           }
-          return filteredRecord;
+        });
+        if (!requestedFields.includes("id") && "id" in record) {
+          filteredRecord.id = record.id;
         }
-      );
+        if (!requestedFields.includes("type")) {
+          filteredRecord.type = record.type;
+        }
+        return filteredRecord;
+      });
     }
 
-    return NextResponse.json(filtered);
+    return NextResponse.json({
+      total: allRecordsFlat.length,
+      records: filtered,
+    });
   } catch (error) {
     console.error("Error fetching records by IDs:", error);
     return NextResponse.json(
