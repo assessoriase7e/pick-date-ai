@@ -128,25 +128,24 @@ export function Sidebar() {
   );
 
   const DesktopSidebar = () => (
-    <aside
-      className="fixed top-0 bottom-0 my-auto left-8 z-50 flex flex-col items-center border border-border bg-background/80 rounded-2xl shadow-2xl p-6 gap-6 h-[80vh] transition-all text-foreground"
-      style={{ backdropFilter: "blur(8px)" }}
-    >
-      {navigationItems.map((item) => (
-        <SidebarItem
-          key={item.href}
-          href={item.href}
-          icon={item.icon}
-          label={item.label}
-          isActive={item.isActive}
-        />
-      ))}
+    <div className="relative h-svh w-28">
+      <aside className="fixed my-auto top-0 left-5 bottom-0 flex flex-col items-center border border-border bg-background/80 rounded-2xl shadow-2xl p-6 gap-6  transition-all text-foreground h-[90svh]">
+        {navigationItems.map((item) => (
+          <SidebarItem
+            key={item.href}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+            isActive={item.isActive}
+          />
+        ))}
 
-      <div className="mt-auto flex flex-col gap-2 w-full items-center justify-center">
-        <ThemeToggle />
-        <UserButton afterSignOutUrl="/" />
-      </div>
-    </aside>
+        <div className="mt-auto flex flex-col gap-2 w-full items-center justify-center">
+          <ThemeToggle />
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </aside>
+    </div>
   );
 
   return <>{isMobile ? <MobileMenu /> : <DesktopSidebar />}</>;
