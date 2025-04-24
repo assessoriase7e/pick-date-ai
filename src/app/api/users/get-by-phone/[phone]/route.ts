@@ -14,13 +14,19 @@ export async function GET(
   }
 
   try {
-    const user = await prisma.user.findFirst({
+    const profile = await prisma.profile.findFirst({
       where: { phone: paramsResolved.phone },
+      include: { user: true },
     });
 
-    if (!user) {
+    if (!profile || !profile.user) {
       return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: profile.user.id },
+      include: { profile: true },
+    });
 
     return NextResponse.json(user);
   } catch (error) {

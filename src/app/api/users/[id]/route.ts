@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(
   req: NextRequest,
@@ -17,6 +17,7 @@ export async function GET(
   try {
     const user = await prisma.user.findUnique({
       where: { id: paramsResolved.id },
+      include: { profile: true }, // Incluir o perfil do usuário
     });
 
     if (!user) {
@@ -47,22 +48,62 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { name, phone, company } = body;
+    const {
+      firstName,
+      lastName,
+      phone,
+      companyName,
+      address,
+      locationUrl,
+      documentNumber,
+      businessHours,
+    } = body;
 
-    if (!name && !phone && !company) {
+    if (
+      !firstName &&
+      !lastName &&
+      !phone &&
+      !companyName &&
+      !address &&
+      !locationUrl &&
+      !documentNumber &&
+      !businessHours
+    ) {
       return NextResponse.json(
         { error: "At least one field must be provided" },
         { status: 400 }
       );
     }
 
+    const userData = {
+      ...(firstName && { firstName }),
+      ...(lastName && { lastName }),
+    };
+
+    const profileData = {
+      ...(phone && { phone }),
+      ...(companyName && { companyName }),
+      ...(address && { address }),
+      ...(locationUrl && { locationUrl }),
+      ...(documentNumber && { documentNumber }),
+      ...(businessHours && { businessHours }),
+    };
+
     const user = await prisma.user.update({
       where: { id: paramsResolved.id },
       data: {
-        ...(name && { name }),
-        ...(phone && { phone }),
-        ...(company && { company }),
+        ...userData,
+        profile:
+          Object.keys(profileData).length > 0
+            ? {
+                upsert: {
+                  create: profileData,
+                  update: profileData,
+                },
+              }
+            : undefined,
       },
+      include: { profile: true },
     });
 
     return NextResponse.json(user);
@@ -79,7 +120,6 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Validar API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {

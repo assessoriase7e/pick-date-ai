@@ -1,70 +1,88 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-key-utils"; // Importar a função de validação
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
   // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { searchParams } = new URL(req.url)
-  const page = Number.parseInt(searchParams.get("page") || "1")
-  const limit = Number.parseInt(searchParams.get("limit") || "10")
-  const skip = (page - 1) * limit
+  const { searchParams } = new URL(req.url);
+  const page = Number.parseInt(searchParams.get("page") || "1");
+  const limit = Number.parseInt(searchParams.get("limit") || "10");
+  const skip = (page - 1) * limit;
 
   try {
-    const [professionals, totalCount] = await Promise.all([
-      prisma.professional.findMany({
+    const [users, totalCount] = await Promise.all([
+      prisma.user.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        include: { profile: true }, // Incluir o perfil de cada usuário
       }),
-      prisma.professional.count(),
-    ])
+      prisma.user.count(),
+    ]);
 
-    const totalPages = Math.ceil(totalCount / limit)
+    const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
-      professionals,
+      users,
       totalPages,
       currentPage: page,
-    })
+    });
   } catch (error) {
-    console.error("Error fetching professionals:", error)
-    return NextResponse.json({ error: "Failed to fetch professionals" }, { status: 500 })
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   // Validar API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
   try {
-    const body = await req.json()
-    const { name, phone, company } = body
+    const body = await req.json();
+    const { id, email, firstName, lastName, imageUrl, profile } = body;
 
-    if (!name || !phone || !company) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!id || !email) {
+      return NextResponse.json(
+        { error: "ID e email são obrigatórios" },
+        { status: 400 }
+      );
     }
 
-    const professional = await prisma.professional.create({
+    const user = await prisma.user.create({
       data: {
-        name,
-        phone,
-        company,
+        id,
+        email,
+        firstName,
+        lastName,
+        imageUrl,
+        profile: profile
+          ? {
+              create: profile,
+            }
+          : undefined,
       },
-    })
+      include: { profile: true },
+    });
 
-    return NextResponse.json(professional, { status: 201 })
+    return NextResponse.json(user, { status: 201 });
   } catch (error) {
-    console.error("Error creating professional:", error)
-    return NextResponse.json({ error: "Failed to create professional" }, { status: 500 })
+    console.error("Error creating user:", error);
+    return NextResponse.json(
+      { error: "Failed to create user" },
+      { status: 500 }
+    );
   }
 }
