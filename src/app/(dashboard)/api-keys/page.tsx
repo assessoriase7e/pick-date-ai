@@ -18,7 +18,7 @@ import { userRoutes } from "@/mocked/docs/professionals";
 
 export default function ApiKeysPage() {
   return (
-    <div className="container mx-auto p-10 space-y-6">
+    <div className="container mx-auto p-5 space-y-6">
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
         <ApiKeysContent />
       </Suspense>
