@@ -7,6 +7,7 @@ interface SidebarItemProps {
   icon: LucideIcon;
   label: string;
   isActive?: boolean;
+  isMobile?: boolean;
 }
 
 export function SidebarItem({
@@ -14,7 +15,22 @@ export function SidebarItem({
   icon: Icon,
   label,
   isActive = false,
+  isMobile = false,
 }: SidebarItemProps) {
+  if (isMobile) {
+    return (
+      <Link href={href} className="w-full">
+        <Button
+          variant={isActive ? "default" : "ghost"}
+          className="w-full justify-start"
+        >
+          <Icon className="h-5 w-5 mr-3" />
+          <span>{label}</span>
+        </Button>
+      </Link>
+    );
+  }
+
   return (
     <Link href={href} className="relative group w-full">
       <Button
