@@ -1,45 +1,32 @@
 "use client";
+
 import { useUser } from "@clerk/nextjs";
-import { UserButton } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import {
+  Bot,
   Music,
   Image,
   KeyRound,
   FileIcon,
   Link,
-  Menu,
   User,
-  Bot,
+  Menu,
 } from "lucide-react";
-import { SidebarItem } from "./sidebarItem";
-import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { SidebarItem } from "./sidebarItem";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { UserButton } from "@clerk/nextjs";
 import { Separator } from "./ui/separator";
 
-export function Sidebar() {
+export function MobileSidebar() {
   const { user } = useUser();
   const pathname = usePathname();
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar se é dispositivo móvel
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
 
   if (!user) {
     return null;
@@ -77,21 +64,21 @@ export function Sidebar() {
       isActive: pathname === "/profile",
     },
     {
-      label: "Agentes",
-      icon: Bot,
-      href: "/agents",
-      color: "text-emerald-500",
-      isActive: pathname === "/agents",
-    },
-    {
       href: "/api-keys",
       icon: KeyRound,
       label: "API Keys",
       isActive: pathname.startsWith("/api-keys"),
     },
+    {
+      label: "Agentes",
+      icon: Bot,
+      href: "/agentes",
+      color: "text-emerald-500",
+      isActive: pathname.startsWith("/agentes"),
+    },
   ];
 
-  const MobileMenu = () => (
+  return (
     <Sheet>
       <SheetTrigger asChild>
         <Button size="icon" className="md:hidden fixed top-4 left-4 z-50">
@@ -103,7 +90,7 @@ export function Sidebar() {
       <SheetContent side="left" className="w-full">
         <SheetHeader></SheetHeader>
 
-        <div className="flex flex-col h-full py-6 px-4 space-y-6 ">
+        <div className="flex flex-col h-full py-6 px-4 space-y-6">
           <div className="flex flex-col space-y-6">
             {routes.map((item) => (
               <SidebarItem
@@ -134,27 +121,4 @@ export function Sidebar() {
       </SheetContent>
     </Sheet>
   );
-
-  const DesktopSidebar = () => (
-    <div className="relative h-svh w-28">
-      <aside className="fixed my-auto top-0 left-5 bottom-0 flex flex-col items-center border border-border bg-background/80 rounded-2xl shadow-2xl p-6 gap-6  transition-all text-foreground h-[90svh]">
-        {routes.map((item) => (
-          <SidebarItem
-            key={item.href}
-            href={item.href}
-            icon={item.icon}
-            label={item.label}
-            isActive={item.isActive}
-          />
-        ))}
-
-        <div className="mt-auto flex flex-col gap-2 w-full items-center justify-center">
-          <ThemeToggle />
-          <UserButton afterSignOutUrl="/" />
-        </div>
-      </aside>
-    </div>
-  );
-
-  return <>{isMobile ? <MobileMenu /> : <DesktopSidebar />}</>;
 }

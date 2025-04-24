@@ -7,7 +7,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { userId } = await auth();
+    const { userId } = await await auth();
     const { id } = params;
 
     if (!userId) {
