@@ -1,7 +1,15 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Music, Image, KeyRound, FileIcon, Link, Menu } from "lucide-react"; // Adicionado Menu
+import {
+  Music,
+  Image,
+  KeyRound,
+  FileIcon,
+  Link,
+  Menu,
+  User,
+} from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -26,13 +34,9 @@ export function Sidebar() {
       setIsMobile(window.innerWidth < 768);
     };
 
-    // Verificar inicialmente
     checkIfMobile();
-
-    // Adicionar listener para redimensionamento
     window.addEventListener("resize", checkIfMobile);
 
-    // Cleanup
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
@@ -66,6 +70,12 @@ export function Sidebar() {
       isActive: pathname === "/links",
     },
     {
+      href: "/profile",
+      icon: User,
+      label: "Perfil",
+      isActive: pathname === "/profile",
+    },
+    {
       href: "/api-keys",
       icon: KeyRound,
       label: "API Keys",
@@ -73,7 +83,6 @@ export function Sidebar() {
     },
   ];
 
-  // Componente de menu para dispositivos móveis
   const MobileMenu = () => (
     <Sheet>
       <SheetTrigger asChild>
@@ -118,7 +127,6 @@ export function Sidebar() {
     </Sheet>
   );
 
-  // Componente de sidebar para desktop
   const DesktopSidebar = () => (
     <aside
       className="fixed top-0 bottom-0 my-auto left-8 z-50 flex flex-col items-center border border-border bg-background/80 rounded-2xl shadow-2xl p-6 gap-6 h-[80vh] transition-all text-foreground"
