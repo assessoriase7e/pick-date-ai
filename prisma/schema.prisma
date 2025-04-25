@@ -149,6 +149,7 @@ model RagFile {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  metadataKey String? // <-- Adicionado campo opcional para chave metadata
   User      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])

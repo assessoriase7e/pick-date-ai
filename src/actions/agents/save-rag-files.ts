@@ -7,6 +7,7 @@ type RagFile = {
   id: string;
   name: string;
   content: string;
+  metadataKey?: string; // <-- Adicionado
 };
 
 export async function saveRagFiles({
@@ -30,6 +31,7 @@ export async function saveRagFiles({
           name: file.name,
           content: file.content,
           userId,
+          metadataKey: file.metadataKey || null, // <-- Adicionado
         })),
       });
     }
@@ -58,11 +60,9 @@ export async function saveRagFiles({
         }
       } catch (webhookError) {
         console.error("Erro ao chamar webhook:", webhookError);
-        // Não interrompe o fluxo principal se o webhook falhar
       }
     }
 
-    // Salvar a URL do webhook para uso futuro
     await prisma.webhookConfig.upsert({
       where: { userId },
       update: { url: webhookUrl || "" },

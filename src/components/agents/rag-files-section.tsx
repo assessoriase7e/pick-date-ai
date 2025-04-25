@@ -41,6 +41,7 @@ export function RagFilesSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [metadataKey, setMetadataKey] = useState<string>("");
 
   useEffect(() => {
     loadFiles();
@@ -54,6 +55,13 @@ export function RagFilesSection() {
       const result = await getRagFiles(user.id);
       if (result.success && result.data?.files) {
         setFiles(result.data.files);
+        if (result.data.files.length > 0) {
+          const sortedFiles = [...result.data.files].sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          setMetadataKey(sortedFiles[0].metadataKey || "");
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error);
@@ -126,6 +134,7 @@ export function RagFilesSection() {
         userId: user.id,
         name: selectedFile.name,
         content: fileContent,
+        metadataKey,
       });
 
       if (result.success) {
@@ -178,6 +187,7 @@ export function RagFilesSection() {
         id: file.id,
         name: file.name,
         content: file.content,
+        metadataKey: file.metadataKey, // <-- Adicionado para garantir que o campo seja enviado
       }));
 
       const result = await saveRagFiles({
@@ -266,6 +276,7 @@ export function RagFilesSection() {
             onChange={handleFileChange}
           />
         </div>
+
         <Button onClick={handleUpload} disabled={isLoading || !selectedFile}>
           <Plus className="mr-2 h-4 w-4" />
           {isLoading ? "Enviando..." : "Adicionar"}
@@ -273,11 +284,20 @@ export function RagFilesSection() {
       </div>
 
       <div className="space-y-2">
-        <Input
-          placeholder="URL do Webhook (opcional)"
-          value={webhookUrl}
-          onChange={(e) => setWebhookUrl(e.target.value)}
-        />
+        <div className="flex gap-5">
+          <Input
+            placeholder="URL do Webhook (opcional)"
+            value={webhookUrl}
+            onChange={(e) => setWebhookUrl(e.target.value)}
+          />
+
+          <Input
+            placeholder="Chave metadata"
+            value={metadataKey}
+            onChange={(e) => setMetadataKey(e.target.value)}
+            className="w-56"
+          />
+        </div>
         <p className="text-sm text-muted-foreground">
           Se fornecido, os arquivos RAG serão enviados para esta URL quando
           salvos
@@ -289,6 +309,7 @@ export function RagFilesSection() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome do Arquivo</TableHead>
+              <TableHead>Chave metadata</TableHead> {/* Novo cabeçalho */}
               <TableHead>Data de Upload</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
@@ -296,7 +317,7 @@ export function RagFilesSection() {
           <TableBody>
             {files.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-6">
+                <TableCell colSpan={4} className="text-center py-6">
                   Nenhum arquivo encontrado
                 </TableCell>
               </TableRow>
@@ -311,6 +332,7 @@ export function RagFilesSection() {
                     <FileText className="mr-2 h-4 w-4" />
                     {file.name}
                   </TableCell>
+                  <TableCell>{file.metadataKey || "-"}</TableCell>
                   <TableCell>
                     {new Date(file.createdAt).toLocaleDateString("pt-BR")}
                   </TableCell>

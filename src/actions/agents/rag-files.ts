@@ -8,6 +8,7 @@ const ragFileSchema = z.object({
   userId: z.string(),
   name: z.string(),
   content: z.string(),
+  metadataKey: z.string(),
 });
 
 export async function uploadRagFile(data: z.infer<typeof ragFileSchema>) {
@@ -26,6 +27,7 @@ export async function uploadRagFile(data: z.infer<typeof ragFileSchema>) {
         userId: data.userId,
         name: data.name,
         content: data.content,
+        metadataKey: data.metadataKey || null, // <-- Adicionado para salvar o campo
       },
     });
 
