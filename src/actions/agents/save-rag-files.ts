@@ -19,7 +19,6 @@ export async function saveRagFiles({
   ragFiles: RagFile[];
   webhookUrl?: string;
 }) {
-  console.log(webhookUrl);
   try {
     await prisma.ragFile.deleteMany({
       where: { userId },
@@ -31,7 +30,7 @@ export async function saveRagFiles({
           name: file.name,
           content: file.content,
           userId,
-          metadataKey: file.metadataKey || null, // <-- Adicionado
+          metadataKey: file.metadataKey || null,
         })),
       });
     }
@@ -42,7 +41,6 @@ export async function saveRagFiles({
           .map((file) => `\n\n${file.content}\n\n`)
           .join("\n\n");
 
-        // Chamar o webhook
         const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {

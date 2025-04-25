@@ -47,7 +47,6 @@ export function RagFilesSection() {
 
     try {
       const result = await getWebhookUrl(user.id);
-      console.log("result", result);
       if (result.success) {
         setWebhookUrl(result?.data?.url || "");
       }
@@ -223,18 +222,24 @@ export function RagFilesSection() {
 
       <div className="space-y-2">
         <div className="flex gap-5">
-          <Input
-            placeholder="URL do Webhook (opcional)"
-            value={webhookUrl}
-            onChange={(e) => setWebhookUrl(e.target.value)}
-          />
+          <div className="w-full mb-1">
+            <p className="text-xs">URL do Webhook</p>
+            <Input
+              placeholder="https://..."
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+            />
+          </div>
 
-          <Input
-            placeholder="Chave metadata"
-            value={metadataKey}
-            onChange={(e) => setMetadataKey(e.target.value)}
-            className="w-56"
-          />
+          <div>
+            <p className="text-xs mb-1">Nome Metadata</p>
+            <Input
+              placeholder="nome_negocio"
+              value={metadataKey}
+              onChange={(e) => setMetadataKey(e.target.value)}
+              className="w-56"
+            />
+          </div>
         </div>
         <p className="text-sm text-muted-foreground">
           Se fornecido, os arquivos RAG serão enviados para esta URL quando
