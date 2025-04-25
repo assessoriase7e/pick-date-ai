@@ -43,12 +43,12 @@ type RagFilesSectionPropos = {
   ragConfig?: RagConfig;
 };
 
-const ragFilesSchema = z.object({
+const ragConfigSchema = z.object({
   webhookUrl: z.string().url({ message: "URL inválida" }).optional(),
   metadataKey: z.string().optional(),
 });
 
-type RagFilesFormValues = z.infer<typeof ragFilesSchema>;
+type RagFilesFormValues = z.infer<typeof ragConfigSchema>;
 
 export function RagFilesSection({
   user,
@@ -62,7 +62,7 @@ export function RagFilesSection({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<RagFilesFormValues>({
-    resolver: zodResolver(ragFilesSchema),
+    resolver: zodResolver(ragConfigSchema),
     defaultValues: {
       webhookUrl: ragConfig?.webhookUrl || "",
       metadataKey: ragConfig?.metadataKey || "",
@@ -217,7 +217,6 @@ export function RagFilesSection({
           <TableHeader>
             <TableRow>
               <TableHead>Nome do Arquivo</TableHead>
-              <TableHead>Chave metadata</TableHead> {/* Novo cabeçalho */}
               <TableHead>Data de Upload</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
@@ -240,7 +239,6 @@ export function RagFilesSection({
                     <FileText className="mr-2 h-4 w-4" />
                     {file.name}
                   </TableCell>
-                  <TableCell>{ragConfig?.metadataKey || "-"}</TableCell>
                   <TableCell>
                     {new Date(file.createdAt).toLocaleDateString("pt-BR")}
                   </TableCell>
