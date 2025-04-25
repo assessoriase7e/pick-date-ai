@@ -7,6 +7,15 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { getPrompts } from "@/actions/agents/prompts";
 import { AttendantPrompt } from "@/types/prompt";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -23,12 +32,23 @@ export function AttendantTab({
   const { handleSaveAttendantPrompt } = useAttendantHandler();
   const [isActive, setIsActive] = useState(false);
 
-  // Novos estados para os campos do formulário
-  const [presentation, setPresentation] = useState("");
-  const [speechStyle, setSpeechStyle] = useState("");
-  const [expressionInterpretation, setExpressionInterpretation] = useState("");
-  const [schedulingScript, setSchedulingScript] = useState("");
-  const [rules, setRules] = useState("");
+  type FormValues = {
+    presentation: string;
+    speechStyle: string;
+    expressionInterpretation: string;
+    schedulingScript: string;
+    rules: string;
+  };
+
+  const form = useForm<FormValues>({
+    defaultValues: {
+      presentation: "",
+      speechStyle: "",
+      expressionInterpretation: "",
+      schedulingScript: "",
+      rules: "",
+    },
+  });
 
   useEffect(() => {
     async function loadAttendantPrompt() {
@@ -36,53 +56,58 @@ export function AttendantTab({
 
       try {
         const result = await getPrompts(user.id);
-        if (result.success && result.data?.prompts) {
-          const { prompts } = result.data;
+        if (!result.success || !result.data?.prompts) return;
 
-          const attendantPrompt = prompts.find(
-            (prompt) => prompt.type === "Atendente"
-          ) as AttendantPrompt | undefined;
+        const attendantPrompt = result.data.prompts.find(
+          (prompt) => prompt.type === "Atendente"
+        ) as AttendantPrompt | undefined;
 
-          if (attendantPrompt) {
-            setIsActive(attendantPrompt.isActive);
+        if (!attendantPrompt) return;
 
-            setPresentation((attendantPrompt as any).presentation || "");
-            setSpeechStyle((attendantPrompt as any).speechStyle || "");
-            setExpressionInterpretation(
-              (attendantPrompt as any).expressionInterpretation || ""
-            );
-            setSchedulingScript(
-              (attendantPrompt as any).schedulingScript || ""
-            );
-            setRules((attendantPrompt as any).rules || "");
-          }
-        }
+        setIsActive(attendantPrompt.isActive);
+
+        const {
+          presentation = "",
+          speechStyle = "",
+          expressionInterpretation = "",
+          schedulingScript = "",
+          rules = "",
+        } = attendantPrompt;
+
+        form.reset({
+          presentation,
+          speechStyle,
+          expressionInterpretation,
+          schedulingScript,
+          rules,
+        });
       } catch (error) {
         console.error("Erro ao carregar prompt do atendente:", error);
       }
     }
 
     loadAttendantPrompt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const handleSave = async () => {
+  const handleSave = async (values: FormValues) => {
     if (onSave) {
       return onSave();
     }
 
     if (setIsLoading) setIsLoading(true);
     try {
-      const content = `Apresentação: ${presentation}\n\nEstilo da Fala: ${speechStyle}\n\nInterpretação de Expressões: ${expressionInterpretation}\n\nScript de Agendamento: ${schedulingScript}\n\nRegras: ${rules}`;
+      const content = `Apresentação: ${values.presentation}\n\nEstilo da Fala: ${values.speechStyle}\n\nInterpretação de Expressões: ${values.expressionInterpretation}\n\nScript de Agendamento: ${values.schedulingScript}\n\nRegras: ${values.rules}`;
 
       await handleSaveAttendantPrompt(
         user?.id,
         content,
         isActive,
-        presentation,
-        speechStyle,
-        expressionInterpretation,
-        schedulingScript,
-        rules
+        values.presentation,
+        values.speechStyle,
+        values.expressionInterpretation,
+        values.schedulingScript,
+        values.rules
       );
     } finally {
       if (setIsLoading) setIsLoading(false);
@@ -102,70 +127,105 @@ export function AttendantTab({
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="presentation">Apresentação</Label>
-          <Textarea
-            id="presentation"
-            placeholder="Digite a apresentação do atendente..."
-            className="min-h-[100px] mt-2"
-            value={presentation}
-            onChange={(e) => setPresentation(e.target.value)}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="presentation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Apresentação</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Digite a apresentação do atendente..."
+                    className="min-h-[100px] mt-2"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <Label htmlFor="speechStyle">Estilo da Fala</Label>
-          <Textarea
-            id="speechStyle"
-            placeholder="Descreva o estilo de fala do atendente..."
-            className="min-h-[100px] mt-2"
-            value={speechStyle}
-            onChange={(e) => setSpeechStyle(e.target.value)}
+          <FormField
+            control={form.control}
+            name="speechStyle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estilo da Fala</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Descreva o estilo de fala do atendente..."
+                    className="min-h-[100px] mt-2"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <Label htmlFor="expressionInterpretation">
-            Interpretação de Expressões
-          </Label>
-          <Textarea
-            id="expressionInterpretation"
-            placeholder="Como o atendente deve interpretar expressões..."
-            className="min-h-[100px] mt-2"
-            value={expressionInterpretation}
-            onChange={(e) => setExpressionInterpretation(e.target.value)}
+          <FormField
+            control={form.control}
+            name="expressionInterpretation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Interpretação de Expressões</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Como o atendente deve interpretar expressões..."
+                    className="min-h-[100px] mt-2"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <Label htmlFor="schedulingScript">Script de Agendamento</Label>
-          <Textarea
-            id="schedulingScript"
-            placeholder="Script para agendamento..."
-            className="min-h-[100px] mt-2"
-            value={schedulingScript}
-            onChange={(e) => setSchedulingScript(e.target.value)}
+          <FormField
+            control={form.control}
+            name="schedulingScript"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Script de Agendamento</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Script para agendamento..."
+                    className="min-h-[100px] mt-2"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <Label htmlFor="rules">Regras</Label>
-          <Textarea
-            id="rules"
-            placeholder="Regras para o atendente seguir..."
-            className="min-h-[100px] mt-2"
-            value={rules}
-            onChange={(e) => setRules(e.target.value)}
+          <FormField
+            control={form.control}
+            name="rules"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Regras</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Regras para o atendente seguir..."
+                    className="min-h-[100px] mt-2"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? "Salvando..." : "Salvar"}
-        </Button>
-      </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

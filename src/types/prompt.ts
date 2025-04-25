@@ -16,12 +16,8 @@ export interface AttendantPrompt extends BasePrompt {
   rules?: string;
 }
 
-export interface SdrPrompt extends BasePrompt {
-  // SDR specific fields
-}
+export interface SdrPrompt extends BasePrompt {}
 
-export interface FollowUpPrompt extends BasePrompt {
-  // Follow Up specific fields
-}
+export interface FollowUpPrompt extends BasePrompt {}
 
 export type Prompt = AttendantPrompt | SdrPrompt | FollowUpPrompt;
