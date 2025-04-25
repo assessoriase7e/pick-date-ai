@@ -126,14 +126,19 @@ model Evolution {
 }
 
 model Prompt {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  type      String // "Atendente", "SDR", "Follow Up"
-  content   String
-  isActive  Boolean  @default(false)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  type                     String // "Atendente", "SDR", "Follow Up"
+  content                  String
+  isActive                 Boolean  @default(false)
+  userId                   String
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  presentation             String?
+  speechStyle              String?
+  expressionInterpretation String?
+  schedulingScript         String?
+  rules                    String?
 
   @@map("prompt")
 }

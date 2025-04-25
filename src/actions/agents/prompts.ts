@@ -2,13 +2,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-
-const promptSchema = z.object({
-  userId: z.string(),
-  type: z.string(),
-  content: z.string(),
-  isActive: z.boolean(),
-});
+import { promptSchema } from "@/validators/prompts";
 
 export async function savePrompt(data: z.infer<typeof promptSchema>) {
   try {
@@ -21,7 +15,6 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
       };
     }
 
-    // Verificar se já existe um prompt deste tipo para o usuário
     const existingPrompt = await prisma.prompt.findFirst({
       where: {
         userId: data.userId,
@@ -32,26 +25,36 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
     let prompt;
 
     if (existingPrompt) {
-      // Atualizar o prompt existente
       prompt = await prisma.prompt.update({
         where: {
           id: existingPrompt.id,
         },
-        data: {
-          content: data.content,
-          isActive: data.isActive,
-        },
+        data: createPromptData(data),
       });
     } else {
-      // Criar um novo prompt
       prompt = await prisma.prompt.create({
         data: {
           userId: data.userId,
           type: data.type,
-          content: data.content,
-          isActive: data.isActive,
+          ...createPromptData(data),
         },
       });
+    }
+
+    function createPromptData(data: z.infer<typeof promptSchema>) {
+      return {
+        content: data.content || "",
+        isActive: data.isActive,
+        ...(data.presentation && { presentation: data.presentation }),
+        ...(data.speechStyle && { speechStyle: data.speechStyle }),
+        ...(data.expressionInterpretation && {
+          expressionInterpretation: data.expressionInterpretation,
+        }),
+        ...(data.schedulingScript && {
+          schedulingScript: data.schedulingScript,
+        }),
+        ...(data.rules && { rules: data.rules }),
+      };
     }
 
     return {
