@@ -6,7 +6,7 @@ import { z } from "zod";
 
 const ragFileSchema = z.object({
   userId: z.string(),
-  fileName: z.string(),
+  name: z.string(),
   content: z.string(),
 });
 
@@ -24,7 +24,7 @@ export async function uploadRagFile(data: z.infer<typeof ragFileSchema>) {
     const ragFile = await prisma.ragFile.create({
       data: {
         userId: data.userId,
-        fileName: data.fileName,
+        name: data.name,
         content: data.content,
       },
     });
