@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getRagFiles, deleteRagFile } from "@/actions/agents/rag-files";
-import { saveRagFiles } from "@/actions/agents/save-rag-files";
-import { getWebhookUrl } from "@/actions/agents/get-webhook-url";
+import { saveRagFiles } from "@/actions/agents/rag/save-rag-files";
 import { User } from "@clerk/nextjs/server";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,9 +32,15 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { deleteRagFile } from "@/actions/agents/rag/delete-rag-file";
+import { RagConfig, RagFile } from "@prisma/client";
+import { saveRagWebhook } from "@/actions/agents/rag/save-rag-webhook";
+import { callRagWebhook } from "@/actions/agents/rag/call-rag-webhook";
 
 type RagFilesSectionPropos = {
   user: User;
+  ragFiles: RagFile[];
+  ragConfig?: RagConfig;
 };
 
 const ragFilesSchema = z.object({
@@ -46,9 +50,12 @@ const ragFilesSchema = z.object({
 
 type RagFilesFormValues = z.infer<typeof ragFilesSchema>;
 
-export function RagFilesSection({ user }: RagFilesSectionPropos) {
+export function RagFilesSection({
+  user,
+  ragFiles,
+  ragConfig,
+}: RagFilesSectionPropos) {
   const [isSaving, setIsSaving] = useState(false);
-  const [files, setFiles] = useState<any[]>([]);
   const [selectedContent, setSelectedContent] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -57,46 +64,10 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
   const form = useForm<RagFilesFormValues>({
     resolver: zodResolver(ragFilesSchema),
     defaultValues: {
-      webhookUrl: "",
-      metadataKey: "",
+      webhookUrl: ragConfig?.webhookUrl || "",
+      metadataKey: ragConfig?.metadataKey || "",
     },
   });
-
-  useEffect(() => {
-    loadFiles();
-    loadWebhookUrl();
-  }, [user.id]);
-
-  const loadWebhookUrl = async () => {
-    try {
-      const result = await getWebhookUrl(user.id);
-      if (result.success) {
-        form.setValue("webhookUrl", result?.data?.url || "");
-      }
-    } catch (error) {
-      console.error("Erro ao carregar URL do webhook:", error);
-    }
-  };
-
-  const loadFiles = async () => {
-    if (!user?.id) return;
-
-    try {
-      const result = await getRagFiles(user.id);
-      if (result.success && result.data?.files) {
-        setFiles(result.data.files);
-        if (result.data.files.length > 0) {
-          const sortedFiles = [...result.data.files].sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          form.setValue("metadataKey", sortedFiles[0].metadataKey || "");
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao carregar arquivos:", error);
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -126,7 +97,6 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
       const result = await deleteRagFile(id);
       if (result.success) {
         toast.success("Arquivo excluído com sucesso");
-        loadFiles();
       } else {
         toast.error(result.error || "Erro ao excluir arquivo");
       }
@@ -147,24 +117,26 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
 
     setIsSaving(true);
     try {
-      const ragFilesFormatted = files.map((file) => ({
-        id: file.id,
-        name: file.name,
-        content: file.content,
-        metadataKey: file.metadataKey,
-      }));
-
-      const result = await saveRagFiles({
+      await saveRagFiles({
         userId: user.id,
-        ragFiles: ragFilesFormatted,
-        webhookUrl: data.webhookUrl,
+        ragFiles: ragFiles,
       });
 
-      if (result.success) {
-        toast.success("Arquivos RAG salvos com sucesso");
-      } else {
-        toast.error(result.error || "Erro ao salvar arquivos RAG");
+      if (data.webhookUrl && data.metadataKey) {
+        await saveRagWebhook({
+          userId: user.id,
+          webhookUrl: data.webhookUrl,
+          metadataKey: data.metadataKey,
+        });
+
+        await callRagWebhook({
+          ragFiles: ragFiles,
+          webhookUrl: data.webhookUrl,
+          metadataKey: data.metadataKey,
+        });
       }
+
+      toast.success("Arquivos RAG salvos com sucesso");
     } catch (error) {
       console.error("Erro ao salvar arquivos RAG:", error);
       toast.error("Ocorreu um erro ao salvar os arquivos RAG");
@@ -190,7 +162,10 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
                 onChange={handleFileChange}
               />
 
-              <Button type="submit" disabled={isSaving || files.length === 0}>
+              <Button
+                type="submit"
+                disabled={isSaving || ragFiles?.length === 0}
+              >
                 <Upload className="mr-2 h-4 w-4" />
                 {isSaving ? "Salvando..." : "Salvar Todos"}
               </Button>
@@ -248,14 +223,14 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {files.length === 0 ? (
+            {ragFiles?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-6">
                   Nenhum arquivo encontrado
                 </TableCell>
               </TableRow>
             ) : (
-              files.map((file) => (
+              ragFiles?.map((file) => (
                 <TableRow
                   key={file.id}
                   className="cursor-pointer"
@@ -265,7 +240,7 @@ export function RagFilesSection({ user }: RagFilesSectionPropos) {
                     <FileText className="mr-2 h-4 w-4" />
                     {file.name}
                   </TableCell>
-                  <TableCell>{file.metadataKey || "-"}</TableCell>
+                  <TableCell>{ragConfig?.metadataKey || "-"}</TableCell>
                   <TableCell>
                     {new Date(file.createdAt).toLocaleDateString("pt-BR")}
                   </TableCell>

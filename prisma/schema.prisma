@@ -32,7 +32,7 @@ model User {
   agentRagFiles  AgentRagFile[]
   agentRedisKeys AgentRedisKey[]
   agentWhatsapp  AgentWhatsapp[]
-  
+
   // Novas relações para prompts separados
   attendantPrompts AttendantPrompt[]
   sdrPrompts       SdrPrompt[]
@@ -163,7 +163,7 @@ model AttendantPrompt {
   formattedContent         String
   userId                   String
   user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@map("attendantprompt")
 }
@@ -176,7 +176,7 @@ model SdrPrompt {
   updatedAt DateTime @updatedAt
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@map("sdrprompt")
 }
@@ -189,30 +189,31 @@ model FollowUpPrompt {
   updatedAt DateTime @updatedAt
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@map("followupprompt")
 }
 
 model RagFile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  content     String
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  metadataKey String? // <-- Adicionado campo opcional para chave metadata
-  User        User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  content   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
 
-model WebhookConfig {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @unique
-  url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model RagConfig {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique
+  webhookUrl  String?
+  metadataKey String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model RedisKey {

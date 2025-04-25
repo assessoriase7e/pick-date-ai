@@ -1,3 +1,6 @@
+"use server";
+import { getRagFiles } from "@/actions/agents/rag/get-rag-files";
+import { getRagConfig } from "@/actions/agents/rag/get-webhook-url";
 import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { EvolutionSection } from "@/components/agents/evolution-section";
 import { PromptsSection } from "@/components/agents/prompts-section";
@@ -8,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 
 export default async function AgentesPage() {
   const user = await getClerkUser();
+  const { data: ragFiles } = await getRagFiles(user.id);
+  const { data: ragConfig } = await getRagConfig(user.id);
 
   return (
     <div className="container py-10 max-w-6xl">
@@ -18,7 +23,11 @@ export default async function AgentesPage() {
 
         <Separator className="my-6" />
 
-        <RagFilesSection user={user!} />
+        <RagFilesSection
+          user={user!}
+          ragFiles={ragFiles || []}
+          ragConfig={ragConfig || undefined}
+        />
 
         <Separator className="my-6" />
 
