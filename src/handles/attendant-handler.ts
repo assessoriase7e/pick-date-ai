@@ -1,39 +1,38 @@
 import { toast } from "sonner";
 import { savePrompt } from "@/actions/agents/prompts";
 
-export const usePromptHandlers = (setIsLoading: (loading: boolean) => void) => {
-  const handleSavePrompt = async (
+export const useAttendantHandler = () => {
+  const handleSaveAttendantPrompt = async (
     userId: string | undefined,
-    type: string,
-    content: string,
-    isActive: boolean
+    attendantPrompt: string,
+    isAttendantActive: boolean
   ) => {
     if (!userId) {
       toast.error("Usuário não identificado");
       return;
     }
 
-    setIsLoading(true);
     try {
       const result = await savePrompt({
         userId,
-        type,
-        content,
-        isActive,
+        type: "Atendente",
+        content: attendantPrompt,
+        isActive: isAttendantActive,
       });
 
       if (result.success) {
-        toast.success(`Prompt de ${type.toLowerCase()} salvo com sucesso`);
+        toast.success("Prompt de atendente salvo com sucesso");
       } else {
         toast.error(result.error || "Erro ao salvar prompt");
       }
+
+      return result;
     } catch (error) {
       console.error("Erro ao salvar prompt:", error);
       toast.error("Ocorreu um erro ao salvar o prompt");
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
-  return { handleSavePrompt };
+  return { handleSaveAttendantPrompt };
 };
