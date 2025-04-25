@@ -52,7 +52,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     defaultValues: {
       firstName: initialData?.firstName || "",
       lastName: initialData?.lastName || "",
-      phone: initialData?.profile?.phone || "",
+      whatsapp: initialData?.profile?.whatsapp || "",
       imageUrl: initialData?.imageUrl || "",
       companyName: initialData?.profile?.companyName || "",
       businessHours: initialData?.profile?.businessHours
@@ -135,10 +135,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
           <FormField
             control={form.control}
-            name="phone"
+            name="whatsapp"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Telefone</FormLabel>
+                <FormLabel>Whatsapp</FormLabel>
                 <FormControl>
                   <Input placeholder="(00) 00000-0000" {...field} />
                 </FormControl>

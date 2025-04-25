@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { saveRedisKey } from "@/actions/agents/save-redis-key";
-import { saveWhatsapp } from "@/actions/agents/save-whatsapp";
+import { saveWhatsapp } from "@/actions/agents/whatsapp/save-whatsapp";
 import { createEvolution } from "@/actions/agents/create-evolution";
 
 export const useConfigHandlers = (setIsLoading: (loading: boolean) => void) => {

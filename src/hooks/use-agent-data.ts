@@ -6,7 +6,7 @@ import { getAttendantPrompt } from "@/actions/agents/attendant/get-attendant-pro
 import { getSdrPrompt } from "@/actions/agents/sdr/get-sdr-prompt";
 import { getFollowUpPrompt } from "@/actions/agents/followup/get-followup-prompt";
 import { getRedisKey } from "@/actions/agents/redis-key";
-import { getWhatsapp } from "@/actions/agents/whatsapp";
+import { getWhatsapp } from "@/actions/agents/whatsapp/get-whatsapp";
 
 export function useAgentData() {
   const { user } = useUser();
