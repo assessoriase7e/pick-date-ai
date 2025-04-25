@@ -127,11 +127,9 @@ model Evolution {
 
 model Prompt {
   id                       String   @id @default(auto()) @map("_id") @db.ObjectId
-  type                     String // "Atendente", "SDR", "Follow Up"
+  type                     String
   content                  String
   isActive                 Boolean  @default(false)
-  userId                   String
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
   presentation             String?
@@ -139,8 +137,9 @@ model Prompt {
   expressionInterpretation String?
   schedulingScript         String?
   rules                    String?
-
-  @@map("prompt")
+  formattedContent         String?
+  userId                   String
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RagFile {

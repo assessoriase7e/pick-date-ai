@@ -10,4 +10,5 @@ export const promptSchema = z.object({
   expressionInterpretation: z.string().nullable(),
   schedulingScript: z.string().nullable(),
   rules: z.string().nullable(),
+  formattedContent: z.string(),
 });

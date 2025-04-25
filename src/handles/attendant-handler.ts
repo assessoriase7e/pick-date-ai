@@ -3,44 +3,44 @@ import { toast } from "sonner";
 
 export function useAttendantHandler() {
   const handleSaveAttendantPrompt = async (
-    userId?: string,
-    content?: string,
-    isActive?: boolean,
-    presentation?: string,
-    speechStyle?: string,
-    expressionInterpretation?: string,
-    schedulingScript?: string,
-    rules?: string
+    userId: string | undefined,
+    content: string,
+    isActive: boolean,
+    presentation: string,
+    speechStyle: string,
+    expressionInterpretation: string,
+    schedulingScript: string,
+    rules: string
   ) => {
-    if (!userId) {
-      toast.error("Usuário não identificado");
-      return;
-    }
+    if (!userId) return;
 
     try {
-      const result = await savePrompt({
+      // Criar o conteúdo formatado com hashtags
+      const formattedContent =
+        `#Apresentação\n${presentation}\n\n` +
+        `#Estilo da Fala\n${speechStyle}\n\n` +
+        `#Interpretação de Expressões\n${expressionInterpretation}\n\n` +
+        `#Script de Agendamento\n${schedulingScript}\n\n` +
+        `#Regras\n${rules}`;
+
+      // Salvar o prompt com o conteúdo formatado
+      await savePrompt({
         userId,
         type: "Atendente",
-        content: content || "",
-        isActive: isActive || false,
+        content,
+        isActive,
         presentation,
         speechStyle,
         expressionInterpretation,
         schedulingScript,
         rules,
+        formattedContent,
       });
 
-      if (result.success) {
-        toast.success("Prompt de atendente salvo com sucesso");
-      } else {
-        toast.error(result.error || "Erro ao salvar prompt");
-      }
-
-      return result;
+      toast.success("Prompt do atendente salvo com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar prompt do atendente:", error);
-      toast.error("Ocorreu um erro ao salvar o prompt");
-      throw error;
+      toast.error("Erro ao salvar prompt do atendente");
     }
   };
 
