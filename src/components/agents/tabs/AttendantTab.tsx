@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { useAttendantHandler } from "@/handles/attendant-handler";
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getPrompts } from "@/actions/agents/prompts";
 import { AttendantPrompt } from "@/types/prompt";
 import { useForm } from "react-hook-form";
@@ -30,9 +29,9 @@ export function AttendantTab({
 }: AttendantTabProps) {
   const { user } = useUser();
   const { handleSaveAttendantPrompt } = useAttendantHandler();
-  const [isActive, setIsActive] = useState(false);
 
   type FormValues = {
+    isActive: boolean;
     presentation: string;
     speechStyle: string;
     expressionInterpretation: string;
@@ -42,6 +41,7 @@ export function AttendantTab({
 
   const form = useForm<FormValues>({
     defaultValues: {
+      isActive: false,
       presentation: "",
       speechStyle: "",
       expressionInterpretation: "",
@@ -64,9 +64,8 @@ export function AttendantTab({
 
         if (!attendantPrompt) return;
 
-        setIsActive(attendantPrompt.isActive);
-
         const {
+          isActive = false,
           presentation = "",
           speechStyle = "",
           expressionInterpretation = "",
@@ -75,6 +74,7 @@ export function AttendantTab({
         } = attendantPrompt;
 
         form.reset({
+          isActive,
           presentation,
           speechStyle,
           expressionInterpretation,
@@ -102,7 +102,7 @@ export function AttendantTab({
       await handleSaveAttendantPrompt(
         user?.id,
         content,
-        isActive,
+        values.isActive,
         values.presentation,
         values.speechStyle,
         values.expressionInterpretation,
@@ -116,17 +116,6 @@ export function AttendantTab({
 
   return (
     <div className="space-y-4 mt-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="attendant-active"
-            checked={isActive}
-            onCheckedChange={setIsActive}
-          />
-          <Label htmlFor="attendant-active">Ativar</Label>
-        </div>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
           <FormField
@@ -219,10 +208,32 @@ export function AttendantTab({
             )}
           />
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar"}
-            </Button>
+          <div className="flex justify-between items-center">
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Switch
+                        id="attendant-active"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel htmlFor="attendant-active">Ativar</FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
