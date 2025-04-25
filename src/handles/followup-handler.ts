@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { savePrompt } from "@/actions/agents/prompts";
+import { saveFollowUpPrompt } from "@/actions/agents/followup/save-followup-prompt";
 
 export const useFollowUpHandler = () => {
   const handleSaveFollowUpPrompt = async (
@@ -13,9 +13,8 @@ export const useFollowUpHandler = () => {
     }
 
     try {
-      const result = await savePrompt({
+      const result = await saveFollowUpPrompt({
         userId,
-        type: "Follow Up",
         content: followUpPrompt,
         isActive: isFollowUpActive,
       });

@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { savePrompt } from "@/actions/agents/prompts";
+import { saveSdrPrompt } from "@/actions/agents/sdr/save-sdr-prompt";
 
 export const useSdrHandler = () => {
   const handleSaveSdrPrompt = async (
@@ -13,9 +13,8 @@ export const useSdrHandler = () => {
     }
 
     try {
-      const result = await savePrompt({
+      const result = await saveSdrPrompt({
         userId,
-        type: "SDR",
         content: sdrPrompt,
         isActive: isSdrActive,
       });

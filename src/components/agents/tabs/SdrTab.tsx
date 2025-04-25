@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useSdrHandler } from "@/handles/sdr-handler";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { getPrompts } from "@/actions/agents/prompts";
+import { getSdrPrompt } from "@/actions/agents/sdr/get-sdr-prompt";
 
 interface SdrTabProps {
   onSave?: () => Promise<void>;
@@ -13,11 +13,7 @@ interface SdrTabProps {
   setIsLoading?: (value: boolean) => void;
 }
 
-export function SdrTab({
-  onSave,
-  isLoading,
-  setIsLoading,
-}: SdrTabProps) {
+export function SdrTab({ onSave, isLoading, setIsLoading }: SdrTabProps) {
   const { user } = useUser();
   const { handleSaveSdrPrompt } = useSdrHandler();
   const [prompt, setPrompt] = useState("");
@@ -26,23 +22,19 @@ export function SdrTab({
   useEffect(() => {
     async function loadSdrPrompt() {
       if (!user?.id) return;
-      
+
       try {
-        const result = await getPrompts(user.id);
-        if (result.success && result.data?.prompts) {
-          const { prompts } = result.data;
-          
-          const sdrPrompt = prompts.find(prompt => prompt.type === "SDR");
-          if (sdrPrompt) {
-            setPrompt(sdrPrompt.content);
-            setIsActive(sdrPrompt.isActive);
-          }
+        const result = await getSdrPrompt(user.id);
+        if (result.success && result.data?.sdrPrompt) {
+          const sdrPrompt = result.data.sdrPrompt;
+          setPrompt(sdrPrompt.content);
+          setIsActive(sdrPrompt.isActive);
         }
       } catch (error) {
         console.error("Erro ao carregar prompt do SDR:", error);
       }
     }
-    
+
     loadSdrPrompt();
   }, [user?.id]);
 

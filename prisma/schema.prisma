@@ -32,6 +32,11 @@ model User {
   agentRagFiles  AgentRagFile[]
   agentRedisKeys AgentRedisKey[]
   agentWhatsapp  AgentWhatsapp[]
+  
+  // Novas relações para prompts separados
+  attendantPrompts AttendantPrompt[]
+  sdrPrompts       SdrPrompt[]
+  followUpPrompts  FollowUpPrompt[]
 
   @@map("user")
 }
@@ -125,6 +130,7 @@ model Evolution {
   status     String
 }
 
+// Modelo existente que será mantido para compatibilidade
 model Prompt {
   id                       String   @id @default(auto()) @map("_id") @db.ObjectId
   type                     String
@@ -142,15 +148,61 @@ model Prompt {
   user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model RagFile {
+// Novos modelos para prompts separados
+model AttendantPrompt {
+  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  content                  String
+  isActive                 Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  presentation             String
+  speechStyle              String
+  expressionInterpretation String
+  schedulingScript         String
+  rules                    String
+  formattedContent         String
+  userId                   String
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("attendantprompt")
+}
+
+model SdrPrompt {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
   content   String
-  userId    String
+  isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("sdrprompt")
+}
+
+model FollowUpPrompt {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("followupprompt")
+}
+
+model RagFile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  content     String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   metadataKey String? // <-- Adicionado campo opcional para chave metadata
-  User      User     @relation(fields: [userId], references: [id])
+  User        User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }

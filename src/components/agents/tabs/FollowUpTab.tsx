@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useFollowUpHandler } from "@/handles/followup-handler";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { getPrompts } from "@/actions/agents/prompts";
+import { getFollowUpPrompt } from "@/actions/agents/followup/get-followup-prompt";
 
 interface FollowUpTabProps {
   onSave?: () => Promise<void>;
@@ -26,23 +26,19 @@ export function FollowUpTab({
   useEffect(() => {
     async function loadFollowUpPrompt() {
       if (!user?.id) return;
-      
+
       try {
-        const result = await getPrompts(user.id);
-        if (result.success && result.data?.prompts) {
-          const { prompts } = result.data;
-          
-          const followUpPrompt = prompts.find(prompt => prompt.type === "Follow Up");
-          if (followUpPrompt) {
-            setPrompt(followUpPrompt.content);
-            setIsActive(followUpPrompt.isActive);
-          }
+        const result = await getFollowUpPrompt(user.id);
+        if (result.success && result.data?.followUpPrompt) {
+          const followUpPrompt = result.data.followUpPrompt;
+          setPrompt(followUpPrompt.content);
+          setIsActive(followUpPrompt.isActive);
         }
       } catch (error) {
         console.error("Erro ao carregar prompt do Follow Up:", error);
       }
     }
-    
+
     loadFollowUpPrompt();
   }, [user?.id]);
 

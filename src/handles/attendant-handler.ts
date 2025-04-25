@@ -1,4 +1,4 @@
-import { savePrompt } from "@/actions/agents/prompts";
+import { saveAttendantPrompt } from "@/actions/agents/attendant/save-attendant-prompt";
 import { toast } from "sonner";
 
 export function useAttendantHandler() {
@@ -24,9 +24,8 @@ export function useAttendantHandler() {
         `#Regras\n${rules}`;
 
       // Salvar o prompt com o conteúdo formatado
-      await savePrompt({
+      const result = await saveAttendantPrompt({
         userId,
-        type: "Atendente",
         content,
         isActive,
         presentation,
@@ -37,7 +36,11 @@ export function useAttendantHandler() {
         formattedContent,
       });
 
-      toast.success("Prompt do atendente salvo com sucesso!");
+      if (result.success) {
+        toast.success("Prompt do atendente salvo com sucesso!");
+      } else {
+        toast.error(result.error || "Erro ao salvar prompt do atendente");
+      }
     } catch (error) {
       console.error("Erro ao salvar prompt do atendente:", error);
       toast.error("Erro ao salvar prompt do atendente");

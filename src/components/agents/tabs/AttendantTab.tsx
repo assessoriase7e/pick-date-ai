@@ -4,8 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAttendantHandler } from "@/handles/attendant-handler";
 import { useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
-import { getPrompts } from "@/actions/agents/prompts";
-import { AttendantPrompt } from "@/types/prompt";
+import { getAttendantPrompt } from "@/actions/agents/attendant/get-attendant-prompt";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -56,12 +55,10 @@ export function AttendantTab({
       if (!user?.id) return;
 
       try {
-        const result = await getPrompts(user.id);
-        if (!result.success || !result.data?.prompts) return;
+        const result = await getAttendantPrompt(user.id);
+        if (!result.success || !result.data?.attendantPrompt) return;
 
-        const attendantPrompt = result.data.prompts.find(
-          (prompt) => prompt.type === "Atendente"
-        ) as AttendantPrompt | undefined;
+        const attendantPrompt = result.data.attendantPrompt;
 
         if (!attendantPrompt) return;
 
@@ -72,7 +69,8 @@ export function AttendantTab({
           expressionInterpretation = "",
           schedulingScript = "",
           rules = "",
-        } = attendantPrompt || {};
+        } = attendantPrompt;
+
         form.reset({
           isActive,
           presentation,

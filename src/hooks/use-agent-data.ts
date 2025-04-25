@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { getPrompts } from "@/actions/agents/prompts";
+import { getAttendantPrompt } from "@/actions/agents/attendant/get-attendant-prompt";
+import { getSdrPrompt } from "@/actions/agents/sdr/get-sdr-prompt";
+import { getFollowUpPrompt } from "@/actions/agents/followup/get-followup-prompt";
 import { getRedisKey } from "@/actions/agents/redis-key";
 import { getWhatsapp } from "@/actions/agents/whatsapp";
 
@@ -10,6 +12,10 @@ export function useAgentData() {
   const { user } = useUser();
   const [attendantPrompt, setAttendantPrompt] = useState("");
   const [attendantEnabled, setAttendantEnabled] = useState(false);
+  const [sdrPrompt, setSdrPrompt] = useState("");
+  const [sdrEnabled, setSdrEnabled] = useState(false);
+  const [followUpPrompt, setFollowUpPrompt] = useState("");
+  const [followUpEnabled, setFollowUpEnabled] = useState(false);
   const [redisKey, setRedisKey] = useState("");
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -20,16 +26,29 @@ export function useAgentData() {
 
       try {
         setIsLoading(true);
-        // Carregar prompts
-        const promptsResult = await getPrompts(user.id);
-        if (promptsResult.success && promptsResult.data?.prompts) {
-          const { prompts } = promptsResult.data;
-          prompts.forEach((prompt) => {
-            if (prompt.type === "Atendente") {
-              setAttendantPrompt(prompt.content);
-              setAttendantEnabled(prompt.isActive);
-            }
-          });
+
+        // Carregar prompt do atendente
+        const attendantResult = await getAttendantPrompt(user.id);
+        if (attendantResult.success && attendantResult.data?.attendantPrompt) {
+          const prompt = attendantResult.data.attendantPrompt;
+          setAttendantPrompt(prompt.content);
+          setAttendantEnabled(prompt.isActive);
+        }
+
+        // Carregar prompt do SDR
+        const sdrResult = await getSdrPrompt(user.id);
+        if (sdrResult.success && sdrResult.data?.sdrPrompt) {
+          const prompt = sdrResult.data.sdrPrompt;
+          setSdrPrompt(prompt.content);
+          setSdrEnabled(prompt.isActive);
+        }
+
+        // Carregar prompt do Follow Up
+        const followUpResult = await getFollowUpPrompt(user.id);
+        if (followUpResult.success && followUpResult.data?.followUpPrompt) {
+          const prompt = followUpResult.data.followUpPrompt;
+          setFollowUpPrompt(prompt.content);
+          setFollowUpEnabled(prompt.isActive);
         }
 
         const redisKeyResult = await getRedisKey(user.id);
@@ -54,12 +73,20 @@ export function useAgentData() {
   return {
     attendantPrompt,
     attendantEnabled,
+    sdrPrompt,
+    sdrEnabled,
+    followUpPrompt,
+    followUpEnabled,
     redisKey,
     whatsappPhone,
     isLoading,
     setAttendantPrompt,
     setAttendantEnabled,
+    setSdrPrompt,
+    setSdrEnabled,
+    setFollowUpPrompt,
+    setFollowUpEnabled,
     setRedisKey,
-    setWhatsappPhone
+    setWhatsappPhone,
   };
 }
