@@ -12,8 +12,8 @@ export function PromptsSection() {
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Prompts</h2>
 
-      <Tabs defaultValue="attendant" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="attendant" className="">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="attendant">Atendente</TabsTrigger>
           <TabsTrigger value="sdr">SDR</TabsTrigger>
           <TabsTrigger value="followup">Follow Up</TabsTrigger>

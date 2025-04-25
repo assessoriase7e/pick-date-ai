@@ -15,6 +15,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -116,125 +117,176 @@ export function AttendantTab({
   return (
     <div className="space-y-4 mt-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="presentation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Apresentação</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Digite a apresentação do atendente..."
-                    className="min-h-[100px] mt-2"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="speechStyle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estilo da Fala</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descreva o estilo de fala do atendente..."
-                    className="min-h-[100px] mt-2"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="expressionInterpretation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Interpretação de Expressões</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Como o atendente deve interpretar expressões..."
-                    className="min-h-[100px] mt-2"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="schedulingScript"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Script de Agendamento</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Script para agendamento..."
-                    className="min-h-[100px] mt-2"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="rules"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Regras</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Regras para o atendente seguir..."
-                    className="min-h-[100px] mt-2"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-between items-center">
-            <FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center space-x-2">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="w-full lg:w-1/2">
+            <form
+              onSubmit={form.handleSubmit(handleSave)}
+              className="space-y-4"
+            >
+              <FormField
+                control={form.control}
+                name="presentation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Apresentação</FormLabel>
                     <FormControl>
-                      <Switch
-                        id="attendant-active"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Textarea
+                        placeholder="Digite a apresentação do atendente..."
+                        className="min-h-[100px] mt-2"
+                        {...field}
                       />
                     </FormControl>
-                    <FormLabel htmlFor="attendant-active">Ativar</FormLabel>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Salvar"}
-              </Button>
-            </div>
+              <FormField
+                control={form.control}
+                name="speechStyle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estilo da Fala</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descreva o estilo de fala do atendente..."
+                        className="min-h-[100px] mt-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expressionInterpretation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Interpretação de Expressões</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Como o atendente deve interpretar expressões..."
+                        className="min-h-[100px] mt-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="schedulingScript"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Script de Agendamento</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Script para agendamento..."
+                        className="min-h-[100px] mt-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="rules"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Regras</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Regras para o atendente seguir..."
+                        className="min-h-[100px] mt-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-between items-center">
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center space-x-2">
+                        <FormControl>
+                          <Switch
+                            id="attendant-active"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel htmlFor="attendant-active">Ativar</FormLabel>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
+
+          <div className="w-full lg:w-1/2 mt-6 lg:mt-0">
+            <Card className="sticky top-4">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  Visualização do Prompt
+                </h3>
+                <div className="whitespace-pre-wrap text-sm">
+                  <div className="mb-4">
+                    <div className="font-medium">#Apresentação</div>
+                    <div className="pl-4 mt-1">
+                      {form.watch("presentation")}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="font-medium">#Estilo da Fala</div>
+                    <div className="pl-4 mt-1">{form.watch("speechStyle")}</div>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="font-medium">
+                      #Interpretação de Expressões
+                    </div>
+                    <div className="pl-4 mt-1">
+                      {form.watch("expressionInterpretation")}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="font-medium">#Script de Agendamento</div>
+                    <div className="pl-4 mt-1">
+                      {form.watch("schedulingScript")}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="font-medium">#Regras</div>
+                    <div className="pl-4 mt-1">{form.watch("rules")}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </Form>
     </div>
   );
