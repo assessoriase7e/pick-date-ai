@@ -7,7 +7,7 @@ type RagFile = {
   id: string;
   name: string;
   content: string;
-  metadataKey?: string; // <-- Adicionado
+  metadataKey?: string;
 };
 
 export async function saveRagFiles({
@@ -19,8 +19,8 @@ export async function saveRagFiles({
   ragFiles: RagFile[];
   webhookUrl?: string;
 }) {
+  console.log(webhookUrl);
   try {
-    // Salvar os arquivos RAG no banco de dados
     await prisma.ragFile.deleteMany({
       where: { userId },
     });
@@ -36,13 +36,11 @@ export async function saveRagFiles({
       });
     }
 
-    // Se tiver uma URL de webhook, enviar os arquivos
     if (webhookUrl) {
       try {
-        // Formatar todos os arquivos em um único texto com quebras de linha
         const formattedContent = ragFiles
-          .map((file) => `### ${file.name} ###\n\n${file.content}\n\n`)
-          .join("---\n\n");
+          .map((file) => `\n\n${file.content}\n\n`)
+          .join("\n\n");
 
         // Chamar o webhook
         const response = await fetch(webhookUrl, {

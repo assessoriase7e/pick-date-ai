@@ -8,17 +8,15 @@ export async function getRagFiles(userId: string) {
       where: { userId },
       select: {
         id: true,
-        name: true, // Certifique-se de que o campo no banco é 'name' e não 'fileName'
+        name: true,
         content: true,
         createdAt: true,
       },
     });
 
-    console.log("Arquivos RAG encontrados:", files.length);
-    
     return {
       success: true,
-      data: { files }, // Certifique-se de que a chave é 'files'
+      data: { files },
     };
   } catch (error) {
     console.error("Erro ao buscar arquivos RAG:", error);

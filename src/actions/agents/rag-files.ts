@@ -64,8 +64,6 @@ export async function getRagFiles(userId: string) {
       },
     });
 
-    console.log(files);
-
     return {
       success: true,
       data: {

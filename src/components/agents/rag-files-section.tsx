@@ -1,11 +1,10 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, FileText, Plus, Upload } from "lucide-react";
+import { X, FileText, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,14 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  uploadRagFile,
-  getRagFiles,
-  deleteRagFile,
-} from "@/actions/agents/rag-files";
+import { getRagFiles, deleteRagFile } from "@/actions/agents/rag-files";
 import { saveRagFiles } from "@/actions/agents/save-rag-files";
 import { getWebhookUrl } from "@/actions/agents/get-webhook-url";
-import { docxToText } from "@/utils/docxToText";
 
 export function RagFilesSection() {
   const { user } = useUser();
@@ -48,6 +42,20 @@ export function RagFilesSection() {
     loadWebhookUrl();
   }, [user?.id]);
 
+  const loadWebhookUrl = async () => {
+    if (!user?.id) return;
+
+    try {
+      const result = await getWebhookUrl(user.id);
+      console.log("result", result);
+      if (result.success) {
+        setWebhookUrl(result?.data?.url || "");
+      }
+    } catch (error) {
+      console.error("Erro ao carregar URL do webhook:", error);
+    }
+  };
+
   const loadFiles = async () => {
     if (!user?.id) return;
 
@@ -65,19 +73,6 @@ export function RagFilesSection() {
       }
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error);
-    }
-  };
-
-  const loadWebhookUrl = async () => {
-    if (!user?.id) return;
-
-    try {
-      const result = await getWebhookUrl(user.id);
-      if (result.success) {
-        setWebhookUrl(result?.data?.url || "");
-      }
-    } catch (error) {
-      console.error("Erro ao carregar URL do webhook:", error);
     }
   };
 
@@ -100,58 +95,6 @@ export function RagFilesSection() {
         );
         e.target.value = "";
       }
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile || !user?.id) {
-      toast.error("Selecione um arquivo para upload");
-      return;
-    }
-
-    const allowedTypes = [
-      "text/plain",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error("Apenas arquivos TXT ou DOCX são permitidos");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      let fileContent = "";
-      if (selectedFile.type === "text/plain") {
-        fileContent = await readFileAsText(selectedFile);
-      } else if (
-        selectedFile.type ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
-        fileContent = await docxToText(selectedFile);
-      }
-
-      const result = await uploadRagFile({
-        userId: user.id,
-        name: selectedFile.name,
-        content: fileContent,
-        metadataKey,
-      });
-
-      if (result.success) {
-        toast.success("Arquivo enviado com sucesso");
-        setSelectedFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        loadFiles();
-      } else {
-        toast.error(result.error || "Erro ao enviar arquivo");
-      }
-    } catch (error) {
-      console.error("Erro ao fazer upload:", error);
-      toast.error("Ocorreu um erro ao enviar o arquivo");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -257,30 +200,25 @@ export function RagFilesSection() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Arquivos RAG</h2>
-        <Button
-          onClick={handleSaveAll}
-          disabled={isSaving || files.length === 0}
-          variant="outline"
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          {isSaving ? "Salvando..." : "Salvar Todos"}
-        </Button>
       </div>
 
       <div className="flex items-end gap-4">
-        <div className="flex-1">
+        <div className="flex  gap-5 flex-1">
           <Input
             ref={fileInputRef}
             type="file"
             accept=".txt,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
             onChange={handleFileChange}
           />
-        </div>
 
-        <Button onClick={handleUpload} disabled={isLoading || !selectedFile}>
-          <Plus className="mr-2 h-4 w-4" />
-          {isLoading ? "Enviando..." : "Adicionar"}
-        </Button>
+          <Button
+            onClick={handleSaveAll}
+            disabled={isSaving || files.length === 0}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {isSaving ? "Salvando..." : "Salvar Todos"}
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
