@@ -71,8 +71,7 @@ export function AttendantTab({
           expressionInterpretation = "",
           schedulingScript = "",
           rules = "",
-        } = attendantPrompt;
-
+        } = attendantPrompt || {};
         form.reset({
           isActive,
           presentation,

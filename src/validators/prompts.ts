@@ -3,11 +3,11 @@ import { z } from "zod";
 export const promptSchema = z.object({
   userId: z.string(),
   type: z.string(),
-  content: z.string().optional(),
+  content: z.string(),
   isActive: z.boolean(),
-  presentation: z.string().optional(),
-  speechStyle: z.string().optional(),
-  expressionInterpretation: z.string().optional(),
-  schedulingScript: z.string().optional(),
-  rules: z.string().optional(),
+  presentation: z.string().nullable(),
+  speechStyle: z.string().nullable(),
+  expressionInterpretation: z.string().nullable(),
+  schedulingScript: z.string().nullable(),
+  rules: z.string().nullable(),
 });

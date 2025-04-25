@@ -9,6 +9,11 @@ const promptSchema = z.object({
   type: z.string(),
   content: z.string(),
   isActive: z.boolean(),
+  presentation: z.string().optional(),
+  speechStyle: z.string().optional(),
+  expressionInterpretation: z.string().optional(),
+  schedulingScript: z.string().optional(),
+  rules: z.string().optional(),
 });
 
 export async function savePrompt(data: z.infer<typeof promptSchema>) {
@@ -32,16 +37,23 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
 
     let prompt;
 
+    const promptData = {
+      content: data.content,
+      isActive: data.isActive,
+      presentation: data.presentation,
+      speechStyle: data.speechStyle,
+      expressionInterpretation: data.expressionInterpretation,
+      schedulingScript: data.schedulingScript,
+      rules: data.rules,
+    };
+
     if (existingPrompt) {
       // Atualizar o prompt existente
       prompt = await prisma.prompt.update({
         where: {
           id: existingPrompt.id,
         },
-        data: {
-          content: data.content,
-          isActive: data.isActive,
-        },
+        data: promptData,
       });
     } else {
       // Criar um novo prompt
@@ -49,8 +61,7 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
         data: {
           userId: data.userId,
           type: data.type,
-          content: data.content,
-          isActive: data.isActive,
+          ...promptData,
         },
       });
     }
