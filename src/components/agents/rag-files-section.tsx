@@ -28,6 +28,7 @@ import {
 } from "@/actions/agents/rag-files";
 import { saveRagFiles } from "@/actions/agents/save-rag-files";
 import { getWebhookUrl } from "@/actions/agents/get-webhook-url";
+import { docxToText } from "@/utils/docxToText";
 
 export function RagFilesSection() {
   const { user } = useUser();
@@ -75,15 +76,20 @@ export function RagFilesSection() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      // Aceitar qualquer tipo de arquivo de texto ou sem tipo definido
+      // Aceitar arquivos de texto e docx
       if (
         file.type === "text/plain" ||
         file.type === "" ||
-        file.name.endsWith(".txt")
+        file.name.endsWith(".txt") ||
+        file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        file.name.endsWith(".docx")
       ) {
         setSelectedFile(file);
       } else {
-        toast.error("Apenas arquivos de texto são permitidos");
+        toast.error(
+          "Apenas arquivos de texto (.txt) ou Word (.docx) são permitidos"
+        );
         e.target.value = "";
       }
     }
@@ -95,9 +101,26 @@ export function RagFilesSection() {
       return;
     }
 
+    const allowedTypes = [
+      "text/plain",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.error("Apenas arquivos TXT ou DOCX são permitidos");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const fileContent = await readFileAsText(selectedFile);
+      let fileContent = "";
+      if (selectedFile.type === "text/plain") {
+        fileContent = await readFileAsText(selectedFile);
+      } else if (
+        selectedFile.type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        fileContent = await docxToText(selectedFile);
+      }
 
       const result = await uploadRagFile({
         userId: user.id,
@@ -115,20 +138,9 @@ export function RagFilesSection() {
       } else {
         toast.error(result.error || "Erro ao enviar arquivo");
       }
-    } catch (error: any) {
-      if (
-        error.message &&
-        error.message.includes("could not be read")
-      ) {
-        toast.error("Não foi possível ler o arquivo. Por favor, selecione novamente e tente de novo.");
-        setSelectedFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      } else {
-        toast.error("Ocorreu um erro ao enviar o arquivo");
-      }
+    } catch (error) {
       console.error("Erro ao fazer upload:", error);
+      toast.error("Ocorreu um erro ao enviar o arquivo");
     } finally {
       setIsLoading(false);
     }
@@ -207,9 +219,17 @@ export function RagFilesSection() {
       };
       reader.onerror = (event) => {
         if (reader.error?.name === "NotReadableError") {
-          reject(new Error("The file could not be read. This may be due to permission issues or the file being moved/deleted after selection."));
+          reject(
+            new Error(
+              "The file could not be read. This may be due to permission issues or the file being moved/deleted after selection."
+            )
+          );
         } else {
-          reject(new Error(`Error reading file: ${reader.error?.message || "Unknown error"}`));
+          reject(
+            new Error(
+              `Error reading file: ${reader.error?.message || "Unknown error"}`
+            )
+          );
         }
       };
       reader.onabort = () => {
@@ -242,7 +262,7 @@ export function RagFilesSection() {
           <Input
             ref={fileInputRef}
             type="file"
-            accept=".txt"
+            accept=".txt,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
             onChange={handleFileChange}
           />
         </div>
@@ -320,7 +340,7 @@ export function RagFilesSection() {
             <DialogDescription>Conteúdo do arquivo</DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto">
-            <pre className="whitespace-pre-wrap bg-muted p-4 rounded-md text-sm">
+            <pre className="whitespace-pre-line bg-muted p-4 rounded-md text-sm">
               {selectedContent}
             </pre>
           </div>
