@@ -2,6 +2,7 @@
 import { getRagFiles } from "@/actions/agents/rag/get-rag-files";
 import { getRagConfig } from "@/actions/agents/rag/get-webhook-url";
 import { getRedisKey } from "@/actions/agents/redis-key";
+import { getWhatsapp } from "@/actions/agents/whatsapp";
 import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { getProfile } from "@/actions/profile/get";
 import { EvolutionSection } from "@/components/agents/evolution-section";
@@ -16,7 +17,8 @@ export default async function AgentesPage() {
   const { data: profile } = await getProfile();
   const { data: ragFiles } = await getRagFiles(user.id);
   const { data: ragConfig } = await getRagConfig(user.id);
-  const { data } = await getRedisKey(user.id);
+  const { data: redisKey } = await getRedisKey(user.id);
+  const { data: whatsapp } = await getWhatsapp(user.id);
 
   return (
     <div className="container py-10 max-w-6xl">
@@ -37,12 +39,15 @@ export default async function AgentesPage() {
 
         <RedisKeySection
           phoneNumber={profile?.phone || "missing phone"}
-          redisKey={data?.redisKey?.key || ""}
+          redisKey={redisKey?.redisKey?.key || ""}
         />
 
         <Separator className="my-6" />
 
-        <WhatsappSection />
+        <WhatsappSection
+          user={user}
+          whatsappNumber={whatsapp?.whatsapp?.phoneNumber}
+        />
 
         <Separator className="my-6" />
 

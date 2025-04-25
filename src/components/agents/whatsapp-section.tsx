@@ -1,46 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useForm, Controller } from "react-hook-form";
+import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getWhatsapp, saveWhatsapp } from "@/actions/agents/whatsapp";
+import { saveWhatsapp } from "@/actions/agents/whatsapp";
+import { User } from "@clerk/nextjs/server";
+import { useState } from "react";
 
-export function WhatsappSection() {
-  const { user } = useUser();
-  const [isLoading, setIsLoading] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
+interface FormData {
+  phoneNumber: string;
+}
 
-  useEffect(() => {
-    loadWhatsapp();
-  }, [user?.id]);
+export function WhatsappSection({
+  whatsappNumber,
+  user,
+}: {
+  whatsappNumber?: string;
+  user: User;
+}) {
+  const [loading, setLoading] = useState(false);
 
-  const loadWhatsapp = async () => {
-    if (!user?.id) return;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      phoneNumber: whatsappNumber || "",
+    },
+  });
 
-    try {
-      const result = await getWhatsapp(user.id);
-      // Add proper null check for result.data
-      if (result.success && result.data?.whatsapp) {
-        setPhoneNumber(result.data.whatsapp.phoneNumber);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar Whatsapp:", error);
-    }
-  };
-
-  const handleSaveWhatsapp = async () => {
-    if (!user?.id) {
-      toast.error("Usuário não identificado");
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
     try {
       const result = await saveWhatsapp({
         userId: user.id,
-        phoneNumber,
+        phoneNumber: data.phoneNumber.replace(/\D/g, ""), // Remove a formatação
       });
 
       if (result.success) {
@@ -52,39 +49,56 @@ export function WhatsappSection() {
       console.error("Erro ao salvar Whatsapp:", error);
       toast.error("Ocorreu um erro ao salvar o número do Whatsapp");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remover qualquer caractere que não seja número
-    const value = e.target.value.replace(/\D/g, "");
-    setPhoneNumber(value);
   };
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Whatsapp</h2>
 
-      <div className="space-y-2">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
         <p className="text-sm text-muted-foreground">
-          Digite o número do Whatsapp sem o código do país.
+          Digite o número do Whatsapp no formato (99) 99999-9999.
         </p>
 
         <div className="flex items-end gap-4">
           <div className="flex-1">
-            <Input
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              placeholder="Digite o número do Whatsapp (apenas números)"
-              maxLength={11}
+            <Controller
+              name="phoneNumber"
+              control={control}
+              rules={{
+                required: "O número do Whatsapp é obrigatório.",
+                minLength: {
+                  value: 14,
+                  message: "O número deve ter pelo menos 10 dígitos.",
+                },
+                maxLength: {
+                  value: 15,
+                  message: "O número deve ter no máximo 11 dígitos.",
+                },
+              }}
+              render={({ field }) => (
+                <PatternFormat
+                  {...field}
+                  format="(##) #####-####"
+                  mask="_"
+                  placeholder="(99) 99999-9999"
+                  customInput={Input}
+                />
+              )}
             />
+            {errors.phoneNumber && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.phoneNumber.message}
+              </p>
+            )}
           </div>
-          <Button onClick={handleSaveWhatsapp} disabled={isLoading}>
-            {isLoading ? "Salvando..." : "Salvar"}
+          <Button type="submit" disabled={loading}>
+            {loading ? "Salvando..." : "Salvar"}
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
