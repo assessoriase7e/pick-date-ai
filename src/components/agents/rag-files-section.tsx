@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,32 +22,56 @@ import {
 import { getRagFiles, deleteRagFile } from "@/actions/agents/rag-files";
 import { saveRagFiles } from "@/actions/agents/save-rag-files";
 import { getWebhookUrl } from "@/actions/agents/get-webhook-url";
+import { User } from "@clerk/nextjs/server";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
-export function RagFilesSection() {
-  const { user } = useUser();
-  const [isLoading, setIsLoading] = useState(false);
+type RagFilesSectionPropos = {
+  user: User;
+};
+
+const ragFilesSchema = z.object({
+  webhookUrl: z.string().url({ message: "URL inválida" }).optional(),
+  metadataKey: z.string().optional(),
+});
+
+type RagFilesFormValues = z.infer<typeof ragFilesSchema>;
+
+export function RagFilesSection({ user }: RagFilesSectionPropos) {
   const [isSaving, setIsSaving] = useState(false);
   const [files, setFiles] = useState<any[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedContent, setSelectedContent] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [metadataKey, setMetadataKey] = useState<string>("");
+
+  const form = useForm<RagFilesFormValues>({
+    resolver: zodResolver(ragFilesSchema),
+    defaultValues: {
+      webhookUrl: "",
+      metadataKey: "",
+    },
+  });
 
   useEffect(() => {
     loadFiles();
     loadWebhookUrl();
-  }, [user?.id]);
+  }, [user.id]);
 
   const loadWebhookUrl = async () => {
-    if (!user?.id) return;
-
     try {
       const result = await getWebhookUrl(user.id);
       if (result.success) {
-        setWebhookUrl(result?.data?.url || "");
+        form.setValue("webhookUrl", result?.data?.url || "");
       }
     } catch (error) {
       console.error("Erro ao carregar URL do webhook:", error);
@@ -67,7 +90,7 @@ export function RagFilesSection() {
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
-          setMetadataKey(sortedFiles[0].metadataKey || "");
+          form.setValue("metadataKey", sortedFiles[0].metadataKey || "");
         }
       }
     } catch (error) {
@@ -87,7 +110,6 @@ export function RagFilesSection() {
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
         file.name.endsWith(".docx")
       ) {
-        setSelectedFile(file);
       } else {
         toast.error(
           "Apenas arquivos de texto (.txt) ou Word (.docx) são permitidos"
@@ -120,7 +142,7 @@ export function RagFilesSection() {
     setIsDialogOpen(true);
   };
 
-  const handleSaveAll = async () => {
+  const handleSaveAll = async (data: RagFilesFormValues) => {
     if (!user?.id) return;
 
     setIsSaving(true);
@@ -129,13 +151,13 @@ export function RagFilesSection() {
         id: file.id,
         name: file.name,
         content: file.content,
-        metadataKey: file.metadataKey, // <-- Adicionado para garantir que o campo seja enviado
+        metadataKey: file.metadataKey,
       }));
 
       const result = await saveRagFiles({
         userId: user.id,
         ragFiles: ragFilesFormatted,
-        webhookUrl: webhookUrl,
+        webhookUrl: data.webhookUrl,
       });
 
       if (result.success) {
@@ -151,101 +173,69 @@ export function RagFilesSection() {
     }
   };
 
-  const readFileAsText = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (!file) {
-        reject(new Error("No file provided"));
-        return;
-      }
-      if (file.size === 0) {
-        reject(new Error("File is empty"));
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          resolve(event.target.result.toString());
-        } else {
-          reject(new Error("File read result is empty"));
-        }
-      };
-      reader.onerror = (event) => {
-        if (reader.error?.name === "NotReadableError") {
-          reject(
-            new Error(
-              "The file could not be read. This may be due to permission issues or the file being moved/deleted after selection."
-            )
-          );
-        } else {
-          reject(
-            new Error(
-              `Error reading file: ${reader.error?.message || "Unknown error"}`
-            )
-          );
-        }
-      };
-      reader.onabort = () => {
-        reject(new Error("File reading was aborted"));
-      };
-      try {
-        reader.readAsText(file);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Arquivos RAG</h2>
       </div>
 
-      <div className="flex items-end gap-4">
-        <div className="flex  gap-5 flex-1">
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-            onChange={handleFileChange}
-          />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSaveAll)} className="space-y-2">
+          <div className="flex items-end gap-4">
+            <div className="flex gap-5 flex-1">
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                onChange={handleFileChange}
+              />
 
-          <Button
-            onClick={handleSaveAll}
-            disabled={isSaving || files.length === 0}
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {isSaving ? "Salvando..." : "Salvar Todos"}
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex gap-5">
-          <div className="w-full mb-1">
-            <p className="text-xs">URL do Webhook</p>
-            <Input
-              placeholder="https://..."
-              value={webhookUrl}
-              onChange={(e) => setWebhookUrl(e.target.value)}
-            />
+              <Button type="submit" disabled={isSaving || files.length === 0}>
+                <Upload className="mr-2 h-4 w-4" />
+                {isSaving ? "Salvando..." : "Salvar Todos"}
+              </Button>
+            </div>
           </div>
 
-          <div>
-            <p className="text-xs mb-1">Nome Metadata</p>
-            <Input
-              placeholder="nome_negocio"
-              value={metadataKey}
-              onChange={(e) => setMetadataKey(e.target.value)}
-              className="w-56"
+          <div className="flex gap-5">
+            <FormField
+              control={form.control}
+              name="webhookUrl"
+              render={({ field }) => (
+                <FormItem className="w-full mb-1">
+                  <FormLabel>URL do Webhook</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="metadataKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome Metadata</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="nome_negocio"
+                      className="w-56"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Se fornecido, os arquivos RAG serão enviados para esta URL quando
-          salvos
-        </p>
-      </div>
+          <p className="text-sm text-muted-foreground">
+            Se fornecido, os arquivos RAG serão enviados para esta URL quando
+            salvos
+          </p>
+        </form>
+      </Form>
 
       <div className="rounded-md border">
         <Table>

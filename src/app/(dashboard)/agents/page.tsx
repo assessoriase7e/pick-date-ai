@@ -1,3 +1,4 @@
+import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { EvolutionSection } from "@/components/agents/evolution-section";
 import { PromptsSection } from "@/components/agents/prompts-section";
 import { RagFilesSection } from "@/components/agents/rag-files-section";
@@ -5,7 +6,9 @@ import { RedisKeySection } from "@/components/agents/redis-key-section";
 import { WhatsappSection } from "@/components/agents/whatsapp-section";
 import { Separator } from "@/components/ui/separator";
 
-export default function AgentesPage() {
+export default async function AgentesPage() {
+  const user = await getClerkUser();
+
   return (
     <div className="container py-10 max-w-6xl">
       <h1 className="text-3xl font-bold mb-8">Agentes</h1>
@@ -15,7 +18,7 @@ export default function AgentesPage() {
 
         <Separator className="my-6" />
 
-        <RagFilesSection />
+        <RagFilesSection user={user!} />
 
         <Separator className="my-6" />
 
