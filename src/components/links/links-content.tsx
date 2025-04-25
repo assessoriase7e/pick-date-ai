@@ -21,7 +21,6 @@ import { deleteLink } from "@/actions/links/delete";
 import { listLinks } from "@/actions/links/getMany";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
-import { useProfessionals } from "@/hooks/use-professionals";
 import { Link } from "@prisma/client";
 
 export function LinksContent() {
@@ -36,8 +35,6 @@ export function LinksContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<any | null>(null);
   const [deletingLink, setDeletingLink] = useState<any | null>(null);
-
-  const { data: professionals = [] } = useProfessionals();
 
   // Fetch links using server action
   useEffect(() => {
@@ -247,7 +244,6 @@ export function LinksContent() {
             url: editingLink.url,
             title: editingLink.title,
             description: editingLink.description,
-            professionalId: editingLink.professionalId,
           }}
           onSubmit={handleUpdateLink}
         />

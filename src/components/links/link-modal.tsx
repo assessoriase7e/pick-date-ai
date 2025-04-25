@@ -18,10 +18,8 @@ interface LinkModalProps {
     url: string;
     title: string;
     description: string;
-    professionalId?: string;
   };
   onSubmit: (data: any) => Promise<void>;
-  professionals?: any; // Add this line to accept the professionals prop
 }
 
 export function LinkModal({
@@ -31,7 +29,6 @@ export function LinkModal({
   description,
   initialData,
   onSubmit,
-  professionals,
 }: LinkModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
