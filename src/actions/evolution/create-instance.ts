@@ -26,13 +26,6 @@ export async function createInstance(data: CreateInstanceFormValues) {
       };
     }
 
-    console.log({
-      instanceName: data.name,
-      qrcode: data.qrCode,
-      number: data.number,
-      webhook: data.webhookUrl || null,
-    });
-
     const response = await fetch(`${evolutionApiUrl}/instance/create`, {
       method: "POST",
       headers: {
@@ -43,7 +36,7 @@ export async function createInstance(data: CreateInstanceFormValues) {
         instanceName: data.name,
         qrcode: data.qrCode,
         number: data.number,
-        webhook: data.webhookUrl || null,
+        webhookUrl: data.webhookUrl,
         integration: "WHATSAPP-BAILEYS",
       }),
     });
