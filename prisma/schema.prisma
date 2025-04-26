@@ -298,7 +298,7 @@ model EvolutionInstance {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   number     String
-  qrCode     Boolean  @default(true)
+  qrCode     String
   webhookUrl String?
   apiKey     String
   status     String   @default("pending") // pending, connected, disconnected
