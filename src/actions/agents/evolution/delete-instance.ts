@@ -1,54 +1,58 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 
-export async function deleteInstance(instanceId: string) {
+const evolutionApiUrl =
+  process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
+const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
+
+export async function deleteInstance(id: string) {
   try {
-    // Buscar a instância no banco de dados
-    const instance = await prisma.evolution.findFirst({
-      where: { instanceId },
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    // Verificar se a instância existe e pertence ao usuário
+    const instance = await prisma.evolutionInstance.findFirst({
+      where: {
+        id,
+        userId,
+      },
     });
 
     if (!instance) {
-      return { 
-        success: false, 
-        error: "Instância não encontrada" 
+      return {
+        success: false,
+        error: "Instância não encontrada",
       };
     }
 
-    // Fazer a chamada para a API da Evolution para excluir a instância
+    // Excluir instância na Evolution API
     const response = await fetch(
-      `${process.env.EVOLUTION_API_URL}/instance/delete/${instance.instanceName}`,
+      `${evolutionApiUrl}/instance/delete/${instance.name}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "apikey": process.env.EVOLUTION_API_KEY || "",
+          "apikey": evolutionApiKey,
         },
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { 
-        success: false, 
-        error: errorData.message || "Falha ao excluir instância" 
-      };
-    }
-
-    // Excluir a instância do banco de dados
-    await prisma.evolution.delete({
-      where: { id: instance.id },
+    // Excluir instância no banco de dados
+    await prisma.evolutionInstance.delete({
+      where: { id },
     });
 
-    revalidatePath("/agents");
     return { success: true };
   } catch (error) {
     console.error("Erro ao excluir instância:", error);
-    return { 
-      success: false, 
-      error: "Falha ao excluir instância" 
+    return {
+      success: false,
+      error: "Falha ao excluir instância",
     };
   }
 }

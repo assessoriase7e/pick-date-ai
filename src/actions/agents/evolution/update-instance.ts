@@ -1,88 +1,102 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
+const evolutionApiUrl =
+  process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
+const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
+
 const updateInstanceSchema = z.object({
-  id: z.string(),
-  instanceName: z.string().min(1, "Nome da instância é obrigatório"),
+  id: z.string().min(1, "ID é obrigatório"),
+  name: z.string().min(1, "Nome é obrigatório"),
   number: z.string().min(1, "Número é obrigatório"),
-  webhookUrl: z.string().url("URL de webhook inválida"),
   qrCode: z.boolean().default(true),
+  webhookUrl: z.string().url().optional().or(z.literal("")),
 });
 
-export type UpdateInstanceParams = z.infer<typeof updateInstanceSchema>;
+export type UpdateInstanceFormValues = z.infer<typeof updateInstanceSchema>;
 
-export async function updateInstance(params: UpdateInstanceParams) {
+export async function updateInstance(data: UpdateInstanceFormValues) {
   try {
-    const validation = updateInstanceSchema.safeParse(params);
-    
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    // Validar os dados
+    const validation = updateInstanceSchema.safeParse(data);
     if (!validation.success) {
-      return { 
-        success: false, 
-        error: validation.error.errors[0].message 
+      return {
+        success: false,
+        error: "Dados inválidos",
       };
     }
 
-    const { id, instanceName, number, webhookUrl, qrCode } = params;
-
-    // Buscar a instância no banco de dados
-    const instance = await prisma.evolution.findUnique({
-      where: { id },
+    // Verificar se a instância existe e pertence ao usuário
+    const existingInstance = await prisma.evolutionInstance.findFirst({
+      where: {
+        id: data.id,
+        userId,
+      },
     });
 
-    if (!instance) {
-      return { 
-        success: false, 
-        error: "Instância não encontrada" 
+    if (!existingInstance) {
+      return {
+        success: false,
+        error: "Instância não encontrada",
       };
     }
 
-    // Atualizar a instância na API da Evolution
+    // Atualizar instância na Evolution API
     const response = await fetch(
-      `${process.env.EVOLUTION_API_URL}/instance/update/${instance.instanceName}`,
+      `${evolutionApiUrl}/instance/update/${existingInstance.name}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "apikey": process.env.EVOLUTION_API_KEY || "",
+          "apikey": evolutionApiKey,
         },
         body: JSON.stringify({
-          instanceName,
-          webhook: webhookUrl,
-          number,
-          qrcode: qrCode,
+          instanceName: data.name,
+          token: data.name,
+          qrcode: data.qrCode,
+          number: data.number,
+          webhook: data.webhookUrl || null,
         }),
       }
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return { 
-        success: false, 
-        error: errorData.message || "Falha ao atualizar instância" 
+      const result = await response.json();
+      return {
+        success: false,
+        error: result.message || "Erro ao atualizar instância",
       };
     }
 
-    // Atualizar a instância no banco de dados
-    await prisma.evolution.update({
-      where: { id },
+    // Atualizar instância no banco de dados
+    const instance = await prisma.evolutionInstance.update({
+      where: { id: data.id },
       data: {
-        instanceName,
-        number,
-        webhookUrl,
-        qrCode,
+        name: data.name,
+        number: data.number,
+        qrCode: data.qrCode,
+        webhookUrl: data.webhookUrl || null,
       },
     });
 
-    revalidatePath("/agents");
-    return { success: true };
+    return {
+      success: true,
+      data: instance,
+    };
   } catch (error) {
     console.error("Erro ao atualizar instância:", error);
-    return { 
-      success: false, 
-      error: "Falha ao atualizar instância" 
+    return {
+      success: false,
+      error: "Falha ao atualizar instância",
     };
   }
 }

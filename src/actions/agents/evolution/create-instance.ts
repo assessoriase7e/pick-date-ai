@@ -1,83 +1,70 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { createInstanceSchema } from "@/validators/evolution";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-const createInstanceSchema = z.object({
-  userId: z.string(),
-  instanceName: z.string().min(1, "Nome da instância é obrigatório"),
-  number: z.string().min(1, "Número é obrigatório"),
-  webhookUrl: z.string().url("URL de webhook inválida"),
-  qrCode: z.boolean().default(true),
-});
+const evolutionApiUrl = process.env.EVOLUTION_API_URL || "";
+const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
 
-export type CreateInstanceParams = z.infer<typeof createInstanceSchema>;
+export type CreateInstanceFormValues = z.infer<typeof createInstanceSchema>;
 
-export async function createInstance(params: CreateInstanceParams) {
+export async function createInstance(data: CreateInstanceFormValues) {
   try {
-    const validation = createInstanceSchema.safeParse(params);
+    const { userId } = await auth();
 
+    if (!userId) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    const validation = createInstanceSchema.safeParse(data);
     if (!validation.success) {
       return {
         success: false,
-        error: validation.error.errors[0].message,
+        error: "Dados inválidos",
       };
     }
 
-    const { userId, instanceName, number, webhookUrl, qrCode } = params;
+    const response = await fetch(`${evolutionApiUrl}/instance/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": evolutionApiKey,
+      },
+      body: JSON.stringify({
+        instanceName: data.name,
+        qrcode: data.qrCode,
+        number: data.number,
+        webhookUrl: data.webhookUrl,
+        integration: "WHATSAPP-BAILEYS",
+      }),
+    });
 
-    const response = await fetch(
-      `${process.env.EVOLUTION_API_URL}/instance/create`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": process.env.EVOLUTION_API_KEY || "",
-        },
-        body: JSON.stringify({
-          instanceName,
-          token: "",
-          qrcode: qrCode,
-          number,
-          webhook: webhookUrl,
-          webhook_by_events: true,
-          events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "SEND_MESSAGE"],
-          reject_call: true,
-          msg_call: "Não posso atender sua ligação no momento.",
-          groups_ignore: false,
-          always_online: true,
-          read_messages: true,
-          read_status: true,
-        }),
-      }
-    );
+    const result = await response.json();
 
     if (!response.ok) {
-      const errorData = await response.json();
       return {
         success: false,
-        error: errorData.message || "Falha ao criar instância",
+        error: result.message || "Erro ao criar instância",
       };
     }
 
-    const data = await response.json();
-
-    await prisma.evolution.create({
+    const instance = await prisma.evolutionInstance.create({
       data: {
+        name: data.name,
+        number: data.number,
+        qrCode: data.qrCode,
+        webhookUrl: data.webhookUrl || null,
+        apiKey: result.apiKey || evolutionApiKey,
         userId,
-        instanceName,
-        instanceId: data.instance.instanceId,
-        number,
-        webhookUrl,
-        apiKey: data.hash.apikey,
-        qrCode,
-        status: data.instance.status,
       },
     });
 
-    revalidatePath("/agents");
-    return { success: true, data };
+    return {
+      success: true,
+      data: instance,
+    };
   } catch (error) {
     console.error("Erro ao criar instância:", error);
     return {
