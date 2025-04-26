@@ -31,11 +31,31 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      return NextResponse.json(
+        { error: "Resposta inesperada da API" },
+        { status: 500 }
+      );
+    }
+
     const instance = data.find(
-      (item: any) => item.instance.instanceName === instanceName
+      (item: any) => item?.instance?.instanceName === instanceName
     );
 
     if (!instance) {
       return NextResponse.json(
         { error: "Instância não encontrada" },
         { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ instance });
+  } catch (error) {
+    console.error("Erro ao buscar instância:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao buscar instância" },
+      { status: 500 }
+    );
+  }
+}
