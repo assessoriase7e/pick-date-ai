@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const evolutionApiUrl =
@@ -68,9 +69,9 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
         }),
       }
     );
+    const result = await response.json();
 
     if (!response.ok) {
-      const result = await response.json();
       return {
         success: false,
         error: result.message || "Erro ao atualizar instância",
@@ -83,10 +84,11 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
       data: {
         name: data.name,
         number: data.number,
-        qrCode: data.qrCode,
         webhookUrl: data.webhookUrl || null,
       },
     });
+
+    revalidatePath("/agents");
 
     return {
       success: true,
