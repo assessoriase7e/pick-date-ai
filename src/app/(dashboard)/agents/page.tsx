@@ -4,7 +4,7 @@ import { getRagConfig } from "@/actions/agents/rag/get-webhook-url";
 import { getRedisKey } from "@/actions/agents/redis-key";
 import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { getProfile } from "@/actions/profile/get";
-import { EvolutionSection } from "@/components/agents/evolution-section";
+import { EvolutionSection } from "@/components/agents/evolution/evolution-section";
 import { PromptsSection } from "@/components/agents/prompts-section";
 import { RagFilesSection } from "@/components/agents/rag-files-section";
 import { RedisKeySection } from "@/components/agents/redis-key-section";

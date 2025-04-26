@@ -37,6 +37,7 @@ model User {
   attendantPrompts AttendantPrompt[]
   sdrPrompts       SdrPrompt[]
   followUpPrompts  FollowUpPrompt[]
+  Evolution        Evolution[]
 
   @@map("user")
 }
@@ -121,13 +122,21 @@ model ApiKey {
 }
 
 model Evolution {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userId     String
-  webhookUrl String
-  instanceId String
-  status     String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  instanceName String
+  instanceId   String
+  number       String
+  webhookUrl   String
+  apiKey       String
+  qrCode       Boolean  @default(true)
+  status       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("evolution")
 }
 
 // Modelo existente que será mantido para compatibilidade
@@ -283,4 +292,17 @@ model AgentWhatsapp {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model EvolutionInstance {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  number     String
+  qrCode     Boolean  @default(true)
+  webhookUrl String?
+  apiKey     String
+  status     String   @default("pending") // pending, connected, disconnected
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
 }
