@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,37 +21,22 @@ import { Badge } from "@/components/ui/badge";
 import { Trash, Bolt, QrCode } from "lucide-react";
 import { InstanceModal } from "./instance-modal";
 import { QRCodeModal } from "./qrcode-modal";
-import { getInstances } from "@/actions/evolution/get-instances";
-import { deleteInstance } from "@/actions/evolution/delete-instance";
+import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
 import { EvolutionInstance } from "@prisma/client";
 
 interface EvolutionSectionProps {
   profilePhone?: string;
+  instances: EvolutionInstance[];
 }
 
-export function EvolutionSection({ profilePhone }: EvolutionSectionProps) {
-  const [instances, setInstances] = useState<EvolutionInstance[]>([]);
+export function EvolutionSection({
+  profilePhone,
+  instances,
+}: EvolutionSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
-
-  useEffect(() => {
-    fetchInstances();
-  }, []);
-
-  const fetchInstances = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await getInstances();
-
-      setInstances(data || []);
-    } catch (error) {
-      toast.error("Ocorreu um erro ao buscar as instâncias");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
@@ -60,7 +44,6 @@ export function EvolutionSection({ profilePhone }: EvolutionSectionProps) {
         const result = await deleteInstance(id);
         if (result.success) {
           toast.success("Instância excluída com sucesso");
-          fetchInstances();
         } else {
           toast.error(result.error || "Erro ao excluir instância");
         }
@@ -83,12 +66,10 @@ export function EvolutionSection({ profilePhone }: EvolutionSectionProps) {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedInstance(null);
-    fetchInstances();
   };
 
   const handleQRModalClose = () => {
     setIsQRModalOpen(false);
-    fetchInstances();
   };
 
   const getStatusBadge = (status: string) => {
@@ -118,11 +99,7 @@ export function EvolutionSection({ profilePhone }: EvolutionSectionProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : instances.length === 0 ? (
+        {instances.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhuma instância encontrada. Crie uma nova instância para começar.
           </div>

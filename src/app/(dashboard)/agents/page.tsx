@@ -1,4 +1,5 @@
 "use server";
+import { getInstances } from "@/actions/agents/evolution/get-instances";
 import { getRagFiles } from "@/actions/agents/rag/get-rag-files";
 import { getRagConfig } from "@/actions/agents/rag/get-webhook-url";
 import { getRedisKey } from "@/actions/agents/redis-key";
@@ -16,6 +17,9 @@ export default async function AgentesPage() {
   const { data: ragFiles } = await getRagFiles(user.id);
   const { data: ragConfig } = await getRagConfig(user.id);
   const { data: redisKey } = await getRedisKey(user.id);
+  const { data: instances } = await getInstances();
+
+  console.log(instances);
 
   return (
     <div className="container py-10 max-w-6xl">
@@ -41,7 +45,7 @@ export default async function AgentesPage() {
 
         <Separator className="my-6" />
 
-        <EvolutionSection />
+        <EvolutionSection instances={instances || []} />
       </div>
     </div>
   );
