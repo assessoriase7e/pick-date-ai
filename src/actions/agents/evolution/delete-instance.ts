@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 
 const evolutionApiUrl =
   process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
@@ -31,21 +32,20 @@ export async function deleteInstance(id: string) {
     }
 
     // Excluir instância na Evolution API
-    const response = await fetch(
-      `${evolutionApiUrl}/instance/delete/${instance.name}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": evolutionApiKey,
-        },
-      }
-    );
+    await fetch(`${evolutionApiUrl}/instance/delete/${instance.name}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": evolutionApiKey,
+      },
+    });
 
     // Excluir instância no banco de dados
     await prisma.evolutionInstance.delete({
       where: { id },
     });
+
+    revalidatePath("/agents");
 
     return { success: true };
   } catch (error) {
