@@ -20,11 +20,11 @@ import { Switch } from "@/components/ui/switch";
 import {
   createInstance,
   CreateInstanceFormValues,
-} from "@/actions/evolution/create-instance";
+} from "@/actions/agents/evolution/create-instance";
 import {
   updateInstance,
   UpdateInstanceFormValues,
-} from "@/actions/evolution/update-instance";
+} from "@/actions/agents/evolution/update-instance";
 import { evolutionFormSchema } from "@/validators/evolution";
 
 interface InstanceFormProps {

@@ -33,7 +33,6 @@ export function EvolutionSection({
   profilePhone,
   instances,
 }: EvolutionSectionProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
@@ -164,8 +163,7 @@ export function EvolutionSection({
         <QRCodeModal
           isOpen={isQRModalOpen}
           onClose={handleQRModalClose}
-          instanceId={selectedInstance.id}
-          instanceName={selectedInstance.name}
+          instance={selectedInstance}
         />
       )}
     </Card>

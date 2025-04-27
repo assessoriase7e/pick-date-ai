@@ -34,10 +34,10 @@ model User {
   agentWhatsapp  AgentWhatsapp[]
 
   // Novas relações para prompts separados
-  attendantPrompts AttendantPrompt[]
-  sdrPrompts       SdrPrompt[]
-  followUpPrompts  FollowUpPrompt[]
-  Evolution        Evolution[]
+  attendantPrompts   AttendantPrompt[]
+  sdrPrompts         SdrPrompt[]
+  followUpPrompts    FollowUpPrompt[]
+  evolutionInstances EvolutionInstance[]
 
   @@map("user")
 }
@@ -119,24 +119,6 @@ model ApiKey {
 
   @@index([userId])
   @@map("apikey")
-}
-
-model Evolution {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  userId       String
-  instanceName String
-  instanceId   String
-  number       String
-  webhookUrl   String
-  apiKey       String
-  qrCode       Boolean  @default(true)
-  status       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("evolution")
 }
 
 // Modelo existente que será mantido para compatibilidade
@@ -305,4 +287,5 @@ model EvolutionInstance {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   userId     String
+  User       User     @relation(fields: [userId], references: [id])
 }

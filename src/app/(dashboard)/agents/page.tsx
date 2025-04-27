@@ -19,8 +19,6 @@ export default async function AgentesPage() {
   const { data: redisKey } = await getRedisKey(user.id);
   const { data: instances } = await getInstances();
 
-  console.log(instances);
-
   return (
     <div className="container py-10 max-w-6xl">
       <h1 className="text-3xl font-bold mb-8">Agentes</h1>
