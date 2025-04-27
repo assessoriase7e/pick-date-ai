@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const page = Number.parseInt(searchParams.get("page") || "1");
-  const limit = Number.parseInt(searchParams.get("limit") || "10");
+  const limit = Number.parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
   try {

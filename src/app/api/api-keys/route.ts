@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const limit = 10;
+    const limit = 20;
     const skip = (page - 1) * limit;
 
     const apiKeys = await prisma.apiKey.findMany({

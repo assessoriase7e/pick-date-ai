@@ -4,7 +4,7 @@ import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
   // Validate API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const page = Number.parseInt(searchParams.get("page") || "1");
-  const limit = Number.parseInt(searchParams.get("limit") || "10");
+  const limit = Number.parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
   try {
@@ -21,9 +21,6 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          professional: true,
-        },
       }),
       prisma.documentRecord.count(),
     ]);
@@ -31,9 +28,9 @@ export async function GET(req: NextRequest) {
     const totalPages = Math.ceil(totalCount / limit);
 
     // Add standardized base64 field to each document
-    const responseDocuments = documents.map(doc => ({
+    const responseDocuments = documents.map((doc) => ({
       ...doc,
-      base64: doc.documentBase64
+      base64: doc.documentBase64,
     }));
 
     return NextResponse.json({
@@ -52,7 +49,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   // Validate API Key
-  const apiKeyHeader = req.headers.get('Authorization');
+  const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -60,9 +57,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { professionalId, description, documentBase64, fileName, fileType } = body;
+    const { userId, description, documentBase64, fileName, fileType } = body;
 
-    if (!professionalId || !description || !documentBase64 || !fileName || !fileType) {
+    if (!userId || !description || !documentBase64 || !fileName || !fileType) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -75,10 +72,7 @@ export async function POST(req: NextRequest) {
         fileName,
         fileType,
         description,
-        professionalId,
-      },
-      include: {
-        professional: true,
+        userId,
       },
     });
 

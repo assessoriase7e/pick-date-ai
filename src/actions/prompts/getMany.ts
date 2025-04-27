@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 
-export async function listPrompts(page = 1, limit = 10) {
+export async function listPrompts(page = 1, limit = 20) {
   try {
     const { userId } = await auth();
 

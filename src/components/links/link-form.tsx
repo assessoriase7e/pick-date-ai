@@ -24,7 +24,6 @@ interface LinkFormProps {
     url: string;
     title: string;
     description: string;
-    professionalId?: string;
   };
   onSubmit: (data: LinkFormValues) => Promise<void>;
   onCancel: () => void;

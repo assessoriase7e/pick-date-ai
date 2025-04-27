@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
-export async function getServices(page = 1, limit = 10) {
+export async function getServices(page = 1, limit = 20) {
   try {
     const { userId } = await auth();
 

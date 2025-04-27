@@ -21,9 +21,6 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          user: true,
-        },
       }),
       prisma.audioRecord.count(),
     ]);
