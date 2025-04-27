@@ -43,7 +43,10 @@ export default async function AgentesPage() {
 
         <Separator className="my-6" />
 
-        <EvolutionSection instances={instances || []} />
+        <EvolutionSection
+          instances={instances || []}
+          profilePhone={profile?.whatsapp || ""}
+        />
       </div>
     </div>
   );

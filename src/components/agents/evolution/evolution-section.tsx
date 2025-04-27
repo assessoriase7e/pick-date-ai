@@ -18,10 +18,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash, Bolt, QrCode } from "lucide-react";
+import { Trash, Bolt, QrCode, RefreshCw } from "lucide-react";
 import { InstanceModal } from "./instance-modal";
 import { QRCodeModal } from "./qrcode-modal";
 import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
+import { getConnectionStatus } from "@/actions/agents/evolution/get-connection-status";
 import { EvolutionInstance } from "@prisma/client";
 
 interface EvolutionSectionProps {
@@ -31,11 +32,14 @@ interface EvolutionSectionProps {
 
 export function EvolutionSection({
   profilePhone,
-  instances,
+  instances: initialInstances,
 }: EvolutionSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
+  const [instances, setInstances] =
+    useState<EvolutionInstance[]>(initialInstances);
+  const [refreshing, setRefreshing] = useState<Record<string, boolean>>({});
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
@@ -43,6 +47,7 @@ export function EvolutionSection({
         const result = await deleteInstance(id);
         if (result.success) {
           toast.success("Instância excluída com sucesso");
+          setInstances(instances.filter((instance) => instance.id !== id));
         } else {
           toast.error(result.error || "Erro ao excluir instância");
         }
@@ -71,13 +76,31 @@ export function EvolutionSection({
     setIsQRModalOpen(false);
   };
 
+  const refreshStatus = async (instance: EvolutionInstance) => {
+    try {
+      setRefreshing((prev) => ({ ...prev, [instance.id]: true }));
+      const result = await getConnectionStatus(instance.name);
+
+      if (result.success && result.data) {
+        const updatedInstances = instances.map((i) =>
+          i.id === instance.id ? { ...i, status: result.data.status } : i
+        );
+        setInstances(updatedInstances);
+      } else {
+        toast.error(result.error || "Erro ao atualizar status");
+      }
+    } catch (error) {
+      toast.error("Ocorreu um erro ao atualizar o status");
+    } finally {
+      setRefreshing((prev) => ({ ...prev, [instance.id]: false }));
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "connected":
+      case "open":
         return <Badge className="bg-green-500">Conectado</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-500">Pendente</Badge>;
-      case "disconnected":
+      case "close":
         return <Badge className="bg-red-500">Desconectado</Badge>;
       default:
         return <Badge className="bg-gray-500">{status}</Badge>;
@@ -120,6 +143,18 @@ export function EvolutionSection({
                   <TableCell>{getStatusBadge(instance.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => refreshStatus(instance)}
+                        disabled={refreshing[instance.id]}
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 ${
+                            refreshing[instance.id] ? "animate-spin" : ""
+                          }`}
+                        />
+                      </Button>
                       <Button
                         variant="outline"
                         size="icon"
