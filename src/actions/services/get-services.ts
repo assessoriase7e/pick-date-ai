@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
-export async function getServices() {
+export async function getServices(page = 1, limit = 10) {
   try {
     const { userId } = await auth();
 
@@ -14,14 +14,29 @@ export async function getServices() {
       };
     }
 
-    const services = await prisma.service.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
+    const skip = (page - 1) * limit;
+
+    const [services, total] = await Promise.all([
+      prisma.service.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.service.count({
+        where: { userId },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
 
     return {
       success: true,
       data: services,
+      pagination: {
+        totalPages,
+        currentPage: page,
+      },
     };
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);

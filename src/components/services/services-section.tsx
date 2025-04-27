@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,13 +19,22 @@ import { DeleteServiceModal } from "./delete-service-modal";
 import { deleteService } from "@/actions/services/delete-service";
 import { formatCurrency } from "@/lib/format-utils";
 import { formatAvailableDays } from "@/lib/format-days";
+import { Pagination } from "@/components/ui/pagination";
 
 interface ServicesSectionProps {
   services: any[];
   user: any;
+  pagination: {
+    totalPages: number;
+    currentPage: number;
+  };
 }
 
-export function ServicesSection({ services, user }: ServicesSectionProps) {
+export function ServicesSection({
+  services,
+  pagination,
+}: ServicesSectionProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<any | null>(null);
   const [deletingService, setDeletingService] = useState<any | null>(null);
@@ -43,7 +53,6 @@ export function ServicesSection({ services, user }: ServicesSectionProps) {
       if (result.success) {
         toast.success("Serviço excluído com sucesso");
         setDeletingService(null);
-        // Recarregar a página para atualizar a lista
         window.location.reload();
       } else {
         toast.error(result.error || "Erro ao excluir serviço");
@@ -58,8 +67,11 @@ export function ServicesSection({ services, user }: ServicesSectionProps) {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingService(null);
-    // Recarregar a página para atualizar a lista
     window.location.reload();
+  };
+
+  const handlePageChange = (page: number) => {
+    router.push(`/services?page=${page}`);
   };
 
   return (
@@ -96,7 +108,9 @@ export function ServicesSection({ services, user }: ServicesSectionProps) {
                       {service.name}
                     </TableCell>
                     <TableCell>{formatCurrency(service.price)}</TableCell>
-                    <TableCell>{formatAvailableDays(service.availableDays)}</TableCell>
+                    <TableCell>
+                      {formatAvailableDays(service.availableDays)}
+                    </TableCell>
                     <TableCell>{service.professionalName}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -123,6 +137,12 @@ export function ServicesSection({ services, user }: ServicesSectionProps) {
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+        />
 
         <ServiceModal
           isOpen={isModalOpen}
