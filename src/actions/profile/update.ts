@@ -4,12 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { ProfileFormValues } from "@/validators/profile";
 
-export async function updateProfile(
-  id: string,
-  data: ProfileFormValues
-) {
-  console.log("Action de atualização chamada", id, data);
-  
+export async function updateProfile(id: string, data: ProfileFormValues) {
   try {
     // Separar os dados entre User e Profile
     const userData = {
@@ -18,7 +13,7 @@ export async function updateProfile(
     };
 
     const profileData = {
-      phone: data.phone,
+      phone: data.whatsapp,
       companyName: data.companyName,
       businessHours: data.businessHours,
       address: data.address,
@@ -42,8 +37,6 @@ export async function updateProfile(
         profile: true,
       },
     });
-
-    console.log("Usuário atualizado com sucesso", updatedUser);
 
     revalidatePath("/profile");
     return { success: true, data: updatedUser };
