@@ -61,7 +61,7 @@ export async function getConnectionStatus(instanceName: string) {
     return {
       success: true,
       data: {
-        status: apiInstance.connectionStatus || "disconnected",
+        status: apiInstance.connectionStatus || "close",
       },
     };
   } catch (error) {

@@ -107,6 +107,8 @@ export function EvolutionSection({
     }
   };
 
+  console.log(instances.length > 0);
+
   return (
     <Card>
       <CardHeader>
@@ -117,7 +119,12 @@ export function EvolutionSection({
               Gerencie suas instâncias de WhatsApp
             </CardDescription>
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>Nova Instância</Button>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            disabled={instances.length > 0}
+          >
+            Nova Instância
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
