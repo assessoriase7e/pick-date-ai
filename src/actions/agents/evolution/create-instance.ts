@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { createInstanceSchema } from "@/validators/evolution";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const evolutionApiUrl = process.env.EVOLUTION_API_URL || "";
@@ -54,12 +55,14 @@ export async function createInstance(data: CreateInstanceFormValues) {
       data: {
         name: data.name,
         number: data.number,
-        qrCode: data.qrCode,
-        webhookUrl: data.webhookUrl || null,
+        qrCode: result.qrcode.base64,
+        webhookUrl: data.webhookUrl,
         apiKey: result.apiKey || evolutionApiKey,
         userId,
       },
     });
+
+    revalidatePath("/agents");
 
     return {
       success: true,
