@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,45 @@ export function EvolutionSection({
   const [instances, setInstances] =
     useState<EvolutionInstance[]>(initialInstances);
   const [refreshing, setRefreshing] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const refreshAllInstances = async () => {
+      if (instances.length === 0) return;
+
+      const tempRefreshing: Record<string, boolean> = {};
+      instances.forEach((instance) => {
+        tempRefreshing[instance.id] = true;
+      });
+      setRefreshing(tempRefreshing);
+
+      const refreshPromises = instances.map(async (instance) => {
+        try {
+          const result = await getConnectionStatus(instance.name);
+          if (result.success && result.data) {
+            return {
+              ...instance,
+              status: result.data.status,
+            };
+          }
+          return instance;
+        } catch (error) {
+          console.error(`Error refreshing status for ${instance.name}:`, error);
+          return instance;
+        }
+      });
+
+      const updatedInstances = await Promise.all(refreshPromises);
+      setInstances(updatedInstances);
+
+      const resetRefreshing: Record<string, boolean> = {};
+      instances.forEach((instance) => {
+        resetRefreshing[instance.id] = false;
+      });
+      setRefreshing(resetRefreshing);
+    };
+
+    refreshAllInstances();
+  }, [initialInstances]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
@@ -106,8 +145,6 @@ export function EvolutionSection({
         return <Badge className="bg-gray-500">{status}</Badge>;
     }
   };
-
-  console.log(instances.length > 0);
 
   return (
     <Card>
