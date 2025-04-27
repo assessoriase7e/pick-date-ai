@@ -17,10 +17,17 @@ export function formatCNPJ(value: string): string {
 
 export function formatDocument(value: string): string {
   const numbers = value.replace(/\D/g, "");
-  
+
   if (numbers.length <= 11) {
     return formatCPF(numbers);
   } else {
     return formatCNPJ(numbers);
   }
+}
+
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
 }

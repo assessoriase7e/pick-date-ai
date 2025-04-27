@@ -11,6 +11,7 @@ import {
   Link,
   User,
   Menu,
+  Scissors,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,13 @@ export function MobileSidebar() {
   }
 
   const routes = [
+    {
+      label: "Serviços",
+      icon: Scissors,
+      href: "/services",
+      color: "text-emerald-500",
+      isActive: pathname === "/services",
+    },
     {
       href: "/audios",
       icon: Music,
@@ -57,24 +65,26 @@ export function MobileSidebar() {
       label: "Links",
       isActive: pathname === "/links",
     },
-    {
-      href: "/profile",
-      icon: User,
-      label: "Perfil",
-      isActive: pathname === "/profile",
-    },
-    {
-      href: "/api-keys",
-      icon: KeyRound,
-      label: "API Keys",
-      isActive: pathname.startsWith("/api-keys"),
-    },
+
     {
       label: "Agentes",
       icon: Bot,
       href: "/agentes",
       color: "text-emerald-500",
       isActive: pathname.startsWith("/agentes"),
+    },
+    {
+      href: "/profile",
+      icon: User,
+      label: "Perfil",
+      isActive: pathname === "/profile",
+    },
+
+    {
+      href: "/api-keys",
+      icon: KeyRound,
+      label: "API Keys",
+      isActive: pathname.startsWith("/api-keys"),
     },
   ];
 

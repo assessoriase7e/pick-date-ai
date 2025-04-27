@@ -10,6 +10,7 @@ import {
   Menu,
   User,
   Bot,
+  Scissors,
 } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
@@ -47,6 +48,13 @@ export function Sidebar() {
 
   const routes = [
     {
+      label: "Serviços",
+      icon: Scissors,
+      href: "/services",
+      color: "text-emerald-500",
+      isActive: pathname === "/services",
+    },
+    {
       href: "/audios",
       icon: Music,
       label: "Áudios",
@@ -70,18 +78,19 @@ export function Sidebar() {
       label: "Links",
       isActive: pathname === "/links",
     },
-    {
-      href: "/profile",
-      icon: User,
-      label: "Perfil",
-      isActive: pathname === "/profile",
-    },
+
     {
       label: "Agentes",
       icon: Bot,
       href: "/agents",
       color: "text-emerald-500",
       isActive: pathname === "/agents",
+    },
+    {
+      href: "/profile",
+      icon: User,
+      label: "Perfil",
+      isActive: pathname === "/profile",
     },
     {
       href: "/api-keys",
