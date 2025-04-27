@@ -12,7 +12,6 @@ interface SaveAttendantPromptParams {
   expressionInterpretation: string;
   schedulingScript: string;
   rules: string;
-  formattedContent: string;
 }
 
 export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
@@ -26,47 +25,37 @@ export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
       expressionInterpretation,
       schedulingScript,
       rules,
-      formattedContent,
     } = params;
 
-    // Verificar se já existe um prompt para este usuário
-    const existingPrompt = await prisma.attendantPrompt.findFirst({
+    const formattedContent = `Apresentação: ${presentation}\n\nEstilo da Fala: ${speechStyle}\n\nInterpretação de Expressões: ${expressionInterpretation}\n\nScript de Agendamento: ${schedulingScript}\n\nRegras: ${rules}`;
+
+    await prisma.attendantPrompt.upsert({
       where: { userId },
+      update: {
+        content,
+        isActive,
+        presentation,
+        speechStyle,
+        expressionInterpretation,
+        schedulingScript,
+        rules,
+        formattedContent,
+      },
+      create: {
+        userId,
+        content,
+        isActive,
+        presentation,
+        speechStyle,
+        expressionInterpretation,
+        schedulingScript,
+        rules,
+        formattedContent,
+      },
     });
 
-    if (existingPrompt) {
-      // Atualizar o prompt existente
-      await prisma.attendantPrompt.update({
-        where: { id: existingPrompt.id },
-        data: {
-          content,
-          isActive,
-          presentation,
-          speechStyle,
-          expressionInterpretation,
-          schedulingScript,
-          rules,
-          formattedContent,
-        },
-      });
-    } else {
-      // Criar um novo prompt
-      await prisma.attendantPrompt.create({
-        data: {
-          userId,
-          content,
-          isActive,
-          presentation,
-          speechStyle,
-          expressionInterpretation,
-          schedulingScript,
-          rules,
-          formattedContent,
-        },
-      });
-    }
+    revalidatePath("/agentes");
 
-    revalidatePath("/agents");
     return { success: true };
   } catch (error) {
     console.error("Erro ao salvar prompt do atendente:", error);

@@ -117,7 +117,6 @@ model ApiKey {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([userId])
   @@map("apikey")
 }
 
@@ -152,10 +151,9 @@ model AttendantPrompt {
   schedulingScript         String
   rules                    String
   formattedContent         String
-  userId                   String
+  userId                   String   @unique
   user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@map("attendantprompt")
 }
 
@@ -165,10 +163,9 @@ model SdrPrompt {
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    String
+  userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@map("sdrprompt")
 }
 
@@ -178,10 +175,9 @@ model FollowUpPrompt {
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    String
+  userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@map("followupprompt")
 }
 
@@ -194,8 +190,6 @@ model RagFile {
   updatedAt DateTime @updatedAt
 
   User User @relation(fields: [userId], references: [id])
-
-  @@index([userId])
 }
 
 model RagConfig {
@@ -238,8 +232,6 @@ model AgentPrompt {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model AgentRagFile {
@@ -250,8 +242,6 @@ model AgentRagFile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model AgentRedisKey {
@@ -261,8 +251,6 @@ model AgentRedisKey {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model AgentWhatsapp {
@@ -272,8 +260,6 @@ model AgentWhatsapp {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model EvolutionInstance {

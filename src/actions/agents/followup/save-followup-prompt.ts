@@ -13,32 +13,21 @@ export async function saveFollowUpPrompt(params: SaveFollowUpPromptParams) {
   try {
     const { userId, content, isActive } = params;
 
-    // Verificar se já existe um prompt para este usuário
-    const existingPrompt = await prisma.followUpPrompt.findFirst({
+    await prisma.followUpPrompt.upsert({
       where: { userId },
+      update: {
+        content,
+        isActive,
+      },
+      create: {
+        userId,
+        content,
+        isActive,
+      },
     });
 
-    if (existingPrompt) {
-      // Atualizar o prompt existente
-      await prisma.followUpPrompt.update({
-        where: { id: existingPrompt.id },
-        data: {
-          content,
-          isActive,
-        },
-      });
-    } else {
-      // Criar um novo prompt
-      await prisma.followUpPrompt.create({
-        data: {
-          userId,
-          content,
-          isActive,
-        },
-      });
-    }
+    revalidatePath("/agentes");
 
-    revalidatePath("/agents");
     return { success: true };
   } catch (error) {
     console.error("Erro ao salvar prompt do Follow Up:", error);

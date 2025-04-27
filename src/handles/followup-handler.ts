@@ -1,5 +1,5 @@
-import { toast } from "sonner";
 import { saveFollowUpPrompt } from "@/actions/agents/followup/save-followup-prompt";
+import { toast } from "sonner";
 
 export const useFollowUpHandler = () => {
   const handleSaveFollowUpPrompt = async (
