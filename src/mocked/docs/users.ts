@@ -1,12 +1,12 @@
 // apiDocsData.ts
 
-export const linksRoutes = {
-  title: "Rotas de Links",
+export const usersRoutes = {
+  title: "Rotas de Usuários",
   routes: [
     {
       method: "GET",
-      path: "/api/links",
-      description: "Retorna uma lista paginada de links do banco de dados.",
+      path: "/api/users",
+      description: "Retorna uma lista paginada de usuários do banco de dados.",
       query: [
         {
           name: "page",
@@ -31,7 +31,7 @@ export const linksRoutes = {
       responses: [
         {
           code: 200,
-          description: "Lista paginada de links (inclui dados do usuário)",
+          description: "Lista paginada de usuários (inclui dados do perfil)",
         },
         { code: 401, description: "Não autorizado" },
         { code: 500, description: "Erro interno do servidor" },
@@ -39,13 +39,15 @@ export const linksRoutes = {
     },
     {
       method: "POST",
-      path: "/api/links",
-      description: "Cria um novo registro de link.",
+      path: "/api/users",
+      description: "Cria um novo registro de usuário.",
       body: [
-        { name: "url", type: "string" },
-        { name: "title", type: "string" },
-        { name: "description", type: "string" },
-        { name: "userId", type: "string" },
+        { name: "id", type: "string" },
+        { name: "email", type: "string" },
+        { name: "firstName", type: "string", optional: true },
+        { name: "lastName", type: "string", optional: true },
+        { name: "imageUrl", type: "string", optional: true },
+        { name: "profile", type: "object", optional: true },
       ],
       headers: [
         {
@@ -57,7 +59,7 @@ export const linksRoutes = {
       responses: [
         {
           code: 201,
-          description: "Link criado com sucesso",
+          description: "Usuário criado com sucesso (inclui dados do perfil)",
         },
         { code: 400, description: "Campos obrigatórios ausentes" },
         { code: 401, description: "Não autorizado" },
@@ -66,8 +68,8 @@ export const linksRoutes = {
     },
     {
       method: "GET",
-      path: "/api/links/:id",
-      description: "Retorna os dados de um link específico.",
+      path: "/api/users/:id",
+      description: "Retorna os dados de um usuário específico.",
       headers: [
         {
           name: "Authorization",
@@ -76,20 +78,43 @@ export const linksRoutes = {
         },
       ],
       responses: [
-        { code: 200, description: "Dados do link" },
+        { code: 200, description: "Dados do usuário (inclui dados do perfil)" },
         { code: 401, description: "Não autorizado" },
-        { code: 404, description: "Link não encontrado" },
+        { code: 404, description: "Usuário não encontrado" },
+        { code: 500, description: "Erro interno do servidor" },
+      ],
+    },
+    {
+      method: "GET",
+      path: "/api/users/get-by-phone/:phone",
+      description: "Retorna um usuário pelo número de telefone.",
+      headers: [
+        {
+          name: "Authorization",
+          type: "string",
+          description: "Chave da API (Bearer Token)",
+        },
+      ],
+      responses: [
+        { code: 200, description: "Dados do usuário (inclui dados do perfil)" },
+        { code: 401, description: "Não autorizado" },
+        { code: 404, description: "Usuário não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "PATCH",
-      path: "/api/links/:id",
-      description: "Atualiza um ou mais campos do registro de link.",
+      path: "/api/users/:id",
+      description: "Atualiza um ou mais campos do registro de usuário.",
       body: [
-        { name: "url", type: "string", optional: true },
-        { name: "title", type: "string", optional: true },
-        { name: "description", type: "string", optional: true },
+        { name: "firstName", type: "string", optional: true },
+        { name: "lastName", type: "string", optional: true },
+        { name: "phone", type: "string", optional: true },
+        { name: "companyName", type: "string", optional: true },
+        { name: "address", type: "string", optional: true },
+        { name: "locationUrl", type: "string", optional: true },
+        { name: "documentNumber", type: "string", optional: true },
+        { name: "businessHours", type: "string", optional: true },
       ],
       headers: [
         {
@@ -101,21 +126,21 @@ export const linksRoutes = {
       responses: [
         {
           code: 200,
-          description: "Registro atualizado",
+          description: "Registro atualizado (inclui dados do perfil)",
         },
         {
           code: 400,
           description: "Nenhum campo válido enviado para atualização",
         },
         { code: 401, description: "Não autorizado" },
-        { code: 404, description: "Link não encontrado" },
+        { code: 404, description: "Usuário não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
     },
     {
       method: "DELETE",
-      path: "/api/links/:id",
-      description: "Remove um registro de link do sistema.",
+      path: "/api/users/:id",
+      description: "Remove um registro de usuário do sistema.",
       headers: [
         {
           name: "Authorization",
@@ -126,7 +151,7 @@ export const linksRoutes = {
       responses: [
         { code: 200, description: "Exclusão bem-sucedida" },
         { code: 401, description: "Não autorizado" },
-        { code: 404, description: "Link não encontrado" },
+        { code: 404, description: "Usuário não encontrado" },
         { code: 500, description: "Erro interno do servidor" },
       ],
     },

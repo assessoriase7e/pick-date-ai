@@ -1,20 +1,21 @@
 import { Suspense } from "react";
 import { ApiKeysContent } from "./api-keys-content";
 import { LoaderCircle } from "lucide-react";
-import { ApiDocsAccordion } from "@/components/docs/AudioAccordion";
+import { ApiDocsAccordion } from "@/components/docs/ApiDocsAccordion";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Separator } from "@/components/ui/separator";
 import { audioRoutes } from "@/mocked/docs/audio";
-import { imageRoutes } from "@/mocked/docs/images";
-import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
-import { getByProfessionalRoutes } from "@/mocked/docs/get-by-user";
+import { usersRoutes } from "@/mocked/docs/users";
+import { documentsRoutes } from "@/mocked/docs/documents";
+import { imagesRoutes } from "@/mocked/docs/images";
 import { linksRoutes } from "@/mocked/docs/links";
-import { userRoutes } from "@/mocked/docs/professionals";
+import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
+import { getByUserRoutes } from "@/mocked/docs/get-by-user";
+import { attendantPromptsRoutes } from "@/mocked/docs/attendant-prompts";
 
 export default function ApiKeysPage() {
   return (
@@ -30,17 +31,16 @@ export default function ApiKeysPage() {
               <h3 className="text-xl font-semibold">Documentação</h3>
             </AccordionTrigger>
             <AccordionContent>
-              <ApiDocsAccordion doc={userRoutes} />
-              <Separator />
-              <ApiDocsAccordion doc={audioRoutes} />
-              <Separator />
-              <ApiDocsAccordion doc={getByIdsRoutes} />
-              <Separator />
-              <ApiDocsAccordion doc={getByProfessionalRoutes} />
-              <Separator />
-              <ApiDocsAccordion doc={imageRoutes} />
-              <Separator />
-              <ApiDocsAccordion doc={linksRoutes} />
+              <div className="space-y-8">
+                <ApiDocsAccordion doc={audioRoutes} />
+                <ApiDocsAccordion doc={usersRoutes} />
+                <ApiDocsAccordion doc={documentsRoutes} />
+                <ApiDocsAccordion doc={imagesRoutes} />
+                <ApiDocsAccordion doc={linksRoutes} />
+                <ApiDocsAccordion doc={attendantPromptsRoutes} />
+                <ApiDocsAccordion doc={getByIdsRoutes} />
+                <ApiDocsAccordion doc={getByUserRoutes} />
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

@@ -1,60 +1,37 @@
 // apiDocsData.ts
 
-export const getByProfessionalRoutes = {
-  title: "Documentação Rotas de Busca por usuário",
+export const getByUserRoutes = {
+  title: "Rota de Busca por Usuário",
   routes: [
     {
       method: "GET",
       path: "/api/get-by-user/:id",
       description:
         "Retorna todos os registros associados a um usuário específico.",
-      params: [
-        {
-          name: "id",
-          type: "string",
-          description: "ID do úsuário",
-        },
-      ],
-      queryParams: [
+      query: [
         {
           name: "fields",
           type: "string",
-          description:
-            "Lista de campos a serem incluídos na resposta, separados por vírgula. Se não especificado, todos os campos são retornados.",
-          example: "description,base64,createdAt",
           optional: true,
+          description:
+            "Lista de campos a serem retornados, separados por vírgula",
         },
       ],
       headers: [
-        { name: "Authorization", type: "string", description: "Chave da API" },
+        {
+          name: "Authorization",
+          type: "string",
+          description: "Chave da API (Bearer Token)",
+        },
       ],
       responses: [
         {
           code: 200,
-          description: "Lista de registros com os campos solicitados",
-          example: {
-            "data": [
-              {
-                "id": "60d21b4667d0d8992e610c85",
-                "type": "AudioRecord",
-                "description": "Descrição do áudio",
-                "base64": "dados em base64...",
-              },
-            ],
-          },
+          description:
+            "Lista unificada de registros do usuário e links encontrados",
         },
         { code: 401, description: "Não autorizado" },
-        {
-          code: 404,
-          description: "Nenhum registro encontrado para este profissional",
-        },
         { code: 500, description: "Erro interno do servidor" },
-      ],
-      notes: [
-        "Todos os registros são retornados em um único array 'data'",
-        "Cada registro inclui um campo 'type' que indica o tipo do modelo (AudioRecord, ImageRecord, etc.)",
-        "Os campos 'id' e 'type' são sempre incluídos, independentemente dos campos solicitados",
-        "Todos os campos base64 (audioBase64, imageBase64, documentBase64) são padronizados para um único campo 'base64'",
       ],
     },
   ],

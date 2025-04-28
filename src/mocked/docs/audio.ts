@@ -1,7 +1,7 @@
 // apiDocsData.ts
 
 export const audioRoutes = {
-  title: "Documentação Rotas de Áudio",
+  title: "Rotas de Áudio",
   routes: [
     {
       method: "GET",
