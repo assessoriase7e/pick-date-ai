@@ -26,19 +26,19 @@ model User {
   ragFiles  RagFile[]
   redisKeys RedisKey[]
   whatsapp  Whatsapp?
-  services  Service[]  // Nova relação para serviços
+  services  Service[]
 
-  // Agent-related relations
   agentPrompts   AgentPrompt[]
   agentRagFiles  AgentRagFile[]
   agentRedisKeys AgentRedisKey[]
   agentWhatsapp  AgentWhatsapp[]
 
-  // Novas relações para prompts separados
   attendantPrompts   AttendantPrompt[]
   sdrPrompts         SdrPrompt[]
   followUpPrompts    FollowUpPrompt[]
   evolutionInstances EvolutionInstance[]
+  Client             Client[]
+  ServiceHistory     ServiceHistory[]
 
   @@map("user")
 }
@@ -121,7 +121,6 @@ model ApiKey {
   @@map("apikey")
 }
 
-// Modelo existente que será mantido para compatibilidade
 model Prompt {
   id                       String   @id @default(auto()) @map("_id") @db.ObjectId
   type                     String
@@ -139,7 +138,6 @@ model Prompt {
   user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Novos modelos para prompts separados
 model AttendantPrompt {
   id                       String   @id @default(auto()) @map("_id") @db.ObjectId
   content                  String
@@ -270,7 +268,7 @@ model EvolutionInstance {
   qrCode     String
   webhookUrl String?
   apiKey     String
-  status     String   @default("pending") // pending, connected, disconnected
+  status     String   @default("pending")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   userId     String
@@ -278,16 +276,62 @@ model EvolutionInstance {
 }
 
 model Service {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  price           Float
-  availableDays   String[] // Array de dias disponíveis
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  price            Float
+  availableDays    String[]
   professionalName String
-  notes           String?
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  notes            String?
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  ServiceHistory   ServiceHistory[]
+  ClientService    ClientService[]
 
   @@map("service")
+}
+
+model Client {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  fullName       String
+  phone          String
+  birthDate      DateTime
+  notes          String?
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  serviceHistory ServiceHistory[]
+  ClientService  ClientService[]
+
+  @@map("client")
+}
+
+model ServiceHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId  String   @db.ObjectId
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceId String   @db.ObjectId
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  date      DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("servicehistory")
+}
+
+model ClientService {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId  String   @db.ObjectId
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceId String   @db.ObjectId
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clientservice")
 }
