@@ -12,6 +12,7 @@ import {
   User,
   Menu,
   Scissors,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,7 +66,13 @@ export function MobileSidebar() {
       label: "Links",
       isActive: pathname === "/links",
     },
-
+    {
+      label: "Clientes",
+      icon: Users,
+      href: "/clients",
+      color: "text-emerald-500",
+      isActive: pathname === "/clients",
+    },
     {
       label: "Agentes",
       icon: Bot,

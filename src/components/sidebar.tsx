@@ -11,6 +11,7 @@ import {
   User,
   Bot,
   Scissors,
+  Users,
 } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
@@ -78,7 +79,13 @@ export function Sidebar() {
       label: "Links",
       isActive: pathname === "/links",
     },
-
+    {
+      label: "Clientes",
+      icon: Users,
+      href: "/clients",
+      color: "text-emerald-500",
+      isActive: pathname === "/clients",
+    },
     {
       label: "Agentes",
       icon: Bot,
