@@ -212,42 +212,34 @@ export function CalendarContent({
     <div className="container py-10 max-w-7xl">
       <CalendarHeader setOpen={setOpen} />
 
-      <div className="flex">
-        <div
-          className={`flex-1 transition-all ${
-            selectedDayDetails ? "pr-4" : ""
-          }`}
-        >
-          {calendars.length === 0 ? (
-            <EmptyCalendarState setOpen={setOpen} />
-          ) : (
-            <CalendarTabs
-              calendars={calendars}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              hoveredTab={hoveredTab}
-              setHoveredTab={setHoveredTab}
-              openEditModal={openEditModal}
-              openDeleteModal={openDeleteModal}
-              currentDate={currentDate}
-              goToPreviousMonth={goToPreviousMonth}
-              goToNextMonth={goToNextMonth}
-              goToToday={goToToday}
-              exampleEvents={exampleEvents}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              openDayDetails={openDayDetails}
-            />
-          )}
-        </div>
+      <div className="relative">
+        {calendars.length === 0 ? (
+          <EmptyCalendarState setOpen={setOpen} />
+        ) : (
+          <CalendarTabs
+            calendars={calendars}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            hoveredTab={hoveredTab}
+            setHoveredTab={setHoveredTab}
+            openEditModal={openEditModal}
+            openDeleteModal={openDeleteModal}
+            currentDate={currentDate}
+            goToPreviousMonth={goToPreviousMonth}
+            goToNextMonth={goToNextMonth}
+            goToToday={goToToday}
+            exampleEvents={exampleEvents}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            openDayDetails={openDayDetails}
+          />
+        )}
 
         {selectedDayDetails && (
-          <div className="w-[400px]">
-            <DayDetailsModal
-              dayDetails={selectedDayDetails}
-              closeDayDetails={closeDayDetails}
-            />
-          </div>
+          <DayDetailsModal
+            dayDetails={selectedDayDetails}
+            closeDayDetails={closeDayDetails}
+          />
         )}
       </div>
 

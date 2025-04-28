@@ -64,26 +64,26 @@ export function CalendarTabs({
                     : "opacity-0 max-w-0 overflow-hidden"
                 }`}
               >
-                <button
+                <span
                   onClick={(e) => {
                     e.stopPropagation();
                     openEditModal(calendar);
                   }}
-                  className="p-1 rounded-full"
+                  className="p-1 rounded-full cursor-pointer"
                   aria-label="Editar calendário"
                 >
                   <Edit className="h-4 w-4" />
-                </button>
-                <button
+                </span>
+                <span
                   onClick={(e) => {
                     e.stopPropagation();
                     openDeleteModal(calendar);
                   }}
-                  className="p-1 rounded-full"
+                  className="p-1 rounded-full cursor-pointer"
                   aria-label="Excluir calendário"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </span>
               </div>
             </span>
           </TabsTrigger>

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import moment from "moment";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -99,25 +98,15 @@ export function CalendarGrid({
       <div className="flex flex-col h-full border rounded-lg">
         {/* Cabeçalho do Calendário */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-2xl font-semibold">
-            {formatMonth(currentDate)}
-          </h2>
+          <h2 className="text-2xl font-semibold">{formatMonth(currentDate)}</h2>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPreviousMonth}
-            >
+            <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <Button variant="outline" size="sm" onClick={goToToday}>
               Hoje
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNextMonth}
-            >
+            <Button variant="outline" size="sm" onClick={goToNextMonth}>
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
@@ -140,17 +129,14 @@ export function CalendarGrid({
               className={`
                 border p-1 min-h-[80px] relative
                 ${
-                  !day.isCurrentMonth
-                    ? "bg-muted/20 text-muted-foreground"
-                    : ""
+                  !day.isCurrentMonth ? "bg-muted/20 text-muted-foreground" : ""
                 }
                 ${day.isToday ? "bg-primary/10" : ""}
                 ${
                   selectedDate &&
                   day.date.getDate() === selectedDate.getDate() &&
                   day.date.getMonth() === selectedDate.getMonth() &&
-                  day.date.getFullYear() ===
-                    selectedDate.getFullYear()
+                  day.date.getFullYear() === selectedDate.getFullYear()
                     ? "ring-2 ring-primary"
                     : ""
                 }
