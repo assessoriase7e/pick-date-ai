@@ -12,6 +12,7 @@ import {
   Bot,
   Scissors,
   Users,
+  Calendar,
 } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
@@ -48,6 +49,13 @@ export function Sidebar() {
   }
 
   const routes = [
+    {
+      label: "Agendamentos",
+      icon: Calendar,
+      href: "/calendar",
+      color: "text-blue-500",
+      isActive: pathname === "/calendar",
+    },
     {
       label: "Serviços",
       icon: Scissors,
@@ -93,6 +101,7 @@ export function Sidebar() {
       color: "text-emerald-500",
       isActive: pathname === "/agents",
     },
+
     {
       href: "/profile",
       icon: User,

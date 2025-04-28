@@ -13,6 +13,7 @@ import {
   Menu,
   Scissors,
   Users,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,13 @@ export function MobileSidebar() {
   }
 
   const routes = [
+    {
+      label: "Agendamentos",
+      icon: Calendar,
+      href: "/calendar",
+      color: "text-blue-500",
+      isActive: pathname === "/calendar",
+    },
     {
       label: "Serviços",
       icon: Scissors,
@@ -80,6 +88,7 @@ export function MobileSidebar() {
       color: "text-emerald-500",
       isActive: pathname.startsWith("/agentes"),
     },
+
     {
       href: "/profile",
       icon: User,
