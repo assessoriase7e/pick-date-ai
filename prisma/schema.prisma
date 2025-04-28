@@ -289,6 +289,7 @@ model Service {
   updatedAt        DateTime         @updatedAt
   ServiceHistory   ServiceHistory[]
   ClientService    ClientService[]
+  Appointment      Appointment[]
 
   @@map("service")
 }
@@ -305,6 +306,7 @@ model Client {
   updatedAt      DateTime         @updatedAt
   serviceHistory ServiceHistory[]
   ClientService  ClientService[]
+  Appointment    Appointment[]
 
   @@map("client")
 }
@@ -338,12 +340,31 @@ model ClientService {
 }
 
 model Calendar {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
 
   @@map("calendar")
+}
+
+model Appointment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId   String   @db.ObjectId
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceId  String   @db.ObjectId
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  calendarId String   @db.ObjectId
+  calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  startTime  DateTime
+  endTime    DateTime
+  notes      String?
+  status     String   @default("scheduled") // scheduled, completed, cancelled
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("appointment")
 }
