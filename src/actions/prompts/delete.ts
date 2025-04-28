@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function deletePrompt(id: string) {
   try {
-    const { userId } = await await auth();
+    const { userId } = await auth();
 
     if (!userId) {
       return {
