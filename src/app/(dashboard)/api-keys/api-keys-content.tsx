@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ApiKeyModal } from "./api-key-modal";
 import { Pagination } from "@/components/ui/pagination";
-import { Plus, Pencil, Trash2, EyeOff, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, EyeOff, Copy, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -232,9 +232,13 @@ export function ApiKeysContent() {
                           {apiKey.key.substring(0, 7)}...
                         </code>
                         {/* Não mostramos a chave completa por padrão */}
-                        {/* <Button variant="ghost" size="icon" onClick={() => setShowKeyId(apiKey.id)}>
-                            <Eye className="h-4 w-4" />
-                        </Button> */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowKeyId(apiKey.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </>
                     )}
                   </div>
