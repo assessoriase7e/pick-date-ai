@@ -9,7 +9,9 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 container p-10 py-20 mx-auto">{children}</main>
+      <main className="flex-1 container p-5 py-10 lg:p-10 lg:py-20 mx-auto">
+        {children}
+      </main>
     </div>
   );
 }

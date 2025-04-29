@@ -3,43 +3,42 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentFullData } from "@/types/calendar";
 import React from "react"; // Import React
+import { Card, CardHeader } from "@/components/ui/card";
 
 interface AppointmentCardProps {
   appointment: AppointmentFullData;
+  onEdit: () => void;
   style?: React.CSSProperties;
-  onEdit?: () => void; // Adicionado para permitir edição
 }
 
 export function AppointmentCard({
   appointment,
-  style,
   onEdit,
+  style,
 }: AppointmentCardProps) {
   const { startTime, endTime, client, service, notes } = appointment;
 
   return (
-    <div
-      className="absolute left-0 right-0 bg-primary border-l-4 border-primary p-2 overflow-hidden cursor-pointer z-10"
+    <Card
+      className="appointment-card bg-primary z-20 text-sm"
       style={style}
-      onClick={onEdit} // Permite clicar para editar
+      onClick={onEdit}
     >
-      <h4 className="font-medium truncate">{client.fullName}</h4>
+      <CardHeader className="p-2 pl-4">
+        {client.fullName}
+        <h4 className="font-medium truncate flex items-center gap-2">
+          {service.name} <span>|</span>
+          <div className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" />
+            <span>
+              {format(startTime, "HH:mm", { locale: ptBR })} -{" "}
+              {format(endTime, "HH:mm", { locale: ptBR })}
+            </span>
+          </div>
+        </h4>
 
-      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
-        <Clock className="h-3 w-3 mr-1" />
-        <span>
-          {format(startTime, "HH:mm", { locale: ptBR })} -{" "}
-          {format(endTime, "HH:mm", { locale: ptBR })}
-        </span>
-      </div>
-
-      <p className="text-sm font-medium mt-1">{service.name}</p>
-
-      {notes && (
-        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
-          {notes}
-        </p>
-      )}
-    </div>
+        {notes && <p className="text-xs line-clamp-2">{notes}</p>}
+      </CardHeader>
+    </Card>
   );
 }

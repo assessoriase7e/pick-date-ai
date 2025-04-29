@@ -97,11 +97,13 @@ export function CalendarGrid({
   };
 
   return (
-    <div className="h-[600px] w-full">
+    <div className="lg:h-[600px] w-full">
       <div className="flex flex-col h-full border rounded-lg">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-2xl font-semibold">{formatMonth(currentDate)}</h2>
+          <h2 className="lg:text-2xl font-semibold">
+            {formatMonth(currentDate)}
+          </h2>
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
               <ChevronLeft className="h-5 w-5" />
@@ -118,7 +120,7 @@ export function CalendarGrid({
         {/* Dias da Semana */}
         <div className="grid grid-cols-7 text-center py-2 border-b bg-muted/20">
           {weekDays.map((day, index) => (
-            <div key={index} className="text-lg font-medium">
+            <div key={index} className="text-xs lg:text-lg font-medium">
               {day}
             </div>
           ))}
@@ -148,7 +150,7 @@ export function CalendarGrid({
               <div className="flex flex-col h-full">
                 <span
                   className={`
-                    text-lg font-medium
+                    text-xs lg:text-lg font-medium
                     ${dayObj.isToday ? "text-primary" : ""}
                   `}
                 >

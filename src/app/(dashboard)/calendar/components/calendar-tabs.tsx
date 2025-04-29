@@ -36,11 +36,11 @@ export function CalendarTabs({
   selectedDate,
   setSelectedDate,
   openDayDetails,
-  initialAppointments
+  initialAppointments,
 }: CalendarTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="mb-4 w-full justify-start overflow-x-auto overflow-y-hidden">
+      <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
         {calendars.map((calendar) => (
           <TabsTrigger
             key={calendar.id}

@@ -57,7 +57,6 @@ export function CalendarContent({
 
     if (dayAppointments.length === 0) {
       const response = await getAppointmentsByDate(date);
-      console.log(response);
       if (response.success && response.data) {
         dayAppointments = response.data;
         setAppointments((prev) => ({
@@ -215,10 +214,10 @@ export function CalendarContent({
   };
 
   return (
-    <div className="container py-10 max-w-7xl">
+    <div className="container lg:py-10  w-full">
       <CalendarHeader setOpen={setOpen} />
 
-      <div className="relative">
+      <div className="relative w-full">
         {calendars.length === 0 ? (
           <EmptyCalendarState setOpen={setOpen} />
         ) : (
