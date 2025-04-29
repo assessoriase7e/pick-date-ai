@@ -16,6 +16,7 @@ import { linksRoutes } from "@/mocked/docs/links";
 import { getByIdsRoutes } from "@/mocked/docs/get-by-ids";
 import { getByUserRoutes } from "@/mocked/docs/get-by-user";
 import { attendantPromptsRoutes } from "@/mocked/docs/attendant-prompts";
+import { clientsRoutes } from "@/mocked/docs/clients";
 
 export default function ApiKeysPage() {
   return (
@@ -37,6 +38,7 @@ export default function ApiKeysPage() {
                 <ApiDocsAccordion doc={documentsRoutes} />
                 <ApiDocsAccordion doc={imagesRoutes} />
                 <ApiDocsAccordion doc={linksRoutes} />
+                <ApiDocsAccordion doc={clientsRoutes} />
                 <ApiDocsAccordion doc={attendantPromptsRoutes} />
                 <ApiDocsAccordion doc={getByIdsRoutes} />
                 <ApiDocsAccordion doc={getByUserRoutes} />
