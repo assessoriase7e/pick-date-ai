@@ -19,12 +19,12 @@ export function SidebarItem({
 }: SidebarItemProps) {
   if (isMobile) {
     return (
-      <Link href={href} className="w-full">
+      <Link href={href}>
         <Button
           variant={isActive ? "default" : "ghost"}
           className="w-full justify-start"
         >
-          <Icon className="h-5 w-5 mr-3" />
+          <Icon className="h-5 w-5" />
           <span>{label}</span>
         </Button>
       </Link>

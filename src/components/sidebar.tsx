@@ -1,6 +1,5 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
-import { UserButton } from "@clerk/nextjs";
 import {
   Music,
   Image,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import Logo from "./Logo";
 import { Separator } from "./ui/separator";
 
 export function Sidebar() {
@@ -101,7 +100,6 @@ export function Sidebar() {
       color: "text-emerald-500",
       isActive: pathname === "/agents",
     },
-
     {
       href: "/profile",
       icon: User,
@@ -126,9 +124,11 @@ export function Sidebar() {
       </SheetTrigger>
 
       <SheetContent side="left" className="w-full">
-        <SheetHeader></SheetHeader>
+        <SheetHeader className="flex justify-center items-center py-4">
+          <Logo className="h-12 w-12" />
+        </SheetHeader>
 
-        <div className="flex flex-col h-full py-6 px-4 space-y-6 ">
+        <div className="flex flex-col h-full py-6 px-4 space-y-6">
           <div className="flex flex-col space-y-6">
             {routes.map((item) => (
               <SidebarItem
@@ -141,28 +141,18 @@ export function Sidebar() {
               />
             ))}
           </div>
-
-          <Separator />
-
-          <div className="mt-auto flex flex-row tablet:flex-col gap-2 w-full items-center">
-            <div className="flex gap-2 justify-center items-center w-full">
-              <ThemeToggle /> <p>Tema</p>
-            </div>
-
-            <Separator orientation="vertical" />
-
-            <div className="flex gap-2 justify-center items-center w-full">
-              <UserButton afterSignOutUrl="/" /> Perfil
-            </div>
-          </div>
         </div>
       </SheetContent>
     </Sheet>
   );
 
   const DesktopSidebar = () => (
-    <div className="relative h-svh w-28">
-      <aside className="fixed my-auto top-0 left-5 bottom-0 flex flex-col items-center border border-border bg-background/80 rounded-2xl shadow-2xl p-6 gap-6  transition-all text-foreground h-[90svh]">
+    <div className="h-svh border-r p-5 fixed z-50 bg-background">
+      <aside className="flex flex-col gap-5">
+        <Logo className="h-12 w-12" />
+
+        <Separator />
+
         {routes.map((item) => (
           <SidebarItem
             key={item.href}
@@ -172,11 +162,6 @@ export function Sidebar() {
             isActive={item.isActive}
           />
         ))}
-
-        <div className="mt-auto flex flex-col gap-2 w-full items-center justify-center">
-          <ThemeToggle />
-          <UserButton afterSignOutUrl="/" />
-        </div>
       </aside>
     </div>
   );

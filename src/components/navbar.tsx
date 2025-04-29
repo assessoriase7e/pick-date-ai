@@ -1,30 +1,40 @@
-import Link from "next/link";
-import { Button } from "./ui/button";
-import { currentUser } from "@clerk/nextjs/server";
+"use client";
 
-export async function Navbar() {
-  const user = await currentUser();
+import { UserButton } from "@clerk/nextjs";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { usePathname } from "next/navigation";
+import { Separator } from "./ui/separator";
+
+export function Navbar() {
+  const pathname = usePathname();
+
+  // Função para obter o título da página atual
+  const getPageTitle = () => {
+    if (pathname.startsWith("/audios")) return "Áudios";
+    if (pathname.startsWith("/images")) return "Imagens";
+    if (pathname.startsWith("/documents")) return "Documentos";
+    if (pathname === "/links") return "Links";
+    if (pathname === "/calendar") return "Agendamentos";
+    if (pathname === "/services") return "Serviços";
+    if (pathname === "/clients") return "Clientes";
+    if (pathname === "/agents") return "Agentes";
+    if (pathname === "/profile") return "Perfil";
+    if (pathname.startsWith("/api-keys")) return "API Keys";
+    return "Dashboard";
+  };
 
   return (
-    <nav className="border-b">
-      <div className="flex h-16 items-center px-4 container mx-auto">
-        <div className="flex items-center space-x-4">
-          <Link href="/" className="font-bold text-xl">
-            Pick Date AI
-          </Link>
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex p-5 items-center justify-between mx-auto">
+        <div className="flex items-center">
+          <h1 className="text-xl font-bold">{getPageTitle()}</h1>
         </div>
-        <div className="ml-auto flex items-center space-x-4">
-          {user ? (
-            <Button asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-          ) : (
-            <Button asChild>
-              <Link href="/sign-in">Entrar</Link>
-            </Button>
-          )}
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
+          <Separator orientation="vertical" className="h-6" />
+          <UserButton afterSignOutUrl="/" />
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
