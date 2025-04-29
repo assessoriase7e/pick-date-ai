@@ -35,7 +35,6 @@ export function SidebarItem({
     <Link href={href} className="relative group w-full">
       <Button
         variant="ghost"
-        size="icon"
         className={`w-10 h-10 hover:bg-primary hover:text-background ${
           isActive ? "text-background bg-primary" : ""
         }`}
