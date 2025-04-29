@@ -14,6 +14,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const ids = searchParams.getAll("id");
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
   if (!ids.length) {
     return NextResponse.json(
       { error: "At least one ID must be provided" },
@@ -30,8 +37,11 @@ export async function GET(req: NextRequest) {
     const recordsPromises = modelNames.map(async (modelName) => {
       try {
         // @ts-ignore
+        const where: any = { id: { in: ids } };
+        if (userId) where.userId = userId;
+        // @ts-ignore
         const records = await prisma[modelName].findMany({
-          where: { id: { in: ids } },
+          where,
           include: { professional: true },
         });
 

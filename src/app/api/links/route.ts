@@ -10,12 +10,20 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  try {
-    const { searchParams } = new URL(req.url);
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 20;
-    const skip = (page - 1) * limit;
+  const { searchParams } = new URL(req.url);
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 20;
+  const skip = (page - 1) * limit;
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
+  try {
+    const where = userId ? { userId } : {};
     const [links, total] = await Promise.all([
       prisma.link.findMany({
         skip,
@@ -30,8 +38,9 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        where,
       }),
-      prisma.link.count(),
+      prisma.link.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -57,7 +66,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { url, title, description, userId } = body;
+    let { url, title, description, userId } = body;
+
+    if (validationResult.isMaster) {
+      userId = userId || undefined;
+    } else {
+      userId = validationResult.userId;
+    }
 
     if (!url || !title || !description || !userId) {
       return NextResponse.json(

@@ -10,12 +10,20 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  try {
-    const { searchParams } = new URL(req.url);
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 20;
-    const skip = (page - 1) * limit;
+  const { searchParams } = new URL(req.url);
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 20;
+  const skip = (page - 1) * limit;
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
+  try {
+    const where = userId ? { userId } : {};
     const [images, total] = await Promise.all([
       prisma.imageRecord.findMany({
         skip,
@@ -29,8 +37,9 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        where,
       }),
-      prisma.imageRecord.count(),
+      prisma.imageRecord.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -56,7 +65,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { imageBase64, description, userId } = body;
+    let { imageBase64, description, userId } = body;
+
+    if (validationResult.isMaster) {
+      userId = userId || undefined;
+    } else {
+      userId = validationResult.userId;
+    }
 
     if (!imageBase64 || !description || !userId) {
       return NextResponse.json(

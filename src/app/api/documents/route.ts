@@ -15,14 +15,23 @@ export async function GET(req: NextRequest) {
   const limit = Number.parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
   try {
+    const where = userId ? { userId } : {};
     const [documents, totalCount] = await Promise.all([
       prisma.documentRecord.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        where,
       }),
-      prisma.documentRecord.count(),
+      prisma.documentRecord.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -57,7 +66,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { userId, description, documentBase64, fileName, fileType } = body;
+    let { userId, description, documentBase64, fileName, fileType } = body;
+
+    if (validationResult.isMaster) {
+      userId = userId || undefined;
+    } else {
+      userId = validationResult.userId;
+    }
 
     if (!userId || !description || !documentBase64 || !fileName || !fileType) {
       return NextResponse.json(

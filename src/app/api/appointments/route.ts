@@ -6,15 +6,21 @@ import { z } from "zod";
 export async function POST(req: NextRequest) {
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
-  if (!validationResult.isValid || !validationResult.userId) {
+  if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const userId = validationResult.userId;
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    const body = await req.json();
+    userId = body.userId || undefined;
+    req.json = async () => body; // preserve body for later use
+  } else {
+    userId = validationResult.userId;
+  }
 
   try {
     const body = await req.json();
-
     const {
       clientId,
       serviceId,
@@ -25,7 +31,14 @@ export async function POST(req: NextRequest) {
       status,
     } = body;
 
-    if (!clientId || !serviceId || !calendarId || !startTime || !endTime) {
+    if (
+      !userId ||
+      !clientId ||
+      !serviceId ||
+      !calendarId ||
+      !startTime ||
+      !endTime
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -107,17 +120,22 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
-  if (!validationResult.isValid || !validationResult.userId) {
+  if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const userId = validationResult.userId;
+  const { searchParams } = new URL(req.url);
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
 
   try {
+    const where = userId ? { userId } : {};
     const appointments = await prisma.appointment.findMany({
-      where: {
-        userId: userId, // Filtrar pelo usuário da API Key
-      },
+      where,
       include: {
         client: true,
         service: true,

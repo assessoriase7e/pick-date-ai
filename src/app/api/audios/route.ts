@@ -14,14 +14,23 @@ export async function GET(req: NextRequest) {
   const limit = Number.parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
   try {
+    const where = userId ? { userId } : {};
     const [audios, totalCount] = await Promise.all([
       prisma.audioRecord.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        where,
       }),
-      prisma.audioRecord.count(),
+      prisma.audioRecord.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -49,7 +58,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { userId, description, audioBase64 } = body;
+    let { userId, description, audioBase64 } = body;
+
+    if (validationResult.isMaster) {
+      userId = userId || undefined;
+    } else {
+      userId = validationResult.userId;
+    }
 
     if (!userId || !description || !audioBase64) {
       return NextResponse.json(

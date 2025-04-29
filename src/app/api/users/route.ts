@@ -15,15 +15,24 @@ export async function GET(req: NextRequest) {
   const limit = Number.parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
+  let userId: string | undefined = undefined;
+  if (validationResult.isMaster) {
+    userId = searchParams.get("userId") || undefined;
+  } else {
+    userId = validationResult.userId;
+  }
+
   try {
+    const where = userId ? { id: userId } : {};
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
         include: { profile: true }, // Incluir o perfil de cada usuário
+        where,
       }),
-      prisma.user.count(),
+      prisma.user.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -52,7 +61,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { id, email, firstName, lastName, imageUrl, profile } = body;
+    let { id, email, firstName, lastName, imageUrl, profile, userId } = body;
+
+    if (validationResult.isMaster) {
+      id = userId || id;
+    }
 
     if (!id || !email) {
       return NextResponse.json(
