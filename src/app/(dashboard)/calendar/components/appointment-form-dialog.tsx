@@ -8,6 +8,7 @@ import {
 import { AppointmentForm } from "./appointment-form";
 import { AppointmentFullData } from "@/types/calendar";
 import { XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AppointmentFormDialogProps {
   isOpen: boolean;
@@ -42,8 +43,10 @@ export function AppointmentFormDialog({
             {appointment ? "Editar agendamento" : "Novo agendamento"}
           </AlertDialogTitle>
 
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>
-            <XIcon className="w-6 h-6 lg:w-4 lg:h-4" />
+          <AlertDialogCancel onClick={() => onOpenChange(false)} asChild>
+            <Button size="icon">
+              <XIcon className="w-6 h-6 lg:w-4 lg:h-4" />
+            </Button>
           </AlertDialogCancel>
         </AlertDialogHeader>
 
