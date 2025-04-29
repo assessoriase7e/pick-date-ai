@@ -2,10 +2,18 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { generateApiKey } from "@/lib/api-key-utils";
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: Request) {
+  const apiKeyHeader = req.headers.get("authorization");
+  const { isValid, isMaster } = await validateApiKey(apiKeyHeader);
+
+  if (!isValid || !isMaster) {
+    return new NextResponse("Acesso restrito à master key", { status: 403 });
+  }
+
   try {
-    const { userId } = await await auth();
+    const { userId } = await auth();
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });

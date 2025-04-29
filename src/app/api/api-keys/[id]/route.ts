@@ -1,13 +1,21 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const apiKeyHeader = request.headers.get("authorization");
+  const { isValid, isMaster } = await validateApiKey(apiKeyHeader);
+
+  if (!isValid || !isMaster) {
+    return new NextResponse("Acesso restrito à master key", { status: 403 });
+  }
+
   try {
-    const { userId } = await await auth();
+    const { userId } = await auth();
     const { id } = params;
 
     if (!userId) {
