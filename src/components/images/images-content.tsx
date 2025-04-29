@@ -112,8 +112,7 @@ export function ImagesContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between">
-        <h1 className="text-xl font-bold">Imagens</h1>
+      <div className="flex justify-end items-center">
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <ImagePlus className="h-4 w-4 mr-2" />
           Nova Imagem

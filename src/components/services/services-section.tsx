@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ServiceModal } from "./service-modal";
 import { DeleteServiceModal } from "./delete-service-modal";
 import { deleteService } from "@/actions/services/delete-service";
@@ -75,91 +74,86 @@ export function ServicesSection({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Lista de Serviços</CardTitle>
+    <div className="space-y-4">
+      <div className="flex justify-end">
         <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo Serviço
+          <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
         </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Preço</TableHead>
+              <TableHead>Dias Disponíveis</TableHead>
+              <TableHead>Profissional</TableHead>
+              <TableHead className="w-[150px]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {services.length === 0 ? (
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Dias Disponíveis</TableHead>
-                <TableHead>Profissional</TableHead>
-                <TableHead className="w-[150px]">Ações</TableHead>
+                <TableCell colSpan={5} className="text-center py-10">
+                  Nenhum serviço encontrado.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {services.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10">
-                    Nenhum serviço encontrado.
+            ) : (
+              services.map((service) => (
+                <TableRow key={service.id}>
+                  <TableCell className="font-medium">{service.name}</TableCell>
+                  <TableCell>{formatCurrency(service.price)}</TableCell>
+                  <TableCell>
+                    {formatAvailableDays(service.availableDays)}
+                  </TableCell>
+                  <TableCell>{service.professionalName}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => setDeletingService(service)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                services.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">
-                      {service.name}
-                    </TableCell>
-                    <TableCell>{formatCurrency(service.price)}</TableCell>
-                    <TableCell>
-                      {formatAvailableDays(service.availableDays)}
-                    </TableCell>
-                    <TableCell>{service.professionalName}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(service)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => setDeletingService(service)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
+      <Pagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={handlePageChange}
+      />
+
+      <ServiceModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        initialData={editingService}
+      />
+
+      {deletingService && (
+        <DeleteServiceModal
+          isOpen={!!deletingService}
+          onClose={() => setDeletingService(null)}
+          onConfirm={() => handleDelete(deletingService.id)}
+          serviceName={deletingService.name}
+          isLoading={isLoading}
         />
-
-        <ServiceModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          initialData={editingService}
-        />
-
-        {deletingService && (
-          <DeleteServiceModal
-            isOpen={!!deletingService}
-            onClose={() => setDeletingService(null)}
-            onConfirm={() => handleDelete(deletingService.id)}
-            serviceName={deletingService.name}
-            isLoading={isLoading}
-          />
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

@@ -19,7 +19,12 @@ export default async function ServicesPage({
 
   return (
     <div className="container">
-      <h1 className="text-3xl font-bold mb-8">Serviços</h1>
+      <div>
+        <h1 className="text-3xl font-bold">Serviços</h1>
+        <p className="text-muted-foreground">
+          Gerencie os links cadastrados no sistema.
+        </p>
+      </div>
 
       <div className="space-y-8">
         <ServicesSection

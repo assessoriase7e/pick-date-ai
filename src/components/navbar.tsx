@@ -25,16 +25,13 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex p-5 items-center justify-between mx-auto">
-        <div className="flex items-center">
-          <h1 className="text-xl font-bold">{getPageTitle()}</h1>
-        </div>
-        <div className="flex items-center space-x-4">
+
+        <div className="flex items-center justify-end space-x-4 p-5">
           <ThemeToggle />
           <Separator orientation="vertical" className="h-6" />
           <UserButton afterSignOutUrl="/" />
         </div>
-      </div>
+  
     </header>
   );
 }

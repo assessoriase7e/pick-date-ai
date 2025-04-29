@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Pencil, Plus, Trash2, FileText, Download } from "lucide-react";
+import { Pencil, Trash2, FileText, Download, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -109,11 +109,12 @@ export function DocumentsContent() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
-        <h1 className="text-xl font-bold">Documentos</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Documento
-        </Button>
+        <div className="flex justify-end w-full">
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <File className="mr-2 h-4 w-4" />
+            Novo Documento
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -221,7 +222,6 @@ export function DocumentsContent() {
           isOpen={!!deletingDocument}
           onClose={() => setDeletingDocument(null)}
           onConfirm={handleDeleteDocument}
-          professionalName={deletingDocument.professional.name}
         />
       )}
     </div>

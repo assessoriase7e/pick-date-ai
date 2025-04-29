@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Trash2, FileText, PlusCircle } from "lucide-react";
+import { Edit, Trash2, FileText, Users } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
@@ -111,7 +111,7 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
     <>
       <div className="flex justify-end mb-4">
         <Button onClick={() => setIsNewClientDialogOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <Users className="mr-2 h-4 w-4" />
           Novo Cliente
         </Button>
       </div>

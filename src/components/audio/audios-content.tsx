@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Pencil, Plus, Trash2, Play, Pause } from "lucide-react";
+import { Pencil, Trash2, Play, Pause, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -129,7 +129,7 @@ export function AudiosContent() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo
+          <Music className="mr-2 h-4 w-4" /> Novo
         </Button>
       </div>
 

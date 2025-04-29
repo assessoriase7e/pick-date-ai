@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
 import { DeleteLinkModal } from "./delete-link-modal";
 import { Pagination } from "@/components/ui/pagination";
-import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, LinkIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -144,7 +144,7 @@ export function LinksContent() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo link
+          <LinkIcon className="mr-2 h-4 w-4" /> Novo link
         </Button>
       </div>
 

@@ -5,17 +5,14 @@ export default async function ClientsPage() {
   const { success, data, error } = await getClients();
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-2xl font-bold">Clientes</h1>
-      <p>Gerencie seus clientes</p>
-
-      {!success ? (
-        <div className="p-4 bg-red-50 text-red-500 rounded-md">
-          Erro ao carregar clientes: {error}
-        </div>
-      ) : (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
+        <p className="text-muted-foreground">
+          Gerencie os cleintes cadastrados no sistema.
+        </p>
         <ClientsTable clients={data?.clients || []} />
-      )}
+      </div>
     </div>
   );
 }
