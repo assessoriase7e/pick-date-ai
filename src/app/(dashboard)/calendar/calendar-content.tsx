@@ -2,7 +2,7 @@
 import moment from "moment";
 import { z } from "zod";
 import "moment/locale/pt-br";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // <-- adicionei useEffect aqui
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -50,6 +50,28 @@ export function CalendarContent({
   const { toast } = useToast();
   const [appointments, setAppointments] =
     useState<Record<string, AppointmentFullData[]>>(initialAppointments);
+
+  useEffect(() => {
+    const handleAppointmentUpdated = (event: CustomEvent) => {
+      const { dateKey, appointments: updatedAppointments } = event.detail;
+      setAppointments((prev) => ({
+        ...prev,
+        [dateKey]: updatedAppointments,
+      }));
+    };
+
+    window.addEventListener(
+      "appointmentUpdated",
+      handleAppointmentUpdated as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "appointmentUpdated",
+        handleAppointmentUpdated as EventListener
+      );
+    };
+  }, []);
 
   const openDayDetails = async (date: Date) => {
     const dateKey = date.toISOString().split("T")[0];
@@ -214,7 +236,7 @@ export function CalendarContent({
   };
 
   return (
-    <div className="container lg:py-10  w-full">
+    <div className="container lg:py-10 w-full">
       <CalendarHeader setOpen={setOpen} />
 
       <div className="relative w-full">

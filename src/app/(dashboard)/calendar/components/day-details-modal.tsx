@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AppointmentFullData } from "@/types/calendar";
 import { deleteAppointment } from "@/actions/appointments/delete";
+import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 import { AppointmentFormDialog } from "./appointment-form-dialog";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
@@ -44,11 +45,38 @@ export function DayDetailsModal({
   );
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [initialStartTime, setInitialStartTime] = useState<string | null>(null);
+  const [localAppointments, setLocalAppointments] =
+    useState<AppointmentFullData[]>(appointments);
+
+  // Função para recarregar os agendamentos
+  const reloadAppointments = async () => {
+    if (!dayDetails) return;
+
+    try {
+      const response = await getAppointmentsByDate(dayDetails.date);
+      if (response.success && response.data) {
+        setLocalAppointments(response.data);
+
+        // Atualiza o estado global de appointments no CalendarContent
+        const dateKey = dayDetails.date.toISOString().split("T")[0];
+        window.dispatchEvent(
+          new CustomEvent("appointmentUpdated", {
+            detail: {
+              dateKey,
+              appointments: response.data,
+            },
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao recarregar agendamentos:", error);
+    }
+  };
 
   // Handlers
-  const handleFormSuccess = () => {
+  const handleFormSuccess = async () => {
     setShowAppointmentForm(false);
-    closeDayDetails();
+    await reloadAppointments();
   };
 
   const handleEditAppointment = (appointment: AppointmentFullData) => {
@@ -82,6 +110,7 @@ export function DayDetailsModal({
 
       if (result.success) {
         toast.success("Agendamento excluído com sucesso");
+        await reloadAppointments();
         closeDayDetails();
       } else {
         toast.error(result.error || "Erro ao excluir agendamento");
@@ -105,7 +134,7 @@ export function DayDetailsModal({
     endTime: Date,
     excludeId?: string
   ) => {
-    return appointments.some((appointment) => {
+    return localAppointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
 
       return (
@@ -153,7 +182,7 @@ export function DayDetailsModal({
           />
 
           <DayScheduleGrid
-            appointments={appointments}
+            appointments={localAppointments}
             date={dayDetails.date}
             onHourClick={handleHourClick}
             onEditAppointment={handleEditAppointment}
