@@ -1,6 +1,6 @@
 "use server";
 import { listCalendars } from "@/actions/calendars/getMany";
-import { CalendarContent } from "./calendar-content";
+import { CalendarContent } from "../../../components/calendar/calendar-content";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { addMonths, subMonths } from "date-fns";
 import { AppointmentFullData } from "@/types/calendar";

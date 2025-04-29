@@ -7,12 +7,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
 import { deleteCalendar } from "@/actions/calendars/delete";
-import { CalendarHeader } from "./components/calendar-header";
-import { CalendarModals } from "./components/calendar-modals";
-import { EmptyCalendarState } from "./components/empty-calendar-state";
-import { CalendarTabs } from "./components/calendar-tabs";
+import { CalendarHeader } from "./calendar-header";
+import { CalendarModals } from "./calendar-modals";
+import { EmptyCalendarState } from "./empty-calendar-state";
+import { CalendarTabs } from "./calendar-tabs";
 import { calendarFormSchema } from "@/validators/calendar";
-import { DayDetailsModal } from "./components/day-details-modal";
+import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData } from "@/types/calendar";
 import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 
