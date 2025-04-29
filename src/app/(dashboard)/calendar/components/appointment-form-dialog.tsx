@@ -2,12 +2,12 @@ import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AppointmentForm } from "./appointment-form";
 import { AppointmentFullData } from "@/types/calendar";
+import { XIcon } from "lucide-react";
 
 interface AppointmentFormDialogProps {
   isOpen: boolean;
@@ -37,10 +37,14 @@ export function AppointmentFormDialog({
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
-        <AlertDialogHeader>
+        <AlertDialogHeader className="flex-row items-center justify-between">
           <AlertDialogTitle>
             {appointment ? "Editar agendamento" : "Novo agendamento"}
           </AlertDialogTitle>
+
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>
+            <XIcon className="w-6 h-6 lg:w-4 lg:h-4" />
+          </AlertDialogCancel>
         </AlertDialogHeader>
 
         <AppointmentForm
@@ -51,12 +55,6 @@ export function AppointmentFormDialog({
           initialStartTime={initialStartTime}
           calendarId={calendarId}
         />
-
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>
-            Cancelar
-          </AlertDialogCancel>
-        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

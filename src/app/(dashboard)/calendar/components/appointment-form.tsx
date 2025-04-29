@@ -221,7 +221,7 @@ export function AppointmentForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-10">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="clientId"
@@ -401,7 +401,7 @@ export function AppointmentForm({
           )}
         />
 
-        <div className="flex justify-between pt-4">
+        <div className="flex flex-col gap-5 lg:flex-row justify-between pt-4">
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isEditing ? "Atualizar Agendamento" : "Criar Agendamento"}
