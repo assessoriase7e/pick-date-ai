@@ -44,6 +44,12 @@ interface ClientService {
     id: string;
     name: string;
   };
+  // Novos campos
+  isAppointment?: boolean;
+  startTime?: Date;
+  endTime?: Date;
+  description?: string;
+  status?: string;
 }
 
 interface Service {
@@ -109,6 +115,14 @@ export default function ClientServicesTable({
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
+  const formatTime = (date: Date | undefined) => {
+    if (!date) return "";
+    return new Date(date).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
     router.refresh();
@@ -154,6 +168,8 @@ export default function ClientServicesTable({
             <TableRow>
               <TableHead>Serviço</TableHead>
               <TableHead>Data</TableHead>
+              <TableHead>Horário</TableHead>
+              <TableHead>Descrição</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -161,7 +177,7 @@ export default function ClientServicesTable({
             {clientServices.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={3}
+                  colSpan={5}
                   className="text-center py-6 text-muted-foreground"
                 >
                   Nenhum serviço encontrado
@@ -172,6 +188,14 @@ export default function ClientServicesTable({
                 <TableRow key={service.id}>
                   <TableCell>{service.service.name}</TableCell>
                   <TableCell>{formatDate(service.date)}</TableCell>
+                  <TableCell>
+                    {service.isAppointment && service.startTime && service.endTime
+                      ? `${formatTime(service.startTime)} - ${formatTime(service.endTime)}`
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {service.description || "-"}
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="outline"
