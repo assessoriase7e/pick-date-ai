@@ -1,102 +1,105 @@
+import { useMemo } from "react";
+import moment from "moment";
+import "moment/locale/pt-br";
 import { Button } from "@/components/ui/button";
+import { weekDays } from "@/mocked/calendar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AppointmentFullData } from "@/types/calendar";
 
 interface CalendarGridProps {
   currentDate: Date;
   goToPreviousMonth: () => void;
   goToNextMonth: () => void;
   goToToday: () => void;
-  exampleEvents: Record<string, boolean>;
   selectedDate: Date | null;
   setSelectedDate: (date: Date | null) => void;
   openDayDetails: (date: Date) => void;
+  initialAppointments: Record<string, AppointmentFullData[]>;
 }
+
+type CalendarDay = {
+  date: moment.Moment;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+};
 
 export function CalendarGrid({
   currentDate,
   goToPreviousMonth,
   goToNextMonth,
   goToToday,
-  exampleEvents,
   selectedDate,
   setSelectedDate,
   openDayDetails,
+  initialAppointments,
 }: CalendarGridProps) {
-  // Dias da semana
-  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const today = moment();
 
-  // Função para formatar o nome do mês
-  const formatMonth = (date: Date) => {
-    return date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-  };
+  const calendarDays = useMemo(() => {
+    const startOfMonth = moment(currentDate).startOf("month");
+    const endOfMonth = moment(currentDate).endOf("month");
+    const startDayOfWeek = startOfMonth.day();
+    const daysInMonth = endOfMonth.date();
 
-  type CalendarDay = {
-    date: Date;
-    isCurrentMonth: boolean;
-    isToday: boolean;
-  };
+    const days: CalendarDay[] = [];
 
-  const generateCalendarDays = (): CalendarDay[] => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    const firstDayOfWeek = firstDayOfMonth.getDay();
-    const daysInMonth = lastDayOfMonth.getDate();
-
-    const calendarDays = [];
-
-    // Adicionar dias do mês anterior para completar a primeira semana
-    const daysFromPrevMonth = firstDayOfWeek;
-    const prevMonth = new Date(year, month, 0);
-    const prevMonthDays = prevMonth.getDate();
-
-    for (
-      let i = prevMonthDays - daysFromPrevMonth + 1;
-      i <= prevMonthDays;
-      i++
-    ) {
-      calendarDays.push({
-        date: new Date(year, month - 1, i),
+    // Dias do mês anterior
+    const prevMonthStart = moment(startOfMonth).subtract(
+      startDayOfWeek,
+      "days"
+    );
+    for (let i = 0; i < startDayOfWeek; i++) {
+      const date = moment(prevMonthStart).add(i, "days");
+      days.push({
+        date,
         isCurrentMonth: false,
-        isToday: false,
+        isToday: date.isSame(today, "day"),
       });
     }
 
-    // Adicionar dias do mês atual
-    const today = new Date();
+    // Dias do mês atual
     for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(year, month, i);
-      calendarDays.push({
+      const date = moment(startOfMonth).date(i);
+      days.push({
         date,
         isCurrentMonth: true,
-        isToday:
-          date.getDate() === today.getDate() &&
-          date.getMonth() === today.getMonth() &&
-          date.getFullYear() === today.getFullYear(),
+        isToday: date.isSame(today, "day"),
       });
     }
 
-    // Adicionar dias do próximo mês para completar a última semana
-    const totalDaysDisplayed = calendarDays.length;
-    const remainingDays = 42 - totalDaysDisplayed; // 6 semanas * 7 dias = 42
-
-    for (let i = 1; i <= remainingDays; i++) {
-      calendarDays.push({
-        date: new Date(year, month + 1, i),
+    // Dias do próximo mês
+    const totalDisplayed = days.length;
+    const remaining = 42 - totalDisplayed;
+    for (let i = 1; i <= remaining; i++) {
+      const date = moment(endOfMonth).add(i, "days");
+      days.push({
+        date,
         isCurrentMonth: false,
-        isToday: false,
+        isToday: date.isSame(today, "day"),
       });
     }
 
-    return calendarDays;
+    return days;
+  }, [currentDate]);
+
+  const formatMonth = (date: Date) => {
+    return moment(date).format("MMMM [de] YYYY");
+  };
+
+  const isSelected = (day: moment.Moment) => {
+    if (!selectedDate) return false;
+    return day.isSame(moment(selectedDate), "day");
+  };
+
+  const getAppointmentsForDay = (day: moment.Moment) => {
+    const dateKey = day.format("YYYY-MM-DD");
+    return initialAppointments[dateKey] || [];
   };
 
   return (
     <div className="h-[600px] w-full">
       <div className="flex flex-col h-full border rounded-lg">
-        {/* Cabeçalho do Calendário */}
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-2xl font-semibold">{formatMonth(currentDate)}</h2>
           <div className="flex items-center space-x-2">
@@ -123,51 +126,47 @@ export function CalendarGrid({
 
         {/* Dias do Calendário */}
         <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-          {generateCalendarDays().map((day, index) => (
+          {calendarDays.map((dayObj, index) => (
             <div
               key={index}
               className={`
                 border p-1 min-h-[80px] relative
                 ${
-                  !day.isCurrentMonth ? "bg-muted/20 text-muted-foreground" : ""
-                }
-                ${day.isToday ? "bg-primary/10" : ""}
-                ${
-                  selectedDate &&
-                  day.date.getDate() === selectedDate.getDate() &&
-                  day.date.getMonth() === selectedDate.getMonth() &&
-                  day.date.getFullYear() === selectedDate.getFullYear()
-                    ? "ring-2 ring-primary"
+                  !dayObj.isCurrentMonth
+                    ? "bg-muted/20 text-muted-foreground"
                     : ""
                 }
+                ${dayObj.isToday ? "bg-primary/10" : ""}
+                ${isSelected(dayObj.date) ? "ring-2 ring-primary" : ""}
                 hover:bg-muted/30 cursor-pointer transition-colors
               `}
               onClick={() => {
-                setSelectedDate(day.date);
-                openDayDetails(day.date);
+                setSelectedDate(dayObj.date.toDate());
+                openDayDetails(dayObj.date.toDate());
               }}
             >
               <div className="flex flex-col h-full">
                 <span
                   className={`
-                  text-lg font-medium
-                  ${day.isToday ? "text-primary" : ""}
-                `}
+                    text-lg font-medium
+                    ${dayObj.isToday ? "text-primary" : ""}
+                  `}
                 >
-                  {day.date.getDate()}
+                  {dayObj.date.date()}
                 </span>
 
-                {/* Aqui você pode adicionar eventos ou compromissos */}
+                {/* Agendamentos */}
                 <div className="flex-1 overflow-y-auto">
-                  {/* Exemplo de evento (agora usando o estado exampleEvents) */}
-                  {day.isCurrentMonth &&
-                    exampleEvents[
-                      `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
-                    ] && (
-                      <div className="bg-primary/20 text-primary rounded p-1 mb-1 text-sm truncate">
-                        Compromisso
+                  {dayObj.isCurrentMonth &&
+                    getAppointmentsForDay(dayObj.date)?.map((appointment) => (
+                      <div
+                        key={appointment.id}
+                        className="bg-primary/20 text-primary rounded p-1 mb-1 text-sm truncate"
+                      >
+                        {appointment.client.fullName} -
+                        {appointment.service.name}
                       </div>
-                    )}
+                    ))}
                 </div>
               </div>
             </div>

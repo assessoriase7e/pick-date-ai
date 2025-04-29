@@ -2,7 +2,7 @@
 import moment from "moment";
 import { z } from "zod";
 import "moment/locale/pt-br";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -13,12 +13,16 @@ import { EmptyCalendarState } from "./components/empty-calendar-state";
 import { CalendarTabs } from "./components/calendar-tabs";
 import { calendarFormSchema } from "@/validators/calendar";
 import { DayDetailsModal } from "./components/day-details-modal";
+import { AppointmentFullData } from "@/types/calendar";
+import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 
 moment.locale("pt-br");
 
 interface CalendarContentProps {
   initialCalendars: any[];
   initialActiveTab: string;
+  initialAppointments: Record<string, AppointmentFullData[]>;
+  initialDate: Date;
 }
 
 type CalendarFormValues = z.infer<typeof calendarFormSchema>;
@@ -26,6 +30,8 @@ type CalendarFormValues = z.infer<typeof calendarFormSchema>;
 export function CalendarContent({
   initialCalendars,
   initialActiveTab,
+  initialAppointments,
+  initialDate,
 }: CalendarContentProps) {
   const [calendars, setCalendars] = useState(initialCalendars);
   const [open, setOpen] = useState(false);
@@ -34,37 +40,37 @@ export function CalendarContent({
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(initialDate);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [exampleEvents, setExampleEvents] = useState<Record<string, boolean>>(
-    {}
-  );
   const [selectedDayDetails, setSelectedDayDetails] = useState<{
     date: Date;
     isOpen: boolean;
+    appointments: AppointmentFullData[];
   } | null>(null);
   const { toast } = useToast();
+  const [appointments, setAppointments] =
+    useState<Record<string, AppointmentFullData[]>>(initialAppointments);
 
-  useEffect(() => {
-    const events: Record<string, boolean> = {};
-    const daysInMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0
-    ).getDate();
+  const openDayDetails = async (date: Date) => {
+    const dateKey = date.toISOString().split("T")[0];
+    let dayAppointments = appointments[dateKey] || [];
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      events[`${currentDate.getFullYear()}-${currentDate.getMonth()}-${i}`] =
-        Math.random() > 0.8;
+    if (dayAppointments.length === 0) {
+      const response = await getAppointmentsByDate(date);
+      console.log(response);
+      if (response.success && response.data) {
+        dayAppointments = response.data;
+        setAppointments((prev) => ({
+          ...prev,
+          [dateKey]: dayAppointments,
+        }));
+      }
     }
 
-    setExampleEvents(events);
-  }, [currentDate.getMonth(), currentDate.getFullYear()]);
-
-  const openDayDetails = (date: Date) => {
     setSelectedDayDetails({
       date,
       isOpen: true,
+      appointments: dayAppointments,
     });
   };
 
@@ -228,17 +234,19 @@ export function CalendarContent({
             goToPreviousMonth={goToPreviousMonth}
             goToNextMonth={goToNextMonth}
             goToToday={goToToday}
-            exampleEvents={exampleEvents}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             openDayDetails={openDayDetails}
+            initialAppointments={appointments}
           />
         )}
 
         {selectedDayDetails && (
           <DayDetailsModal
+            appointments={selectedDayDetails.appointments}
             dayDetails={selectedDayDetails}
             closeDayDetails={closeDayDetails}
+            activeTab={activeTab}
           />
         )}
       </div>

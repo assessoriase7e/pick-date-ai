@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
 import { CalendarGrid } from "./calendar-grid";
+import { AppointmentFullData } from "@/types/calendar";
 
 interface CalendarTabsProps {
   calendars: any[];
@@ -14,10 +15,10 @@ interface CalendarTabsProps {
   goToPreviousMonth: () => void;
   goToNextMonth: () => void;
   goToToday: () => void;
-  exampleEvents: Record<string, boolean>;
   selectedDate: Date | null;
   setSelectedDate: (date: Date | null) => void;
   openDayDetails: (date: Date) => void;
+  initialAppointments: Record<string, AppointmentFullData[]>;
 }
 
 export function CalendarTabs({
@@ -32,10 +33,10 @@ export function CalendarTabs({
   goToPreviousMonth,
   goToNextMonth,
   goToToday,
-  exampleEvents,
   selectedDate,
   setSelectedDate,
   openDayDetails,
+  initialAppointments
 }: CalendarTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -91,20 +92,16 @@ export function CalendarTabs({
       </TabsList>
 
       {calendars.map((calendar) => (
-        <TabsContent
-          key={calendar.id}
-          value={calendar.id}
-          className="border rounded-lg p-4"
-        >
+        <TabsContent key={calendar.id} value={calendar.id}>
           <CalendarGrid
             currentDate={currentDate}
             goToPreviousMonth={goToPreviousMonth}
             goToNextMonth={goToNextMonth}
             goToToday={goToToday}
-            exampleEvents={exampleEvents}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             openDayDetails={openDayDetails}
+            initialAppointments={initialAppointments}
           />
         </TabsContent>
       ))}
