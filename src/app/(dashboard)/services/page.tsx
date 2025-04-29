@@ -18,7 +18,7 @@ export default async function ServicesPage({
   const { data: services, pagination } = await getServices(pageParam);
 
   return (
-    <div className="container py-10 max-w-6xl">
+    <div className="container">
       <h1 className="text-3xl font-bold mb-8">Serviços</h1>
 
       <div className="space-y-8">

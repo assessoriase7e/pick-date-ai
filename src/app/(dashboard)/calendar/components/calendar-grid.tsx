@@ -97,7 +97,7 @@ export function CalendarGrid({
   };
 
   return (
-    <div className="lg:h-[600px] w-full">
+    <div className="w-full">
       <div className="flex flex-col h-full border rounded-lg">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between p-4 border-b">
@@ -138,7 +138,7 @@ export function CalendarGrid({
                     ? "bg-muted/20 text-muted-foreground"
                     : ""
                 }
-                ${dayObj.isToday ? "bg-primary/10" : ""}
+                ${dayObj.isToday ? "bg-primary/50" : ""}
                 ${isSelected(dayObj.date) ? "ring-2 ring-primary" : ""}
                 hover:bg-muted/30 cursor-pointer transition-colors
               `}

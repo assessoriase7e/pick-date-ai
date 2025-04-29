@@ -20,7 +20,7 @@ export default async function AgentesPage() {
   const { data: instances } = await getInstances();
 
   return (
-    <div className="container py-10 max-w-6xl">
+    <div className="container">
       <h1 className="text-3xl font-bold mb-8">Agentes</h1>
 
       <div className="space-y-8">
