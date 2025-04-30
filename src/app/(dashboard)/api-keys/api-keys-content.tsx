@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,23 +26,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ApiKey } from "@prisma/client"; // Importe o tipo ApiKey
-import { useApiKeys } from "@/hooks/use-api-keys";
 import { toast } from "sonner";
+import { createApiKey } from "@/actions/api-key/create";
+import { updateApiKey } from "@/actions/api-key/update";
+import { deleteApiKey } from "@/actions/api-key/delete";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 // Interface para o tipo de dado retornado pelo hook/API, incluindo a chave na criação
 interface ApiKeyWithKey extends ApiKey {
   key: string;
 }
 
-export function ApiKeysContent() {
+interface ApiKeysContentProps {
+  apiKeys: ApiKey[];
+  totalPages: number;
+  currentPage: number;
+}
+
+export function ApiKeysContent({
+  apiKeys,
+  totalPages,
+  currentPage,
+}: ApiKeysContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
-  const { apiKeys, totalPages, isLoading, mutate } = useApiKeys(page);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingApiKey, setEditingApiKey] = useState<ApiKey | null>(null);
   const [deletingApiKey, setDeletingApiKey] = useState<ApiKey | null>(null);
+  const [loading, setLoading] = useState(false);
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<string | null>(
     null
   );
@@ -51,66 +63,60 @@ export function ApiKeysContent() {
 
   async function handleCreateApiKey(data: { description?: string }) {
     try {
-      const response = await fetch("/api/api-keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      setLoading(true);
+      const result = await createApiKey(data);
 
-      if (!response.ok) {
-        throw new Error("Falha ao criar chave de API");
-      }
+      setNewlyGeneratedKey(result?.data!.key);
 
-      const newKeyData: ApiKeyWithKey = await response.json();
-      setNewlyGeneratedKey(newKeyData.key); // Armazena a chave gerada para mostrar uma vez
-      mutate(); // Revalida os dados
-      setIsCreateModalOpen(false);
-      toast("Chave de API criada com sucesso!");
+      revalidatePathAction("/api-keys");
     } catch (error) {
       console.error("Erro ao criar chave:", error);
       toast("Erro ao criar chave");
+    } finally {
+      setLoading(false);
+      setIsCreateModalOpen(false);
     }
   }
 
   async function handleUpdateApiKey(data: { description?: string }) {
     if (!editingApiKey) return;
     try {
-      const response = await fetch(`/api/api-keys/${editingApiKey.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      setLoading(true);
+      const result = await updateApiKey(editingApiKey.id, data);
 
-      if (!response.ok) {
-        throw new Error("Falha ao atualizar chave de API");
+      if (result.success) {
+        router.refresh();
+        toast("Chave de API atualizada com sucesso!");
+      } else {
+        toast("Erro ao atualizar chave");
       }
-
-      mutate();
-      setEditingApiKey(null);
-      toast("Chave de API atualizada com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar chave:", error);
       toast("Erro ao atualizar chave");
+    } finally {
+      setLoading(false);
+      setEditingApiKey(null);
     }
   }
 
   async function handleDeleteApiKey() {
     if (!deletingApiKey) return;
     try {
-      const response = await fetch(`/api/api-keys/${deletingApiKey.id}`, {
-        method: "DELETE",
-      });
+      setLoading(true);
+      const result = await deleteApiKey(deletingApiKey.id);
 
-      if (!response.ok) {
-        throw new Error("Falha ao excluir chave de API");
+      if (result.success) {
+        router.refresh();
+        toast("Chave de API excluída com sucesso!");
+      } else {
+        toast("Erro ao excluir chave");
       }
-
-      mutate();
-      setDeletingApiKey(null);
-      toast("Chave de API excluída com sucesso!");
     } catch (error) {
       console.error("Erro ao excluir chave:", error);
       toast("Erro ao excluir chave");
+    } finally {
+      setLoading(false);
+      setDeletingApiKey(null);
     }
   }
 
@@ -178,7 +184,8 @@ export function ApiKeysContent() {
         </AlertDialog>
       )}
 
-      <div className="rounded-md border">
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -189,14 +196,14 @@ export function ApiKeysContent() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && (
+            {loading && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   Carregando...
                 </TableCell>
               </TableRow>
             )}
-            {!isLoading && apiKeys?.length === 0 && (
+            {!loading && apiKeys?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   Nenhuma chave de API encontrada.
@@ -231,7 +238,6 @@ export function ApiKeysContent() {
                         <code className="font-mono">
                           {apiKey.key.substring(0, 7)}...
                         </code>
-                        {/* Não mostramos a chave completa por padrão */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -275,6 +281,81 @@ export function ApiKeysContent() {
         </Table>
       </div>
 
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="text-center py-10">Carregando...</div>
+        ) : apiKeys?.length === 0 ? (
+          <div className="text-center py-10">Nenhuma chave de API encontrada.</div>
+        ) : (
+          apiKeys?.map((apiKey) => (
+            <div key={apiKey.id} className="rounded-lg border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="font-medium">{apiKey.description || "-"}</p>
+                  <div className="flex items-center gap-2">
+                    {showKeyId === apiKey.id ? (
+                      <>
+                        <code className="font-mono text-sm">{apiKey.key}</code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowKeyId(null)}
+                        >
+                          <EyeOff className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => copyToClipboard(apiKey.key)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <code className="font-mono text-sm">
+                          {apiKey.key.substring(0, 7)}...
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowKeyId(apiKey.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(apiKey.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditingApiKey(apiKey)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => setDeletingApiKey(apiKey)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {totalPages > 1 && (
         <Pagination
           currentPage={page}
@@ -282,7 +363,7 @@ export function ApiKeysContent() {
           onPageChange={(newPage: number) => {
             router.push(`/api-keys?page=${newPage}`);
           }}
-          isLoading={isLoading}
+          isLoading={loading}
         />
       )}
 
