@@ -12,7 +12,8 @@ type GetAppointmentsByMonthReturn = {
 };
 
 export async function getAppointmentsByMonth(
-  date: Date
+  date: Date,
+  calendarId: string
 ): Promise<GetAppointmentsByMonthReturn> {
   try {
     const { userId } = await auth();
@@ -37,6 +38,7 @@ export async function getAppointmentsByMonth(
             },
           },
           { userId },
+          { calendarId },
         ],
       },
       include: {

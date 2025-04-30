@@ -2,6 +2,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
 import { CalendarGrid } from "./calendar-grid";
 import { AppointmentFullData } from "@/types/calendar";
+import { useRouter } from "next/navigation";
+import { Calendar } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
+import { Loader2 } from "lucide-react";
 
 interface CalendarTabsProps {
   calendars: any[];
@@ -38,10 +43,84 @@ export function CalendarTabs({
   openDayDetails,
   initialAppointments,
 }: CalendarTabsProps) {
+  const router = useRouter();
+  const [appointmentsCache, setAppointmentsCache] = useState<Record<string, Record<string, AppointmentFullData[]>>>({});
+  const [currentAppointments, setCurrentAppointments] = useState<Record<string, AppointmentFullData[]>>(initialAppointments);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const getCacheKey = (calendarId: string, date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return `${calendarId}-${year}-${month}`;
+  };
+
+  const fetchAppointmentsForMonth = async (calendarId: string, date: Date) => {
+    const cacheKey = getCacheKey(calendarId, date);
+    
+    // Verificar se já temos os dados em cache
+    if (appointmentsCache[cacheKey]) {
+      setCurrentAppointments(appointmentsCache[cacheKey]);
+      return;
+    }
+    
+    // Se não estiver em cache, buscar do servidor
+    setIsLoading(true);
+    try {
+      const response = await getAppointmentsByMonth(date, calendarId);
+      if (response.success && response.data) {
+        const newAppointments: Record<string, AppointmentFullData[]> = {};
+        
+        response.data.forEach((appointment: any) => {
+          if (!appointment.client || !appointment.service) {
+            console.warn(
+              "Appointment missing client or service data:",
+              appointment.id
+            );
+            return;
+          }
+
+          const dateKey = new Date(appointment.startTime)
+            .toISOString()
+            .split("T")[0];
+
+          if (!newAppointments[dateKey]) {
+            newAppointments[dateKey] = [];
+          }
+
+          newAppointments[dateKey].push(appointment as AppointmentFullData);
+        });
+        
+        // Atualizar o cache e os agendamentos atuais
+        setAppointmentsCache(prev => ({
+          ...prev,
+          [cacheKey]: newAppointments
+        }));
+        setCurrentAppointments(newAppointments);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Atualizar agendamentos quando o calendário ativo ou a data mudar
+  useEffect(() => {
+    if (activeTab) {
+      fetchAppointmentsForMonth(activeTab, currentDate);
+    }
+  }, [activeTab, currentDate]);
+
+  const setCalendarIdQueryParam = (calendarId: string) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("calendarId", calendarId);
+    router.push(`/calendar?${params.toString()}`);
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
-        {calendars.map((calendar) => (
+        {calendars.map((calendar: Calendar) => (
           <TabsTrigger
             key={calendar.id}
             value={calendar.id}
@@ -53,6 +132,8 @@ export function CalendarTabs({
                 e.preventDefault();
                 e.stopPropagation();
               }
+
+              setCalendarIdQueryParam(calendar.id);
             }}
           >
             <span className="flex items-center">
@@ -92,7 +173,12 @@ export function CalendarTabs({
       </TabsList>
 
       {calendars.map((calendar) => (
-        <TabsContent key={calendar.id} value={calendar.id}>
+        <TabsContent key={calendar.id} value={calendar.id} className="relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
           <CalendarGrid
             currentDate={currentDate}
             goToPreviousMonth={goToPreviousMonth}
@@ -101,7 +187,7 @@ export function CalendarTabs({
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             openDayDetails={openDayDetails}
-            initialAppointments={initialAppointments}
+            initialAppointments={currentAppointments}
           />
         </TabsContent>
       ))}

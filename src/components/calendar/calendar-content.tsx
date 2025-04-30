@@ -2,7 +2,7 @@
 import moment from "moment";
 import { z } from "zod";
 import "moment/locale/pt-br";
-import { useState, useEffect } from "react"; // <-- adicionei useEffect aqui
+import { useState, useEffect } from "react"; // Adicionei useEffect aqui
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -15,6 +15,7 @@ import { calendarFormSchema } from "@/validators/calendar";
 import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData } from "@/types/calendar";
 import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
+import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 
 moment.locale("pt-br");
 
@@ -51,27 +52,46 @@ export function CalendarContent({
   const [appointments, setAppointments] =
     useState<Record<string, AppointmentFullData[]>>(initialAppointments);
 
+  // Função para buscar agendamentos quando o calendário ou mês mudar
+  const fetchAppointmentsForMonth = async (calendarId: string, date: Date) => {
+    try {
+      const response = await getAppointmentsByMonth(date, calendarId);
+      if (response.success && response.data) {
+        const newAppointments: Record<string, AppointmentFullData[]> = {};
+
+        response.data.forEach((appointment: any) => {
+          if (!appointment.client || !appointment.service) {
+            console.warn(
+              "Appointment missing client or service data:",
+              appointment.id
+            );
+            return;
+          }
+
+          const dateKey = new Date(appointment.startTime)
+            .toISOString()
+            .split("T")[0];
+
+          if (!newAppointments[dateKey]) {
+            newAppointments[dateKey] = [];
+          }
+
+          newAppointments[dateKey].push(appointment as AppointmentFullData);
+        });
+
+        setAppointments(newAppointments);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos:", error);
+    }
+  };
+
+  // Atualizar agendamentos quando o calendário ativo ou a data mudar
   useEffect(() => {
-    const handleAppointmentUpdated = (event: CustomEvent) => {
-      const { dateKey, appointments: updatedAppointments } = event.detail;
-      setAppointments((prev) => ({
-        ...prev,
-        [dateKey]: updatedAppointments,
-      }));
-    };
-
-    window.addEventListener(
-      "appointmentUpdated",
-      handleAppointmentUpdated as EventListener
-    );
-
-    return () => {
-      window.removeEventListener(
-        "appointmentUpdated",
-        handleAppointmentUpdated as EventListener
-      );
-    };
-  }, []);
+    if (activeTab) {
+      fetchAppointmentsForMonth(activeTab, currentDate);
+    }
+  }, [activeTab, currentDate]);
 
   const openDayDetails = async (date: Date) => {
     const dateKey = date.toISOString().split("T")[0];

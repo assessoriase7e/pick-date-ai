@@ -94,7 +94,8 @@ export function CalendarGrid({
 
   const getAppointmentsForDay = (day: moment.Moment) => {
     const dateKey = day.format("YYYY-MM-DD");
-    return initialAppointments[dateKey] || [];
+    const appointments = initialAppointments[dateKey] || [];
+    return appointments;
   };
 
   return (
