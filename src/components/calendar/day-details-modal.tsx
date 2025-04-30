@@ -17,7 +17,6 @@ import { AppointmentFormDialog } from "./appointment-form-dialog";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
-import { useSearchParams } from "next/navigation";
 
 interface DayDetailsModalProps {
   dayDetails: {
@@ -26,18 +25,16 @@ interface DayDetailsModalProps {
   } | null;
   appointments: AppointmentFullData[];
   closeDayDetails: () => void;
-  activeTab: string;
+  calendarId: string;
 }
 
 export function DayDetailsModal({
   dayDetails,
   appointments,
   closeDayDetails,
-  activeTab,
+  calendarId,
 }: DayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
-  const searchParams = useSearchParams();
-  const calendarId = searchParams.get("calendarId");
 
   // Estados
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
@@ -57,7 +54,7 @@ export function DayDetailsModal({
 
     try {
       const response = await getAppointmentsByCalendarAndDate(
-        activeTab,
+        calendarId,
         dayDetails.date
       );
       if (response.success && response.data) {
@@ -184,7 +181,7 @@ export function DayDetailsModal({
             onSuccess={handleFormSuccess}
             checkTimeConflict={hasTimeConflict}
             initialStartTime={initialStartTime}
-            calendarId={activeTab}
+            calendarId={calendarId}
           />
 
           <DayScheduleGrid

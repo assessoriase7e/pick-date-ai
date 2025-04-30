@@ -20,14 +20,14 @@ moment.locale("pt-br");
 
 interface CalendarContentProps {
   initialCalendars: CalendarFullData[];
-  initialActiveTab: string;
+  initialcalendarId: string;
   initialAppointments: Record<string, AppointmentFullData[]>;
   initialDate: Date;
 }
 
 export function CalendarContent({
   initialCalendars,
-  initialActiveTab,
+  initialcalendarId,
   initialAppointments,
   initialDate,
 }: CalendarContentProps) {
@@ -35,7 +35,7 @@ export function CalendarContent({
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(initialActiveTab);
+  const [calendarId, setcalendarId] = useState(initialcalendarId);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
   const [currentDate, setCurrentDate] = useState(initialDate);
@@ -83,19 +83,18 @@ export function CalendarContent({
     }
   };
 
-  // Atualizar agendamentos quando o calendário ativo ou a data mudar
   useEffect(() => {
-    if (activeTab) {
-      fetchAppointmentsForMonth(activeTab, currentDate);
+    if (calendarId) {
+      fetchAppointmentsForMonth(calendarId, currentDate);
     }
-  }, [activeTab, currentDate]);
+  }, [calendarId, currentDate]);
 
   const openDayDetails = async (date: Date) => {
     const dateKey = date.toISOString().split("T")[0];
     let dayAppointments = appointments[dateKey] || [];
 
     if (dayAppointments.length === 0) {
-      const response = await getAppointmentsByCalendarAndDate(activeTab, date);
+      const response = await getAppointmentsByCalendarAndDate(calendarId, date);
       if (response.success && response.data) {
         dayAppointments = response.data;
         setAppointments((prev) => ({
@@ -131,7 +130,7 @@ export function CalendarContent({
           description: "Calendário criado com sucesso",
         });
         if (calendars.length === 0) {
-          setActiveTab(response?.data?.id as string);
+          setcalendarId(response?.data?.id as string);
         }
       } else {
         toast({
@@ -206,8 +205,8 @@ export function CalendarContent({
         );
         setCalendars(updatedCalendars);
 
-        if (activeTab === selectedCalendar.id) {
-          setActiveTab(
+        if (calendarId === selectedCalendar.id) {
+          setcalendarId(
             updatedCalendars.length > 0 ? updatedCalendars[0].id : ""
           );
         }
@@ -267,8 +266,8 @@ export function CalendarContent({
         ) : (
           <CalendarTabs
             calendars={calendars}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            calendarId={calendarId}
+            setCalendarId={setcalendarId}
             hoveredTab={hoveredTab}
             setHoveredTab={setHoveredTab}
             openEditModal={openEditModal}
@@ -289,7 +288,7 @@ export function CalendarContent({
             appointments={selectedDayDetails.appointments}
             dayDetails={selectedDayDetails}
             closeDayDetails={closeDayDetails}
-            activeTab={activeTab}
+            calendarId={calendarId}
           />
         )}
       </div>

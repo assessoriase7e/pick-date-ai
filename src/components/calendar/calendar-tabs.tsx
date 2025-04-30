@@ -9,8 +9,8 @@ import { Loader2 } from "lucide-react";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  calendarId: string;
+  setCalendarId: (tab: string) => void;
   hoveredTab: string | null;
   setHoveredTab: (tab: string | null) => void;
   openEditModal: (calendar: any) => void;
@@ -27,8 +27,8 @@ interface CalendarTabsProps {
 
 export function CalendarTabs({
   calendars,
-  activeTab,
-  setActiveTab,
+  calendarId,
+  setCalendarId,
   hoveredTab,
   setHoveredTab,
   openEditModal,
@@ -108,10 +108,10 @@ export function CalendarTabs({
 
   // Atualizar agendamentos quando o calendário ativo ou a data mudar
   useEffect(() => {
-    if (activeTab) {
-      fetchAppointmentsForMonth(activeTab, currentDate);
+    if (calendarId) {
+      fetchAppointmentsForMonth(calendarId, currentDate);
     }
-  }, [activeTab, currentDate]);
+  }, [calendarId, currentDate]);
 
   const setCalendarIdQueryParam = (calendarId: string) => {
     const params = new URLSearchParams(window.location.search);
@@ -120,7 +120,7 @@ export function CalendarTabs({
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Tabs value={calendarId} onValueChange={setCalendarId} className="w-full">
       <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
         {calendars.map((calendar: CalendarFullData) => (
           <TabsTrigger

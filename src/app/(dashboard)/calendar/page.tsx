@@ -11,8 +11,8 @@ export default async function CalendarPage({
 }) {
   const response = await listCalendars();
   const calendars = response.success && response.data ? response.data : [];
-  const initialActiveTab = calendars.length > 0 ? calendars[0].id : "";
-  const { calendarId } = (await searchParams) || initialActiveTab;
+  const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
+  const { calendarId } = (await searchParams) || initialCalendarId;
 
   const currentDate = new Date();
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
@@ -44,7 +44,7 @@ export default async function CalendarPage({
   return (
     <CalendarContent
       initialCalendars={calendars}
-      initialActiveTab={initialActiveTab}
+      initialcalendarId={initialCalendarId}
       initialAppointments={appointmentsByDate}
       initialDate={currentDate}
     />
