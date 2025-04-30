@@ -21,6 +21,9 @@ export async function getServices(page = 1, limit = 20) {
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
+        include: {
+          collaborator: true,
+        },
       }),
       prisma.service.count({
         where: { userId },

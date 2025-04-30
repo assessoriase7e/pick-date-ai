@@ -1,50 +1,44 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
-import { serviceSchema } from "@/validators/service";
-import { z } from "zod";
+import { ServiceFormValues } from "@/validators/service";
 
-export async function createService(data: z.infer<typeof serviceSchema>) {
+export async function createService(data: ServiceFormValues) {
   try {
-    const { userId } = await auth();
+    const user = await getClerkUser();
 
-    if (!userId) {
+    if (!user) {
       return {
         success: false,
         error: "Usuário não autenticado",
       };
     }
 
-    const validatedData = serviceSchema.parse(data);
-
     const service = await prisma.service.create({
       data: {
-        ...validatedData,
-        userId,
+        name: data.name,
+        price: data.price,
+        availableDays: data.availableDays,
+        notes: data.notes,
+        collaboratorId: data.collaboratorId || null,
+        userId: user.id,
       },
     });
 
     revalidatePath("/services");
+    revalidatePath("/collaborators");
 
     return {
       success: true,
       data: service,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: "Dados inválidos",
-        fieldErrors: error.flatten().fieldErrors,
-      };
-    }
-
-    console.error("Erro ao criar serviço:", error);
+    console.error("[CREATE_SERVICE_ERROR]", error);
     return {
       success: false,
-      error: "Falha ao criar serviço",
+      error: "Ocorreu um erro ao criar o serviço",
     };
   }
 }

@@ -1,32 +1,29 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
-import { serviceSchema } from "@/validators/service";
-import { z } from "zod";
+import { Service } from "@prisma/client";
 
 export async function updateService(
   id: string,
-  data: z.infer<typeof serviceSchema>
+  data: Omit<Service, "id" | "createdAt" | "updatedAt" | "userId">
 ) {
   try {
-    const { userId } = await auth();
+    const user = await getClerkUser();
 
-    if (!userId) {
+    if (!user) {
       return {
         success: false,
         error: "Usuário não autenticado",
       };
     }
 
-    const validatedData = serviceSchema.parse(data);
-
     // Verificar se o serviço existe e pertence ao usuário
-    const existingService = await prisma.service.findFirst({
+    const existingService = await prisma.service.findUnique({
       where: {
         id,
-        userId,
+        userId: user.id,
       },
     });
 
@@ -38,29 +35,30 @@ export async function updateService(
     }
 
     const service = await prisma.service.update({
-      where: { id },
-      data: validatedData,
+      where: {
+        id,
+      },
+      data: {
+        name: data.name,
+        price: data.price,
+        availableDays: data.availableDays,
+        notes: data.notes,
+        collaboratorId: data.collaboratorId || null,
+      },
     });
 
     revalidatePath("/services");
+    revalidatePath("/collaborators");
 
     return {
       success: true,
       data: service,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: "Dados inválidos",
-        fieldErrors: error.flatten().fieldErrors,
-      };
-    }
-
-    console.error("Erro ao atualizar serviço:", error);
+    console.error("[UPDATE_SERVICE_ERROR]", error);
     return {
       success: false,
-      error: "Falha ao atualizar serviço",
+      error: "Ocorreu um erro ao atualizar o serviço",
     };
   }
 }
