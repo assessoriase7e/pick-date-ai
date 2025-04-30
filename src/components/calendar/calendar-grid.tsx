@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { weekDays } from "@/mocked/calendar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
+import { cn } from "@/lib/utils";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -116,7 +117,6 @@ export function CalendarGrid({
             </Button>
           </div>
         </div>
-
         {/* Dias da Semana */}
         <div className="grid grid-cols-7 text-center py-2 border-b bg-muted/20">
           {weekDays.map((day, index) => (
@@ -125,23 +125,17 @@ export function CalendarGrid({
             </div>
           ))}
         </div>
-
         {/* Dias do Calendário */}
         <div className="grid grid-cols-7 flex-1 auto-rows-fr">
           {calendarDays.map((dayObj, index) => (
             <div
               key={index}
-              className={`
-                border p-1 min-h-[80px] relative
-                ${
-                  !dayObj.isCurrentMonth
-                    ? "bg-muted/20 text-muted-foreground"
-                    : ""
-                }
-                ${dayObj.isToday ? "bg-primary/50" : ""}
-                ${isSelected(dayObj.date) ? "ring-2 ring-primary" : ""}
-                hover:bg-muted/30 cursor-pointer transition-colors
-              `}
+              className={cn(
+                "border p-1 min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors",
+                !dayObj.isCurrentMonth && "bg-muted/20",
+                isSelected(dayObj.date) && "ring-2 ring-primary",
+                getAppointmentsForDay(dayObj.date)?.length && "bg-primary/50"
+              )}
               onClick={() => {
                 setSelectedDate(dayObj.date.toDate());
                 openDayDetails(dayObj.date.toDate());
@@ -156,20 +150,6 @@ export function CalendarGrid({
                 >
                   {dayObj.date.date()}
                 </span>
-
-                {/* Agendamentos */}
-                <div className="flex-1 overflow-y-auto">
-                  {dayObj.isCurrentMonth &&
-                    getAppointmentsForDay(dayObj.date)?.map((appointment) => (
-                      <div
-                        key={appointment.id}
-                        className="bg-primary/20 text-primary rounded p-1 mb-1 text-sm truncate"
-                      >
-                        {appointment.client.fullName} -
-                        {appointment.service.name}
-                      </div>
-                    ))}
-                </div>
               </div>
             </div>
           ))}
