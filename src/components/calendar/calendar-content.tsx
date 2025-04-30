@@ -15,23 +15,23 @@ import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { CalendarFormValues } from "@/validators/calendar";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 moment.locale("pt-br");
 
 interface CalendarContentProps {
-  initialCalendars: CalendarFullData[];
+  calendars: CalendarFullData[];
   initialcalendarId: string;
   initialAppointments: Record<string, AppointmentFullData[]>;
   initialDate: Date;
 }
 
 export function CalendarContent({
-  initialCalendars,
+  calendars,
   initialcalendarId,
   initialAppointments,
   initialDate,
 }: CalendarContentProps) {
-  const [calendars, setCalendars] = useState(initialCalendars);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -122,23 +122,16 @@ export function CalendarContent({
         collaboratorId: values.collaboratorId,
       });
 
-      if (response.success) {
-        setCalendars((prev) => [...prev, response.data as CalendarFullData]);
-        setOpen(false);
-        toast({
-          title: "Sucesso",
-          description: "Calendário criado com sucesso",
-        });
-        if (calendars.length === 0) {
-          setcalendarId(response?.data?.id as string);
-        }
-      } else {
-        toast({
-          title: "Erro",
-          description: response.error || "Falha ao criar calendário",
-          variant: "destructive",
-        });
-      }
+      await revalidatePathAction("/calendar");
+
+      setOpen(false);
+      setSelectedCalendar(response.data?.id);
+
+      toast({
+        title: "Erro",
+        description: response.error || "Falha ao criar calendário",
+        variant: "destructive",
+      });
     } catch (error) {
       console.error("Erro ao criar calendário:", error);
       toast({
@@ -153,34 +146,21 @@ export function CalendarContent({
     if (!selectedCalendar) return;
 
     try {
-      const response = await updateCalendar({
+      await updateCalendar({
         id: selectedCalendar.id,
         name: values.name,
         collaboratorId: values.collaboratorId,
       });
 
-      if (response.success && response.data) {
-        setCalendars((prev) =>
-          prev.map((cal) => {
-            if (cal.id === selectedCalendar.id) {
-              return response.data as CalendarFullData;
-            }
-            return cal;
-          })
-        );
-        setEditOpen(false);
-        setSelectedCalendar(null);
-        toast({
-          title: "Sucesso",
-          description: "Calendário atualizado com sucesso",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: response.error || "Falha ao atualizar calendário",
-          variant: "destructive",
-        });
-      }
+      setEditOpen(false);
+      setSelectedCalendar(null);
+
+      await revalidatePathAction("/calendar");
+
+      toast({
+        title: "Sucesso",
+        description: "Calendário atualizado com sucesso",
+      });
     } catch (error) {
       console.error("Erro ao atualizar calendário:", error);
       toast({
@@ -195,35 +175,18 @@ export function CalendarContent({
     if (!selectedCalendar) return;
 
     try {
-      const response = await deleteCalendar({
+      await deleteCalendar({
         id: selectedCalendar.id,
       });
 
-      if (response.success) {
-        const updatedCalendars = calendars.filter(
-          (cal) => cal.id !== selectedCalendar.id
-        );
-        setCalendars(updatedCalendars);
+      revalidatePathAction("/calendar");
 
-        if (calendarId === selectedCalendar.id) {
-          setcalendarId(
-            updatedCalendars.length > 0 ? updatedCalendars[0].id : ""
-          );
-        }
-
-        setDeleteOpen(false);
-        setSelectedCalendar(null);
-        toast({
-          title: "Sucesso",
-          description: "Calendário excluído com sucesso",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: response.error || "Falha ao excluir calendário",
-          variant: "destructive",
-        });
-      }
+      setDeleteOpen(false);
+      setSelectedCalendar(null);
+      toast({
+        title: "Sucesso",
+        description: "Calendário excluído com sucesso",
+      });
     } catch (error) {
       console.error("Erro ao excluir calendário:", error);
       toast({

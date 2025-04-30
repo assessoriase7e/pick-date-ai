@@ -1,5 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CalendarGrid } from "./calendar-grid";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter } from "next/navigation";
@@ -121,7 +128,47 @@ export function CalendarTabs({
 
   return (
     <Tabs value={calendarId} onValueChange={setCalendarId} className="w-full">
-      <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
+      {/* Versão Mobile - Select */}
+      <div className="lg:hidden w-full mb-4">
+        <Select value={calendarId} onValueChange={setCalendarId}>
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {calendars.find((c) => c.id === calendarId)?.name ||
+                "Selecione um calendário"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {calendars.map((calendar) => (
+              <SelectItem key={calendar.id} value={calendar.id}>
+                <span className="flex items-center justify-between w-full">
+                  <span>
+                    {calendar.name} | ({calendar.collaborator?.name})
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <Edit
+                      className="h-4 w-4 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(calendar);
+                      }}
+                    />
+                    <Trash2
+                      className="h-4 w-4 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteModal(calendar);
+                      }}
+                    />
+                  </div>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Versão Desktop - Tabs */}
+      <TabsList className="hidden lg:flex w-full h-16 justify-start overflow-x-auto overflow-y-hidden">
         {calendars.map((calendar: CalendarFullData) => (
           <TabsTrigger
             key={calendar.id}
@@ -139,13 +186,7 @@ export function CalendarTabs({
             }}
           >
             <span className="flex items-center">
-              {calendar.name}
-              {calendar.collaborator && (
-                <span className="ml-1 text-xs text-muted-foreground">
-                  ({calendar.collaborator.name})
-                </span>
-              )}
-
+              {calendar.name} | ({calendar.collaborator?.name})
               <div
                 className={`calendar-actions ml-2 flex items-center justify-center space-x-1 transition-all duration-200 ${
                   hoveredTab === calendar.id

@@ -102,26 +102,29 @@ export function CalendarGrid({
     <div className="w-full">
       <div className="flex flex-col h-full border rounded-lg">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="lg:text-2xl font-semibold">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
+          <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left">
             {formatMonth(currentDate)}
           </h2>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <Button variant="outline" size="sm" onClick={goToToday}>
               Hoje
             </Button>
             <Button variant="outline" size="sm" onClick={goToNextMonth}>
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         </div>
         {/* Dias da Semana */}
-        <div className="grid grid-cols-7 text-center py-2 border-b bg-muted/20">
+        <div className="grid grid-cols-7 text-center py-1 sm:py-2 border-b bg-muted/20">
           {weekDays.map((day, index) => (
-            <div key={index} className="text-xs lg:text-lg font-medium">
+            <div
+              key={index}
+              className="text-[10px] sm:text-xs lg:text-lg font-medium"
+            >
               {day}
             </div>
           ))}
@@ -132,7 +135,7 @@ export function CalendarGrid({
             <div
               key={index}
               className={cn(
-                "border p-1 min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors",
+                "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors",
                 !dayObj.isCurrentMonth && "bg-muted/20",
                 isSelected(dayObj.date) && "ring-2 ring-primary",
                 getAppointmentsForDay(dayObj.date)?.length && "bg-primary/50"
@@ -144,13 +147,18 @@ export function CalendarGrid({
             >
               <div className="flex flex-col h-full">
                 <span
-                  className={`
-                    text-xs lg:text-lg font-medium
-                    ${dayObj.isToday ? "text-primary" : ""}
-                  `}
+                  className={cn(
+                    "text-xs sm:text-sm lg:text-lg font-medium",
+                    dayObj.isToday && "text-primary"
+                  )}
                 >
                   {dayObj.date.date()}
                 </span>
+                {getAppointmentsForDay(dayObj.date)?.length > 0 && (
+                  <span className="text-[10px] sm:text-xs mt-1">
+                    {getAppointmentsForDay(dayObj.date).length} agendamento(s)
+                  </span>
+                )}
               </div>
             </div>
           ))}

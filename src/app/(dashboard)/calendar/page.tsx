@@ -43,7 +43,7 @@ export default async function CalendarPage({
 
   return (
     <CalendarContent
-      initialCalendars={calendars}
+      calendars={calendars}
       initialcalendarId={initialCalendarId}
       initialAppointments={appointmentsByDate}
       initialDate={currentDate}
