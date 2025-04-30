@@ -1,20 +1,7 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
-import {
-  Music,
-  Image,
-  KeyRound,
-  FileIcon,
-  Link,
-  Menu,
-  User,
-  Bot,
-  Scissors,
-  Users,
-  Calendar,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
-import { usePathname } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -25,10 +12,11 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
 import { Separator } from "./ui/separator";
+import { useSidebarRoutes } from "@/mocked/sidebar";
 
 export function Sidebar() {
   const { user } = useUser();
-  const pathname = usePathname();
+  const { routes } = useSidebarRoutes();
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar se é dispositivo móvel
@@ -46,73 +34,6 @@ export function Sidebar() {
   if (!user) {
     return null;
   }
-
-  const routes = [
-    {
-      label: "Agendamentos",
-      icon: Calendar,
-      href: "/calendar",
-      color: "text-blue-500",
-      isActive: pathname === "/calendar",
-    },
-    {
-      label: "Serviços",
-      icon: Scissors,
-      href: "/services",
-      color: "text-emerald-500",
-      isActive: pathname === "/services",
-    },
-    {
-      href: "/audios",
-      icon: Music,
-      label: "Áudios",
-      isActive: pathname.startsWith("/audios"),
-    },
-    {
-      href: "/images",
-      icon: Image,
-      label: "Imagens",
-      isActive: pathname.startsWith("/images"),
-    },
-    {
-      href: "/documents",
-      icon: FileIcon,
-      label: "Documents",
-      isActive: pathname.startsWith("/documents"),
-    },
-    {
-      href: "/links",
-      icon: Link,
-      label: "Links",
-      isActive: pathname === "/links",
-    },
-    {
-      label: "Clientes",
-      icon: Users,
-      href: "/clients",
-      color: "text-emerald-500",
-      isActive: pathname === "/clients",
-    },
-    {
-      label: "Agentes",
-      icon: Bot,
-      href: "/agents",
-      color: "text-emerald-500",
-      isActive: pathname === "/agents",
-    },
-    {
-      href: "/profile",
-      icon: User,
-      label: "Perfil",
-      isActive: pathname === "/profile",
-    },
-    {
-      href: "/api-keys",
-      icon: KeyRound,
-      label: "API Keys",
-      isActive: pathname.startsWith("/api-keys"),
-    },
-  ];
 
   const MobileMenu = () => (
     <Sheet>

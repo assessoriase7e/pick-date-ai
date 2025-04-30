@@ -1,20 +1,6 @@
 "use client";
-
 import { useUser } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
-import {
-  Bot,
-  Music,
-  Image,
-  KeyRound,
-  FileIcon,
-  Link,
-  User,
-  Menu,
-  Scissors,
-  Users,
-  Calendar,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,83 +12,15 @@ import { SidebarItem } from "./sidebarItem";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserButton } from "@clerk/nextjs";
 import { Separator } from "./ui/separator";
+import { useSidebarRoutes } from "@/mocked/sidebar";
 
 export function MobileSidebar() {
   const { user } = useUser();
-  const pathname = usePathname();
+  const { routes } = useSidebarRoutes();
 
   if (!user) {
     return null;
   }
-
-  const routes = [
-    {
-      label: "Agendamentos",
-      icon: Calendar,
-      href: "/calendar",
-      color: "text-blue-500",
-      isActive: pathname === "/calendar",
-    },
-    {
-      label: "Serviços",
-      icon: Scissors,
-      href: "/services",
-      color: "text-emerald-500",
-      isActive: pathname === "/services",
-    },
-    {
-      href: "/audios",
-      icon: Music,
-      label: "Áudios",
-      isActive: pathname.startsWith("/audios"),
-    },
-    {
-      href: "/images",
-      icon: Image,
-      label: "Imagens",
-      isActive: pathname.startsWith("/images"),
-    },
-    {
-      href: "/documents",
-      icon: FileIcon,
-      label: "Documents",
-      isActive: pathname.startsWith("/documents"),
-    },
-    {
-      href: "/links",
-      icon: Link,
-      label: "Links",
-      isActive: pathname === "/links",
-    },
-    {
-      label: "Clientes",
-      icon: Users,
-      href: "/clients",
-      color: "text-emerald-500",
-      isActive: pathname === "/clients",
-    },
-    {
-      label: "Agentes",
-      icon: Bot,
-      href: "/agentes",
-      color: "text-emerald-500",
-      isActive: pathname.startsWith("/agentes"),
-    },
-
-    {
-      href: "/profile",
-      icon: User,
-      label: "Perfil",
-      isActive: pathname === "/profile",
-    },
-
-    {
-      href: "/api-keys",
-      icon: KeyRound,
-      label: "API Keys",
-      isActive: pathname.startsWith("/api-keys"),
-    },
-  ];
 
   return (
     <Sheet>

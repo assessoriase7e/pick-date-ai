@@ -1,7 +1,7 @@
 "use server";
 import { getServices } from "@/actions/services/get-services";
-import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { ServicesSection } from "@/components/services/services-section";
+import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 
 interface ServicesPageProps {
   searchParams: Promise<{
@@ -12,10 +12,19 @@ interface ServicesPageProps {
 export default async function ServicesPage({
   searchParams,
 }: ServicesPageProps) {
-  const user = await getClerkUser();
   const { page } = await searchParams;
   const pageParam = Number(page) || 1;
-  const { data: services, pagination } = await getServices(pageParam);
+
+  const [servicesResult, collaboratorsResult] = await Promise.all([
+    getServices(pageParam),
+    getCollaborators(1, 100),
+  ]);
+
+  // Ensure pagination is never undefined
+  const pagination =
+    servicesResult.success && servicesResult.pagination
+      ? servicesResult.pagination
+      : { totalPages: 1, currentPage: 1 };
 
   return (
     <div className="container">
@@ -28,9 +37,9 @@ export default async function ServicesPage({
 
       <div className="space-y-8">
         <ServicesSection
-          services={services || []}
-          user={user}
-          pagination={pagination || { totalPages: 1, currentPage: 1 }}
+          services={servicesResult.data || []}
+          collaborators={collaboratorsResult.data || []}
+          pagination={pagination}
         />
       </div>
     </div>

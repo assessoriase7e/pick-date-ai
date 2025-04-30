@@ -3,21 +3,9 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 
-export function ThemeToggle() {
+export function ThemeToggleClient() {
   const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Só renderize o componente depois que o cliente estiver montado
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Renderize um placeholder durante a renderização do servidor
-  if (!mounted) {
-    return <Button variant="ghost" size="icon" aria-label="Toggle theme" />;
-  }
 
   return (
     <Button
