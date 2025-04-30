@@ -117,7 +117,8 @@ export function DocumentsContent() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -185,6 +186,64 @@ export function DocumentsContent() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Carregando...
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Nenhum documento encontrado
+          </div>
+        ) : (
+          documents.map((document) => (
+            <div key={document.id} className="rounded-md border p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <h3 className="font-medium">
+                      {truncateText(document.fileName || "Documento", 20)}
+                      <span className="ml-2 text-xs text-muted-foreground uppercase">
+                        ({document.fileType})
+                      </span>
+                    </h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {truncateText(document.description, 30)}
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDownloadDocument(document)}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditingDocument(document)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => setDeletingDocument(document)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (

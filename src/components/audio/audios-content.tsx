@@ -133,7 +133,8 @@ export function AudiosContent() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      {/* Visualização para Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -214,6 +215,69 @@ export function AudiosContent() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Visualização para Mobile */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="text-center py-10">Carregando...</div>
+        ) : audios.length === 0 ? (
+          <div className="text-center py-10">Nenhum áudio encontrado.</div>
+        ) : (
+          audios.map((audio: AudioRecord) => (
+            <div key={audio.id} className="rounded-lg border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => {
+                      const audioElement = document.getElementById(
+                        `audio-${audio.id}`
+                      ) as HTMLAudioElement;
+                      handlePlayPause(`audio-${audio.id}`, audioElement);
+                    }}
+                  >
+                    {playingAudio === `audio-${audio.id}` ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <audio
+                    id={`audio-${audio.id}`}
+                    className="hidden"
+                    onEnded={() => setPlayingAudio(null)}
+                  >
+                    <source
+                      src={createAudioUrl(audio.audioBase64)}
+                      type="audio/mpeg"
+                    />
+                    Seu navegador não suporta o elemento de áudio.
+                  </audio>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditingAudio(audio)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => setDeletingAudio(audio)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">{audio.description}</div>
+            </div>
+          ))
+        )}
       </div>
 
       <Pagination

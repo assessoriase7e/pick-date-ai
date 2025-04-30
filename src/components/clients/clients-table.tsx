@@ -116,7 +116,8 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -170,7 +171,51 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
         </Table>
       </div>
 
-      {/* Modal para novo cliente */}
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {clients.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Nenhum cliente encontrado
+          </div>
+        ) : (
+          clients.map((client) => (
+            <div key={client.id} className="rounded-md border p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h3 className="font-medium">{client.fullName}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {client.phone}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(client.birthDate)}
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Link href={`/clients/${client.id}/edit`}>
+                    <Button variant="outline" size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link href={`/clients/${client.id}/services`}>
+                    <Button variant="outline" size="icon">
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDeleteClick(client.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Modais existentes */}
       <Dialog
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}

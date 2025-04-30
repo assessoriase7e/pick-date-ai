@@ -83,13 +83,14 @@ export function ServicesSection({
           <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
         </Button>
       </div>
-      <div className="rounded-md border">
+
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Tempo</TableHead>
-
               <TableHead>Preço</TableHead>
               <TableHead>Dias Disponíveis</TableHead>
               <TableHead>Profissional</TableHead>
@@ -99,7 +100,7 @@ export function ServicesSection({
           <TableBody>
             {services.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">
+                <TableCell colSpan={6} className="text-center py-10">
                   Nenhum serviço encontrado.
                 </TableCell>
               </TableRow>
@@ -139,6 +140,60 @@ export function ServicesSection({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {services.length === 0 ? (
+          <div className="text-center py-10 rounded-lg border p-4">
+            Nenhum serviço encontrado.
+          </div>
+        ) : (
+          services.map((service) => (
+            <div key={service.id} className="rounded-lg border p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h3 className="font-medium">{service.name}</h3>
+                  <p className="text-sm text-gray-500">
+                    {service.collaborator?.name}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEdit(service)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => setDeletingService(service)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Duração:</span>
+                  <p>{service.durationMinutes} Min</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Preço:</span>
+                  <p>{formatCurrency(service.price)}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-500">Dias Disponíveis:</span>
+                  <p>{formatAvailableDays(service.availableDays)}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <Pagination

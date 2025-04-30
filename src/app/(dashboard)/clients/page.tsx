@@ -1,5 +1,5 @@
 import { getClients } from "@/actions/clients/get-clients";
-import ClientsTable from "./components/clients-table";
+import ClientsTable from "@/components/clients/clients-table";
 
 export default async function ClientsPage() {
   const { success, data, error } = await getClients();

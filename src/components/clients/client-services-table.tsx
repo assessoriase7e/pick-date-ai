@@ -134,82 +134,105 @@ export default function ClientServicesTable({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <Link href="/clients">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
-        </Link>
-
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Serviço
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Link href="/clients">
+            <Button variant="outline" size="icon">
+              <ArrowLeft className="h-4 w-4" />
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Serviço</DialogTitle>
-            </DialogHeader>
-            <AddClientServiceForm
-              clientId={clientId}
-              services={services}
-              onSuccess={handleAddSuccess}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+          </Link>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Serviço
+          </Button>
+        </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Serviço</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Horário</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {clientServices.length === 0 ? (
+        {/* Visualização Desktop */}
+        <div className="rounded-md border hidden md:block">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-center py-6 text-muted-foreground"
-                >
-                  Nenhum serviço encontrado
-                </TableCell>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
-            ) : (
-              clientServices.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell>{service.service.name}</TableCell>
-                  <TableCell>{formatDate(service.date)}</TableCell>
-                  <TableCell>
-                    {service.isAppointment && service.startTime && service.endTime
-                      ? `${formatTime(service.startTime)} - ${formatTime(service.endTime)}`
-                      : "-"}
+            </TableHeader>
+            <TableBody>
+              {clientServices.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-6 text-muted-foreground"
+                  >
+                    Nenhum serviço encontrado
                   </TableCell>
-                  <TableCell>
-                    {service.description || "-"}
-                  </TableCell>
-                  <TableCell>
+                </TableRow>
+              ) : (
+                clientServices.map((service) => (
+                  <TableRow key={service.id}>
+                    <TableCell>{service.service.name}</TableCell>
+                    <TableCell>{formatDate(service.date)}</TableCell>
+                    <TableCell>
+                      {service.isAppointment && service.startTime && service.endTime
+                        ? `${formatTime(service.startTime)} - ${formatTime(service.endTime)}`
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {service.description || "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDeleteClick(service.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Visualização Mobile */}
+        <div className="md:hidden space-y-4">
+          {clientServices.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground rounded-md border">
+              Nenhum serviço encontrado
+            </div>
+          ) : (
+            clientServices.map((clientService) => (
+              <div key={clientService.id} className="rounded-md border p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <h3 className="font-medium">{clientService.service.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(clientService.date)}
+                    </p>
+                    {clientService.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {clientService.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => handleDeleteClick(service.id)}
+                      onClick={() => handleDeleteClick(clientService.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {pagination && pagination.pages > 1 && (

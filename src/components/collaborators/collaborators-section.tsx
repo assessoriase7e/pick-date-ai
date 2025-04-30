@@ -81,7 +81,9 @@ export function CollaboratorsSection({
           Novo Colaborador
         </Button>
       </div>
-      <div className="rounded-md border">
+
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -133,6 +135,48 @@ export function CollaboratorsSection({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {collaborators.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Nenhum colaborador encontrado
+          </div>
+        ) : (
+          collaborators.map((collaborator) => (
+            <div key={collaborator.id} className="rounded-md border p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h3 className="font-medium">{collaborator.name}</h3>
+                  <p className="text-sm text-muted-foreground">{collaborator.phone}</p>
+                  <p className="text-sm text-muted-foreground">{collaborator.profession}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatServices(collaborator.services)}
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEdit(collaborator)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => handleDelete(collaborator.id)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <Pagination

@@ -1,5 +1,5 @@
 import { getClient } from "@/actions/clients/get-client";
-import ClientForm from "../../components/client-form";
+import ClientForm from "@/components/clients/client-form";
 import { notFound } from "next/navigation";
 
 interface EditClientPageProps {

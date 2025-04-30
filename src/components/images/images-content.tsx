@@ -119,7 +119,8 @@ export function ImagesContent() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      {/* Visualização Desktop */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -186,6 +187,57 @@ export function ImagesContent() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Visualização Mobile */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Carregando...
+          </div>
+        ) : images.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground rounded-md border">
+            Nenhuma imagem encontrada
+          </div>
+        ) : (
+          images.map((image) => (
+            <div key={image.id} className="rounded-md border p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h3 className="font-medium">{image.description}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(image.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setViewingImage(image)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditingImage(image)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setDeletingImage(image)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (

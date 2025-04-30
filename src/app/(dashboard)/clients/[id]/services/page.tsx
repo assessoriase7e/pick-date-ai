@@ -1,7 +1,7 @@
 import { getClient } from "@/actions/clients/get-client";
 import { getClientServices } from "@/actions/clients/services/get-client-services";
 import { getServices } from "@/actions/services/get-services";
-import ClientServicesTable from "./components/client-services-table";
+import ClientServicesTable from "@/components/clients/client-services-table";
 import { notFound } from "next/navigation";
 
 interface ClientServicesPageProps {
