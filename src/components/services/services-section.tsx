@@ -88,6 +88,8 @@ export function ServicesSection({
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
+              <TableHead>Tempo</TableHead>
+
               <TableHead>Preço</TableHead>
               <TableHead>Dias Disponíveis</TableHead>
               <TableHead>Profissional</TableHead>
@@ -105,6 +107,9 @@ export function ServicesSection({
               services.map((service) => (
                 <TableRow key={service.id}>
                   <TableCell className="font-medium">{service.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {service.durationMinutes} Min
+                  </TableCell>
                   <TableCell>{formatCurrency(service.price)}</TableCell>
                   <TableCell>
                     {formatAvailableDays(service.availableDays)}

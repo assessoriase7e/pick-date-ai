@@ -44,6 +44,7 @@ export async function updateService(
         availableDays: data.availableDays,
         notes: data.notes,
         collaboratorId: data.collaboratorId || null,
+        durationMinutes: data.durationMinutes,
       },
     });
 

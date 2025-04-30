@@ -7,6 +7,7 @@ export const serviceSchema = z.object({
     .array(z.string())
     .min(1, "Selecione pelo menos um dia disponível"),
   notes: z.string().nullable(),
+  durationMinutes: z.number().min(1, "Duração deve ser maior que zero"),
   collaboratorId: z.string().nullable(),
 });
 

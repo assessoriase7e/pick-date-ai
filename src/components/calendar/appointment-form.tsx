@@ -39,18 +39,9 @@ import { Input } from "@/components/ui/input";
 import moment from "moment";
 import { AppointmentFullData } from "@/types/calendar";
 import { getClients } from "@/actions/clients/get-clients";
+import { Client, Service } from "@prisma/client";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
-
-interface Client {
-  id: string;
-  fullName: string;
-}
-
-interface Service {
-  id: string;
-  name: string;
-}
 
 interface AppointmentFormProps {
   date: Date;
@@ -77,6 +68,11 @@ export function AppointmentForm({
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Novo estado para armazenar a duração do serviço selecionado
+  const [selectedServiceDuration, setSelectedServiceDuration] = useState<
+    number | null
+  >(null);
 
   const isEditing = !!appointment;
 
@@ -124,6 +120,25 @@ export function AppointmentForm({
 
     loadData();
   }, []);
+
+  // Atualiza a duração do serviço ao selecionar um serviço
+  useEffect(() => {
+    if (form.watch("serviceId")) {
+      const service = services.find((s) => s.id === form.watch("serviceId"));
+      setSelectedServiceDuration(service?.durationMinutes ?? null);
+    }
+  }, [form.watch("serviceId"), services]);
+
+  // Atualiza o horário final automaticamente ao alterar o serviço ou o horário inicial
+  useEffect(() => {
+    const startTime = form.watch("startTime");
+    if (selectedServiceDuration && startTime) {
+      const newEndTime = moment(startTime, "HH:mm")
+        .add(selectedServiceDuration, "minutes")
+        .format("HH:mm");
+      form.setValue("endTime", newEndTime);
+    }
+  }, [selectedServiceDuration, form.watch("startTime")]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -316,6 +331,9 @@ export function AppointmentForm({
                           value={service.id}
                           onSelect={() => {
                             form.setValue("serviceId", service.id);
+                            setSelectedServiceDuration(
+                              service.durationMinutes ?? null
+                            );
                           }}
                         >
                           <Check
@@ -327,6 +345,11 @@ export function AppointmentForm({
                             )}
                           />
                           {service.name}
+                          {service.durationMinutes && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({service.durationMinutes} min)
+                            </span>
+                          )}
                         </CommandItem>
                       ))}
                     </CommandGroup>

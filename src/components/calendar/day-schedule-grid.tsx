@@ -27,7 +27,10 @@ export function DayScheduleGrid({
     <div className="flex-1 overflow-y-auto">
       <div className="flex h-full">
         {/* Régua de horas */}
-        <div className="w-16 flex-shrink-0 border-r bg-muted/20" style={{ minHeight: "1920px" }}>
+        <div
+          className="w-16 flex-shrink-0 border-r bg-muted/20"
+          style={{ minHeight: "1920px" }}
+        >
           {hoursOfDay.map((hour) => (
             <div
               key={hour}
@@ -75,6 +78,9 @@ export function DayScheduleGrid({
                     marginTop: `${(startPosition % 60) * (80 / 60)}px`,
                     height: `${duration * (80 / 60)}px`,
                   }}
+                  duration={moment(appointment.startTime).diff(
+                    appointment.endTime
+                  )}
                 />
               );
             })}

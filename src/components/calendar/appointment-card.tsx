@@ -4,17 +4,20 @@ import { ptBR } from "date-fns/locale";
 import { AppointmentFullData } from "@/types/calendar";
 import React from "react"; // Import React
 import { Card, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface AppointmentCardProps {
   appointment: AppointmentFullData;
   onEdit: () => void;
   style?: React.CSSProperties;
+  duration: number;
 }
 
 export function AppointmentCard({
   appointment,
   onEdit,
   style,
+  duration,
 }: AppointmentCardProps) {
   const { startTime, endTime, client, service, notes } = appointment;
 
@@ -24,7 +27,12 @@ export function AppointmentCard({
       style={style}
       onClick={onEdit}
     >
-      <CardHeader className="p-2 pl-4">
+      <CardHeader
+        className={cn(
+          "p-2 pl-4 items-center h-full",
+          duration < 60 && "flex-row"
+        )}
+      >
         {client.fullName}
         <h4 className="font-medium truncate flex items-center gap-2">
           {service.name} <span>|</span>

@@ -61,6 +61,7 @@ export function ServiceForm({
       availableDays: initialData?.availableDays || [],
       notes: initialData?.notes || "",
       collaboratorId: initialData?.collaboratorId || "none",
+      durationMinutes: initialData?.durationMinutes || 30,
     },
   });
 
@@ -215,6 +216,26 @@ export function ServiceForm({
               <FormDescription>
                 Associe este serviço a um colaborador específico.
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="durationMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duração (minutos)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Ex: 30"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
