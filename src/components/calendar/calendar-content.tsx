@@ -12,9 +12,9 @@ import { EmptyCalendarState } from "./empty-calendar-state";
 import { CalendarTabs } from "./calendar-tabs";
 import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
-import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { CalendarFormValues } from "@/validators/calendar";
+import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 
 moment.locale("pt-br");
 
@@ -95,7 +95,7 @@ export function CalendarContent({
     let dayAppointments = appointments[dateKey] || [];
 
     if (dayAppointments.length === 0) {
-      const response = await getAppointmentsByDate(date);
+      const response = await getAppointmentsByCalendarAndDate(activeTab, date);
       if (response.success && response.data) {
         dayAppointments = response.data;
         setAppointments((prev) => ({
@@ -122,7 +122,7 @@ export function CalendarContent({
         name: values.name,
         collaboratorId: values.collaboratorId,
       });
-  
+
       if (response.success) {
         setCalendars((prev) => [...prev, response.data as CalendarFullData]);
         setOpen(false);

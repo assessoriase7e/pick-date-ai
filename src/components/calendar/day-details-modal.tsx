@@ -13,10 +13,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AppointmentFullData } from "@/types/calendar";
 import { deleteAppointment } from "@/actions/appointments/delete";
-import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 import { AppointmentFormDialog } from "./appointment-form-dialog";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
+import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { useSearchParams } from "next/navigation";
 
 interface DayDetailsModalProps {
   dayDetails: {
@@ -35,6 +36,8 @@ export function DayDetailsModal({
   activeTab,
 }: DayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
+  const searchParams = useSearchParams();
+  const calendarId = searchParams.get("calendarId");
 
   // Estados
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
@@ -53,7 +56,10 @@ export function DayDetailsModal({
     if (!dayDetails) return;
 
     try {
-      const response = await getAppointmentsByDate(dayDetails.date);
+      const response = await getAppointmentsByCalendarAndDate(
+        activeTab,
+        dayDetails.date
+      );
       if (response.success && response.data) {
         setLocalAppointments(response.data);
 
