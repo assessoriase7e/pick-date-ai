@@ -13,16 +13,18 @@ interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: any;
+  collaborators: any[];
 }
 
 export function ServiceModal({
   isOpen,
   onClose,
   initialData,
+  collaborators,
 }: ServiceModalProps) {
-  const title = initialData ? "Editar Serviço" : "Criar Serviço";
+  const title = initialData ? "Editar Serviço" : "Novo Serviço";
   const description = initialData
-    ? "Edite as informações do serviço existente."
+    ? "Edite as informações do serviço."
     : "Adicione um novo serviço ao sistema.";
 
   return (
@@ -32,7 +34,11 @@ export function ServiceModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <ServiceForm initialData={initialData} onSuccess={onClose} />
+        <ServiceForm
+          initialData={initialData}
+          onSuccess={onClose}
+          collaborators={collaborators}
+        />
       </DialogContent>
     </Dialog>
   );

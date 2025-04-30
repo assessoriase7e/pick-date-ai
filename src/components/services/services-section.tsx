@@ -19,10 +19,12 @@ import { deleteService } from "@/actions/services/delete-service";
 import { formatCurrency } from "@/lib/format-utils";
 import { formatAvailableDays } from "@/lib/format-days";
 import { Pagination } from "@/components/ui/pagination";
+import { Collaborator } from "@prisma/client";
+import { ServiceFullData } from "@/types/service";
 
 interface ServicesSectionProps {
-  services: any[];
-  user: any;
+  services: ServiceFullData[];
+  collaborators: Collaborator[];
   pagination: {
     totalPages: number;
     currentPage: number;
@@ -31,6 +33,7 @@ interface ServicesSectionProps {
 
 export function ServicesSection({
   services,
+  collaborators,
   pagination,
 }: ServicesSectionProps) {
   const router = useRouter();
@@ -106,7 +109,7 @@ export function ServicesSection({
                   <TableCell>
                     {formatAvailableDays(service.availableDays)}
                   </TableCell>
-                  <TableCell>{service.professionalName}</TableCell>
+                  <TableCell>{service.collaborator?.name}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
@@ -143,6 +146,7 @@ export function ServicesSection({
         isOpen={isModalOpen}
         onClose={handleModalClose}
         initialData={editingService}
+        collaborators={collaborators}
       />
 
       {deletingService && (

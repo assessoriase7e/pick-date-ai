@@ -9,11 +9,19 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +32,7 @@ import { updateService } from "@/actions/services/update-service";
 interface ServiceFormProps {
   initialData?: any;
   onSuccess: () => void;
+  collaborators: any[];
 }
 
 const DAYS_OF_WEEK = [
@@ -36,7 +45,11 @@ const DAYS_OF_WEEK = [
   "Domingo",
 ];
 
-export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
+export function ServiceForm({
+  initialData,
+  onSuccess,
+  collaborators,
+}: ServiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!initialData;
 
@@ -46,16 +59,23 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
       name: initialData?.name || "",
       price: initialData?.price || 0,
       availableDays: initialData?.availableDays || [],
-      professionalName: initialData?.professionalName || "",
       notes: initialData?.notes || "",
+      collaboratorId: initialData?.collaboratorId || "none",
     },
   });
 
   const onSubmit = async (values: ServiceFormValues) => {
     setIsLoading(true);
     try {
+      // Convert "none" value to null or empty string
+      const submissionValues = {
+        ...values,
+        collaboratorId:
+          values.collaboratorId === "none" ? null : values.collaboratorId,
+      };
+
       if (isEditing) {
-        const result = await updateService(initialData.id, values);
+        const result = await updateService(initialData.id, submissionValues);
         if (result.success) {
           toast.success("Serviço atualizado com sucesso");
           onSuccess();
@@ -63,7 +83,7 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
           toast.error(result.error || "Erro ao atualizar serviço");
         }
       } else {
-        const result = await createService(values);
+        const result = await createService(submissionValues);
         if (result.success) {
           toast.success("Serviço criado com sucesso");
           onSuccess();
@@ -156,9 +176,7 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">
-                            {day}
-                          </FormLabel>
+                          <FormLabel className="font-normal">{day}</FormLabel>
                         </FormItem>
                       );
                     }}
@@ -172,13 +190,31 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
 
         <FormField
           control={form.control}
-          name="professionalName"
+          name="collaboratorId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome do Profissional</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome do profissional" {...field} />
-              </FormControl>
+              <FormLabel>Colaborador</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value || undefined}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um colaborador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {collaborators.map((collaborator) => (
+                    <SelectItem key={collaborator.id} value={collaborator.id}>
+                      {collaborator.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Associe este serviço a um colaborador específico.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -195,6 +231,7 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
                   placeholder="Observações sobre o serviço"
                   className="resize-none"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
