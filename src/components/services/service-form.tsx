@@ -62,6 +62,7 @@ export function ServiceForm({
       notes: initialData?.notes || "",
       collaboratorId: initialData?.collaboratorId || "none",
       durationMinutes: initialData?.durationMinutes || 30,
+      commission: initialData?.commission || 0,
     },
   });
 
@@ -226,14 +227,34 @@ export function ServiceForm({
           name="durationMinutes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duração (minutos)</FormLabel>
+              <FormLabel>Duração</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  placeholder="Ex: 30"
+                <Input type="number" min={1} placeholder="Ex: 30" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="commission"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Comissão</FormLabel>
+              <FormControl>
+                <NumericFormat
+                  customInput={Input}
+                  suffix="%"
+                  decimalScale={0}
+                  maxLength={4}
+                  fixedDecimalScale
+                  placeholder="10%"
                   {...field}
-                  value={field.value || ""}
+                  defaultValue={field.value || 0}
+                  onValueChange={(values) => {
+                    field.onChange(values.value);
+                  }}
                 />
               </FormControl>
               <FormMessage />

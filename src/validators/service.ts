@@ -9,6 +9,7 @@ export const serviceSchema = z.object({
   notes: z.string().nullable(),
   durationMinutes: z.number().min(1, "Duração deve ser maior que zero"),
   collaboratorId: z.string().nullable(),
+  commission: z.number().nullable(),
 });
 
 export type ServiceFormValues = z.infer<typeof serviceSchema>;

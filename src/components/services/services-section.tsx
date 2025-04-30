@@ -92,6 +92,7 @@ export function ServicesSection({
               <TableHead>Nome</TableHead>
               <TableHead>Tempo</TableHead>
               <TableHead>Preço</TableHead>
+              <TableHead>Comissão</TableHead>
               <TableHead>Dias Disponíveis</TableHead>
               <TableHead>Profissional</TableHead>
               <TableHead className="w-[150px]">Ações</TableHead>
@@ -112,6 +113,7 @@ export function ServicesSection({
                     {service.durationMinutes} Min
                   </TableCell>
                   <TableCell>{formatCurrency(service.price)}</TableCell>
+                  <TableCell>{service.commission}%</TableCell>
                   <TableCell>
                     {formatAvailableDays(service.availableDays)}
                   </TableCell>
@@ -177,7 +179,7 @@ export function ServicesSection({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
                   <span className="text-gray-500">Duração:</span>
                   <p>{service.durationMinutes} Min</p>
@@ -185,6 +187,10 @@ export function ServicesSection({
                 <div>
                   <span className="text-gray-500">Preço:</span>
                   <p>{formatCurrency(service.price)}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Comissão</span>
+                  <p>{service.commission}%</p>
                 </div>
                 <div className="col-span-2">
                   <span className="text-gray-500">Dias Disponíveis:</span>

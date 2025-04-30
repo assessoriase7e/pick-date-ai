@@ -285,6 +285,7 @@ model Service {
   availableDays   String[]
   notes           String?
   userId          String
+  commission      Int?             @default(0)
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt

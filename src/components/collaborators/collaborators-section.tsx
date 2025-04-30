@@ -50,13 +50,13 @@ export function CollaboratorsSection({
       const result = await deleteCollaborator(id);
 
       if (result.success) {
-        toast.success("Colaborador excluído com sucesso");
+        toast.success("profissional excluído com sucesso");
         router.refresh();
       } else {
-        toast.error(result.error || "Erro ao excluir colaborador");
+        toast.error(result.error || "Erro ao excluir profissional");
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao excluir o colaborador");
+      toast.error("Ocorreu um erro ao excluir o profissional");
     } finally {
       setIsDeleting(false);
     }
@@ -75,10 +75,10 @@ export function CollaboratorsSection({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Lista de Colaboradores</h2>
+        <h2 className="text-xl font-semibold">Lista de Profissionais</h2>
         <Button onClick={() => setIsModalOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Colaborador
+          Novo Profissional
         </Button>
       </div>
 
@@ -98,7 +98,7 @@ export function CollaboratorsSection({
             {collaborators.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10">
-                  Nenhum colaborador encontrado.
+                  Nenhum profissional encontrado.
                 </TableCell>
               </TableRow>
             ) : (
@@ -141,16 +141,23 @@ export function CollaboratorsSection({
       <div className="md:hidden space-y-4">
         {collaborators.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground rounded-md border">
-            Nenhum colaborador encontrado
+            Nenhum profissional encontrado
           </div>
         ) : (
           collaborators.map((collaborator) => (
-            <div key={collaborator.id} className="rounded-md border p-4 space-y-3">
+            <div
+              key={collaborator.id}
+              className="rounded-md border p-4 space-y-3"
+            >
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <h3 className="font-medium">{collaborator.name}</h3>
-                  <p className="text-sm text-muted-foreground">{collaborator.phone}</p>
-                  <p className="text-sm text-muted-foreground">{collaborator.profession}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {collaborator.phone}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {collaborator.profession}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {formatServices(collaborator.services)}
                   </p>
