@@ -8,9 +8,11 @@ import { calendarSchema } from "@/validators/calendar";
 export async function updateCalendar({
   id,
   name,
+  collaboratorId,
 }: {
   id: string;
   name: string;
+  collaboratorId?: string;
 }) {
   try {
     const { userId } = await auth();
@@ -41,6 +43,7 @@ export async function updateCalendar({
     const validatedData = calendarSchema.parse({
       name,
       userId,
+      collaboratorId,
     });
 
     // Atualizar o calendário
@@ -50,6 +53,7 @@ export async function updateCalendar({
       },
       data: {
         name: validatedData.name,
+        collaboratorId: validatedData.collaboratorId,
       },
     });
 

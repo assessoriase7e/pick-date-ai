@@ -343,15 +343,35 @@ model ClientService {
 }
 
 model Calendar {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  appointments Appointment[]
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  appointments   Appointment[]
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  collaboratorId String?       @db.ObjectId
 
   @@map("calendar")
+}
+
+model Collaborator {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  phone        String
+  profession   String
+  description  String?
+  workingHours String
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services     Service[]
+  serviceIds   String[]   @db.ObjectId
+  calendars    Calendar[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("collaborator")
 }
 
 model Appointment {
@@ -372,21 +392,4 @@ model Appointment {
   userId     String?
 
   @@map("appointment")
-}
-
-model Collaborator {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  phone        String
-  profession   String
-  description  String?
-  workingHours String
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  services     Service[]
-  serviceIds   String[]  @db.ObjectId
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@map("collaborator")
 }

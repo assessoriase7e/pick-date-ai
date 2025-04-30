@@ -65,10 +65,8 @@ export const changeAppointmentStatusSchema = z.object({
 // Schema para operações de banco de dados (inclui userId)
 export const calendarSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  userId: z.string(),
+  userId: z.string().optional(),
+  collaboratorId: z.string().optional(),
 });
 
-// Schema para validação de formulário (sem userId)
-export const calendarFormSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-});
+export type CalendarFormValues = z.infer<typeof calendarSchema>;

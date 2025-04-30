@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { calendarFormSchema } from "@/validators/calendar";
-import { z } from "zod";
+import { CalendarFormValues, calendarSchema } from "@/validators/calendar";
 import {
   Dialog,
   DialogContent,
@@ -9,20 +8,16 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
-
-type CalendarFormValues = z.infer<typeof calendarFormSchema>;
+import { useEffect, useState } from "react";
+import { CalendarForm } from "./calendar-form";
+import { updateCalendar } from "@/actions/calendars/update";
+import { Pencil } from "lucide-react";
+import { toast } from "sonner";
+import { createCalendar } from "@/actions/calendars/create";
+import { Calendar } from "@prisma/client";
 
 interface CalendarModalsProps {
   open: boolean;
@@ -50,14 +45,14 @@ export function CalendarModals({
   handleDeleteCalendar,
 }: CalendarModalsProps) {
   const form = useForm<CalendarFormValues>({
-    resolver: zodResolver(calendarFormSchema),
+    resolver: zodResolver(calendarSchema),
     defaultValues: {
       name: "",
     },
   });
 
   const editForm = useForm<CalendarFormValues>({
-    resolver: zodResolver(calendarFormSchema),
+    resolver: zodResolver(calendarSchema),
     defaultValues: {
       name: "",
     },
@@ -85,36 +80,7 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Criar Novo Calendário</DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleCreateCalendar)}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do calendário" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  type="button"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">Salvar</Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <CalendarForm onSubmit={handleCreateCalendar} />
         </DialogContent>
       </Dialog>
 
@@ -124,36 +90,10 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Editar Calendário</DialogTitle>
           </DialogHeader>
-          <Form {...editForm}>
-            <form
-              onSubmit={editForm.handleSubmit(handleEditCalendar)}
-              className="space-y-4"
-            >
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do calendário" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setEditOpen(false)}
-                  type="button"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">Salvar</Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <CalendarForm
+            onSubmit={handleEditCalendar}
+            calendar={selectedCalendar}
+          />
         </DialogContent>
       </Dialog>
 
@@ -186,5 +126,86 @@ export function CalendarModals({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// Modal de Criação
+export function CreateCalendarModal() {
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async (values: CalendarFormValues) => {
+    try {
+      const response = await createCalendar(values);
+      if (response.success) {
+        toast.success("Calendário criado com sucesso!");
+        setOpen(false);
+      } else {
+        toast.error(response.error || "Erro ao criar calendário");
+      }
+    } catch (error) {
+      toast.error("Erro ao criar calendário");
+      console.error(error);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>Criar Calendário</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Criar Novo Calendário</DialogTitle>
+          <DialogDescription>
+            Preencha as informações para criar um novo calendário.
+          </DialogDescription>
+        </DialogHeader>
+
+        <CalendarForm onSubmit={handleSubmit} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Modal de Edição
+export function EditCalendarModal({ calendar }: { calendar: Calendar }) {
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async (values: CalendarFormValues) => {
+    try {
+      const response = await updateCalendar({
+        id: calendar.id,
+        ...values,
+      });
+      if (response.success) {
+        toast.success("Calendário atualizado com sucesso!");
+        setOpen(false);
+      } else {
+        toast.error(response.error || "Erro ao atualizar calendário");
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar calendário");
+      console.error(error);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar Calendário</DialogTitle>
+          <DialogDescription>
+            Atualize as informações do calendário.
+          </DialogDescription>
+        </DialogHeader>
+
+        <CalendarForm onSubmit={handleSubmit} calendar={calendar} />
+      </DialogContent>
+    </Dialog>
   );
 }

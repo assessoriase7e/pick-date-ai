@@ -1,6 +1,5 @@
 "use client";
 import moment from "moment";
-import { z } from "zod";
 import "moment/locale/pt-br";
 import { useState, useEffect } from "react"; // Adicionei useEffect aqui
 import { useToast } from "@/components/ui/use-toast";
@@ -11,22 +10,20 @@ import { CalendarHeader } from "./calendar-header";
 import { CalendarModals } from "./calendar-modals";
 import { EmptyCalendarState } from "./empty-calendar-state";
 import { CalendarTabs } from "./calendar-tabs";
-import { calendarFormSchema } from "@/validators/calendar";
 import { DayDetailsModal } from "./day-details-modal";
-import { AppointmentFullData } from "@/types/calendar";
+import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { getAppointmentsByDate } from "@/actions/appointments/get-by-date";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
+import { CalendarFormValues } from "@/validators/calendar";
 
 moment.locale("pt-br");
 
 interface CalendarContentProps {
-  initialCalendars: any[];
+  initialCalendars: CalendarFullData[];
   initialActiveTab: string;
   initialAppointments: Record<string, AppointmentFullData[]>;
   initialDate: Date;
 }
-
-type CalendarFormValues = z.infer<typeof calendarFormSchema>;
 
 export function CalendarContent({
   initialCalendars,
@@ -123,10 +120,11 @@ export function CalendarContent({
     try {
       const response = await createCalendar({
         name: values.name,
+        collaboratorId: values.collaboratorId,
       });
-
+  
       if (response.success) {
-        setCalendars((prev) => [response.data, ...prev]);
+        setCalendars((prev) => [...prev, response.data as CalendarFullData]);
         setOpen(false);
         toast({
           title: "Sucesso",
@@ -159,13 +157,17 @@ export function CalendarContent({
       const response = await updateCalendar({
         id: selectedCalendar.id,
         name: values.name,
+        collaboratorId: values.collaboratorId,
       });
 
-      if (response.success) {
+      if (response.success && response.data) {
         setCalendars((prev) =>
-          prev.map((cal) =>
-            cal.id === selectedCalendar.id ? response.data : cal
-          )
+          prev.map((cal) => {
+            if (cal.id === selectedCalendar.id) {
+              return response.data as CalendarFullData;
+            }
+            return cal;
+          })
         );
         setEditOpen(false);
         setSelectedCalendar(null);

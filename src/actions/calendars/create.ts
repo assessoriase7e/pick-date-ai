@@ -1,12 +1,16 @@
 "use server";
-
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { calendarSchema } from "@/validators/calendar";
 
-// Accept just the name parameter
-export async function createCalendar({ name }: { name: string }) {
+// Accept name and collaboratorId parameters
+export async function createCalendar({
+  name,
+  collaboratorId,
+}: {
+  name: string;
+  collaboratorId?: string;
+}) {
   try {
     const { userId } = await auth();
 
@@ -17,14 +21,12 @@ export async function createCalendar({ name }: { name: string }) {
       };
     }
 
-    // Add the userId to the data before validation
-    const validatedData = calendarSchema.parse({
-      name,
-      userId,
-    });
-
     const calendar = await prisma.calendar.create({
-      data: validatedData,
+      data: {
+        name,
+        userId,
+        collaboratorId,
+      },
     });
 
     return {

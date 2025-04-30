@@ -1,15 +1,14 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
 import { CalendarGrid } from "./calendar-grid";
-import { AppointmentFullData } from "@/types/calendar";
+import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter } from "next/navigation";
-import { Calendar } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { Loader2 } from "lucide-react";
 
 interface CalendarTabsProps {
-  calendars: any[];
+  calendars: CalendarFullData[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
   hoveredTab: string | null;
@@ -44,8 +43,11 @@ export function CalendarTabs({
   initialAppointments,
 }: CalendarTabsProps) {
   const router = useRouter();
-  const [appointmentsCache, setAppointmentsCache] = useState<Record<string, Record<string, AppointmentFullData[]>>>({});
-  const [currentAppointments, setCurrentAppointments] = useState<Record<string, AppointmentFullData[]>>(initialAppointments);
+  const [appointmentsCache, setAppointmentsCache] = useState<
+    Record<string, Record<string, AppointmentFullData[]>>
+  >({});
+  const [currentAppointments, setCurrentAppointments] =
+    useState<Record<string, AppointmentFullData[]>>(initialAppointments);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const getCacheKey = (calendarId: string, date: Date) => {
@@ -56,20 +58,20 @@ export function CalendarTabs({
 
   const fetchAppointmentsForMonth = async (calendarId: string, date: Date) => {
     const cacheKey = getCacheKey(calendarId, date);
-    
+
     // Verificar se já temos os dados em cache
     if (appointmentsCache[cacheKey]) {
       setCurrentAppointments(appointmentsCache[cacheKey]);
       return;
     }
-    
+
     // Se não estiver em cache, buscar do servidor
     setIsLoading(true);
     try {
       const response = await getAppointmentsByMonth(date, calendarId);
       if (response.success && response.data) {
         const newAppointments: Record<string, AppointmentFullData[]> = {};
-        
+
         response.data.forEach((appointment: any) => {
           if (!appointment.client || !appointment.service) {
             console.warn(
@@ -89,11 +91,11 @@ export function CalendarTabs({
 
           newAppointments[dateKey].push(appointment as AppointmentFullData);
         });
-        
+
         // Atualizar o cache e os agendamentos atuais
-        setAppointmentsCache(prev => ({
+        setAppointmentsCache((prev) => ({
           ...prev,
-          [cacheKey]: newAppointments
+          [cacheKey]: newAppointments,
         }));
         setCurrentAppointments(newAppointments);
       }
@@ -120,7 +122,7 @@ export function CalendarTabs({
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
-        {calendars.map((calendar: Calendar) => (
+        {calendars.map((calendar: CalendarFullData) => (
           <TabsTrigger
             key={calendar.id}
             value={calendar.id}
@@ -138,6 +140,11 @@ export function CalendarTabs({
           >
             <span className="flex items-center">
               {calendar.name}
+              {calendar.collaborator && (
+                <span className="ml-1 text-xs text-muted-foreground">
+                  ({calendar.collaborator.name})
+                </span>
+              )}
 
               <div
                 className={`calendar-actions ml-2 flex items-center justify-center space-x-1 transition-all duration-200 ${

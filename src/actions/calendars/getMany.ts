@@ -2,6 +2,12 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { CalendarFullData } from "@/types/calendar";
+export type ListCalendarReturnProps = {
+  success: boolean;
+  error?: string;
+  data?: CalendarFullData[];
+};
 
 export async function listCalendars() {
   try {
@@ -18,6 +24,15 @@ export async function listCalendars() {
       where: {
         userId,
       },
+      include: {
+        collaborator: true,
+        appointments: {
+          include: {
+            client: true,
+            service: true,
+          }
+        },
+      },
       orderBy: {
         createdAt: "asc",
       },
@@ -25,7 +40,7 @@ export async function listCalendars() {
 
     return {
       success: true,
-      data: calendars,
+      data: calendars as unknown as CalendarFullData[],
     };
   } catch (error) {
     console.error("[CALENDARS_GET_MANY]", error);

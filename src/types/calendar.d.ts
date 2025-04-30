@@ -1,6 +1,12 @@
 "use server";
 
-import { Appointment, Client, Service } from "@prisma/client";
+import {
+  Appointment,
+  Calendar,
+  Client,
+  Collaborator,
+  Service,
+} from "@prisma/client";
 
 export type AppointmentData = Omit<
   Appointment,
@@ -12,4 +18,9 @@ export type AppointmentData = Omit<
 export type AppointmentFullData = Appointment & {
   client: Client;
   service: Service;
+};
+
+export type CalendarFullData = Calendar & {
+  appointments: AppointmentFullData[];
+  collaborator: Collaborator;
 };
