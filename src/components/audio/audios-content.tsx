@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil, Trash2, Play, Pause, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +22,22 @@ import { deleteAudio } from "@/actions/audios/delete";
 import { listAudios } from "@/actions/audios/getMany";
 import { AudioRecord } from "@prisma/client";
 
-export function AudiosContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+interface AudiosContentProps {
+  initialAudios: AudioRecord[];
+  initialTotalPages: number;
+  currentPage: number;
+}
 
-  const [audios, setAudios] = useState<AudioRecord[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+export function AudiosContent({ 
+  initialAudios, 
+  initialTotalPages, 
+  currentPage 
+}: AudiosContentProps) {
+  const router = useRouter();
+  
+  const [audios, setAudios] = useState<AudioRecord[]>(initialAudios);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingAudio, setEditingAudio] = useState<AudioRecord | null>(null);
@@ -38,7 +46,7 @@ export function AudiosContent() {
 
   async function loadAudios() {
     setIsLoading(true);
-    const result = await listAudios(page, 20);
+    const result = await listAudios(currentPage, 20);
 
     if (result.success) {
       setAudios(result.data.audios);
@@ -46,10 +54,6 @@ export function AudiosContent() {
     }
     setIsLoading(false);
   }
-
-  useEffect(() => {
-    loadAudios();
-  }, [page]);
 
   async function handleCreateAudio(data: any) {
     try {
@@ -62,7 +66,7 @@ export function AudiosContent() {
       loadAudios();
       setIsCreateModalOpen(false);
     } catch (error) {
-      console.error("Error creating audio:", error);
+      console.error("Erro ao criar áudio:", error);
       throw error;
     }
   }
@@ -80,7 +84,7 @@ export function AudiosContent() {
       loadAudios();
       setEditingAudio(null);
     } catch (error) {
-      console.error("Error updating audio:", error);
+      console.error("Erro ao atualizar áudio:", error);
       throw error;
     }
   }
@@ -98,7 +102,7 @@ export function AudiosContent() {
       loadAudios();
       setDeletingAudio(null);
     } catch (error) {
-      console.error("Error deleting audio:", error);
+      console.error("Erro ao excluir áudio:", error);
       throw error;
     }
   }
@@ -281,7 +285,7 @@ export function AudiosContent() {
       </div>
 
       <Pagination
-        currentPage={page}
+        currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
         isLoading={isLoading}
