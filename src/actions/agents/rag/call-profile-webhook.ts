@@ -40,6 +40,18 @@ export const callProfileWebhook = async ({
       },
     });
 
+    // Testar se o webhook aceita POST antes de enviar dados
+    const optionsResponse = await fetch(webhookUrl, {
+      method: "OPTIONS",
+    });
+
+    if (!optionsResponse.ok) {
+      return {
+        success: true,
+        message: "Webhook não aceita POST, ignorando envio.",
+      };
+    }
+
     // Formatar os dados para o treinamento RAG
     const formattedContent = `
         # Perfil da Empresa
