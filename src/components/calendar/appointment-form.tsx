@@ -41,6 +41,9 @@ import { AppointmentFullData } from "@/types/calendar";
 import { getClients } from "@/actions/clients/get-clients";
 import { Client, Service } from "@prisma/client";
 
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ComboBoxResponsiveField } from "./combo-box-responsive-field";
+
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
 interface AppointmentFormProps {
@@ -241,57 +244,16 @@ export function AppointmentForm({
           control={form.control}
           name="clientId"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Cliente</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value
-                        ? clients.find((client) => client.id === field.value)
-                            ?.fullName
-                        : "Selecione um cliente"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar cliente..." />
-                    <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
-                    <CommandGroup className="max-h-60 overflow-y-auto">
-                      {clients.map((client) => (
-                        <CommandItem
-                          key={client.id}
-                          value={client.id}
-                          onSelect={() => {
-                            form.setValue("clientId", client.id);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              client.id === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {client.fullName}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+            <ComboBoxResponsiveField
+              label="Cliente"
+              placeholder="Selecione um cliente"
+              options={clients}
+              value={field.value}
+              onChange={(val) => form.setValue("clientId", val)}
+              getOptionLabel={(client) => client.fullName}
+              getOptionValue={(client) => client.id}
+              error={form.formState.errors.clientId?.message}
+            />
           )}
         />
 
@@ -299,65 +261,27 @@ export function AppointmentForm({
           control={form.control}
           name="serviceId"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Serviço</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value
-                        ? services.find((service) => service.id === field.value)
-                            ?.name
-                        : "Selecione um serviço"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar serviço..." />
-                    <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
-                    <CommandGroup className="max-h-60 overflow-y-auto">
-                      {services.map((service) => (
-                        <CommandItem
-                          key={service.id}
-                          value={service.id}
-                          onSelect={() => {
-                            form.setValue("serviceId", service.id);
-                            setSelectedServiceDuration(
-                              service.durationMinutes ?? null
-                            );
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              service.id === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {service.name}
-                          {service.durationMinutes && (
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              ({service.durationMinutes} min)
-                            </span>
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+            <ComboBoxResponsiveField
+              label="Serviço"
+              placeholder="Selecione um serviço"
+              options={services}
+              value={field.value}
+              onChange={(val) => {
+                form.setValue("serviceId", val);
+                const service = services.find((s) => s.id === val);
+                setSelectedServiceDuration(service?.durationMinutes ?? null);
+              }}
+              getOptionLabel={(service) => service.name}
+              getOptionValue={(service) => service.id}
+              getOptionExtra={(service) =>
+                service.durationMinutes ? (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    ({service.durationMinutes} min)
+                  </span>
+                ) : null
+              }
+              error={form.formState.errors.serviceId?.message}
+            />
           )}
         />
 

@@ -10,12 +10,12 @@ export function EvolutionForm() {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState("");
-  
+
   const { handleCreateEvolutionInstance } = useConfigHandlers(setIsLoading);
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Evolution</h2>
+      <h2 className="text-2xl font-semibold mb-4">Whatsapp</h2>
       <div className="space-y-4">
         <Input
           placeholder="URL do Webhook"

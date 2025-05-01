@@ -151,10 +151,8 @@ export function EvolutionSection({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Evolution API</CardTitle>
-            <CardDescription>
-              Gerencie suas instâncias de WhatsApp
-            </CardDescription>
+            <CardTitle>Whatsapp</CardTitle>
+            <CardDescription>Canais de atendimento conectados</CardDescription>
           </div>
           <Button
             onClick={() => setIsModalOpen(true)}
