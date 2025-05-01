@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect, TouchEvent } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,12 @@ export function CalendarGrid({
   initialAppointments,
 }: CalendarGridProps) {
   const today = moment();
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
+  // Configuração mínima de distância para considerar como um swipe
+  const minSwipeDistance = 50;
 
   const calendarDays = useMemo(() => {
     const startOfMonth = moment(currentDate).startOf("month");
@@ -98,9 +104,47 @@ export function CalendarGrid({
     return appointments;
   };
 
+  // Manipuladores de eventos de toque
+  const onTouchStart = (e: TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      // Swipe para a esquerda - avançar para o próximo mês
+      goToNextMonth();
+    }
+    
+    if (isRightSwipe) {
+      // Swipe para a direita - voltar para o mês anterior
+      goToPreviousMonth();
+    }
+    
+    // Resetar os valores de toque
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
   return (
     <div className="w-full">
-      <div className="flex flex-col h-full border rounded-lg">
+      <div 
+        ref={calendarRef}
+        className="flex flex-col h-full border rounded-lg"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {/* Cabeçalho */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
           <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left">
@@ -148,7 +192,7 @@ export function CalendarGrid({
               <div className="flex flex-col h-full">
                 <span
                   className={cn(
-                    "text-xs sm:text-sm lg:text-lg font-medium",
+                    "lg:text-lg font-medium flex items-center justify-center h-full",
                     dayObj.isToday && "text-primary"
                   )}
                 >
