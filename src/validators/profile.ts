@@ -10,7 +10,7 @@ export const profileSchema = z.object({
   firstName: z.string().min(1, "Nome é obrigatório"),
   lastName: z.string().optional(),
   imageUrl: z.string().optional(),
-  whatsapp: z.string().optional(),
+  whatsapp: z.string().min(1, "WhatsApp é obrigatório"),
   companyName: z.string().min(1, "Nome da empresa/profissional é obrigatório"),
   businessHours: z.array(businessHourSchema),
   address: z.string().min(1, "Endereço é obrigatório"),
