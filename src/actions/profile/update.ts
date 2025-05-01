@@ -1,45 +1,22 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { ProfileFormValues } from "@/validators/profile";
+import { revalidatePath } from "next/cache";
+import { triggerProfileRagUpdate } from "../agents/rag/trigger-profile-rag-update";
 
-export async function updateProfile(id: string, data: ProfileFormValues) {
+export async function updateProfile(userId: string, data: any) {
   try {
-    // Separar os dados entre User e Profile
-    const userData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-    };
-
-    const profileData = {
-      phone: data.whatsapp,
-      companyName: data.companyName,
-      businessHours: data.businessHours,
-      address: data.address,
-      locationUrl: data.locationUrl,
-      documentNumber: data.documentNumber,
-    };
-
-    // Atualizar o usuário
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        ...userData,
-        profile: {
-          upsert: {
-            create: profileData,
-            update: profileData,
-          },
-        },
-      },
-      include: {
-        profile: true,
-      },
+    // Atualizar o perfil no banco de dados
+    const updatedProfile = await prisma.profile.update({
+      where: { userId },
+      data,
     });
 
+    // Acionar a atualização do RAG
+    await triggerProfileRagUpdate(userId);
+
     revalidatePath("/profile");
-    return { success: true, data: updatedUser };
+    return { success: true, data: updatedProfile };
   } catch (error) {
     console.error("Erro ao atualizar perfil:", error);
     return { success: false, error: "Falha ao atualizar perfil" };

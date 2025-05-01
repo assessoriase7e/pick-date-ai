@@ -156,7 +156,7 @@ export function ServicesSection({
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <h3 className="font-medium">{service.name}</h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {service.collaborator?.name}
                   </p>
                 </div>
@@ -181,19 +181,21 @@ export function ServicesSection({
 
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
-                  <span className="text-gray-500">Duração:</span>
+                  <span className="text-muted-foreground">Duração:</span>
                   <p>{service.durationMinutes} Min</p>
                 </div>
                 <div>
-                  <span className="text-gray-500">Preço:</span>
+                  <span className="text-muted-foreground">Preço:</span>
                   <p>{formatCurrency(service.price)}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500">Comissão</span>
+                  <span className="text-muted-foreground">Comissão</span>
                   <p>{service.commission}%</p>
                 </div>
                 <div className="col-span-2">
-                  <span className="text-gray-500">Dias Disponíveis:</span>
+                  <span className="text-muted-foreground">
+                    Dias Disponíveis:
+                  </span>
                   <p>{formatAvailableDays(service.availableDays)}</p>
                 </div>
               </div>
