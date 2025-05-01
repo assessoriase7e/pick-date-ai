@@ -1,4 +1,4 @@
-const SVGComponent = (props: React.SVGProps<SVGSVGElement>) => (
+const Logo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="100%"
     height="100%"
@@ -56,4 +56,4 @@ const SVGComponent = (props: React.SVGProps<SVGSVGElement>) => (
     </g>
   </svg>
 );
-export default SVGComponent;
+export default Logo;
