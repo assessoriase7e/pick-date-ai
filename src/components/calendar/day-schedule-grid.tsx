@@ -1,5 +1,5 @@
 import moment from "moment";
-import { AppointmentCard } from "./appointment-card";
+import { AppointmentCard } from "../appointment/appointment-card";
 import { AppointmentFullData } from "@/types/calendar";
 
 interface DayScheduleGridProps {

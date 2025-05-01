@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,20 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { getServices } from "@/actions/services/get-services";
 
 import { toast } from "sonner";
@@ -41,8 +28,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { getClients } from "@/actions/clients/get-clients";
 import { Client, Service } from "@prisma/client";
 
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { ComboBoxResponsiveField } from "./combo-box-responsive-field";
+import { ComboBoxResponsiveField } from "../calendar/combo-box-responsive-field";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 

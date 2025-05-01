@@ -1,9 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { FormControl, FormLabel, FormMessage, FormItem } from "@/components/ui/form";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  FormControl,
+  FormLabel,
+  FormMessage,
+  FormItem,
+} from "@/components/ui/form";
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +34,20 @@ interface ComboBoxResponsiveFieldProps<T> {
   error?: string;
 }
 
+// Hook para detectar se está em mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    checkScreen(); // inicial
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  return isMobile;
+}
+
 export function ComboBoxResponsiveField<T>({
   label,
   placeholder,
@@ -31,10 +60,11 @@ export function ComboBoxResponsiveField<T>({
   error,
 }: ComboBoxResponsiveFieldProps<T>) {
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const selectedOption = options.find((opt) => getOptionValue(opt) === value);
 
-  const content = (
+  const desktopContent = (
     <Command>
       <CommandInput placeholder={placeholder} />
       <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
@@ -62,11 +92,47 @@ export function ComboBoxResponsiveField<T>({
     </Command>
   );
 
+  const mobileContent = (
+    <Command className="pb-4">
+      <CommandInput placeholder={placeholder} className="py-6 text-base" />
+      <CommandEmpty className="py-6 text-center text-base">
+        Nenhum resultado encontrado.
+      </CommandEmpty>
+      <CommandGroup className="max-h-[50vh] overflow-y-auto">
+        {options.map((option) => (
+          <CommandItem
+            key={getOptionValue(option)}
+            value={getOptionValue(option)}
+            onSelect={() => {
+              onChange(getOptionValue(option));
+              setOpen(false);
+            }}
+            className="py-4 text-base"
+          >
+            <Check
+              className={cn(
+                "mr-3 h-5 w-5",
+                getOptionValue(option) === value ? "opacity-100" : "opacity-0"
+              )}
+            />
+            <div className="flex flex-col">
+              <span>{getOptionLabel(option)}</span>
+              {getOptionExtra && (
+                <div className="mt-1">{getOptionExtra(option)}</div>
+              )}
+            </div>
+          </CommandItem>
+        ))}
+      </CommandGroup>
+    </Command>
+  );
+
   return (
     <FormItem className="flex flex-col">
       <FormLabel>{label}</FormLabel>
+
       {/* Popover para desktop */}
-      <div className="hidden md:block">
+      {!isMobile && (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <FormControl>
@@ -83,11 +149,14 @@ export function ComboBoxResponsiveField<T>({
               </Button>
             </FormControl>
           </PopoverTrigger>
-          <PopoverContent className="w-full p-0">{content}</PopoverContent>
+          <PopoverContent className="w-full p-0">
+            {desktopContent}
+          </PopoverContent>
         </Popover>
-      </div>
+      )}
+
       {/* Drawer para mobile */}
-      <div className="block md:hidden">
+      {isMobile && (
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <FormControl>
@@ -105,10 +174,14 @@ export function ComboBoxResponsiveField<T>({
             </FormControl>
           </DrawerTrigger>
           <DrawerContent>
-            <div className="mt-4 border-t">{content}</div>
+            <div className="mt-4 px-4">
+              <h3 className="mb-4 text-lg font-medium">{label}</h3>
+              {mobileContent}
+            </div>
           </DrawerContent>
         </Drawer>
-      </div>
+      )}
+
       <FormMessage>{error}</FormMessage>
     </FormItem>
   );
