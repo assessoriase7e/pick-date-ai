@@ -1,8 +1,16 @@
 import { Suspense } from "react";
 import { DocumentsContent } from "@/components/document/documents-content";
 import { LoaderCircle } from "lucide-react";
+import { listDocuments } from "@/actions/documents/getMany";
 
-export default function DocumentsPage() {
+export default async function DocumentsPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Number(searchParams.page || "1");
+  const documentsResult = await listDocuments(page);
+  
   return (
     <div className="space-y-6">
       <div>
@@ -12,7 +20,11 @@ export default function DocumentsPage() {
         </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <DocumentsContent />
+        <DocumentsContent 
+          initialDocuments={documentsResult.success ? documentsResult.data.documents : []}
+          totalPages={documentsResult.success ? documentsResult.data.totalPages : 0}
+          currentPage={page}
+        />
       </Suspense>
     </div>
   );

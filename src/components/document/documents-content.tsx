@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil, Trash2, FileText, Download, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,79 +19,75 @@ import { Pagination } from "@/components/ui/pagination";
 import { createDocument } from "@/actions/documents/create";
 import { updateDocument } from "@/actions/documents/update";
 import { deleteDocument } from "@/actions/documents/delete";
-import { listDocuments } from "@/actions/documents/getMany";
 import { DocumentRecord, User } from "@prisma/client";
 
 type DocumentWithUser = DocumentRecord & {
   user: User;
 };
 
-export function DocumentsContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+interface DocumentsContentProps {
+  initialDocuments: DocumentWithUser[];
+  totalPages: number;
+  currentPage: number;
+}
 
-  const [documents, setDocuments] = useState<DocumentWithUser[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+export function DocumentsContent({ 
+  initialDocuments, 
+  totalPages, 
+  currentPage 
+}: DocumentsContentProps) {
+  const router = useRouter();
+  
+  const [documents, setDocuments] = useState<DocumentWithUser[]>(initialDocuments);
+  const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<any | null>(null);
   const [deletingDocument, setDeletingDocument] = useState<any | null>(null);
 
-  async function loadDocuments() {
+  async function handleCreateDocument(data: any) {
     setIsLoading(true);
     try {
-      const result = await listDocuments(page);
+      const result = await createDocument(data);
       if (result.success) {
-        setDocuments(result.data!.documents);
-        setTotalPages(result.data!.totalPages);
+        router.refresh(); // Atualiza a página para buscar os novos dados
+        setIsCreateModalOpen(false);
       }
     } catch (error) {
-      console.error("Erro ao carregar documentos:", error);
+      console.error("Erro ao criar documento:", error);
     } finally {
       setIsLoading(false);
     }
   }
 
-  useEffect(() => {
-    loadDocuments();
-  }, [page]);
-
-  async function handleCreateDocument(data: any) {
-    try {
-      const result = await createDocument(data);
-      if (result.success) {
-        loadDocuments();
-        setIsCreateModalOpen(false);
-      }
-    } catch (error) {
-      console.error("Erro ao criar documento:", error);
-    }
-  }
-
   async function handleUpdateDocument(data: any) {
     if (!editingDocument) return;
+    setIsLoading(true);
     try {
       const result = await updateDocument(editingDocument.id, data);
       if (result.success) {
-        loadDocuments();
+        router.refresh(); // Atualiza a página para buscar os novos dados
         setEditingDocument(null);
       }
     } catch (error) {
       console.error("Erro ao atualizar documento:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handleDeleteDocument() {
     if (!deletingDocument) return;
+    setIsLoading(true);
     try {
       const result = await deleteDocument(deletingDocument.id);
       if (result.success) {
-        loadDocuments();
+        router.refresh(); // Atualiza a página para buscar os novos dados
         setDeletingDocument(null);
       }
     } catch (error) {
       console.error("Erro ao excluir documento:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -248,7 +244,7 @@ export function DocumentsContent() {
 
       {totalPages > 1 && (
         <Pagination
-          currentPage={page}
+          currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={(newPage: number) => {
             router.push(`/documents?page=${newPage}`);
