@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +22,8 @@ import { Trash, Bolt, QrCode, RefreshCw } from "lucide-react";
 import { InstanceModal } from "./instance-modal";
 import { QRCodeModal } from "./qrcode-modal";
 import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
-import { getConnectionStatus } from "@/actions/agents/evolution/get-connection-status";
 import { EvolutionInstance } from "@prisma/client";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 interface EvolutionSectionProps {
   profilePhone?: string;
@@ -32,53 +32,11 @@ interface EvolutionSectionProps {
 
 export function EvolutionSection({
   profilePhone,
-  instances: initialInstances,
+  instances,
 }: EvolutionSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
-  const [instances, setInstances] =
-    useState<EvolutionInstance[]>(initialInstances);
-  const [refreshing, setRefreshing] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const refreshAllInstances = async () => {
-      if (instances.length === 0) return;
-
-      const tempRefreshing: Record<string, boolean> = {};
-      instances.forEach((instance) => {
-        tempRefreshing[instance.id] = true;
-      });
-      setRefreshing(tempRefreshing);
-
-      const refreshPromises = instances.map(async (instance) => {
-        try {
-          const result = await getConnectionStatus(instance.name);
-          if (result.success && result.data) {
-            return {
-              ...instance,
-              status: result.data.status,
-            };
-          }
-          return instance;
-        } catch (error) {
-          console.error(`Error refreshing status for ${instance.name}:`, error);
-          return instance;
-        }
-      });
-
-      const updatedInstances = await Promise.all(refreshPromises);
-      setInstances(updatedInstances);
-
-      const resetRefreshing: Record<string, boolean> = {};
-      instances.forEach((instance) => {
-        resetRefreshing[instance.id] = false;
-      });
-      setRefreshing(resetRefreshing);
-    };
-
-    refreshAllInstances();
-  }, [initialInstances]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
@@ -86,7 +44,6 @@ export function EvolutionSection({
         const result = await deleteInstance(id);
         if (result.success) {
           toast.success("Instância excluída com sucesso");
-          setInstances(instances.filter((instance) => instance.id !== id));
         } else {
           toast.error(result.error || "Erro ao excluir instância");
         }
@@ -116,23 +73,7 @@ export function EvolutionSection({
   };
 
   const refreshStatus = async (instance: EvolutionInstance) => {
-    try {
-      setRefreshing((prev) => ({ ...prev, [instance.id]: true }));
-      const result = await getConnectionStatus(instance.name);
-
-      if (result.success && result.data) {
-        const updatedInstances = instances.map((i) =>
-          i.id === instance.id ? { ...i, status: result.data.status } : i
-        );
-        setInstances(updatedInstances);
-      } else {
-        toast.error(result.error || "Erro ao atualizar status");
-      }
-    } catch (error) {
-      toast.error("Ocorreu um erro ao atualizar o status");
-    } finally {
-      setRefreshing((prev) => ({ ...prev, [instance.id]: false }));
-    }
+    revalidatePathAction("/agents");
   };
 
   const getStatusBadge = (status: string) => {
@@ -189,13 +130,8 @@ export function EvolutionSection({
                         variant="outline"
                         size="icon"
                         onClick={() => refreshStatus(instance)}
-                        disabled={refreshing[instance.id]}
                       >
-                        <RefreshCw
-                          className={`h-4 w-4 ${
-                            refreshing[instance.id] ? "animate-spin" : ""
-                          }`}
-                        />
+                        <RefreshCw className={`h-4 w-4`} />
                       </Button>
                       <Button
                         variant="outline"

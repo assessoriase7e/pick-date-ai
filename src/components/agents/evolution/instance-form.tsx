@@ -104,9 +104,8 @@ export function InstanceForm({
               <FormControl>
                 <PatternFormat
                   customInput={Input}
-                  format="#############"
-                  mask="_"
-                  placeholder="55 + Número do WhatsApp"
+                  format="+55(##)#####-####"
+                  placeholder="(00)00000-0000"
                   value={field.value}
                   onValueChange={(values) => {
                     field.onChange(values.value);

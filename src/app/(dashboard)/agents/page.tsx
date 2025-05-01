@@ -1,13 +1,11 @@
 "use server";
 import { getInstances } from "@/actions/agents/evolution/get-instances";
-import { getClerkUser } from "@/actions/auth/getClerkUser";
 import { getProfile } from "@/actions/profile/get";
 import { EvolutionSection } from "@/components/agents/evolution/evolution-section";
 import { PromptsSection } from "@/components/agents/prompts-section";
 import { Separator } from "@/components/ui/separator";
 
 export default async function AgentesPage() {
-  const user = await getClerkUser();
   const { data: profile } = await getProfile();
   const { data: instances } = await getInstances();
 
