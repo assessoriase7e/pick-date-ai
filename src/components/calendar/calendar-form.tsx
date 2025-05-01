@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,13 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { Calendar, Collaborator } from "@prisma/client";
 import { listCollaborators } from "@/actions/collaborators/getMany";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ComboBoxResponsiveField } from "./combo-box-responsive-field";
 
 interface CalendarFormProps {
   onSubmit: (values: CalendarFormValues) => Promise<void>;
@@ -95,31 +88,20 @@ export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
           control={form.control}
           name="collaboratorId"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profissional</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um profissional" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {collaborators.map((collaborator) => (
-                    <SelectItem
-                      key={collaborator.id}
-                      value={String(collaborator.id)}
-                    >
-                      {collaborator.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
+            <ComboBoxResponsiveField
+              label="Profissional"
+              placeholder="Selecione um profissional"
+              options={collaborators}
+              value={field.value}
+              onChange={field.onChange}
+              getOptionLabel={(option) => option.name}
+              getOptionValue={(option) => String(option.id)}
+              error={form.formState.errors.collaboratorId?.message}
+            />
           )}
         />
 
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {calendar ? "Atualizar" : "Criar"} Calendário
         </Button>

@@ -13,6 +13,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
@@ -56,6 +61,9 @@ export function CalendarTabs({
   const [currentAppointments, setCurrentAppointments] =
     useState<Record<string, AppointmentFullData[]>>(initialAppointments);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showActionsModal, setShowActionsModal] = useState<boolean>(false);
+  const [selectedCalendar, setSelectedCalendar] = useState<CalendarFullData | null>(null);
 
   const getCacheKey = (calendarId: string, date: Date) => {
     const year = date.getFullYear();
@@ -126,6 +134,31 @@ export function CalendarTabs({
     router.push(`/calendar?${params.toString()}`);
   };
 
+  // Funções para gerenciar o long press no mobile
+  const handleTouchStart = (calendar: CalendarFullData) => {
+    const timer = setTimeout(() => {
+      setSelectedCalendar(calendar);
+      setShowActionsModal(true);
+    }, 1000); // 1 segundo para o long press
+    
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  const handleTouchMove = () => {
+    // Cancelar o timer se o usuário mover o dedo
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
   return (
     <Tabs value={calendarId} onValueChange={setCalendarId} className="w-full">
       {/* Versão Mobile - Select */}
@@ -139,33 +172,57 @@ export function CalendarTabs({
           </SelectTrigger>
           <SelectContent>
             {calendars.map((calendar) => (
-              <SelectItem key={calendar.id} value={calendar.id}>
+              <SelectItem 
+                key={calendar.id} 
+                value={calendar.id}
+                onTouchStart={() => handleTouchStart(calendar)}
+                onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchMove}
+                onClick={() => setCalendarIdQueryParam(calendar.id)}
+              >
                 <span className="flex items-center justify-between w-full">
                   <span>
                     {calendar.name} | ({calendar.collaborator?.name})
                   </span>
-                  <div className="flex items-center space-x-2">
-                    <Edit
-                      className="h-4 w-4 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(calendar);
-                      }}
-                    />
-                    <Trash2
-                      className="h-4 w-4 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDeleteModal(calendar);
-                      }}
-                    />
-                  </div>
                 </span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+
+      {/* Modal de ações para mobile */}
+      <Dialog open={showActionsModal} onOpenChange={setShowActionsModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle>Opções do Calendário</DialogTitle>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <button
+              className="flex flex-col items-center justify-center p-4 border rounded-lg"
+              onClick={() => {
+                if (selectedCalendar) {
+                  openEditModal(selectedCalendar);
+                  setShowActionsModal(false);
+                }
+              }}
+            >
+              <Edit className="h-6 w-6 mb-2" />
+              <span>Editar</span>
+            </button>
+            <button
+              className="flex flex-col items-center justify-center p-4 border rounded-lg"
+              onClick={() => {
+                if (selectedCalendar) {
+                  openDeleteModal(selectedCalendar);
+                  setShowActionsModal(false);
+                }
+              }}
+            >
+              <Trash2 className="h-6 w-6 mb-2" />
+              <span>Excluir</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Versão Desktop - Tabs */}
       <TabsList className="hidden lg:flex w-full h-16 justify-start overflow-x-auto overflow-y-hidden">
