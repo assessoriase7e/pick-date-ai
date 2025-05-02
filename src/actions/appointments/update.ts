@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { updateAppointmentSchema } from "@/validators/calendar";
 import { z } from "zod";
 import { Appointment } from "@prisma/client";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function updateAppointment(
   id: string,
@@ -84,6 +85,10 @@ export async function updateAppointment(
         service: true,
       },
     });
+
+    revalidatePath("/calendar");
+    revalidateTag("appointments");
+    revalidateTag("dashboard");
 
     return {
       success: true,
