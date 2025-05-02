@@ -49,19 +49,17 @@ export function Sidebar() {
           <Logo className="h-12 w-12" />
         </SheetHeader>
 
-        <div className="flex flex-col h-full py-6 px-4 space-y-6">
-          <div className="flex flex-col space-y-6">
-            {routes.map((item) => (
-              <SidebarItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                isActive={item.isActive}
-                isMobile={true}
-              />
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-6">
+          {routes.map((item) => (
+            <SidebarItem
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              isActive={item.isActive}
+              isMobile={true}
+            />
+          ))}
         </div>
       </SheetContent>
     </Sheet>
@@ -69,20 +67,20 @@ export function Sidebar() {
 
   const DesktopSidebar = () => (
     <div className="h-svh border-r p-5 fixed z-50 bg-background">
-      <aside className="flex flex-col gap-5">
+      <aside className="flex flex-col gap-5 h-full">
         <Logo className="h-12 w-12" />
-
         <Separator />
-
-        {routes.map((item) => (
-          <SidebarItem
-            key={item.href}
-            href={item.href}
-            icon={item.icon}
-            label={item.label}
-            isActive={item.isActive}
-          />
-        ))}
+        <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden space-y-2">
+          {routes.map((item) => (
+            <SidebarItem
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              isActive={item.isActive}
+            />
+          ))}
+        </div>
       </aside>
     </div>
   );
