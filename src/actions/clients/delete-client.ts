@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function deleteClient(id: string) {
   try {
@@ -16,6 +16,7 @@ export async function deleteClient(id: string) {
     });
 
     revalidatePath("/clients");
+    revalidateTag("services");
 
     return {
       success: true,

@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 interface AddClientServiceParams {
   clientId: string;
@@ -58,6 +58,7 @@ export async function addClientService({
 
     // Revalidar o caminho para atualizar a UI
     revalidatePath(`/clients/${clientId}/services`);
+    revalidateTag("services");
 
     return {
       success: true,
