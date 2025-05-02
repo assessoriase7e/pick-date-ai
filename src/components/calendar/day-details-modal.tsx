@@ -26,6 +26,10 @@ interface DayDetailsModalProps {
   appointments: AppointmentFullData[];
   closeDayDetails: () => void;
   calendarId: string;
+  updateAppointmentsForDate?: (
+    dateKey: string,
+    appointment: AppointmentFullData
+  ) => void;
 }
 
 export function DayDetailsModal({
@@ -33,10 +37,10 @@ export function DayDetailsModal({
   appointments,
   closeDayDetails,
   calendarId,
+  updateAppointmentsForDate,
 }: DayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
 
-  // Estados
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentFullData | null>(null);
@@ -80,6 +84,16 @@ export function DayDetailsModal({
   const handleFormSuccess = async () => {
     setShowAppointmentForm(false);
     await reloadAppointments();
+
+    // If the updateAppointmentsForDate prop exists, call it with the updated appointments
+    if (dayDetails && updateAppointmentsForDate) {
+      const dateKey = dayDetails.date.toISOString().split("T")[0];
+      // You might need to adjust this depending on how you want to update the parent component
+      // This assumes you have access to the newly created appointment
+      if (selectedAppointment) {
+        updateAppointmentsForDate(dateKey, selectedAppointment);
+      }
+    }
   };
 
   const handleEditAppointment = (appointment: AppointmentFullData) => {

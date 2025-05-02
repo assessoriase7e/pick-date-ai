@@ -219,6 +219,20 @@ export function CalendarContent({
     setCurrentDate(moment().toDate());
   };
 
+  const updateAppointmentsForDate = (
+    dateKey: string,
+    appointment: AppointmentFullData
+  ) => {
+    setAppointments((prev) => {
+      const newAppointments = { ...prev };
+      if (!newAppointments[dateKey]) {
+        newAppointments[dateKey] = [];
+      }
+      newAppointments[dateKey] = [...newAppointments[dateKey], appointment];
+      return newAppointments;
+    });
+  };
+
   return (
     <div className="container lg:py-10 w-full">
       <CalendarHeader setOpen={setOpen} />
@@ -252,6 +266,7 @@ export function CalendarContent({
             dayDetails={selectedDayDetails}
             closeDayDetails={closeDayDetails}
             calendarId={calendarId}
+            updateAppointmentsForDate={updateAppointmentsForDate}
           />
         )}
       </div>

@@ -7,7 +7,6 @@ interface DayScheduleGridProps {
   date: Date;
   onHourClick: (hour: number) => void;
   onEditAppointment: (appointment: AppointmentFullData) => void;
-  onDeleteAppointment: (appointmentId: string) => void;
 }
 
 export function DayScheduleGrid({
@@ -15,7 +14,6 @@ export function DayScheduleGrid({
   date,
   onHourClick,
   onEditAppointment,
-  onDeleteAppointment,
 }: DayScheduleGridProps) {
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");

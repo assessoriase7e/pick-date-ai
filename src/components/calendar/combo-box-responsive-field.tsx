@@ -128,26 +128,24 @@ export function ComboBoxResponsiveField<T>({
   );
 
   return (
-    <FormItem className="flex flex-col">
-      <FormLabel>{label}</FormLabel>
+    <div className="flex flex-col">
+      <label className="mb-1 font-medium">{label}</label>
 
       {/* Popover para desktop */}
       {!isMobile && (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <FormControl>
-              <Button
-                variant="outline"
-                role="combobox"
-                className={cn(
-                  "w-full justify-between",
-                  !value && "text-muted-foreground"
-                )}
-              >
-                {selectedOption ? getOptionLabel(selectedOption) : placeholder}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </FormControl>
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "w-full justify-between",
+                !value && "text-muted-foreground"
+              )}
+            >
+              {selectedOption ? getOptionLabel(selectedOption) : placeholder}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full p-0">
             {desktopContent}
@@ -159,19 +157,17 @@ export function ComboBoxResponsiveField<T>({
       {isMobile && (
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
-            <FormControl>
-              <Button
-                variant="outline"
-                role="combobox"
-                className={cn(
-                  "w-full justify-between",
-                  !value && "text-muted-foreground"
-                )}
-              >
-                {selectedOption ? getOptionLabel(selectedOption) : placeholder}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </FormControl>
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "w-full justify-between",
+                !value && "text-muted-foreground"
+              )}
+            >
+              {selectedOption ? getOptionLabel(selectedOption) : placeholder}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
           </DrawerTrigger>
           <DrawerContent>
             <div className="mt-4 px-4">
@@ -182,7 +178,7 @@ export function ComboBoxResponsiveField<T>({
         </Drawer>
       )}
 
-      <FormMessage>{error}</FormMessage>
-    </FormItem>
+      {error && <span className="text-sm text-red-500 mt-1">{error}</span>}
+    </div>
   );
 }
