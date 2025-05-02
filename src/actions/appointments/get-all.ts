@@ -10,40 +10,44 @@ export async function getAllAppointments() {
     return { success: false, error: "Usuário não autenticado" };
   }
 
-  return unstable_cache(
-    async () => {
-      const appointments = await prisma.appointment.findMany({
-        where: {
-          calendar: {
-            userId,
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        calendar: {
+          userId,
+        },
+      },
+      include: {
+        client: {
+          select: {
+            fullName: true,
           },
         },
-        include: {
-          client: {
-            select: {
-              fullName: true,
-            },
-          },
-          service: {
-            select: {
-              name: true,
-            },
-          },
-          calendar: {
-            select: {
-              name: true,
-            },
+        service: {
+          select: {
+            name: true,
           },
         },
-        orderBy: {
-          startTime: "asc",
+        calendar: {
+          select: {
+            name: true,
+          },
         },
-      });
-    },
-    [`appointments-all-${userId}`],
-    {
-      revalidate: 60 * 5, // 5 minutos
-      tags: ["appointments", "clients", "services"],
-    }
-  )();
+      },
+      orderBy: {
+        startTime: "asc",
+      },
+    });
+
+    return {
+      success: true,
+      data: appointments,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar agendamentos:", error);
+    return {
+      success: false,
+      error: "Não foi possível carregar os agendamentos",
+    };
+  }
 }
