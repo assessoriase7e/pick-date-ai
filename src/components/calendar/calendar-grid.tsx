@@ -13,7 +13,6 @@ interface CalendarGridProps {
   goToNextMonth: () => void;
   goToToday: () => void;
   selectedDate: Date | null;
-  setSelectedDate: (date: Date | null) => void;
   openDayDetails: (date: Date) => void;
   initialAppointments: Record<string, AppointmentFullData[]>;
 }
@@ -30,12 +29,13 @@ export function CalendarGrid({
   goToNextMonth,
   goToToday,
   selectedDate,
-  setSelectedDate,
   openDayDetails,
   initialAppointments,
 }: CalendarGridProps) {
   const today = moment();
   const calendarRef = useRef<HTMLDivElement>(null);
+  
+  // Add these two lines:
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
@@ -185,7 +185,6 @@ export function CalendarGrid({
                 getAppointmentsForDay(dayObj.date)?.length && "bg-primary/50"
               )}
               onClick={() => {
-                setSelectedDate(dayObj.date.toDate());
                 openDayDetails(dayObj.date.toDate());
               }}
             >

@@ -1,7 +1,7 @@
 "use client";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { useState, useEffect } from "react"; // Adicionei useEffect aqui
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -12,107 +12,76 @@ import { EmptyCalendarState } from "./empty-calendar-state";
 import { CalendarTabs } from "./calendar-tabs";
 import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
-import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { CalendarFormValues } from "@/validators/calendar";
-import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { useRouter } from "next/navigation";
 
 moment.locale("pt-br");
 
 interface CalendarContentProps {
   calendars: CalendarFullData[];
-  initialcalendarId: string;
+  calendarId: string;
   initialAppointments: Record<string, AppointmentFullData[]>;
-  initialDate: Date;
+  currentDate: Date;
+  selectedDay: Date | null;
+  selectedDayAppointments: AppointmentFullData[];
 }
 
 export function CalendarContent({
   calendars,
-  initialcalendarId,
+  calendarId,
   initialAppointments,
-  initialDate,
+  currentDate,
+  selectedDay,
+  selectedDayAppointments,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [calendarId, setcalendarId] = useState(initialcalendarId);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
-  const [currentDate, setCurrentDate] = useState(initialDate);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedDayDetails, setSelectedDayDetails] = useState<{
-    date: Date;
-    isOpen: boolean;
-    appointments: AppointmentFullData[];
-  } | null>(null);
   const { toast } = useToast();
-  const [appointments, setAppointments] =
-    useState<Record<string, AppointmentFullData[]>>(initialAppointments);
+  const router = useRouter();
 
-  // Função para buscar agendamentos quando o calendário ou mês mudar
-  const fetchAppointmentsForMonth = async (calendarId: string, date: Date) => {
-    try {
-      const response = await getAppointmentsByMonth(date, calendarId);
-      if (response.success && response.data) {
-        const newAppointments: Record<string, AppointmentFullData[]> = {};
-
-        response.data.forEach((appointment: any) => {
-          if (!appointment.client || !appointment.service) {
-            console.warn(
-              "Appointment missing client or service data:",
-              appointment.id
-            );
-            return;
-          }
-
-          const dateKey = new Date(appointment.startTime)
-            .toISOString()
-            .split("T")[0];
-
-          if (!newAppointments[dateKey]) {
-            newAppointments[dateKey] = [];
-          }
-
-          newAppointments[dateKey].push(appointment as AppointmentFullData);
-        });
-
-        setAppointments(newAppointments);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar agendamentos:", error);
-    }
+  // Navigation using query params
+  const setCalendarId = (id: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("calendarId", id);
+    router.push(`/calendar?${searchParams.toString()}`);
   };
 
-  useEffect(() => {
-    if (calendarId) {
-      fetchAppointmentsForMonth(calendarId, currentDate);
-    }
-  }, [calendarId, currentDate]);
+  const goToPreviousMonth = () => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("date", newDate.toISOString());
+    router.push(`/calendar?${searchParams.toString()}`);
+  };
 
-  const openDayDetails = async (date: Date) => {
-    const dateKey = date.toISOString().split("T")[0];
-    let dayAppointments = appointments[dateKey] || [];
+  const goToNextMonth = () => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("date", newDate.toISOString());
+    router.push(`/calendar?${searchParams.toString()}`);
+  };
 
-    if (dayAppointments.length === 0) {
-      const response = await getAppointmentsByCalendarAndDate(calendarId, date);
-      if (response.success && response.data) {
-        dayAppointments = response.data;
-        setAppointments((prev) => ({
-          ...prev,
-          [dateKey]: dayAppointments,
-        }));
-      }
-    }
+  const goToToday = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.delete("date");
+    router.push(`/calendar?${searchParams.toString()}`);
+  };
 
-    setSelectedDayDetails({
-      date,
-      isOpen: true,
-      appointments: dayAppointments,
-    });
+  const openDayDetails = (date: Date) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("selectedDay", date.toISOString());
+    router.push(`/calendar?${searchParams.toString()}`);
   };
 
   const closeDayDetails = () => {
-    setSelectedDayDetails(null);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.delete("selectedDay");
+    router.push(`/calendar?${searchParams.toString()}`);
   };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
@@ -122,21 +91,26 @@ export function CalendarContent({
         collaboratorId: values.collaboratorId,
       });
 
-      await revalidatePathAction("/calendar");
-
-      setOpen(false);
-      setSelectedCalendar(response.data?.id);
-
-      toast({
-        title: "Erro",
-        description: response.error || "Falha ao criar calendário",
-        variant: "destructive",
-      });
+      if (response.success) {
+        toast({
+          title: "Calendário criado com sucesso",
+          description: "O calendário foi criado com sucesso.",
+        });
+        setOpen(false);
+        revalidatePathAction("/calendar");
+      } else {
+        toast({
+          title: "Erro ao criar calendário",
+          description:
+            response.error || "Ocorreu um erro ao criar o calendário.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar calendário:", error);
       toast({
-        title: "Erro",
-        description: "Falha ao criar calendário",
+        title: "Erro ao criar calendário",
+        description: "Ocorreu um erro ao criar o calendário.",
         variant: "destructive",
       });
     }
@@ -207,82 +181,56 @@ export function CalendarContent({
     setDeleteOpen(true);
   };
 
-  const goToPreviousMonth = () => {
-    setCurrentDate(moment(currentDate).subtract(1, "month").toDate());
-  };
-
-  const goToNextMonth = () => {
-    setCurrentDate(moment(currentDate).add(1, "month").toDate());
-  };
-
-  const goToToday = () => {
-    setCurrentDate(moment().toDate());
-  };
-
-  const updateAppointmentsForDate = (
-    dateKey: string,
-    appointment: AppointmentFullData
-  ) => {
-    setAppointments((prev) => {
-      const newAppointments = { ...prev };
-      if (!newAppointments[dateKey]) {
-        newAppointments[dateKey] = [];
-      }
-      newAppointments[dateKey] = [...newAppointments[dateKey], appointment];
-      return newAppointments;
-    });
-  };
+  // Only one return block
+  if (calendars.length === 0) {
+    return <EmptyCalendarState setOpen={setOpen} />;
+  }
 
   return (
-    <div className="container lg:py-10 w-full">
+    <div className="flex flex-col h-full">
       <CalendarHeader setOpen={setOpen} />
 
-      <div className="relative w-full">
-        {calendars.length === 0 ? (
-          <EmptyCalendarState setOpen={setOpen} />
-        ) : (
-          <CalendarTabs
-            calendars={calendars}
-            calendarId={calendarId}
-            setCalendarId={setcalendarId}
-            hoveredTab={hoveredTab}
-            setHoveredTab={setHoveredTab}
-            openEditModal={openEditModal}
-            openDeleteModal={openDeleteModal}
-            currentDate={currentDate}
-            goToPreviousMonth={goToPreviousMonth}
-            goToNextMonth={goToNextMonth}
-            goToToday={goToToday}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            openDayDetails={openDayDetails}
-            initialAppointments={appointments}
-          />
-        )}
-
-        {selectedDayDetails && (
-          <DayDetailsModal
-            appointments={selectedDayDetails.appointments}
-            dayDetails={selectedDayDetails}
-            closeDayDetails={closeDayDetails}
-            calendarId={calendarId}
-            updateAppointmentsForDate={updateAppointmentsForDate}
-          />
-        )}
-      </div>
+      <CalendarTabs
+        calendars={calendars}
+        calendarId={calendarId}
+        setCalendarId={setCalendarId}
+        hoveredTab={hoveredTab}
+        setHoveredTab={setHoveredTab}
+        openEditModal={openEditModal}
+        openDeleteModal={openDeleteModal}
+        currentDate={currentDate}
+        goToPreviousMonth={goToPreviousMonth}
+        goToNextMonth={goToNextMonth}
+        goToToday={goToToday}
+        selectedDate={selectedDay}
+        openDayDetails={openDayDetails}
+        initialAppointments={initialAppointments}
+      />
 
       <CalendarModals
         open={open}
-        setOpen={setOpen}
         editOpen={editOpen}
-        setEditOpen={setEditOpen}
         deleteOpen={deleteOpen}
+        setOpen={setOpen}
+        setEditOpen={setEditOpen}
         setDeleteOpen={setDeleteOpen}
-        selectedCalendar={selectedCalendar}
         handleCreateCalendar={handleCreateCalendar}
         handleEditCalendar={handleEditCalendar}
         handleDeleteCalendar={handleDeleteCalendar}
+        selectedCalendar={selectedCalendar}
       />
+
+      {selectedDay && (
+        <DayDetailsModal
+          dayDetails={{
+            date: selectedDay,
+            isOpen: true,
+          }}
+          appointments={selectedDayAppointments}
+          closeDayDetails={closeDayDetails}
+          calendarId={calendarId}
+        />
+      )}
     </div>
   );
 }

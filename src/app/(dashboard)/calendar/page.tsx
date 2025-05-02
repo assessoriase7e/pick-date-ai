@@ -3,20 +3,31 @@ import { listCalendars } from "@/actions/calendars/getMany";
 import { CalendarContent } from "../../../components/calendar/calendar-content";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
+import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ calendarId: string }>;
+  searchParams: Promise<{
+    calendarId?: string;
+    date?: string;
+    selectedDay?: string;
+  }>;
 }) {
+  const sParams = await searchParams;
+
   const response = await listCalendars();
   const calendars = response.success && response.data ? response.data : [];
+
+  // Obter calendarId da query ou usar o primeiro calendário disponível
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
-  const { calendarId } = (await searchParams) || initialCalendarId;
+  const calendarId = sParams.calendarId || initialCalendarId;
 
-  const currentDate = new Date();
+  // Obter data atual ou da query
+  const currentDate = sParams.date ? new Date(sParams.date) : new Date();
+
+  // Buscar agendamentos do mês
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
-
   const res = await getAppointmentsByMonth(currentDate, calendarId);
 
   if (res?.success && res?.data) {
@@ -41,12 +52,30 @@ export default async function CalendarPage({
     });
   }
 
+  // Verificar se há um dia selecionado para mostrar detalhes
+  let selectedDayAppointments: AppointmentFullData[] = [];
+  let selectedDayDate: Date | null = null;
+
+  if (sParams.selectedDay) {
+    selectedDayDate = new Date(sParams.selectedDay);
+    const dayResponse = await getAppointmentsByCalendarAndDate(
+      calendarId,
+      selectedDayDate
+    );
+
+    if (dayResponse.success && dayResponse.data) {
+      selectedDayAppointments = dayResponse.data;
+    }
+  }
+
   return (
     <CalendarContent
       calendars={calendars}
-      initialcalendarId={initialCalendarId}
+      calendarId={calendarId}
       initialAppointments={appointmentsByDate}
-      initialDate={currentDate}
+      currentDate={currentDate}
+      selectedDay={selectedDayDate}
+      selectedDayAppointments={selectedDayAppointments}
     />
   );
 }

@@ -14,6 +14,7 @@ interface DesktopCalendarTabsProps {
 
 export function DesktopCalendarTabs({
   calendars,
+  calendarId,
   hoveredTab,
   setHoveredTab,
   setCalendarIdQueryParam,
@@ -34,7 +35,6 @@ export function DesktopCalendarTabs({
               e.preventDefault();
               e.stopPropagation();
             }
-
             setCalendarIdQueryParam(calendar.id);
           }}
         >

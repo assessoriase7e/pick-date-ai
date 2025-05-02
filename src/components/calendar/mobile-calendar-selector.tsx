@@ -19,7 +19,6 @@ interface MobileCalendarSelectorProps {
 export function MobileCalendarSelector({
   calendars,
   calendarId,
-  setCalendarId,
   setCalendarIdQueryParam,
   onLongPress,
 }: MobileCalendarSelectorProps) {
@@ -50,7 +49,7 @@ export function MobileCalendarSelector({
 
   return (
     <div className="lg:hidden w-full mb-4">
-      <Select value={calendarId} onValueChange={setCalendarId}>
+      <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
         <SelectTrigger className="w-full">
           <SelectValue>
             {calendars.find((c) => c.id === calendarId)?.name ||

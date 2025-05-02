@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { ptBR } from "date-fns/locale";
@@ -16,19 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen(); // inicial
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
-
-  return isMobile;
-}
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 interface DatePickerWithRangeProps
   extends React.HTMLAttributes<HTMLDivElement> {

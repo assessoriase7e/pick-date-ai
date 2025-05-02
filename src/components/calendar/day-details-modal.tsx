@@ -49,14 +49,15 @@ export function DayDetailsModal({
   );
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [initialStartTime, setInitialStartTime] = useState<string | null>(null);
-  const [localAppointments, setLocalAppointments] =
-    useState<AppointmentFullData[]>(
-      appointments.map((appointment) => ({
-        ...appointment,
-        startTime: new Date(appointment.startTime),
-        endTime: new Date(appointment.endTime),
-      }))
-    );
+  const [localAppointments, setLocalAppointments] = useState<
+    AppointmentFullData[]
+  >(
+    appointments.map((appointment) => ({
+      ...appointment,
+      startTime: new Date(appointment.startTime),
+      endTime: new Date(appointment.endTime),
+    }))
+  );
 
   // Function to reload appointments
   const reloadAppointments = async () => {
