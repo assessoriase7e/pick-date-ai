@@ -15,40 +15,36 @@ type CollaboratorsError = {
   error: string;
 };
 
-async function fetchCollaborators(
-  userId: string
-): Promise<CollaboratorsSuccess | CollaboratorsError> {
-  try {
-    if (!userId) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
-
-    const collaborators = await prisma.collaborator.findMany({
-      where: {
-        userId,
-      },
-      orderBy: { name: "asc" },
-    });
-
-    return {
-      success: true,
-      data: collaborators,
-    };
-  } catch (error) {
-    console.error("Erro ao buscar colaboradores:", error);
-    return { success: false, error: "Falha ao buscar colaboradores" };
-  }
-}
-
-export const getCollaborators = async () => {
+export const getCollaborators = async (): Promise<
+  CollaboratorsSuccess | CollaboratorsError
+> => {
   const { userId } = await auth();
   if (!userId) {
     return { success: false, error: "Usuário não autenticado" };
   }
 
-  return unstable_cache(
-    () => fetchCollaborators(userId),
+  const cachedFetch = unstable_cache(
+    async (): Promise<CollaboratorsSuccess> => {
+      const collaborators = await prisma.collaborator.findMany({
+        where: {
+          userId,
+        },
+        orderBy: { name: "asc" },
+      });
+
+      return {
+        success: true,
+        data: collaborators,
+      } satisfies CollaboratorsSuccess;
+    },
     ["collaborators-list", userId],
     { revalidate: 60 * 60, tags: ["collaborators"] }
-  )();
+  );
+
+  try {
+    return await cachedFetch();
+  } catch (error) {
+    console.error("Erro ao buscar colaboradores:", error);
+    return { success: false, error: "Falha ao buscar colaboradores" };
+  }
 };
