@@ -62,7 +62,11 @@ export function ServiceForm({
       notes: initialData?.notes || "",
       collaboratorId: initialData?.collaboratorId || "none",
       durationMinutes: initialData?.durationMinutes || 30,
-      commission: initialData?.commission || 0,
+      commission:
+        initialData?.commission !== undefined &&
+        initialData?.commission !== null
+          ? Number(initialData.commission)
+          : 0,
     },
   });
 
@@ -136,7 +140,6 @@ export function ServiceForm({
                   onValueChange={(values) => {
                     onChange(values.floatValue);
                   }}
-                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -229,7 +232,17 @@ export function ServiceForm({
             <FormItem>
               <FormLabel>Duração</FormLabel>
               <FormControl>
-                <Input type="number" min={1} placeholder="Ex: 30" {...field} />
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Ex: 30"
+                  onChange={(e) => {
+                    let value = Number(e.target.value);
+                    if (isNaN(value)) value = 0;
+                    field.onChange(value);
+                  }}
+                  value={field.value || 0}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -250,10 +263,12 @@ export function ServiceForm({
                   maxLength={4}
                   fixedDecimalScale
                   placeholder="10%"
-                  {...field}
                   defaultValue={field.value || 0}
                   onValueChange={(values) => {
-                    field.onChange(values.value);
+                    let value = Number(values.value);
+                    if (isNaN(value)) value = 0;
+                    if (value > 100) value = 100;
+                    field.onChange(value);
                   }}
                 />
               </FormControl>
