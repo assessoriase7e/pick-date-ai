@@ -37,8 +37,13 @@ export async function createInstance(data: CreateInstanceFormValues) {
         instanceName: data.name,
         qrcode: data.qrCode,
         number: data.number,
-        webhookUrl: data.webhookUrl,
         integration: "WHATSAPP-BAILEYS",
+        webhook: {
+          url: data.webhookUrl,
+          base64: true,
+          byevents: true,
+          events: ["MESSAGES_UPSERT"],
+        },
       }),
     });
 
