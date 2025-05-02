@@ -11,6 +11,7 @@ import {
   Users,
   Image,
   SquareUser,
+  BarChart3,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -44,6 +45,7 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       color: "text-emerald-500",
       isActive: pathname === "/services",
     },
+
     {
       href: "/audios",
       icon: Music,
@@ -88,6 +90,13 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       href: "/agents",
       color: "text-emerald-500",
       isActive: pathname === "/agents",
+    },
+    {
+      label: "Relatórios",
+      icon: BarChart3,
+      href: "/reports",
+      color: "text-violet-500",
+      isActive: pathname.startsWith("/reports"),
     },
     {
       href: "/profile",
