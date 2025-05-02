@@ -24,7 +24,8 @@ export async function createService(data: ServiceFormValues) {
         notes: data.notes,
         collaboratorId: data.collaboratorId || null,
         userId: user.id,
-        durationMinutes: data.durationMinutes, // <-- Adicione esta linha
+        durationMinutes: data.durationMinutes,
+        commission: data.commission !== undefined ? Number(data.commission) : 0,
       },
     });
 

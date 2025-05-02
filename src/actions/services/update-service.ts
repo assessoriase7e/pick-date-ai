@@ -45,6 +45,7 @@ export async function updateService(
         notes: data.notes,
         collaboratorId: data.collaboratorId || null,
         durationMinutes: data.durationMinutes,
+        commission: data.commission !== undefined ? Number(data.commission) : 0,
       },
     });
 
