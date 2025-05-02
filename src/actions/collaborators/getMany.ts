@@ -2,36 +2,32 @@
 
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
+import { unstable_cache } from "next/cache";
 
 export async function listCollaborators() {
-  try {
-    const user = await getClerkUser();
-
-    if (!user) {
-      return {
-        success: false,
-        error: "Usuário não autenticado",
-      };
-    }
-
-    const collaborators = await prisma.collaborator.findMany({
-      where: {
-        userId: user.id,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
-
-    return {
-      success: true,
-      data: collaborators,
-    };
-  } catch (error) {
-    console.error("[COLLABORATORS_GET_MANY]", error);
+  const user = await getClerkUser();
+  if (!user) {
     return {
       success: false,
-      error: "Falha ao buscar colaboradores",
+      error: "Usuário não autenticado",
     };
   }
+
+  return unstable_cache(
+    async () => {
+      const collaborators = await prisma.collaborator.findMany({
+        where: {
+          userId: user.id,
+        },
+        orderBy: {
+          name: "asc",
+        },
+      });
+    },
+    [`collaborators-list-${user.id}`],
+    {
+      revalidate: 60 * 5, // 5 minutos
+      tags: ["collaborators"]
+    }
+  )();
 }
