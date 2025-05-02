@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { Service } from "@prisma/client";
 
 export async function updateService(
@@ -51,9 +51,6 @@ export async function updateService(
 
     revalidatePath("/services");
     revalidatePath("/collaborators");
-    revalidateTag("services");
-    revalidateTag("revenue");
-    revalidateTag("dashboard");
 
     return {
       success: true,

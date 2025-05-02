@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export async function deleteCollaborator(id: string) {
   try {
@@ -38,7 +38,6 @@ export async function deleteCollaborator(id: string) {
     });
 
     revalidatePath("/collaborators");
-    revalidateTag("collaborators");
 
     return {
       success: true,

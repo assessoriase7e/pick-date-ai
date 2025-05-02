@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 interface UpdateCollaboratorParams {
   id: string;
@@ -56,7 +56,6 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
     });
 
     revalidatePath("/collaborators");
-    revalidateTag("collaborators");
 
     return {
       success: true,

@@ -1,6 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { Appointment } from "@prisma/client";
 
@@ -68,9 +68,6 @@ export async function createAppointment(
     });
 
     revalidatePath("/calendar");
-    revalidateTag("appointments");
-    revalidateTag("revenue");
-    revalidateTag("dashboard");
 
     return {
       success: true,

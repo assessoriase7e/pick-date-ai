@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { ServiceFormValues } from "@/validators/service";
 
 export async function createService(data: ServiceFormValues) {
@@ -31,9 +31,6 @@ export async function createService(data: ServiceFormValues) {
 
     revalidatePath("/services");
     revalidatePath("/collaborators");
-    revalidateTag("services");
-    revalidateTag("revenue");
-    revalidateTag("dashboard");
 
     return {
       success: true,

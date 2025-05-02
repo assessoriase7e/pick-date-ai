@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 
 export async function deleteAppointment(id: string) {
@@ -37,8 +37,6 @@ export async function deleteAppointment(id: string) {
     });
 
     revalidatePath("/calendar");
-    revalidateTag("appointments");
-    revalidateTag("dashboard");
 
     return {
       success: true,

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { clientServiceSchema } from "@/validators/client-service";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export async function saveClientService(data: any) {
   try {
@@ -17,7 +17,6 @@ export async function saveClientService(data: any) {
     });
 
     revalidatePath(`/clients/${validatedData.clientId}/services`);
-    revalidateTag("services");
 
     return {
       success: true,

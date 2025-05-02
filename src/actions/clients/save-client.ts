@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { clientSchema } from "@/validators/client";
 import { currentUser } from "@clerk/nextjs/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export async function saveClient(data: any) {
   try {
@@ -42,7 +42,6 @@ export async function saveClient(data: any) {
     }
 
     revalidatePath("/clients");
-    revalidateTag("services");
 
     return {
       success: true,
