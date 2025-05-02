@@ -203,7 +203,6 @@ export function DayDetailsModal({
             date={dayDetails.date}
             onHourClick={handleHourClick}
             onEditAppointment={handleEditAppointment}
-            onDeleteAppointment={setAppointmentToDelete}
           />
 
           <DrawerFooter className="border-t">
