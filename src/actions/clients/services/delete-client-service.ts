@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function deleteClientService(id: string, clientId: string) {
   try {
@@ -10,7 +11,6 @@ export async function deleteClientService(id: string, clientId: string) {
     });
 
     if (clientService) {
-      // Se encontrou, exclui da tabela clientService
       await prisma.clientService.delete({
         where: { id },
       });
@@ -33,6 +33,9 @@ export async function deleteClientService(id: string, clientId: string) {
         };
       }
     }
+
+    revalidatePath(`/clients/${clientId}/services`);
+    revalidateTag("services");
 
     return {
       success: true,
