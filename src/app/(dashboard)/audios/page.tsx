@@ -6,11 +6,12 @@ import { listAudios } from "@/actions/audios/getMany";
 export default async function AudiosPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const page = Number(searchParams.page || "1");
+  const sParams = await searchParams;
+  const page = Number(sParams.page || "1");
   const result = await listAudios(page, 20);
-  
+
   const audios = result.success ? result.data.audios : [];
   const totalPages = result.success ? result.data.totalPages : 1;
 
@@ -23,10 +24,10 @@ export default async function AudiosPage({
         </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <AudiosContent 
-          initialAudios={audios} 
-          initialTotalPages={totalPages} 
-          currentPage={page} 
+        <AudiosContent
+          initialAudios={audios}
+          initialTotalPages={totalPages}
+          currentPage={page}
         />
       </Suspense>
     </div>

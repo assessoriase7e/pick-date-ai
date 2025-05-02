@@ -5,7 +5,19 @@ import { AttendantTab } from "./tabs/AttendantTab";
 import { SdrTab } from "./tabs/SdrTab";
 import { FollowUpTab } from "./tabs/FollowUpTab";
 
-export function PromptsSection() {
+interface PromptsProps {
+  attendantPrompt?: {
+    isActive: boolean;
+    content: string;
+    presentation: string;
+    speechStyle: string;
+    expressionInterpretation: string;
+    schedulingScript: string;
+    rules: string;
+  };
+}
+
+export function PromptsSection({ attendantPrompt }: PromptsProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
@@ -20,7 +32,11 @@ export function PromptsSection() {
         </TabsList>
 
         <TabsContent value="attendant">
-          <AttendantTab isLoading={isLoading} setIsLoading={setIsLoading} />
+          <AttendantTab 
+            isLoading={isLoading} 
+            setIsLoading={setIsLoading}
+            initialData={attendantPrompt}
+          />
         </TabsContent>
 
         <TabsContent value="sdr">

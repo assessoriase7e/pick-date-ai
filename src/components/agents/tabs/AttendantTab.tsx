@@ -3,8 +3,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useAttendantHandler } from "@/handles/attendant-handler";
 import { useUser } from "@clerk/nextjs";
-import { useEffect } from "react";
-import { getAttendantPrompt } from "@/actions/agents/attendant/get-attendant-prompt";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -20,12 +18,22 @@ interface AttendantTabProps {
   onSave?: () => Promise<void>;
   isLoading: boolean;
   setIsLoading?: (value: boolean) => void;
+  initialData?: {
+    isActive: boolean;
+    content: string;
+    presentation: string;
+    speechStyle: string;
+    expressionInterpretation: string;
+    schedulingScript: string;
+    rules: string;
+  };
 }
 
 export function AttendantTab({
   onSave,
   isLoading,
   setIsLoading,
+  initialData,
 }: AttendantTabProps) {
   const { user } = useUser();
   const { handleSaveAttendantPrompt } = useAttendantHandler();
@@ -41,52 +49,14 @@ export function AttendantTab({
 
   const form = useForm<FormValues>({
     defaultValues: {
-      isActive: false,
-      presentation: "",
-      speechStyle: "",
-      expressionInterpretation: "",
-      schedulingScript: "",
-      rules: "",
+      isActive: initialData?.isActive || false,
+      presentation: initialData?.presentation || "",
+      speechStyle: initialData?.speechStyle || "",
+      expressionInterpretation: initialData?.expressionInterpretation || "",
+      schedulingScript: initialData?.schedulingScript || "",
+      rules: initialData?.rules || "",
     },
   });
-
-  useEffect(() => {
-    async function loadAttendantPrompt() {
-      if (!user?.id) return;
-
-      try {
-        const result = await getAttendantPrompt(user.id);
-        if (!result.success || !result.data?.attendantPrompt) return;
-
-        const attendantPrompt = result.data.attendantPrompt;
-
-        if (!attendantPrompt) return;
-
-        const {
-          isActive = false,
-          presentation = "",
-          speechStyle = "",
-          expressionInterpretation = "",
-          schedulingScript = "",
-          rules = "",
-        } = attendantPrompt;
-
-        form.reset({
-          isActive,
-          presentation,
-          speechStyle,
-          expressionInterpretation,
-          schedulingScript,
-          rules,
-        });
-      } catch (error) {
-        console.error("Erro ao carregar prompt do atendente:", error);
-      }
-    }
-
-    loadAttendantPrompt();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
 
   const handleSave = async (values: FormValues) => {
     if (onSave) {
