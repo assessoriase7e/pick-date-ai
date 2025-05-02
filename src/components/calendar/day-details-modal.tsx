@@ -50,9 +50,15 @@ export function DayDetailsModal({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [initialStartTime, setInitialStartTime] = useState<string | null>(null);
   const [localAppointments, setLocalAppointments] =
-    useState<AppointmentFullData[]>(appointments);
+    useState<AppointmentFullData[]>(
+      appointments.map((appointment) => ({
+        ...appointment,
+        startTime: new Date(appointment.startTime),
+        endTime: new Date(appointment.endTime),
+      }))
+    );
 
-  // Função para recarregar os agendamentos
+  // Function to reload appointments
   const reloadAppointments = async () => {
     if (!dayDetails) return;
 
@@ -62,9 +68,15 @@ export function DayDetailsModal({
         dayDetails.date
       );
       if (response.success && response.data) {
-        setLocalAppointments(response.data);
+        setLocalAppointments(
+          response.data.map((appointment) => ({
+            ...appointment,
+            startTime: new Date(appointment.startTime),
+            endTime: new Date(appointment.endTime),
+          }))
+        );
 
-        // Atualiza o estado global de appointments no CalendarContent
+        // Update global appointments state in CalendarContent
         const dateKey = dayDetails.date.toISOString().split("T")[0];
         window.dispatchEvent(
           new CustomEvent("appointmentUpdated", {
@@ -85,11 +97,8 @@ export function DayDetailsModal({
     setShowAppointmentForm(false);
     await reloadAppointments();
 
-    // If the updateAppointmentsForDate prop exists, call it with the updated appointments
     if (dayDetails && updateAppointmentsForDate) {
       const dateKey = dayDetails.date.toISOString().split("T")[0];
-      // You might need to adjust this depending on how you want to update the parent component
-      // This assumes you have access to the newly created appointment
       if (selectedAppointment) {
         updateAppointmentsForDate(dateKey, selectedAppointment);
       }
