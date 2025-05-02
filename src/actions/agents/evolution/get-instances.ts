@@ -3,9 +3,8 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
-const evolutionApiUrl =
-  process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
-const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
+const evolutionApiUrl = process.env.EVOLUTION_API_URL as string;
+const evolutionApiKey = process.env.EVOLUTION_API_KEY as string;
 
 export async function getInstances() {
   try {
@@ -37,14 +36,16 @@ export async function getInstances() {
 
     const apiInstances = await response.json();
 
+    console.log("apiInstances", apiInstances); // Adicionado console.log para depuraçã
+
     // Atualizar status das instâncias
     const updatedInstances = await Promise.all(
       instances.map(async (instance) => {
         const apiInstance = apiInstances.find(
-          (i: any) => i.instanceName === instance.name
+          (i: any) => i.name === instance.name
         );
 
-        const status = apiInstance?.status || "disconnected";
+        const status = apiInstance?.connectionStatus || "disconnected";
 
         // Atualizar status no banco de dados
         if (status !== instance.status) {
@@ -60,6 +61,8 @@ export async function getInstances() {
         };
       })
     );
+
+    console.log("updatedInstances", updatedInstances); // Adicionado console.log para depuraçã
 
     return { success: true, data: updatedInstances };
   } catch (error) {

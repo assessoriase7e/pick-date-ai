@@ -38,6 +38,8 @@ export function EvolutionSection({
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
 
+  console.log(instances);
+
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
       try {
@@ -147,7 +149,7 @@ export function EvolutionSection({
                       >
                         <Bolt className="h-4 w-4" />
                       </Button>
-                      {instance.status !== "connected" && (
+                      {instance.status !== "open" && (
                         <Button
                           variant="outline"
                           size="icon"
