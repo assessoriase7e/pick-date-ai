@@ -56,6 +56,9 @@ export default async function ReportsPage({
     ? revenueResult.monthlyData
     : [];
 
+  // Calcular o faturamento total do período
+  const periodRevenue = revenueData.reduce((total, item) => total + item.revenue, 0);
+
   // Configurar período para os dados do colaborador
   const formatedFromCollab = fromCollab
     ? moment(fromCollab as string)
@@ -105,6 +108,7 @@ export default async function ReportsPage({
           completedAppointmentsCount={dashboardData.completedAppointmentsCount}
           futureAppointmentsCount={dashboardData.futureAppointmentsCount}
           todayRevenue={dashboardData.todayRevenue}
+          periodRevenue={fromRevenue && toRevenue ? periodRevenue : undefined}
         />
       </Suspense>
 
@@ -112,9 +116,9 @@ export default async function ReportsPage({
         <div className="flex flex-col lg:flex-row gap-5 col-span-1 lg:col-span-4">
           <Suspense fallback={<LoaderCircle className="animate-spin" />}>
             <div className="flex-1">
-              <RevenueChart
-                data={revenueData}
-                config={revenueChartConfig}
+              <MonthlyRevenueChart
+                data={monthlyRevenueData}
+                config={monthlyRevenueChartConfig}
                 initialFromDate={formatedFromRevenue}
                 initialToDate={formatedToRevenue}
               />
@@ -123,9 +127,9 @@ export default async function ReportsPage({
 
           <Suspense fallback={<LoaderCircle className="animate-spin" />}>
             <div className="flex-1">
-              <MonthlyRevenueChart
-                data={monthlyRevenueData}
-                config={monthlyRevenueChartConfig}
+              <RevenueChart
+                data={revenueData}
+                config={revenueChartConfig}
                 initialFromDate={formatedFromRevenue}
                 initialToDate={formatedToRevenue}
               />

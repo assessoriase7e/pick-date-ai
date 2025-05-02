@@ -16,59 +16,52 @@ export async function getAppointmentsByMonth(
   date: Date,
   calendarId: string
 ): Promise<GetAppointmentsByMonthReturn> {
-  return unstable_cache(
-    async () => {
-      try {
-        const { userId } = await auth();
+  // 1. Autentique **antes** do cache
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
 
-        if (!userId) {
-          return {
-            success: false,
-            error: "Usuário não autenticado",
-          };
-        }
+  async function fetchAppointments(
+    userId: string,
+    dateIso: string,
+    calendarId: string
+  ): Promise<GetAppointmentsByMonthReturn> {
+    try {
+      const start = startOfMonth(new Date(dateIso));
+      const end = endOfMonth(new Date(dateIso));
 
-        const start = startOfMonth(date);
-        const end = endOfMonth(date);
+      const appointments = await prisma.appointment.findMany({
+        where: {
+          AND: [
+            { startTime: { gte: start, lte: end } },
+            { userId },
+            { calendarId },
+          ],
+        },
+        include: { client: true, service: true },
+        orderBy: { startTime: "asc" },
+      });
 
-        const appointments = await prisma.appointment.findMany({
-          where: {
-            AND: [
-              {
-                startTime: {
-                  gte: start,
-                  lte: end,
-                },
-              },
-              { userId },
-              { calendarId },
-            ],
-          },
-          include: {
-            client: true,
-            service: true,
-          },
-          orderBy: {
-            startTime: "asc",
-          },
-        });
+      return { success: true, data: appointments };
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos:", error);
+      return {
+        success: false,
+        error: "Não foi possível carregar os agendamentos",
+      };
+    }
+  }
 
-        return {
-          success: true,
-          data: appointments,
-        };
-      } catch (error) {
-        console.error("Erro ao buscar agendamentos:", error);
-        return {
-          success: false,
-          error: "Não foi possível carregar os agendamentos",
-        };
-      }
-    },
-    [`appointments-month-${date.toISOString()}-${calendarId}`],
+  const cachedFetch = unstable_cache(
+    fetchAppointments,
+    // chave do cache incorporando todos os valores dinâmicos
+    [`appointments-month-${date.toISOString()}-${calendarId}-${userId}`],
     {
-      revalidate: 60 * 5, // 5 minutos
+      revalidate: 60 * 5,
       tags: ["appointments", "clients", "services", "calendar"],
     }
-  )();
+  );
+
+  return cachedFetch(userId, date.toISOString(), calendarId);
 }

@@ -15,7 +15,9 @@ type CollaboratorsError = {
   error: string;
 };
 
-async function fetchCollaborators(userId: string): Promise<CollaboratorsSuccess | CollaboratorsError> {
+async function fetchCollaborators(
+  userId: string
+): Promise<CollaboratorsSuccess | CollaboratorsError> {
   try {
     if (!userId) {
       return { success: false, error: "Usuário não autenticado" };
@@ -23,14 +25,14 @@ async function fetchCollaborators(userId: string): Promise<CollaboratorsSuccess 
 
     const collaborators = await prisma.collaborator.findMany({
       where: {
-        userId
+        userId,
       },
-      orderBy: { name: "asc" }
+      orderBy: { name: "asc" },
     });
 
     return {
       success: true,
-      data: collaborators
+      data: collaborators,
     };
   } catch (error) {
     console.error("Erro ao buscar colaboradores:", error);
