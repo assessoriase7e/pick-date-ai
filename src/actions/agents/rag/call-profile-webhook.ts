@@ -52,14 +52,49 @@ export const callProfileWebhook = async ({
       };
     }
 
+    // Função auxiliar para formatar horários de funcionamento
+    function formatBusinessHours(businessHours: any[]): string {
+      if (!Array.isArray(businessHours)) return "";
+      // Agrupa por dia e pega o menor openTime e maior closeTime para cada dia
+      const grouped: Record<string, { open: string; close: string }[]> = {};
+      businessHours.forEach((item) => {
+        if (!grouped[item.day]) grouped[item.day] = [];
+        grouped[item.day].push({ open: item.openTime, close: item.closeTime });
+      });
+
+      return Object.entries(grouped)
+        .map(([day, intervals]) => {
+          // Se houver mais de um intervalo para o mesmo dia, mostra todos
+          return intervals
+            .map(
+              (interval) => `${day}: Das ${interval.open} às ${interval.close}`
+            )
+            .join("\n");
+        })
+        .join("\n");
+    }
     // Formatar os dados para o treinamento RAG
     const formattedContent = `
         # Perfil da Empresa
         Nome da Empresa: ${profile?.companyName || ""}
         Endereço: ${profile?.address || ""}
         Whatsapp: ${profile?.whatsapp || ""}
-        Horário de Funcionamento: ${
-          profile?.businessHours ? JSON.stringify(profile.businessHours) : ""
+        Horário de Funcionamento:
+        ${
+          Array.isArray(profile?.businessHours)
+            ? formatBusinessHours(profile.businessHours as any[])
+            : typeof profile?.businessHours === "string"
+            ? (() => {
+                try {
+                  const parsed = JSON.parse(profile.businessHours as string);
+                  return Array.isArray(parsed)
+                    ? formatBusinessHours(parsed)
+                    : "";
+                } catch {
+                  return "";
+                }
+              })()
+            : ""
         }
         Documento: ${profile?.documentNumber || ""}
         Localização: ${profile?.locationUrl || ""}

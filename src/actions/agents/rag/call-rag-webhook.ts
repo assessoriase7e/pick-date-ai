@@ -14,12 +14,17 @@ export const callRagWebhook = async ({
   try {
     // Verificar se o webhook e metadata estão definidos
     if (!webhookUrl || !metadataKey) {
-      return { success: true, message: "Sem configuração de webhook para chamar" };
+      return {
+        success: true,
+        message: "Sem configuração de webhook para chamar",
+      };
     }
 
     const formattedContent = ragFiles
       .map((file) => `\n\n${file.content}\n\n`)
       .join("\n\n");
+
+    console.log("formattedContent", formattedContent);
 
     const response = await fetch(webhookUrl, {
       method: "POST",
@@ -35,7 +40,7 @@ export const callRagWebhook = async ({
     if (!response.ok) {
       throw new Error(`Erro ao chamar webhook: ${response.statusText}`);
     }
-    
+
     return { success: true };
   } catch (webhookError) {
     console.error("Erro ao chamar webhook:", webhookError);

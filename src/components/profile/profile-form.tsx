@@ -70,6 +70,15 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     name: "businessHours",
   });
 
+  // Função para obter os dias disponíveis
+  const getAvailableDays = (currentIndex: number) => {
+    const selectedDays = fields
+      .map((field, index) => (index !== currentIndex ? form.getValues(`businessHours.${index}.day`) : ""))
+      .filter(Boolean);
+    
+    return DAYS_OF_WEEK.filter(day => !selectedDays.includes(day));
+  };
+
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatDocument(e.target.value);
     form.setValue("documentNumber", formattedValue);
@@ -274,7 +283,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                                 {...field}
                               >
                                 <option value="">Selecione um dia</option>
-                                {DAYS_OF_WEEK.map((day) => (
+                                {getAvailableDays(index).map((day) => (
                                   <option key={day} value={day}>
                                     {day}
                                   </option>
