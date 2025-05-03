@@ -188,7 +188,7 @@ export function CalendarContent({
 
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader setOpen={setOpen} />
+      <CalendarHeader setOpen={setOpen} calendarId={calendarId} />
 
       <CalendarTabs
         calendars={calendars}
