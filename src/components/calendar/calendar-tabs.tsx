@@ -70,7 +70,7 @@ export function CalendarTabs({
       <Tabs
         value={calendarId}
         onValueChange={handleChangeCalendar}
-        className="h-full flex flex-col"
+        className="h-full flex flex-col gap-2"
       >
         {!isMobile && (
           <DesktopCalendarTabs
