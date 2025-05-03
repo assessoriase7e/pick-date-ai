@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { CalendarGrid } from "./calendar-grid";
@@ -52,8 +51,8 @@ export function SharedCalendarView({
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8 text-center">
+    <div className="container mx-auto py-8 px-4 h-svh flex flex-col justify-center w-full items-center">
+      <div className="mb-8 text-center w-full">
         <h1 className="text-3xl font-bold mb-2">{calendar.name}</h1>
         {calendar.collaborator && (
           <p className="text-lg text-muted-foreground">
@@ -62,7 +61,7 @@ export function SharedCalendarView({
         )}
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto w-full">
         <CalendarGrid
           currentDate={currentDate}
           goToPreviousMonth={goToPreviousMonth}

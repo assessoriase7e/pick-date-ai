@@ -47,7 +47,6 @@ export function CalendarTabs({
 
   const isMobile = useIsMobile();
 
-  // Função para atualizar o parâmetro na URL ao trocar de calendário
   const handleChangeCalendar = (id: string) => {
     setCalendarId(id);
   };

@@ -10,14 +10,14 @@ export default async function SharedCalendarPage({
   params,
   searchParams,
 }: {
-  params: { calendarId: string };
+  params: Promise<{ calendarId: string }>;
   searchParams: Promise<{
     date?: string;
     selectedDay?: string;
   }>;
 }) {
   const sParams = await searchParams;
-  const { calendarId } = params;
+  const { calendarId } = await params;
 
   // Buscar o calendário pelo ID
   const calendarResponse = await getCalendarById(calendarId);

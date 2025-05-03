@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect, TouchEvent } from "react";
+import { useMemo, useRef, useState, TouchEvent } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { Button } from "@/components/ui/button";
@@ -34,12 +34,10 @@ export function CalendarGrid({
 }: CalendarGridProps) {
   const today = moment();
   const calendarRef = useRef<HTMLDivElement>(null);
-  
-  // Add these two lines:
+
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  
-  // Configuração mínima de distância para considerar como um swipe
+
   const minSwipeDistance = 50;
 
   const calendarDays = useMemo(() => {
@@ -50,7 +48,6 @@ export function CalendarGrid({
 
     const days: CalendarDay[] = [];
 
-    // Dias do mês anterior
     const prevMonthStart = moment(startOfMonth).subtract(
       startDayOfWeek,
       "days"
@@ -64,7 +61,6 @@ export function CalendarGrid({
       });
     }
 
-    // Dias do mês atual
     for (let i = 1; i <= daysInMonth; i++) {
       const date = moment(startOfMonth).date(i);
       days.push({
@@ -74,7 +70,6 @@ export function CalendarGrid({
       });
     }
 
-    // Dias do próximo mês
     const totalDisplayed = days.length;
     const remaining = 42 - totalDisplayed;
     for (let i = 1; i <= remaining; i++) {
@@ -104,7 +99,6 @@ export function CalendarGrid({
     return appointments;
   };
 
-  // Manipuladores de eventos de toque
   const onTouchStart = (e: TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -116,29 +110,26 @@ export function CalendarGrid({
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe) {
-      // Swipe para a esquerda - avançar para o próximo mês
       goToNextMonth();
     }
-    
+
     if (isRightSwipe) {
-      // Swipe para a direita - voltar para o mês anterior
       goToPreviousMonth();
     }
-    
-    // Resetar os valores de toque
+
     setTouchStart(null);
     setTouchEnd(null);
   };
 
   return (
     <div className="w-full">
-      <div 
+      <div
         ref={calendarRef}
         className="flex flex-col h-full border rounded-lg"
         onTouchStart={onTouchStart}
@@ -198,8 +189,9 @@ export function CalendarGrid({
                   {dayObj.date.date()}
                 </span>
                 {getAppointmentsForDay(dayObj.date)?.length > 0 && (
-                  <span className="text-[10px] sm:text-xs mt-1">
-                    {getAppointmentsForDay(dayObj.date).length} agendamento(s)
+                  <span className="text-[10px] sm:text-xs mt-1 flex flex-col">
+                    {getAppointmentsForDay(dayObj.date).length}{" "}
+                    <span className="hidden lg:block">agendamento(s)</span>
                   </span>
                 )}
               </div>
