@@ -36,8 +36,6 @@ export async function getInstances() {
 
     const apiInstances = await response.json();
 
-    console.log("apiInstances", apiInstances); // Adicionado console.log para depuraçã
-
     // Atualizar status das instâncias
     const updatedInstances = await Promise.all(
       instances.map(async (instance) => {
@@ -61,8 +59,6 @@ export async function getInstances() {
         };
       })
     );
-
-    console.log("updatedInstances", updatedInstances); // Adicionado console.log para depuraçã
 
     return { success: true, data: updatedInstances };
   } catch (error) {

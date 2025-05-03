@@ -38,8 +38,6 @@ export function EvolutionSection({
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
 
-  console.log(instances);
-
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta instância?")) {
       try {
