@@ -1,6 +1,7 @@
 import moment from "moment";
 import { AppointmentCard } from "../appointment/appointment-card";
 import { AppointmentFullData } from "@/types/calendar";
+import { cn } from "@/lib/utils";
 
 interface DayScheduleGridProps {
   appointments: AppointmentFullData[];
@@ -19,7 +20,16 @@ export function DayScheduleGrid({
     return moment().hour(hour).minute(0).format("HH:mm");
   };
 
-  const hoursOfDay = Array.from({ length: 24 }, (_, i) => i);
+  // Reorganizando os horários para começar às 06:00
+  const hoursOfDay = [
+    6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1, 2,
+    3, 4, 5,
+  ];
+
+  // Função para verificar se o horário está no período noturno (22:00-05:00)
+  const isNightHour = (hour: number) => {
+    return hour >= 22 || hour <= 5;
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -32,7 +42,11 @@ export function DayScheduleGrid({
           {hoursOfDay.map((hour) => (
             <div
               key={hour}
-              className="h-20 flex items-center justify-center border-b"
+              className={cn(
+                "h-20 flex items-center justify-center border-b",
+                isNightHour(hour) &&
+                  "bg-background brightness-90 dark:brightness-50"
+              )}
             >
               <span className="text-sm font-medium">{formatHour(hour)}</span>
             </div>
@@ -46,7 +60,11 @@ export function DayScheduleGrid({
             {hoursOfDay.map((hour) => (
               <div
                 key={hour}
-                className="h-20 border-b hover:bg-muted/20 transition-colors cursor-pointer"
+                className={cn(
+                  "h-20 border-b hover:bg-muted/20 transition-colors cursor-pointer",
+                  isNightHour(hour) &&
+                    "bg-background brightness-90 dark:brightness-50"
+                )}
                 onClick={() => onHourClick(hour)}
               />
             ))}
@@ -59,10 +77,18 @@ export function DayScheduleGrid({
               const startMinutes = appointment.startTime.getMinutes();
               const endHour = appointment.endTime.getHours();
               const endMinutes = appointment.endTime.getMinutes();
+
+              // Ajuste para o novo layout de horas
+              const hourIndex = hoursOfDay.indexOf(startHour);
+              if (hourIndex === -1) return null;
+
               const startPosition = startHour * 60 + startMinutes;
               const duration = endHour * 60 + endMinutes - startPosition;
-              const rowStart = Math.floor(startPosition / 60) + 1;
-              const rowEnd = Math.ceil((startPosition + duration) / 60) + 1;
+
+              // Cálculo ajustado para o novo layout
+              const rowStart = hourIndex + 1;
+              const rowSpan = Math.ceil(duration / 60);
+              const rowEnd = rowStart + rowSpan;
 
               return (
                 <AppointmentCard
