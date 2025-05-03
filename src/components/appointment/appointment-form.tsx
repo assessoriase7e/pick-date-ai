@@ -96,6 +96,27 @@ export function AppointmentForm({
         },
   });
 
+  // Função para verificar se um serviço está disponível no dia selecionado
+  const isServiceAvailableOnDay = (service: Service): boolean => {
+    if (!service.availableDays || service.availableDays.length === 0) {
+      return true; // Se não houver dias definidos, consideramos disponível todos os dias
+    }
+
+    const dayOfWeek = moment(date).locale("pt-br").format("dddd");
+    const formattedDay =
+      dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1) + "-feira";
+
+    // Tratamento especial para sábado e domingo
+    const dayName =
+      dayOfWeek === "sábado"
+        ? "Sábado"
+        : dayOfWeek === "domingo"
+        ? "Domingo"
+        : formattedDay;
+
+    return service.availableDays.includes(dayName);
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -208,27 +229,26 @@ export function AppointmentForm({
       onSuccess();
     } catch (error) {
       console.error("Erro ao salvar agendamento:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erro ao salvar agendamento. Tente novamente."
-      );
+      toast.error("Ocorreu um erro ao salvar o agendamento");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!appointment) return;
+    if (!appointment?.id) return;
 
     try {
       setIsDeleting(true);
-      await deleteAppointment(appointment.id!);
-      toast.success("Agendamento cancelado com sucesso!");
+      const result = await deleteAppointment(appointment.id);
+      if (!result.success) {
+        throw new Error(result.error || "Erro ao excluir agendamento");
+      }
+      toast.success("Agendamento excluído com sucesso!");
       onSuccess();
     } catch (error) {
-      console.error("Erro ao cancelar agendamento:", error);
-      toast.error("Erro ao cancelar agendamento. Tente novamente.");
+      console.error("Erro ao excluir agendamento:", error);
+      toast.error("Ocorreu um erro ao excluir o agendamento");
     } finally {
       setIsDeleting(false);
     }
@@ -243,7 +263,11 @@ export function AppointmentForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cliente</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um cliente" />
@@ -252,7 +276,7 @@ export function AppointmentForm({
                 <SelectContent>
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
-                      {client.fullName || client.fullName}
+                      {client.fullName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -268,18 +292,33 @@ export function AppointmentForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Serviço</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um serviço" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {services.map((service) => (
-                    <SelectItem key={service.id} value={service.id}>
-                      {service.name}
-                    </SelectItem>
-                  ))}
+                  {services.map((service) => {
+                    const isAvailable = isServiceAvailableOnDay(service);
+                    return (
+                      <SelectItem
+                        key={service.id}
+                        value={service.id}
+                        disabled={!isAvailable}
+                        className={
+                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                        }
+                      >
+                        {service.name}{" "}
+                        {!isAvailable && "(Indisponível neste dia)"}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -287,13 +326,13 @@ export function AppointmentForm({
           )}
         />
 
-        <div className="flex gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="startTime"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Início</FormLabel>
+              <FormItem>
+                <FormLabel>Horário de Início</FormLabel>
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
@@ -301,12 +340,13 @@ export function AppointmentForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="endTime"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Término</FormLabel>
+              <FormItem>
+                <FormLabel>Horário de Término</FormLabel>
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
@@ -323,32 +363,34 @@ export function AppointmentForm({
             <FormItem>
               <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Textarea placeholder="Observações do agendamento" {...field} />
+                <Textarea
+                  placeholder="Adicione observações sobre o agendamento"
+                  className="resize-none"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-between pt-4">
           {isEditing && (
             <Button
               type="button"
-              variant="outline"
+              variant="destructive"
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Cancelando..." : "Cancelar agendamento"}
+              {isDeleting ? "Excluindo..." : "Excluir"}
             </Button>
           )}
-          <Button type="submit" disabled={isLoading}>
-            {isLoading
-              ? isEditing
-                ? "Salvando..."
-                : "Criando..."
-              : isEditing
-              ? "Salvar"
-              : "Criar"}
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className={isEditing ? "" : "w-full"}
+          >
+            {isLoading ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </form>

@@ -119,114 +119,106 @@ export function DayDetailsModal({
   };
 
   const handleHourClick = (hour: number) => {
-    const startTimeString = moment(dayDetails.date)
-      .hour(hour)
-      .minute(0)
-      .format("HH:mm");
-    setInitialStartTime(startTimeString);
     setSelectedAppointment(null);
+    setInitialStartTime(`${hour.toString().padStart(2, "0")}:00`);
     setShowAppointmentForm(true);
   };
 
-  const handleDeleteAppointment = async () => {
+  const handleDeleteConfirm = async () => {
     if (!appointmentToDelete) return;
 
+    setDeleteLoading(true);
     try {
-      setDeleteLoading(true);
       const result = await deleteAppointment(appointmentToDelete);
-
       if (result.success) {
         toast.success("Agendamento excluído com sucesso");
+        setAppointmentToDelete(null);
         await reloadAppointments();
-        closeDayDetails();
       } else {
         toast.error(result.error || "Erro ao excluir agendamento");
       }
     } catch (error) {
       console.error("Erro ao excluir agendamento:", error);
-      toast.error("Erro ao excluir agendamento. Tente novamente.");
+      toast.error("Ocorreu um erro ao excluir o agendamento");
     } finally {
       setDeleteLoading(false);
-      setAppointmentToDelete(null);
     }
   };
 
-  // Utilitários
-  const formatFullDate = (date: Date) => {
-    return moment(date).format("dddd, D [de] MMMM [de] YYYY");
-  };
-
-  const hasTimeConflict = (
+  // Verificar conflitos de horário
+  const checkTimeConflict = (
     startTime: Date,
     endTime: Date,
     excludeId?: string
-  ) => {
+  ): boolean => {
     return localAppointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
 
+      const appointmentStart = new Date(appointment.startTime);
+      const appointmentEnd = new Date(appointment.endTime);
+
       return (
-        (startTime >= appointment.startTime &&
-          startTime < appointment.endTime) ||
-        (endTime > appointment.startTime && endTime <= appointment.endTime) ||
-        (startTime <= appointment.startTime && endTime >= appointment.endTime)
+        (startTime < appointmentEnd && endTime > appointmentStart) ||
+        (startTime.getTime() === appointmentStart.getTime() &&
+          endTime.getTime() === appointmentEnd.getTime())
       );
     });
   };
 
+  // Formatação da data para exibição
+  const formattedDate = moment(dayDetails.date).format("DD/MM/YYYY");
+
   return (
     <>
-      <Drawer
-        open={dayDetails.isOpen}
-        onOpenChange={(open) => {
-          if (!open) closeDayDetails();
-        }}
-      >
-        <DrawerContent className="h-full max-h-none max-w-2xl mx-auto">
-          <DrawerHeader className="border-b">
-            <DrawerTitle className="text-xl font-semibold capitalize">
-              {formatFullDate(dayDetails.date)}
+      <Drawer open={dayDetails.isOpen} onOpenChange={closeDayDetails}>
+        <DrawerContent className="max-h-[100svh] lg:max-w-xl mx-auto flex flex-col">
+          <DrawerHeader className="flex justify-between items-center">
+            <DrawerTitle className="text-xl">
+              Agendamentos para {formattedDate}
             </DrawerTitle>
-            <DrawerClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-4"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </DrawerClose>
+            <div className="flex items-center gap-2">
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DrawerClose>
+            </div>
           </DrawerHeader>
 
-          <AppointmentFormDialog
-            isOpen={showAppointmentForm}
-            onOpenChange={setShowAppointmentForm}
-            date={dayDetails.date}
-            appointment={selectedAppointment}
-            onSuccess={handleFormSuccess}
-            checkTimeConflict={hasTimeConflict}
-            initialStartTime={initialStartTime}
-            calendarId={calendarId}
-          />
+          <div className="flex-1 overflow-y-auto px-2">
+            <DayScheduleGrid
+              appointments={localAppointments}
+              date={dayDetails.date}
+              onHourClick={handleHourClick}
+              onEditAppointment={handleEditAppointment}
+            />
+          </div>
 
-          <DayScheduleGrid
-            appointments={localAppointments}
-            date={dayDetails.date}
-            onHourClick={handleHourClick}
-            onEditAppointment={handleEditAppointment}
-          />
-
-          <DrawerFooter className="border-t">
-            <Button className="w-full" onClick={handleNewAppointment}>
-              <Plus className="mr-2 h-4 w-4" /> Adicionar compromisso
+          <DrawerFooter>
+            <Button size="sm" onClick={handleNewAppointment}>
+              <Plus className="h-4 w-4 mr-1" /> Adicionar
             </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
 
+      {/* Modal de formulário de agendamento */}
+      <AppointmentFormDialog
+        isOpen={showAppointmentForm}
+        onClose={() => setShowAppointmentForm(false)}
+        appointment={selectedAppointment}
+        onSuccess={handleFormSuccess}
+        date={dayDetails.date}
+        initialStartTime={initialStartTime}
+        calendarId={calendarId}
+        checkTimeConflict={checkTimeConflict}
+      />
+
+      {/* Modal de confirmação de exclusão */}
       <DeleteConfirmationDialog
         isOpen={!!appointmentToDelete}
-        onOpenChange={(open) => !open && setAppointmentToDelete(null)}
-        onConfirm={handleDeleteAppointment}
+        onOpenChange={() => setAppointmentToDelete(null)}
+        onConfirm={handleDeleteConfirm}
         isLoading={deleteLoading}
       />
     </>
