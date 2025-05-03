@@ -23,7 +23,7 @@ export function ShareCalendarModal({
 }: ShareCalendarModalProps) {
   let shareUrl = "";
   if (typeof window !== "undefined") {
-    shareUrl = `${window.location.origin}/calendar/shared-calendar/${calendarId}`;
+    shareUrl = `${window.location.origin}/shared-calendar/${calendarId}`;
   }
 
   const copyToClipboard = async () => {
