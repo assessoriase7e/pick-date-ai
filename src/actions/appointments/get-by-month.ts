@@ -1,10 +1,7 @@
-"use server";
-
-import { prisma } from "@/lib/db";
 import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
-import { startOfMonth, endOfMonth } from "date-fns";
-import { unstable_cache } from "next/cache";
+import { endOfMonth, startOfMonth } from "date-fns";
+import { prisma } from "@/lib/db";
 
 type GetAppointmentsByMonthReturn = {
   success: boolean;
@@ -14,16 +11,19 @@ type GetAppointmentsByMonthReturn = {
 
 export async function getAppointmentsByMonth(
   date: Date,
-  calendarId: string
+  calendarId: string,
+  requireAuth: boolean = true
 ): Promise<GetAppointmentsByMonthReturn> {
-  // 1. Autentique **antes** do cache
-  const { userId } = await auth();
-  if (!userId) {
-    return { success: false, error: "Usuário não autenticado" };
+  let userId: string | undefined = undefined;
+  if (requireAuth) {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
   }
 
   async function fetchAppointments(
-    userId: string,
+    userId: string | undefined,
     dateIso: string,
     calendarId: string
   ): Promise<GetAppointmentsByMonthReturn> {
@@ -31,14 +31,16 @@ export async function getAppointmentsByMonth(
       const start = startOfMonth(new Date(dateIso));
       const end = endOfMonth(new Date(dateIso));
 
+      const whereClause: any = {
+        startTime: { gte: start, lte: end },
+        calendarId,
+      };
+      if (userId) {
+        whereClause.userId = userId;
+      }
+
       const appointments = await prisma.appointment.findMany({
-        where: {
-          AND: [
-            { startTime: { gte: start, lte: end } },
-            { userId },
-            { calendarId },
-          ],
-        },
+        where: whereClause,
         include: { client: true, service: true },
         orderBy: { startTime: "asc" },
       });
@@ -53,15 +55,5 @@ export async function getAppointmentsByMonth(
     }
   }
 
-  const cachedFetch = unstable_cache(
-    fetchAppointments,
-    // chave do cache incorporando todos os valores dinâmicos
-    [`appointments-month-${date.toISOString()}-${calendarId}-${userId}`],
-    {
-      revalidate: 60 * 5,
-      tags: ["appointments", "clients", "services", "calendar"],
-    }
-  );
-
-  return cachedFetch(userId, date.toISOString(), calendarId);
+  return fetchAppointments(userId, date.toISOString(), calendarId);
 }
