@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getServices } from "@/actions/services/get-services";
 import { toast } from "sonner";
 import { updateAppointment } from "@/actions/appointments/update";
 import { createAppointment } from "@/actions/appointments/create";
@@ -12,9 +11,9 @@ import { deleteAppointment } from "@/actions/appointments/delete";
 import { createAppointmentSchema } from "@/validators/calendar";
 import moment from "moment";
 import { AppointmentFullData } from "@/types/calendar";
-import { getClients } from "@/actions/clients/get-clients";
-import { Client, Service } from "@prisma/client";
-import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
+import { useAppointmentDataStore } from "@/store/appointment-data-store";
+import { Service } from "@prisma/client";
+import { daysMap } from "@/mocked/daysMap";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
@@ -39,12 +38,17 @@ export function useAppointmentForm({
   initialStartTime,
   calendarId,
 }: UseAppointmentFormProps) {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  const {
+    clients,
+    services,
+    isLoadingClients,
+    isLoadingServices,
+    fetchClients,
+    fetchServices,
+  } = useAppointmentDataStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
-  const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [selectedServiceDuration, setSelectedServiceDuration] = useState<
     number | null
   >(null);
@@ -85,98 +89,19 @@ export function useAppointmentForm({
     }
 
     const dayOfWeek = moment(date).locale("pt-br").format("dddd");
-
-    let dayName = "";
-
-    switch (dayOfWeek) {
-      case "segunda-feira":
-        dayName = "Segunda-feira";
-        break;
-      case "terça-feira":
-        dayName = "Terça-feira";
-        break;
-      case "quarta-feira":
-        dayName = "Quarta-feira";
-        break;
-      case "quinta-feira":
-        dayName = "Quinta-feira";
-        break;
-      case "sexta-feira":
-        dayName = "Sexta-feira";
-        break;
-      case "sábado":
-        dayName = "Sábado";
-        break;
-      case "domingo":
-        dayName = "Domingo";
-        break;
-      default:
-        dayName = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-    }
+    const dayName =
+      daysMap[dayOfWeek] ||
+      dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
 
     return service.availableDays.includes(dayName);
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoadingClients(true);
-        setIsLoadingServices(true);
-
-        const clientsResult = await getClients();
-        if (clientsResult.success) {
-          setClients(clientsResult?.data?.clients || []);
-        } else {
-          toast.error(clientsResult.error || "Erro ao carregar clientes");
-        }
-        setIsLoadingClients(false);
-
-        const calendarResult = await getCalendarCollaborator(calendarId);
-
-        if (calendarResult.success && calendarResult.data?.collaboratorId) {
-          const servicesResult = await getServices({
-            where: {
-              OR: [
-                { collaboratorId: calendarResult.data.collaboratorId },
-                {
-                  serviceCollaborators: {
-                    some: {
-                      collaboratorId: calendarResult.data.collaboratorId,
-                    },
-                  },
-                },
-              ],
-            },
-          });
-
-          if (servicesResult.success) {
-            setServices(servicesResult.data || []);
-          } else {
-            toast.error(servicesResult.error || "Erro ao carregar serviços");
-          }
-        } else {
-          toast.error(
-            calendarResult.error || "Erro ao carregar dados do calendário"
-          );
-
-          // Carrega todos os serviços se não conseguir filtrar por colaborador
-          const servicesResult = await getServices({});
-          if (servicesResult.success) {
-            setServices(servicesResult.data || []);
-          }
-        }
-        setIsLoadingServices(false);
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        toast.error("Erro ao carregar dados. Tente novamente.");
-        setIsLoadingClients(false);
-        setIsLoadingServices(false);
-      }
-    };
-
-    loadData();
+    fetchClients();
+    fetchServices(calendarId);
   }, [calendarId]);
 
+  // Atualizar a duração do serviço quando o serviço mudar
   useEffect(() => {
     if (form.watch("serviceId")) {
       const service = services.find((s) => s.id === form.watch("serviceId"));
@@ -184,6 +109,7 @@ export function useAppointmentForm({
     }
   }, [form.watch("serviceId"), services]);
 
+  // Atualizar o horário de término quando o horário de início ou a duração do serviço mudar
   useEffect(() => {
     const startTime = form.watch("startTime");
     if (selectedServiceDuration && startTime) {
@@ -192,7 +118,7 @@ export function useAppointmentForm({
         .format("HH:mm");
       form.setValue("endTime", newEndTime);
     }
-  }, [selectedServiceDuration, form.watch("startTime")]);
+  }, [selectedServiceDuration, form.watch("startTime"), form]);
 
   const onSubmit = async (values: FormValues) => {
     try {

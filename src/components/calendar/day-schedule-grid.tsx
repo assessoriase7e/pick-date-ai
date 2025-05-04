@@ -2,29 +2,22 @@ import moment from "moment";
 import { AppointmentCard } from "../appointment/appointment-card";
 import { AppointmentFullData } from "@/types/calendar";
 import { cn } from "@/lib/utils";
+import { hoursOfDay } from "@/mocked/hoursOfDay";
 
 interface DayScheduleGridProps {
   appointments: AppointmentFullData[];
-  date: Date;
   onHourClick: (hour: number) => void;
   onEditAppointment: (appointment: AppointmentFullData) => void;
 }
 
 export function DayScheduleGrid({
   appointments,
-  date,
   onHourClick,
   onEditAppointment,
 }: DayScheduleGridProps) {
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");
   };
-
-  // Reorganizando os horários para começar às 06:00
-  const hoursOfDay = [
-    6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1, 2,
-    3, 4, 5,
-  ];
 
   // Função para verificar se o horário está no período noturno (22:00-05:00)
   const isNightHour = (hour: number) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Plus } from "lucide-react";
 import moment from "moment";
 import {
@@ -17,6 +17,7 @@ import { AppointmentFormDialog } from "../appointment/appointment-form-dialog";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { useAppointmentDataStore } from "@/store/appointment-data-store";
 
 interface DayDetailsModalProps {
   dayDetails: {
@@ -58,6 +59,16 @@ export function DayDetailsModal({
       endTime: new Date(appointment.endTime),
     }))
   );
+
+  // Pré-carregar dados quando o modal é aberto
+  const { fetchClients, fetchServices } = useAppointmentDataStore();
+
+  useEffect(() => {
+    if (dayDetails && dayDetails.isOpen) {
+      fetchClients();
+      fetchServices(calendarId);
+    }
+  }, [dayDetails, calendarId, fetchClients, fetchServices]);
 
   // Function to reload appointments
   const reloadAppointments = async () => {
@@ -188,7 +199,6 @@ export function DayDetailsModal({
           <div className="flex-1 overflow-y-auto px-2">
             <DayScheduleGrid
               appointments={localAppointments}
-              date={dayDetails.date}
               onHourClick={handleHourClick}
               onEditAppointment={handleEditAppointment}
             />

@@ -3,27 +3,34 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
-export async function getCalendarCollaborator(calendarId: string) {
-  const { userId } = await auth();
-  if (!userId) {
-    return {
-      success: false,
-      error: "Usuário não autenticado",
-    };
-  }
+type GetCalendarCollaboratorResponse = {
+  success: boolean;
+  data?: {
+    collaboratorId: string | null;
+  } | null;
+  error?: string;
+};
 
+export async function getCalendarCollaborator(
+  calendarId: string
+): Promise<GetCalendarCollaboratorResponse> {
   try {
-    const calendar = await prisma.calendar.findUnique({
-      where: { id: calendarId },
-      include: { 
-        collaborator: {
-          select: {
-            id: true,
-            name: true,
-            profession: true,
-            workingHours: true
-          }
-        } 
+    const { userId } = await auth();
+
+    if (!userId) {
+      return {
+        success: false,
+        error: "Usuário não autenticado",
+      };
+    }
+
+    const calendar = await prisma.calendar.findFirst({
+      where: {
+        id: calendarId,
+        userId,
+      },
+      select: {
+        collaboratorId: true,
       },
     });
 
@@ -38,14 +45,13 @@ export async function getCalendarCollaborator(calendarId: string) {
       success: true,
       data: {
         collaboratorId: calendar.collaboratorId,
-        collaborator: calendar.collaborator,
       },
     };
   } catch (error) {
-    console.error("Erro ao buscar calendário:", error);
+    console.error("Erro ao buscar colaborador do calendário:", error);
     return {
       success: false,
-      error: "Falha ao buscar dados do calendário",
+      error: "Falha ao buscar colaborador do calendário",
     };
   }
 }
