@@ -82,7 +82,7 @@ export function Sidebar() {
       <aside className="flex flex-col gap-5 h-full">
         <Logo className="h-10 w-10" />
         <Separator />
-        <div className="flex-1 flex flex-col overflow-y-auto  space-y-2">
+        <div className="flex-1 flex flex-col overflow-y-auto  space-y-2 overflow-x-hidden">
           {routes.map((item) =>
             item.type === "submenu" && item.items ? (
               <SidebarSubmenu

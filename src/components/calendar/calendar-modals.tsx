@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarFormValues, calendarSchema } from "@/validators/calendar";
@@ -129,9 +131,18 @@ export function CalendarModals({
   );
 }
 
-// Modal de Criação
-export function CreateCalendarModal() {
-  const [open, setOpen] = useState(false);
+export function CreateCalendarModal({
+  externalOpen,
+  setExternalOpen,
+}: {
+  externalOpen?: boolean;
+  setExternalOpen?: (open: boolean) => void;
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Use o estado externo se fornecido, caso contrário use o interno
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = setExternalOpen || setInternalOpen;
 
   const handleSubmit = async (values: CalendarFormValues) => {
     try {

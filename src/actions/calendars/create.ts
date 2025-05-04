@@ -2,6 +2,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 // Accept name and collaboratorId parameters
 export async function createCalendar({
@@ -28,6 +29,8 @@ export async function createCalendar({
         collaboratorId,
       },
     });
+
+    revalidatePath("/calendar");
 
     return {
       success: true,

@@ -181,9 +181,9 @@ export function CalendarContent({
     setDeleteOpen(true);
   };
 
-  // Only one return block
+  // If there are no calendars, show the empty state
   if (calendars.length === 0) {
-    return <EmptyCalendarState setOpen={setOpen} />;
+    return <EmptyCalendarState />;
   }
 
   return (
