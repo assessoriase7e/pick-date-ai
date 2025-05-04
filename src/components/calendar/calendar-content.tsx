@@ -1,7 +1,7 @@
 "use client";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -14,15 +14,14 @@ import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { useSearchParams } from "next/navigation";
-import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
+import { useCalendarQuery } from "@/hooks/useCalendarQuery";
 
 moment.locale("pt-br");
 
 interface CalendarContentProps {
   calendars: CalendarFullData[];
   calendarId: string;
-  initialAppointments: Record<string, AppointmentFullData[]>;
+  appointments: Record<string, AppointmentFullData[]>;
   currentDate: Date;
   selectedDay: Date | null;
   selectedDayAppointments: AppointmentFullData[];
@@ -31,7 +30,7 @@ interface CalendarContentProps {
 export function CalendarContent({
   calendars,
   calendarId,
-  initialAppointments,
+  appointments,
   currentDate,
   selectedDay,
   selectedDayAppointments,
@@ -41,133 +40,22 @@ export function CalendarContent({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
-  const [activeCalendarId, setActiveCalendarId] = useState(calendarId);
-  const [appointments, setAppointments] =
-    useState<Record<string, AppointmentFullData[]>>(initialAppointments);
-  const [dayDetailsOpen, setDayDetailsOpen] = useState<boolean>(false);
   const { toast } = useToast();
-  const searchParams = useSearchParams();
 
-  // Novo efeito para garantir que sempre haja um calendarId na URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.get("calendarId") && calendars.length > 0) {
-      params.set("calendarId", calendars[0].id);
-      window.history.replaceState(
-        {},
-        "",
-        `${window.location.pathname}?${params.toString()}`
-      );
-      setActiveCalendarId(calendars[0].id);
-    }
-  }, [calendars]);
-
-  // Efeito para abrir o modal quando selectedDay mudar
-  useEffect(() => {
-    if (selectedDay) {
-      setDayDetailsOpen(true);
-    }
-  }, [selectedDay]);
-
-  const setCalendarId = (id: string) => {
-    setActiveCalendarId(id);
-
-    // Atualizar a URL sem causar navegação completa
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("calendarId", id);
-    window.history.pushState(
-      {},
-      "",
-      `${window.location.pathname}?${searchParams.toString()}`
-    );
-
-    // Buscar agendamentos para o novo calendário
-    fetchAppointmentsForCalendar(id, currentDate);
-  };
-
-  // Função para buscar agendamentos para um calendário específico
-  const fetchAppointmentsForCalendar = async (calId: string, date: Date) => {
-    try {
-      const res = await getAppointmentsByMonth(date, calId);
-
-      if (res?.success && res?.data) {
-        const newAppointments: Record<string, AppointmentFullData[]> = {};
-
-        res.data.forEach((appointment: any) => {
-          if (!appointment.client || !appointment.service) {
-            console.warn(
-              "Appointment missing client or service data:",
-              appointment.id
-            );
-            return;
-          }
-
-          const dateKey = new Date(appointment.startTime)
-            .toISOString()
-            .split("T")[0];
-
-          if (!newAppointments[dateKey]) {
-            newAppointments[dateKey] = [];
-          }
-
-          newAppointments[dateKey].push(appointment as AppointmentFullData);
-        });
-
-        setAppointments(newAppointments);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar agendamentos:", error);
-    }
-  };
-
-  const goToPreviousMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("date", newDate.toISOString());
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
-  };
-
-  const goToNextMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("date", newDate.toISOString());
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
-  };
-
-  const goToToday = () => {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.delete("date");
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
-  };
-
-  const openDayDetails = (date: Date) => {
-    // Atualizar a URL para armazenar o dia selecionado
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("selectedDay", date.toISOString());
-
-    // Atualizar a URL sem navegação completa
-    window.history.pushState({}, "", `/calendar?${params.toString()}`);
-
-    // Abrir o modal diretamente
-    setDayDetailsOpen(true);
-  };
-
-  const closeDayDetails = () => {
-    // Atualizar a URL para remover o dia selecionado
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("selectedDay");
-
-    // Atualizar a URL sem navegação completa
-    window.history.pushState({}, "", `/calendar?${params.toString()}`);
-
-    // Fechar o modal diretamente
-    setDayDetailsOpen(false);
-  };
+  const {
+    activeCalendarId,
+    setCalendarId,
+    dayDetailsOpen,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
+    openDayDetails,
+    closeDayDetails,
+  } = useCalendarQuery({
+    initialCalendarId: calendarId,
+    initialDate: currentDate,
+    availableCalendarIds: calendars.map((cal) => cal.id),
+  });
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
     try {

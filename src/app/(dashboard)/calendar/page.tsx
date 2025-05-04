@@ -74,7 +74,7 @@ export default async function CalendarPage({
     <CalendarContent
       calendars={calendars}
       calendarId={calendarId}
-      initialAppointments={appointmentsByDate}
+      appointments={appointmentsByDate}
       currentDate={currentDate}
       selectedDay={selectedDayDate}
       selectedDayAppointments={selectedDayAppointments}

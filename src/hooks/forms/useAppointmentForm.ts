@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -296,6 +298,6 @@ export function useAppointmentForm({
     isEditing,
     isServiceAvailableOnDay,
     onSubmit,
-    handleDelete
+    handleDelete,
   };
 }

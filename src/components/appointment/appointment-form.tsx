@@ -1,5 +1,4 @@
 "use client";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -8,7 +7,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { createAppointmentSchema } from "@/validators/calendar";
 import { AppointmentFullData } from "@/types/calendar";
 import {
   Select,
@@ -21,8 +19,6 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
-
-type FormValues = z.infer<typeof createAppointmentSchema>;
 
 interface AppointmentFormProps {
   date: Date;
@@ -56,7 +52,7 @@ export function AppointmentForm({
     isEditing,
     isServiceAvailableOnDay,
     onSubmit,
-    handleDelete
+    handleDelete,
   } = useAppointmentForm({
     date,
     appointment,

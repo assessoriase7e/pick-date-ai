@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { fileToBase64, getFileTypeFromName } from "@/lib/utils";
 import { toast } from "sonner";
 import { DocumentRecord } from "@prisma/client";
-import { useUser } from "@clerk/nextjs";
 import { documentSchema } from "@/validators/document";
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
@@ -39,7 +38,6 @@ export function DocumentForm({
   const [isLoading, setIsLoading] = useState(false);
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const { user } = useUser();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
