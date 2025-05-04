@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { Collaborator, Service } from "@prisma/client";
+import { Collaborator, Prisma, Service } from "@prisma/client";
 
 // Tipos de resposta para os serviços
 type GetServicesResponse =
@@ -29,12 +29,19 @@ type FilterOptions = {
   collaboratorId?: string;
 };
 
-export async function getServices(
+type GetServicesProps = {
+  where?: Prisma.ServiceWhereInput;
+  page?: number;
+  limit?: number;
+  sort?: SortOptions;
+};
+
+export async function getServices({
   page = 1,
   limit = 20,
-  sort?: SortOptions,
-  filter?: FilterOptions
-): Promise<GetServicesResponse> {
+  sort,
+  where,
+}: GetServicesProps): Promise<GetServicesResponse> {
   const { userId } = await auth();
   if (!userId) {
     return {
@@ -45,16 +52,6 @@ export async function getServices(
 
   try {
     const skip = (page - 1) * limit;
-
-    // Construir a condição where com base nos filtros
-    let whereCondition: any = { userId };
-
-    if (filter?.name) {
-      whereCondition.name = {
-        contains: filter.name,
-        mode: "insensitive",
-      };
-    }
 
     // Construir a ordenação
     let orderBy: any = { createdAt: "desc" };
@@ -67,7 +64,7 @@ export async function getServices(
 
     const [services, total] = await Promise.all([
       prisma.service.findMany({
-        where: whereCondition,
+        where,
         orderBy,
         skip,
         take: limit,
@@ -80,17 +77,17 @@ export async function getServices(
         },
       }),
       prisma.service.count({
-        where: whereCondition,
+        where,
       }),
     ]);
 
     // Se houver filtro por collaboratorId, filtramos após a consulta
     let filteredServices = services;
-    if (filter?.collaboratorId) {
+    if (where?.collaboratorId) {
       filteredServices = services.filter((service) => {
         // Verificar colaboradores
         return service.serviceCollaborators.some(
-          (sc) => sc.collaborator.id === filter.collaboratorId
+          (sc) => sc.collaborator.id === where.collaboratorId
         );
       });
     }

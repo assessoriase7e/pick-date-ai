@@ -1,7 +1,7 @@
 "use client";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -14,7 +14,7 @@ import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 
 moment.locale("pt-br");
@@ -44,8 +44,29 @@ export function CalendarContent({
   const [activeCalendarId, setActiveCalendarId] = useState(calendarId);
   const [appointments, setAppointments] =
     useState<Record<string, AppointmentFullData[]>>(initialAppointments);
+  const [dayDetailsOpen, setDayDetailsOpen] = useState<boolean>(!!selectedDay);
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Novo efeito para garantir que sempre haja um calendarId na URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get("calendarId") && calendars.length > 0) {
+      params.set("calendarId", calendars[0].id);
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?${params.toString()}`
+      );
+      setActiveCalendarId(calendars[0].id);
+    }
+  }, [calendars]);
+
+  // Efeito para sincronizar o estado do modal com a URL
+  useEffect(() => {
+    setDayDetailsOpen(!!selectedDay);
+  }, [selectedDay]);
 
   // Atualizar a URL sem recarregar a página
   const setCalendarId = (id: string) => {
@@ -125,17 +146,29 @@ export function CalendarContent({
   };
 
   const openDayDetails = (date: Date) => {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("selectedDay", date.toISOString());
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
+    // Atualizar a URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("selectedDay", date.toISOString());
+    
+    // Usar o router para navegar, o que causará uma re-renderização
+    router.push(`/calendar?${params.toString()}`);
+    
+    // Alternativamente, se quiser evitar a navegação completa:
+    // window.history.pushState({}, "", `/calendar?${params.toString()}`);
+    // setDayDetailsOpen(true);
   };
 
   const closeDayDetails = () => {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.delete("selectedDay");
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
+    // Atualizar a URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("selectedDay");
+    
+    // Usar o router para navegar
+    router.push(`/calendar?${params.toString()}`);
+    
+    // Alternativamente:
+    // window.history.pushState({}, "", `/calendar?${params.toString()}`);
+    // setDayDetailsOpen(false);
   };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
@@ -278,7 +311,7 @@ export function CalendarContent({
         <DayDetailsModal
           dayDetails={{
             date: selectedDay,
-            isOpen: true,
+            isOpen: dayDetailsOpen,
           }}
           appointments={selectedDayAppointments}
           closeDayDetails={closeDayDetails}

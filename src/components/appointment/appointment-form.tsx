@@ -32,6 +32,7 @@ import {
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
@@ -60,8 +61,9 @@ export function AppointmentForm({
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingClients, setIsLoadingClients] = useState(true);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
 
-  // Novo estado para armazenar a duração do serviço selecionado
   const [selectedServiceDuration, setSelectedServiceDuration] = useState<
     number | null
   >(null);
@@ -96,7 +98,7 @@ export function AppointmentForm({
         },
   });
 
-  // Função para verificar se um serviço está disponível no dia selecionado
+  // Função para verificar se um serviço está disponível no  selecionado
   const isServiceAvailableOnDay = (service: Service): boolean => {
     if (!service.availableDays || service.availableDays.length === 0) {
       return true; // Se não houver dias definidos, consideramos disponível todos os dias
@@ -120,29 +122,63 @@ export function AppointmentForm({
   useEffect(() => {
     const loadData = async () => {
       try {
+        setIsLoadingClients(true);
+        setIsLoadingServices(true);
+
         const clientsResult = await getClients();
         if (clientsResult.success) {
           setClients(clientsResult?.data?.clients || []);
         } else {
           toast.error(clientsResult.error || "Erro ao carregar clientes");
         }
+        setIsLoadingClients(false);
 
-        const servicesResult = await getServices();
-        if (servicesResult.success) {
-          setServices(servicesResult.data || []);
+        const calendarResult = await getCalendarCollaborator(calendarId);
+
+        if (calendarResult.success && calendarResult.data?.collaboratorId) {
+          const servicesResult = await getServices({
+            where: {
+              OR: [
+                { collaboratorId: calendarResult.data.collaboratorId },
+                {
+                  serviceCollaborators: {
+                    some: {
+                      collaboratorId: calendarResult.data.collaboratorId,
+                    },
+                  },
+                },
+              ],
+            },
+          });
+
+          if (servicesResult.success) {
+            setServices(servicesResult.data || []);
+          } else {
+            toast.error(servicesResult.error || "Erro ao carregar serviços");
+          }
         } else {
-          toast.error(servicesResult.error || "Erro ao carregar serviços");
+          toast.error(
+            calendarResult.error || "Erro ao carregar dados do calendário"
+          );
+
+          // Carrega todos os serviços se não conseguir filtrar por colaborador
+          const servicesResult = await getServices({});
+          if (servicesResult.success) {
+            setServices(servicesResult.data || []);
+          }
         }
+        setIsLoadingServices(false);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         toast.error("Erro ao carregar dados. Tente novamente.");
+        setIsLoadingClients(false);
+        setIsLoadingServices(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [calendarId]);
 
-  // Atualiza a duração do serviço ao selecionar um serviço
   useEffect(() => {
     if (form.watch("serviceId")) {
       const service = services.find((s) => s.id === form.watch("serviceId"));
@@ -150,7 +186,6 @@ export function AppointmentForm({
     }
   }, [form.watch("serviceId"), services]);
 
-  // Atualiza o horário final automaticamente ao alterar o serviço ou o horário inicial
   useEffect(() => {
     const startTime = form.watch("startTime");
     if (selectedServiceDuration && startTime) {
@@ -267,10 +302,18 @@ export function AppointmentForm({
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 value={field.value}
+                disabled={isLoadingClients}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
+                    {isLoadingClients ? (
+                      <div className="flex items-center justify-center w-full">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecione um cliente" />
+                    )}
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -296,10 +339,18 @@ export function AppointmentForm({
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 value={field.value}
+                disabled={isLoadingServices}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um serviço" />
+                    {isLoadingServices ? (
+                      <div className="flex items-center justify-center w-full">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecione um serviço" />
+                    )}
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
