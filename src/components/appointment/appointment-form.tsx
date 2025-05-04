@@ -57,6 +57,7 @@ export function AppointmentForm({
   initialStartTime,
   calendarId,
 }: AppointmentFormProps) {
+  console.log(date);
   const [clients, setClients] = useState<Client[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,23 +99,42 @@ export function AppointmentForm({
         },
   });
 
-  // Função para verificar se um serviço está disponível no  selecionado
   const isServiceAvailableOnDay = (service: Service): boolean => {
     if (!service.availableDays || service.availableDays.length === 0) {
-      return true; // Se não houver dias definidos, consideramos disponível todos os dias
+      return true;
     }
 
     const dayOfWeek = moment(date).locale("pt-br").format("dddd");
-    const formattedDay =
-      dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1) + "-feira";
 
-    // Tratamento especial para sábado e domingo
-    const dayName =
-      dayOfWeek === "sábado"
-        ? "Sábado"
-        : dayOfWeek === "domingo"
-        ? "Domingo"
-        : formattedDay;
+    let dayName = "";
+
+    switch (dayOfWeek) {
+      case "segunda-feira":
+        dayName = "Segunda-feira";
+        break;
+      case "terça-feira":
+        dayName = "Terça-feira";
+        break;
+      case "quarta-feira":
+        dayName = "Quarta-feira";
+        break;
+      case "quinta-feira":
+        dayName = "Quinta-feira";
+        break;
+      case "sexta-feira":
+        dayName = "Sexta-feira";
+        break;
+      case "sábado":
+        dayName = "Sábado";
+        break;
+      case "domingo":
+        dayName = "Domingo";
+        break;
+      default:
+        dayName = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+    }
+
+    console.log("Nome do dia formatado:", dayName);
 
     return service.availableDays.includes(dayName);
   };

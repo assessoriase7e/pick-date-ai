@@ -4,6 +4,7 @@ import { CalendarContent } from "../../../components/calendar/calendar-content";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import moment from "moment";
 
 export default async function CalendarPage({
   searchParams,
@@ -23,8 +24,10 @@ export default async function CalendarPage({
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
   const calendarId = sParams.calendarId || initialCalendarId;
 
-  // Obter data atual ou da query
-  const currentDate = sParams.date ? new Date(sParams.date) : new Date();
+  // Obter data atual ou da query (formatada)
+  const currentDate = sParams.date
+    ? moment(sParams.date).toDate()
+    : moment().toDate();
 
   // Buscar agendamentos do mês
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
@@ -40,9 +43,8 @@ export default async function CalendarPage({
         return;
       }
 
-      const dateKey = new Date(appointment.startTime)
-        .toISOString()
-        .split("T")[0];
+      // Formatar a data da chave usando moment
+      const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
 
       if (!appointmentsByDate[dateKey]) {
         appointmentsByDate[dateKey] = [];
@@ -57,7 +59,7 @@ export default async function CalendarPage({
   let selectedDayDate: Date | null = null;
 
   if (sParams.selectedDay) {
-    selectedDayDate = new Date(sParams.selectedDay);
+    selectedDayDate = moment(sParams.selectedDay).toDate();
     const dayResponse = await getAppointmentsByCalendarAndDate(
       calendarId,
       selectedDayDate

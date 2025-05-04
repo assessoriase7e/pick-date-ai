@@ -14,7 +14,7 @@ import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 
 moment.locale("pt-br");
@@ -44,9 +44,8 @@ export function CalendarContent({
   const [activeCalendarId, setActiveCalendarId] = useState(calendarId);
   const [appointments, setAppointments] =
     useState<Record<string, AppointmentFullData[]>>(initialAppointments);
-  const [dayDetailsOpen, setDayDetailsOpen] = useState<boolean>(!!selectedDay);
+  const [dayDetailsOpen, setDayDetailsOpen] = useState<boolean>(false);
   const { toast } = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Novo efeito para garantir que sempre haja um calendarId na URL
@@ -63,12 +62,13 @@ export function CalendarContent({
     }
   }, [calendars]);
 
-  // Efeito para sincronizar o estado do modal com a URL
+  // Efeito para abrir o modal quando selectedDay mudar
   useEffect(() => {
-    setDayDetailsOpen(!!selectedDay);
+    if (selectedDay) {
+      setDayDetailsOpen(true);
+    }
   }, [selectedDay]);
 
-  // Atualizar a URL sem recarregar a página
   const setCalendarId = (id: string) => {
     setActiveCalendarId(id);
 
@@ -146,29 +146,27 @@ export function CalendarContent({
   };
 
   const openDayDetails = (date: Date) => {
-    // Atualizar a URL
+    // Atualizar a URL para armazenar o dia selecionado
     const params = new URLSearchParams(searchParams.toString());
     params.set("selectedDay", date.toISOString());
-    
-    // Usar o router para navegar, o que causará uma re-renderização
-    router.push(`/calendar?${params.toString()}`);
-    
-    // Alternativamente, se quiser evitar a navegação completa:
-    // window.history.pushState({}, "", `/calendar?${params.toString()}`);
-    // setDayDetailsOpen(true);
+
+    // Atualizar a URL sem navegação completa
+    window.history.pushState({}, "", `/calendar?${params.toString()}`);
+
+    // Abrir o modal diretamente
+    setDayDetailsOpen(true);
   };
 
   const closeDayDetails = () => {
-    // Atualizar a URL
+    // Atualizar a URL para remover o dia selecionado
     const params = new URLSearchParams(searchParams.toString());
     params.delete("selectedDay");
-    
-    // Usar o router para navegar
-    router.push(`/calendar?${params.toString()}`);
-    
-    // Alternativamente:
-    // window.history.pushState({}, "", `/calendar?${params.toString()}`);
-    // setDayDetailsOpen(false);
+
+    // Atualizar a URL sem navegação completa
+    window.history.pushState({}, "", `/calendar?${params.toString()}`);
+
+    // Fechar o modal diretamente
+    setDayDetailsOpen(false);
   };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
