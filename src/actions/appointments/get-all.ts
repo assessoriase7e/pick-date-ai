@@ -1,8 +1,6 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { unstable_cache } from "next/cache";
 
 export async function getAllAppointments() {
   const { userId } = await auth();

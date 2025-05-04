@@ -1,3 +1,5 @@
+"use server";
+
 import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 import { endOfMonth, startOfMonth } from "date-fns";

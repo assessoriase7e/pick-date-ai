@@ -15,6 +15,7 @@ import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useRouter } from "next/navigation";
+import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 
 moment.locale("pt-br");
 
@@ -40,14 +41,62 @@ export function CalendarContent({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
+  const [activeCalendarId, setActiveCalendarId] = useState(calendarId);
+  const [appointments, setAppointments] =
+    useState<Record<string, AppointmentFullData[]>>(initialAppointments);
   const { toast } = useToast();
   const router = useRouter();
 
-  // Navigation using query params
+  // Atualizar a URL sem recarregar a página
   const setCalendarId = (id: string) => {
+    setActiveCalendarId(id);
+
+    // Atualizar a URL sem causar navegação completa
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("calendarId", id);
-    router.push(`/calendar?${searchParams.toString()}`);
+    window.history.pushState(
+      {},
+      "",
+      `${window.location.pathname}?${searchParams.toString()}`
+    );
+
+    // Buscar agendamentos para o novo calendário
+    fetchAppointmentsForCalendar(id, currentDate);
+  };
+
+  // Função para buscar agendamentos para um calendário específico
+  const fetchAppointmentsForCalendar = async (calId: string, date: Date) => {
+    try {
+      const res = await getAppointmentsByMonth(date, calId);
+
+      if (res?.success && res?.data) {
+        const newAppointments: Record<string, AppointmentFullData[]> = {};
+
+        res.data.forEach((appointment: any) => {
+          if (!appointment.client || !appointment.service) {
+            console.warn(
+              "Appointment missing client or service data:",
+              appointment.id
+            );
+            return;
+          }
+
+          const dateKey = new Date(appointment.startTime)
+            .toISOString()
+            .split("T")[0];
+
+          if (!newAppointments[dateKey]) {
+            newAppointments[dateKey] = [];
+          }
+
+          newAppointments[dateKey].push(appointment as AppointmentFullData);
+        });
+
+        setAppointments(newAppointments);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos:", error);
+    }
   };
 
   const goToPreviousMonth = () => {
@@ -55,7 +104,8 @@ export function CalendarContent({
     newDate.setMonth(newDate.getMonth() - 1);
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("date", newDate.toISOString());
-    router.push(`/calendar?${searchParams.toString()}`);
+
+    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
   };
 
   const goToNextMonth = () => {
@@ -63,25 +113,29 @@ export function CalendarContent({
     newDate.setMonth(newDate.getMonth() + 1);
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("date", newDate.toISOString());
-    router.push(`/calendar?${searchParams.toString()}`);
+
+    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
   };
 
   const goToToday = () => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.delete("date");
-    router.push(`/calendar?${searchParams.toString()}`);
+
+    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
   };
 
   const openDayDetails = (date: Date) => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("selectedDay", date.toISOString());
-    router.push(`/calendar?${searchParams.toString()}`);
+
+    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
   };
 
   const closeDayDetails = () => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.delete("selectedDay");
-    router.push(`/calendar?${searchParams.toString()}`);
+
+    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
   };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
@@ -188,11 +242,11 @@ export function CalendarContent({
 
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader setOpen={setOpen} calendarId={calendarId} />
+      <CalendarHeader setOpen={setOpen} calendarId={activeCalendarId} />
 
       <CalendarTabs
         calendars={calendars}
-        calendarId={calendarId}
+        calendarId={activeCalendarId}
         setCalendarId={setCalendarId}
         hoveredTab={hoveredTab}
         setHoveredTab={setHoveredTab}
@@ -204,7 +258,7 @@ export function CalendarContent({
         goToToday={goToToday}
         selectedDate={selectedDay}
         openDayDetails={openDayDetails}
-        initialAppointments={initialAppointments}
+        initialAppointments={appointments}
       />
 
       <CalendarModals
@@ -228,7 +282,7 @@ export function CalendarContent({
           }}
           appointments={selectedDayAppointments}
           closeDayDetails={closeDayDetails}
-          calendarId={calendarId}
+          calendarId={activeCalendarId}
         />
       )}
     </div>
