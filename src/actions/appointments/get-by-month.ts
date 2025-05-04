@@ -16,10 +16,11 @@ export async function getAppointmentsByMonth(
 ): Promise<GetAppointmentsByMonthReturn> {
   let userId: string | undefined = undefined;
   if (requireAuth) {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: authUserId } = await auth();
+    if (!authUserId) {
       return { success: false, error: "Usuário não autenticado" };
     }
+    userId = authUserId;
   }
 
   async function fetchAppointments(
@@ -33,9 +34,18 @@ export async function getAppointmentsByMonth(
 
       const whereClause: any = {
         startTime: { gte: start, lte: end },
-        calendarId,
       };
-      if (userId) {
+
+      if (calendarId && calendarId.trim() !== "") {
+        whereClause.calendarId = calendarId;
+      } else {
+        return {
+          success: false,
+          error: "ID do calendário inválido",
+        };
+      }
+
+      if (userId && userId.trim() !== "") {
         whereClause.userId = userId;
       }
 
