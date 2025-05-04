@@ -2,6 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
+import { SidebarSubmenu } from "./sidebar-submenu";
 import {
   Sheet,
   SheetContent,
@@ -38,7 +39,7 @@ export function Sidebar() {
   const MobileMenu = () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" className="md:hidden fixed top-4 left-4 z-50">
+        <Button size="icon" className="md:hidden fixed top-4 left-4 z-50 ">
           <Menu />
           <span className="sr-only">Menu</span>
         </Button>
@@ -49,37 +50,58 @@ export function Sidebar() {
           <Logo className="h-12 w-12" />
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-6">
-          {routes.map((item) => (
-            <SidebarItem
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              label={item.label}
-              isActive={item.isActive}
-              isMobile={true}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto py-6 px-4">
+          {routes.map((item) =>
+            item.type === "submenu" && item.items ? (
+              <SidebarSubmenu
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                items={item.items}
+                isActive={item.isActive}
+                isMobile={true}
+              />
+            ) : (
+              <SidebarItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                isActive={item.isActive}
+                isMobile={true}
+              />
+            )
+          )}
         </div>
       </SheetContent>
     </Sheet>
   );
 
   const DesktopSidebar = () => (
-    <div className="h-svh border-r p-5 fixed z-50 bg-background">
+    <div className="h-svh border-r p-5 fixed z-50 bg-background w-20">
       <aside className="flex flex-col gap-5 h-full">
-        <Logo className="h-12 w-12" />
+        <Logo className="h-10 w-10" />
         <Separator />
-        <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden space-y-2">
-          {routes.map((item) => (
-            <SidebarItem
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              label={item.label}
-              isActive={item.isActive}
-            />
-          ))}
+        <div className="flex-1 flex flex-col overflow-y-auto  space-y-2">
+          {routes.map((item) =>
+            item.type === "submenu" && item.items ? (
+              <SidebarSubmenu
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                items={item.items}
+                isActive={item.isActive}
+              />
+            ) : (
+              <SidebarItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                isActive={item.isActive}
+              />
+            )
+          )}
         </div>
       </aside>
     </div>

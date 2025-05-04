@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { LucideIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarItemProps {
   href: string;
@@ -32,23 +38,28 @@ export function SidebarItem({
   }
 
   return (
-    <Link href={href} className="relative group w-full">
-      <Button
-        variant="ghost"
-        className={`w-10 h-10 hover:bg-primary hover:text-background ${
-          isActive ? "text-background bg-primary" : ""
-        }`}
-      >
-        <Icon className="h-5 w-5" />
-        <span className="sr-only">{label}</span>
-      </Button>
-      <div
-        className={`absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-background border border-border rounded-md px-3 py-1.5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-md whitespace-nowrap ${
-          isActive ? "bg-primary text-background" : ""
-        }`}
-      >
-        {label}
-      </div>
-    </Link>
+    <TooltipProvider>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Link href={href} className="relative group w-full">
+            <Button
+              variant="ghost"
+              className={`w-10 h-10 hover:bg-primary hover:text-background ${
+                isActive ? "text-background bg-primary" : ""
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="sr-only">{label}</span>
+            </Button>
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="bg-background border border-border"
+        >
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

@@ -12,6 +12,7 @@ import {
   Image,
   SquareUser,
   BarChart3,
+  FolderIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -21,6 +22,8 @@ export interface SidebarRoute {
   href: string;
   color?: string;
   isActive: boolean;
+  items?: SidebarRoute[];
+  type?: "submenu";
 }
 
 export interface UseSidebarRoutesResult {
@@ -30,22 +33,8 @@ export interface UseSidebarRoutesResult {
 export const useSidebarRoutes = (): UseSidebarRoutesResult => {
   const pathname = usePathname();
 
-  const routes: SidebarRoute[] = [
-    {
-      label: "Agendamentos",
-      icon: Calendar,
-      href: "/calendar",
-      color: "text-blue-500",
-      isActive: pathname === "/calendar",
-    },
-    {
-      label: "Serviços",
-      icon: Scissors,
-      href: "/services",
-      color: "text-emerald-500",
-      isActive: pathname === "/services",
-    },
-
+  // Itens de mídia agrupados
+  const mediaItems: SidebarRoute[] = [
     {
       href: "/audios",
       icon: Music,
@@ -61,7 +50,7 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
     {
       href: "/documents",
       icon: FileIcon,
-      label: "Documents",
+      label: "Documentos",
       isActive: pathname.startsWith("/documents"),
     },
     {
@@ -69,6 +58,19 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       icon: Link,
       label: "Links",
       isActive: pathname === "/links",
+    },
+  ];
+
+  // Verificar se algum item de mídia está ativo
+  const isMediaActive = mediaItems.some((item) => item.isActive);
+
+  const routes: SidebarRoute[] = [
+    {
+      label: "Agendamentos",
+      icon: Calendar,
+      href: "/calendar",
+      color: "text-blue-500",
+      isActive: pathname === "/calendar",
     },
     {
       label: "Clientes",
@@ -78,11 +80,26 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       isActive: pathname === "/clients",
     },
     {
+      label: "Serviços",
+      icon: Scissors,
+      href: "/services",
+      color: "text-emerald-500",
+      isActive: pathname === "/services",
+    },
+    {
       label: "Profissionais",
       icon: SquareUser,
       href: "/collaborators",
       color: "text-emerald-500",
       isActive: pathname === "/collaborators",
+    },
+    {
+      label: "Mídia",
+      icon: FolderIcon,
+      href: "#",
+      isActive: isMediaActive,
+      items: mediaItems,
+      type: "submenu",
     },
     {
       label: "Agentes",
