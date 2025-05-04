@@ -1,5 +1,6 @@
 "use server";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 import { DayScheduleContent } from "@/components/calendar/day-schedule-page";
 import moment from "moment";
 
@@ -30,11 +31,14 @@ export default async function DaySchedulePage({
   const response = await getAppointmentsByCalendarAndDate(calendarId, date);
   const appointments = response.success && response.data ? response.data : [];
 
+  const collaborator = await getCalendarCollaborator(calendarId);
+
   return (
     <DayScheduleContent
       calendarId={calendarId}
       date={date}
       appointments={appointments}
+      collaborator={collaborator.data?.collaborator!}
     />
   );
 }

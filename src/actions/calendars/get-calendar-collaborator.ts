@@ -2,11 +2,13 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { Collaborator } from "@prisma/client";
 
 type GetCalendarCollaboratorResponse = {
   success: boolean;
   data?: {
     collaboratorId: string | null;
+    collaborator: Collaborator | null;
   } | null;
   error?: string;
 };
@@ -29,8 +31,8 @@ export async function getCalendarCollaborator(
         id: calendarId,
         userId,
       },
-      select: {
-        collaboratorId: true,
+      include: {
+        collaborator: true,
       },
     });
 
@@ -45,6 +47,7 @@ export async function getCalendarCollaborator(
       success: true,
       data: {
         collaboratorId: calendar.collaboratorId,
+        collaborator: calendar.collaborator,
       },
     };
   } catch (error) {

@@ -12,7 +12,7 @@ export default async function DashboardLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
-        <main className="flex-1 container p-5 py-10 mx-auto max-w-[1200px]">
+        <main className="flex-1 container p-5 py-5 mx-auto max-w-[1200px]">
           {children}
         </main>
       </div>

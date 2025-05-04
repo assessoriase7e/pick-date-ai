@@ -9,16 +9,20 @@ import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { Collaborator } from "@prisma/client";
+import { Separator } from "../ui/separator";
 
 interface DayScheduleContentProps {
   calendarId: string;
   date: Date;
   appointments: AppointmentFullData[];
+  collaborator: Collaborator;
 }
 
 export function DayScheduleContent({
   calendarId,
   date,
+  collaborator,
   appointments: initialAppointments,
 }: DayScheduleContentProps) {
   const router = useRouter();
@@ -35,7 +39,9 @@ export function DayScheduleContent({
   const [showForm, setShowForm] = useState(false);
 
   // Obter o horário selecionado dos search params
-  const selectedHour = searchParams.get("hour") ? parseInt(searchParams.get("hour")!) : null;
+  const selectedHour = searchParams.get("hour")
+    ? parseInt(searchParams.get("hour")!)
+    : null;
   const startTime = searchParams.get("startTime");
   const endTime = searchParams.get("endTime");
 
@@ -57,16 +63,16 @@ export function DayScheduleContent({
   const handleHourClick = (hour: number) => {
     // Calcular horário de término (1 hora depois)
     const endHour = (hour + 1) % 24;
-    
+
     // Atualizar URL com os parâmetros
     const params = new URLSearchParams(searchParams.toString());
     params.set("hour", hour.toString());
     params.set("startTime", `${hour.toString().padStart(2, "0")}:00`);
     params.set("endTime", `${endHour.toString().padStart(2, "0")}:00`);
-    
+
     // Limpar appointment selecionado
     setSelectedAppointment(null);
-    
+
     // Navegar para a mesma página com os novos parâmetros
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
@@ -77,7 +83,7 @@ export function DayScheduleContent({
     params.delete("hour");
     params.delete("startTime");
     params.delete("endTime");
-    
+
     setSelectedAppointment(appointment);
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
@@ -94,14 +100,14 @@ export function DayScheduleContent({
           }))
         );
       }
-      
+
       // Limpar parâmetros e estado após sucesso
       const params = new URLSearchParams(searchParams.toString());
       params.delete("hour");
       params.delete("startTime");
       params.delete("endTime");
       router.push(`${window.location.pathname}?${params.toString()}`);
-      
+
       setShowForm(false);
       setSelectedAppointment(null);
     } catch (error) {
@@ -130,18 +136,26 @@ export function DayScheduleContent({
   };
 
   return (
-    <div className="container mx-auto py-4 h-full">
-      <div className="flex items-center mb-6">
-        <Button variant="ghost" onClick={handleBackToCalendar} className="mr-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
+    <div className="container mx-auto  h-full flex flex-col items-center justify-center w-full gap-5">
+      <Button
+        variant="ghost"
+        onClick={handleBackToCalendar}
+        className="mr-auto"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Voltar
+      </Button>
+
+      <div className="flex items-center flex-col">
         <h1 className="text-2xl font-bold ml-auto">
           Agendamentos para {formattedDate}
         </h1>
+        <h2 className="px-4 bg-primary rounded-full">{collaborator.name}</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100vh-150px)]">
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100svh-300px)] w-full">
         <div className="border rounded-lg overflow-hidden">
           <DayScheduleGrid
             appointments={appointments}
