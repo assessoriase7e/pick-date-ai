@@ -24,8 +24,6 @@ export const callRagWebhook = async ({
       .map((file) => `\n\n${file.content}\n\n`)
       .join("\n\n");
 
-    console.log("formattedContent", formattedContent);
-
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {

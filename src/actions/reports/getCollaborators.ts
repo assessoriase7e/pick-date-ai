@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { Collaborator } from "@prisma/client";
-import { unstable_cache } from "next/cache";
 
 type CollaboratorsSuccess = {
   success: true;
@@ -15,34 +14,39 @@ type CollaboratorsError = {
   error: string;
 };
 
-export const getCollaborators = async (): Promise<
-  CollaboratorsSuccess | CollaboratorsError
-> => {
+export const getCollaborators = async (
+  serviceId?: string
+): Promise<CollaboratorsSuccess | CollaboratorsError> => {
   const { userId } = await auth();
   if (!userId) {
     return { success: false, error: "Usuário não autenticado" };
   }
 
-  const cachedFetch = unstable_cache(
-    async (): Promise<CollaboratorsSuccess> => {
-      const collaborators = await prisma.collaborator.findMany({
-        where: {
-          userId,
-        },
-        orderBy: { name: "asc" },
-      });
-
-      return {
-        success: true,
-        data: collaborators,
-      } satisfies CollaboratorsSuccess;
-    },
-    ["collaborators-list", userId],
-    { revalidate: 60 * 60, tags: ["collaborators"] }
-  );
-
   try {
-    return await cachedFetch();
+    const whereCondition: any = {
+      userId,
+    };
+
+    if (serviceId) {
+      whereCondition.services = {
+        some: {
+          serviceId: serviceId,
+        },
+      };
+    }
+
+    const collaborators = await prisma.collaborator.findMany({
+      where: whereCondition,
+      include: {
+        services: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return {
+      success: true,
+      data: collaborators,
+    };
   } catch (error) {
     console.error("Erro ao buscar colaboradores:", error);
     return { success: false, error: "Falha ao buscar colaboradores" };

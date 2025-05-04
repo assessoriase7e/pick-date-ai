@@ -22,12 +22,26 @@ export async function createService(data: ServiceFormValues) {
         price: data.price,
         availableDays: data.availableDays,
         notes: data.notes,
-        collaboratorId: data.collaboratorId || null,
         userId: user.id,
         durationMinutes: data.durationMinutes,
         commission: data.commission !== undefined ? Number(data.commission) : 0,
+        isActive: data.isActive !== undefined ? data.isActive : true,
       },
     });
+
+    // Criar relações com colaboradores
+    if (data.collaboratorIds && data.collaboratorIds.length > 0) {
+      await Promise.all(
+        data.collaboratorIds.map(async (collaboratorId) => {
+          await prisma.serviceCollaborator.create({
+            data: {
+              serviceId: service.id,
+              collaboratorId,
+            },
+          });
+        })
+      );
+    }
 
     revalidatePath("/services");
     revalidatePath("/collaborators");

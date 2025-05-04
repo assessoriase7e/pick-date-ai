@@ -1,8 +1,7 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Scissors } from "lucide-react";
 import { CollaboratorModal } from "./collaborator-modal";
 import { deleteCollaborator } from "@/actions/collaborators/delete-collaborator";
 import { Pencil, Trash2 } from "lucide-react";
@@ -19,6 +18,7 @@ import { Pagination } from "../ui/pagination";
 import { useRouter } from "next/navigation";
 import { Service } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
+import { CollaboratorServicesDialog } from "./collaborator-services-dialog";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -36,6 +36,8 @@ export function CollaboratorsSection({
   const [selectedCollaborator, setSelectedCollaborator] =
     useState<CollaboratorFullData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
 
   const router = useRouter();
 
@@ -66,10 +68,10 @@ export function CollaboratorsSection({
     router.push(`/collaborators?page=${page}`);
   };
 
-  const formatServices = (services: Service[]) => {
-    if (!services || services.length === 0) return "Nenhum serviço";
-
-    return services.map((service) => service.name).join(", ");
+  const handleShowServices = (collaborator: CollaboratorFullData) => {
+    const services = collaborator.ServiceCollaborator.map((sc) => sc.service);
+    setSelectedServices(services);
+    setIsServicesDialogOpen(true);
   };
 
   return (
@@ -90,7 +92,6 @@ export function CollaboratorsSection({
               <TableHead>Nome</TableHead>
               <TableHead>Telefone</TableHead>
               <TableHead>Profissão</TableHead>
-              <TableHead>Serviços</TableHead>
               <TableHead className="w-[150px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,9 +110,17 @@ export function CollaboratorsSection({
                   </TableCell>
                   <TableCell>{collaborator.phone}</TableCell>
                   <TableCell>{collaborator.profession}</TableCell>
-                  <TableCell>{formatServices(collaborator.services)}</TableCell>
+
                   <TableCell>
                     <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleShowServices(collaborator)}
+                      >
+                        <Scissors className="h-4 w-4" />
+                      </Button>
+
                       <Button
                         variant="outline"
                         size="icon"
@@ -158,9 +167,14 @@ export function CollaboratorsSection({
                   <p className="text-sm text-muted-foreground">
                     {collaborator.profession}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatServices(collaborator.services)}
-                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShowServices(collaborator)}
+                  >
+                    <Scissors className="h-4 w-4 mr-2" />
+                    Ver Serviços
+                  </Button>
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Button
@@ -200,6 +214,12 @@ export function CollaboratorsSection({
           router.refresh();
         }}
         initialData={selectedCollaborator}
+      />
+
+      <CollaboratorServicesDialog
+        open={isServicesDialogOpen}
+        onOpenChange={setIsServicesDialogOpen}
+        services={selectedServices}
       />
     </div>
   );

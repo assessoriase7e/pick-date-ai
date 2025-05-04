@@ -278,23 +278,37 @@ model EvolutionInstance {
 }
 
 model Service {
-  id              String          @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  price           Float
-  availableDays   String[]
-  notes           String?
-  userId          String
-  commission      Int?            @default(0)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  clientService   ClientService[]
-  appointment     Appointment[]
-  collaborator    Collaborator?   @relation(fields: [collaboratorId], references: [id])
-  collaboratorId  String?         @db.ObjectId
-  durationMinutes Int?            @default(60)
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  price                Float
+  availableDays        String[]
+  notes                String?
+  collaboratorId       String?               @db.ObjectId
+  collaborator         Collaborator?         @relation(fields: [collaboratorId], references: [id], onDelete: SetNull)
+  serviceCollaborators ServiceCollaborator[]
+  userId               String
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  durationMinutes      Int                   @default(30)
+  commission           Float                 @default(0)
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  clientServices       ClientService[]
+  Appointment          Appointment[]
 
   @@map("service")
+}
+
+model ServiceCollaborator {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  serviceId      String       @db.ObjectId
+  collaboratorId String       @db.ObjectId
+  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([serviceId, collaboratorId])
+  @@map("serviceCollaborator")
 }
 
 model Client {
@@ -342,19 +356,20 @@ model Calendar {
 }
 
 model Collaborator {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  phone        String
-  profession   String
-  description  String?
-  workingHours String
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  services     Service[]
-  serviceIds   String[]   @db.ObjectId
-  calendars    Calendar[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                  String                @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  phone               String
+  profession          String
+  description         String?
+  workingHours        String
+  userId              String
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services            Service[]
+  serviceIds          String[]              @db.ObjectId
+  calendars           Calendar[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  ServiceCollaborator ServiceCollaborator[]
 
   @@map("collaborator")
 }

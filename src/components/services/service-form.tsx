@@ -28,6 +28,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { serviceSchema, ServiceFormValues } from "@/validators/service";
 import { createService } from "@/actions/services/create-service";
 import { updateService } from "@/actions/services/update-service";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Collaborator } from "@prisma/client";
 
 interface ServiceFormProps {
   initialData?: any;
@@ -35,7 +39,7 @@ interface ServiceFormProps {
   collaborators: any[];
 }
 
-const DAYS_OF_WEEK = [
+const daysOfWeek = [
   "Segunda-feira",
   "Terça-feira",
   "Quarta-feira",
@@ -51,6 +55,11 @@ export function ServiceForm({
   collaborators,
 }: ServiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<
+    Collaborator[]
+  >(initialData?.serviceCollaborators?.map((sc: any) => sc.collaborator) || []);
+  const [selectedCollaboratorId, setSelectedCollaboratorId] =
+    useState<string>("none");
   const isEditing = !!initialData;
 
   const form = useForm<ServiceFormValues>({
@@ -58,51 +67,84 @@ export function ServiceForm({
     defaultValues: {
       name: initialData?.name || "",
       price: initialData?.price || 0,
-      availableDays: initialData?.availableDays || [],
+      availableDays: initialData?.availableDays || ([] as Collaborator[]),
       notes: initialData?.notes || "",
-      collaboratorId: initialData?.collaboratorId || "none",
+      collaboratorIds:
+        initialData?.serviceCollaborators?.map(
+          (sc: any) => sc.collaboratorId
+        ) || [],
       durationMinutes: initialData?.durationMinutes || 30,
-      commission:
-        initialData?.commission !== undefined &&
-        initialData?.commission !== null
-          ? Number(initialData.commission)
-          : 0,
+      commission: initialData?.commission || 0,
+      isActive:
+        initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
+  const handleAddCollaborator = () => {
+    if (selectedCollaboratorId === "none") return;
+
+    const collaborator = collaborators.find(
+      (c) => c.id === selectedCollaboratorId
+    );
+    if (!collaborator) return;
+
+    if (selectedCollaborators.some((c) => c.id === collaborator.id)) {
+      toast.error("Este profissional já foi adicionado");
+      return;
+    }
+
+    setSelectedCollaborators((prev) => [...prev, collaborator]);
+
+    const currentIds = form.getValues("collaboratorIds") || [];
+    form.setValue("collaboratorIds", [...currentIds, collaborator.id]);
+
+    setSelectedCollaboratorId("none");
+  };
+
+  const handleRemoveCollaborator = (id: string) => {
+    setSelectedCollaborators((prev) => prev.filter((c) => c.id !== id));
+
+    const currentIds = form.getValues("collaboratorIds") || [];
+    form.setValue(
+      "collaboratorIds",
+      currentIds.filter((cId: string) => cId !== id)
+    );
+  };
+
   const onSubmit = async (values: ServiceFormValues) => {
     setIsLoading(true);
-    try {
-      // Convert "none" value to null or empty string
-      const submissionValues = {
-        ...values,
-        collaboratorId:
-          values.collaboratorId === "none" ? null : values.collaboratorId,
-      };
 
-      if (isEditing) {
-        const result = await updateService(initialData.id, submissionValues);
-        if (result.success) {
-          toast.success("Serviço atualizado com sucesso");
-          onSuccess();
-        } else {
-          toast.error(result.error || "Erro ao atualizar serviço");
-        }
+    const submissionValues = {
+      ...values,
+      notes: values.notes || null,
+      collaboratorIds: values.collaboratorIds || [],
+    };
+
+    try {
+      const result = isEditing
+        ? await updateService(initialData.id, submissionValues)
+        : await createService(submissionValues);
+
+      if (result.success) {
+        toast.success(
+          `Serviço ${isEditing ? "atualizado" : "criado"} com sucesso`
+        );
+        onSuccess();
       } else {
-        const result = await createService(submissionValues);
-        if (result.success) {
-          toast.success("Serviço criado com sucesso");
-          onSuccess();
-        } else {
-          toast.error(result.error || "Erro ao criar serviço");
-        }
+        toast.error(
+          result.error || `Erro ao ${isEditing ? "atualizar" : "criar"} serviço`
+        );
       }
-    } catch (error) {
+    } catch {
       toast.error("Ocorreu um erro ao processar a solicitação");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const availableCollaborators = collaborators.filter(
+    (c) => !selectedCollaborators.some((sc) => sc.id === c.id)
+  );
 
   return (
     <Form {...form}>
@@ -149,6 +191,27 @@ export function ServiceForm({
 
         <FormField
           control={form.control}
+          name="isActive"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel>Status do Serviço</FormLabel>
+                <FormDescription>
+                  Defina se este serviço está ativo ou inativo
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="availableDays"
           render={() => (
             <FormItem>
@@ -156,7 +219,7 @@ export function ServiceForm({
                 <FormLabel>Dias Disponíveis</FormLabel>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {DAYS_OF_WEEK.map((day) => (
+                {daysOfWeek.map((day) => (
                   <FormField
                     key={day}
                     control={form.control}
@@ -193,55 +256,93 @@ export function ServiceForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="collaboratorId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Colaborador</FormLabel>
+        {/* Profissionais */}
+        <div className="border rounded-md p-2">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold">Profissionais</h4>
+            <div className="text-xs bg-muted px-2 py-1 rounded-full">
+              {selectedCollaborators.length} selecionados
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex gap-2">
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value || undefined}
+                value={selectedCollaboratorId}
+                onValueChange={setSelectedCollaboratorId}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um colaborador" />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Selecione um profissional" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {collaborators.map((collaborator) => (
+                  <SelectItem value="none">Selecione...</SelectItem>
+                  {availableCollaborators.map((collaborator) => (
                     <SelectItem key={collaborator.id} value={collaborator.id}>
                       {collaborator.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>
-                Associe este serviço a um colaborador específico.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <Button
+                type="button"
+                onClick={handleAddCollaborator}
+                disabled={selectedCollaboratorId === "none"}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Adicionar
+              </Button>
+            </div>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              <AnimatePresence>
+                {selectedCollaborators.map((collaborator) => (
+                  <motion.div
+                    key={collaborator.id}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-between p-2 border rounded-md"
+                  >
+                    <div>
+                      <p className="font-medium">{collaborator.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {collaborator.profession}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveCollaborator(collaborator.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {selectedCollaborators.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  Nenhum profissional adicionado
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
 
         <FormField
           control={form.control}
           name="durationMinutes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duração</FormLabel>
+              <FormLabel>Duração (minutos)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
                   min={1}
-                  placeholder="Ex: 30"
-                  onChange={(e) => {
-                    let value = Number(e.target.value);
-                    if (isNaN(value)) value = 0;
-                    field.onChange(value);
-                  }}
-                  value={field.value || 0}
+                  placeholder="Duração em minutos"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -254,24 +355,20 @@ export function ServiceForm({
           name="commission"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comissão</FormLabel>
+              <FormLabel>Comissão (%)</FormLabel>
               <FormControl>
-                <NumericFormat
-                  customInput={Input}
-                  suffix="%"
-                  decimalScale={0}
-                  maxLength={4}
-                  fixedDecimalScale
-                  placeholder="10%"
-                  defaultValue={field.value || 0}
-                  onValueChange={(values) => {
-                    let value = Number(values.value);
-                    if (isNaN(value)) value = 0;
-                    if (value > 100) value = 100;
-                    field.onChange(value);
-                  }}
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="Comissão em porcentagem"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
+              <FormDescription>
+                Porcentagem de comissão para o profissional
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -296,21 +393,9 @@ export function ServiceForm({
           )}
         />
 
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
+        <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isLoading}>
-            {isLoading
-              ? "Salvando..."
-              : isEditing
-              ? "Atualizar Serviço"
-              : "Criar Serviço"}
+            {isLoading ? "Processando..." : isEditing ? "Atualizar" : "Criar"}
           </Button>
         </div>
       </form>

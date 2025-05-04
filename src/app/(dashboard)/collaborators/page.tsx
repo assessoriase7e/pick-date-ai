@@ -35,7 +35,7 @@ export default async function CollaboratorsPage({
 
       <div className="space-y-8 mt-6">
         <CollaboratorsSection
-          collaborators={collabs.data ?? []}
+          collaborators={collabs.success ? collabs.data : []}
           pagination={pagination}
         />
       </div>
