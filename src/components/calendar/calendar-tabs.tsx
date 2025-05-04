@@ -97,6 +97,7 @@ export function CalendarTabs({
               selectedDate={selectedDate}
               openDayDetails={openDayDetails}
               initialAppointments={initialAppointments}
+              calendarId={calendar.id}
             />
           </TabsContent>
         ))}

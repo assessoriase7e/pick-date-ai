@@ -6,6 +6,7 @@ import { weekDays } from "@/mocked/calendar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -15,6 +16,7 @@ interface CalendarGridProps {
   selectedDate: Date | null;
   openDayDetails: (date: Date) => void;
   initialAppointments: Record<string, AppointmentFullData[]>;
+  calendarId: string;
 }
 
 type CalendarDay = {
@@ -31,9 +33,11 @@ export function CalendarGrid({
   selectedDate,
   openDayDetails,
   initialAppointments,
+  calendarId,
 }: CalendarGridProps) {
   const today = moment();
   const calendarRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -127,6 +131,11 @@ export function CalendarGrid({
     setTouchEnd(null);
   };
 
+  const handleDayClick = (date: Date) => {
+    // Redirecionar para a página de agendamentos do dia
+    router.push(`/calendar/day?calendarId=${calendarId}&date=${date.toISOString()}`);
+  };
+
   return (
     <div className="w-full">
       <div
@@ -176,7 +185,7 @@ export function CalendarGrid({
                 getAppointmentsForDay(dayObj.date)?.length && "bg-primary/50"
               )}
               onClick={() => {
-                openDayDetails(dayObj.date.toDate());
+                handleDayClick(dayObj.date.toDate());
               }}
             >
               <div className="flex flex-col h-full">

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -26,8 +25,9 @@ interface UseAppointmentFormProps {
     endTime: Date,
     excludeId?: string
   ) => boolean;
-  initialStartTime?: string | null;
   calendarId: string;
+  initialStartTime?: string;
+  initialEndTime?: string;
 }
 
 export function useAppointmentForm({
@@ -35,8 +35,9 @@ export function useAppointmentForm({
   appointment,
   onSuccess,
   checkTimeConflict,
-  initialStartTime,
   calendarId,
+  initialStartTime,
+  initialEndTime,
 }: UseAppointmentFormProps) {
   const {
     clients,
@@ -59,10 +60,13 @@ export function useAppointmentForm({
     return moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
   };
 
-  const defaultStartTime = initialStartTime ?? "09:00";
-  const defaultEndTime = appointment?.endTime
+  const defaultStartTime = appointment
+    ? moment(appointment.startTime).format("HH:mm")
+    : initialStartTime ?? "09:00";
+
+  const defaultEndTime = appointment
     ? moment(appointment.endTime).format("HH:mm")
-    : calculateDefaultEndTime(defaultStartTime);
+    : initialEndTime ?? calculateDefaultEndTime(defaultStartTime);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createAppointmentSchema),
@@ -73,7 +77,7 @@ export function useAppointmentForm({
           startTime: moment(appointment.startTime).format("HH:mm"),
           endTime: moment(appointment.endTime).format("HH:mm"),
           notes: appointment.notes || "",
-          calendarId: calendarId,
+          calendarId,
         }
       : {
           startTime: defaultStartTime,
@@ -92,7 +96,6 @@ export function useAppointmentForm({
     const dayName =
       daysMap[dayOfWeek] ||
       dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-
     return service.availableDays.includes(dayName);
   };
 
@@ -101,15 +104,12 @@ export function useAppointmentForm({
     fetchServices(calendarId);
   }, [calendarId]);
 
-  // Atualizar a duração do serviço quando o serviço mudar
   useEffect(() => {
-    if (form.watch("serviceId")) {
-      const service = services.find((s) => s.id === form.watch("serviceId"));
-      setSelectedServiceDuration(service?.durationMinutes ?? null);
-    }
+    const serviceId = form.watch("serviceId");
+    const service = services.find((s) => s.id === serviceId);
+    setSelectedServiceDuration(service?.durationMinutes ?? null);
   }, [form.watch("serviceId"), services]);
 
-  // Atualizar o horário de término quando o horário de início ou a duração do serviço mudar
   useEffect(() => {
     const startTime = form.watch("startTime");
     if (selectedServiceDuration && startTime) {
@@ -118,7 +118,20 @@ export function useAppointmentForm({
         .format("HH:mm");
       form.setValue("endTime", newEndTime);
     }
-  }, [selectedServiceDuration, form.watch("startTime"), form]);
+  }, [selectedServiceDuration, form.watch("startTime")]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      const start = initialStartTime ?? "09:00";
+      const end = initialEndTime ?? calculateDefaultEndTime(start);
+      form.reset({
+        startTime: start,
+        endTime: end,
+        notes: "",
+        calendarId,
+      });
+    }
+  }, [date, initialStartTime, initialEndTime, calendarId, isEditing]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -126,16 +139,10 @@ export function useAppointmentForm({
       const [endHour, endMinute] = values.endTime.split(":").map(Number);
 
       const startTime = new Date(date);
-      startTime.setHours(startHour);
-      startTime.setMinutes(startMinute);
-      startTime.setSeconds(0);
-      startTime.setMilliseconds(0);
+      startTime.setHours(startHour, startMinute, 0, 0);
 
       const endTime = new Date(date);
-      endTime.setHours(endHour);
-      endTime.setMinutes(endMinute);
-      endTime.setSeconds(0);
-      endTime.setMilliseconds(0);
+      endTime.setHours(endHour, endMinute, 0, 0);
 
       if (endTime <= startTime) {
         toast.error(
@@ -159,29 +166,25 @@ export function useAppointmentForm({
       const appointmentData = {
         clientId: values.clientId,
         serviceId: values.serviceId,
-        calendarId: calendarId,
+        calendarId,
         startTime,
         endTime,
         notes: values.notes || null,
         status: "scheduled",
       };
 
+      let result;
+
       if (isEditing && appointment) {
-        const result = await updateAppointment(appointment.id!, {
+        result = await updateAppointment(appointment.id!, {
           ...appointmentData,
-          startTime,
-          endTime,
           status: appointment.status || "scheduled",
         });
-        if (!result.success) {
-          throw new Error(result.error || "Erro ao atualizar agendamento");
-        }
+        if (!result.success) throw new Error(result.error);
         toast.success("Agendamento atualizado com sucesso!");
       } else {
-        const result = await createAppointment(appointmentData);
-        if (!result.success) {
-          throw new Error(result.error || "Erro ao criar agendamento");
-        }
+        result = await createAppointment(appointmentData);
+        if (!result.success) throw new Error(result.error);
         toast.success("Agendamento criado com sucesso!");
       }
 
@@ -200,9 +203,7 @@ export function useAppointmentForm({
     try {
       setIsDeleting(true);
       const result = await deleteAppointment(appointment.id);
-      if (!result.success) {
-        throw new Error(result.error || "Erro ao excluir agendamento");
-      }
+      if (!result.success) throw new Error(result.error);
       toast.success("Agendamento excluído com sucesso!");
       onSuccess();
     } catch (error) {

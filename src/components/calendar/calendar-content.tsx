@@ -192,18 +192,6 @@ export function CalendarContent({
         handleDeleteCalendar={handleDeleteCalendar}
         selectedCalendar={selectedCalendar}
       />
-
-      {selectedDay && (
-        <DayDetailsModal
-          dayDetails={{
-            date: selectedDay,
-            isOpen: dayDetailsOpen,
-          }}
-          appointments={selectedDayAppointments}
-          closeDayDetails={closeDayDetails}
-          calendarId={activeCalendarId}
-        />
-      )}
     </div>
   );
 }

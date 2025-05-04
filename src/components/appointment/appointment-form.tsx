@@ -29,7 +29,8 @@ interface AppointmentFormProps {
     endTime: Date,
     excludeId?: string
   ) => boolean;
-  initialStartTime?: string | null;
+  initialStartTime?: string;
+  initialEndTime?: string;
   calendarId: string;
 }
 
@@ -39,6 +40,7 @@ export function AppointmentForm({
   onSuccess,
   checkTimeConflict,
   initialStartTime,
+  initialEndTime,
   calendarId,
 }: AppointmentFormProps) {
   const {
@@ -58,8 +60,9 @@ export function AppointmentForm({
     appointment,
     onSuccess,
     checkTimeConflict,
-    initialStartTime,
     calendarId,
+    initialStartTime,
+    initialEndTime,
   });
 
   return (
@@ -101,7 +104,7 @@ export function AppointmentForm({
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="serviceId"

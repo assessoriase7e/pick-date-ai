@@ -8,20 +8,27 @@ interface DayScheduleGridProps {
   appointments: AppointmentFullData[];
   onHourClick: (hour: number) => void;
   onEditAppointment: (appointment: AppointmentFullData) => void;
+  selectedHour: number | null;
 }
 
 export function DayScheduleGrid({
   appointments,
   onHourClick,
   onEditAppointment,
+  selectedHour,
 }: DayScheduleGridProps) {
+
+
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");
   };
 
-  // Função para verificar se o horário está no período noturno (22:00-05:00)
   const isNightHour = (hour: number) => {
     return hour >= 22 || hour <= 5;
+  };
+
+  const handleHourClick = (hour: number) => {
+    onHourClick(hour);
   };
 
   return (
@@ -56,9 +63,10 @@ export function DayScheduleGrid({
                 className={cn(
                   "h-20 border-b hover:bg-muted/20 transition-colors cursor-pointer",
                   isNightHour(hour) &&
-                    "bg-background brightness-90 dark:brightness-50"
+                    "bg-background brightness-90 dark:brightness-50",
+                  selectedHour === hour && "ring-2 ring-primary"
                 )}
-                onClick={() => onHourClick(hour)}
+                onClick={() => handleHourClick(hour)}
               />
             ))}
           </div>
