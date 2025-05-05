@@ -28,7 +28,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddClientServiceForm } from "./add-client-service-form";
 import { useRouter } from "next/navigation";
@@ -83,6 +82,12 @@ export default function ClientServicesTable({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
+  // Add this function to handle successful service addition
+  const handleAddSuccess = () => {
+    setIsAddDialogOpen(false);
+    router.refresh();
+  };
+
   const handleDeleteClick = (id: string) => {
     setServiceToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -121,11 +126,6 @@ export default function ClientServicesTable({
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const handleAddSuccess = () => {
-    setIsAddDialogOpen(false);
-    router.refresh();
   };
 
   const handlePageChange = (page: number) => {
@@ -175,13 +175,15 @@ export default function ClientServicesTable({
                     <TableCell>{service.service.name}</TableCell>
                     <TableCell>{formatDate(service.date)}</TableCell>
                     <TableCell>
-                      {service.isAppointment && service.startTime && service.endTime
-                        ? `${formatTime(service.startTime)} - ${formatTime(service.endTime)}`
+                      {service.isAppointment &&
+                      service.startTime &&
+                      service.endTime
+                        ? `${formatTime(service.startTime)} - ${formatTime(
+                            service.endTime
+                          )}`
                         : "-"}
                     </TableCell>
-                    <TableCell>
-                      {service.description || "-"}
-                    </TableCell>
+                    <TableCell>{service.description || "-"}</TableCell>
                     <TableCell>
                       <Button
                         variant="outline"
@@ -206,10 +208,15 @@ export default function ClientServicesTable({
             </div>
           ) : (
             clientServices.map((clientService) => (
-              <div key={clientService.id} className="rounded-md border p-4 space-y-3">
+              <div
+                key={clientService.id}
+                className="rounded-md border p-4 space-y-3"
+              >
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <h3 className="font-medium">{clientService.service.name}</h3>
+                    <h3 className="font-medium">
+                      {clientService.service.name}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       {formatDate(clientService.date)}
                     </p>
@@ -235,13 +242,26 @@ export default function ClientServicesTable({
         </div>
       </div>
 
-      {pagination && pagination.pages > 1 && (
+      <div className="mt-4">
         <Pagination
           currentPage={pagination.currentPage}
           totalPages={pagination.pages}
           onPageChange={handlePageChange}
         />
-      )}
+      </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Serviço</DialogTitle>
+          </DialogHeader>
+          <AddClientServiceForm
+            clientId={clientId}
+            services={services}
+            onSuccess={handleAddSuccess}
+          />
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog
         open={isDeleteDialogOpen}

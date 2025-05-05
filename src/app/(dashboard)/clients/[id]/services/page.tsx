@@ -25,7 +25,7 @@ export default async function ClientServicesPage({
     await Promise.all([
       getClient(id),
       getClientServices(id, page),
-      getServices(),
+      getServices({}),
     ]);
 
   if (!clientResult.success || !clientResult.data?.client) {
