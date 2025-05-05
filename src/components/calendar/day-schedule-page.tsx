@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { Collaborator } from "@prisma/client";
 import { Separator } from "../ui/separator";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface DayScheduleContentProps {
   calendarId: string;
@@ -37,6 +38,7 @@ export function DayScheduleContent({
     }))
   );
   const [showForm, setShowForm] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Obter o horário selecionado dos search params
   const selectedHour = searchParams.get("hour")
@@ -88,6 +90,18 @@ export function DayScheduleContent({
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
+  const handleClearHourSelection = () => {
+    // Limpar parâmetros e estado
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("hour");
+    params.delete("startTime");
+    params.delete("endTime");
+    router.push(`${window.location.pathname}?${params.toString()}`);
+
+    setShowForm(false);
+    setSelectedAppointment(null);
+  };
+
   const handleFormSuccess = async () => {
     try {
       const response = await getAppointmentsByCalendarAndDate(calendarId, date);
@@ -135,8 +149,13 @@ export function DayScheduleContent({
     });
   };
 
+  const formatSelectedTime = () => {
+    if (!startTime || !endTime) return "";
+    return `${startTime}`;
+  };
+
   return (
-    <div className="container mx-auto  h-full flex flex-col items-center justify-center w-full gap-5">
+    <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
       <Button
         variant="ghost"
         onClick={handleBackToCalendar}
@@ -147,7 +166,7 @@ export function DayScheduleContent({
       </Button>
 
       <div className="flex items-center flex-col">
-        <h1 className="text-2xl font-bold ml-auto">
+        <h1 className="text-xl font-bold ml-auto text-center tablet:text-start">
           Agendamentos para {formattedDate}
         </h1>
         <h2 className="px-4 bg-primary rounded-full">{collaborator.name}</h2>
@@ -156,35 +175,71 @@ export function DayScheduleContent({
       <Separator />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100svh-300px)] w-full">
-        <div className="border rounded-lg overflow-hidden">
-          <DayScheduleGrid
-            appointments={appointments}
-            onHourClick={handleHourClick}
-            onEditAppointment={handleEditAppointment}
-            selectedHour={selectedHour}
-          />
-        </div>
-
-        <div className="border rounded-lg p-4">
-          {showForm ? (
-            <AppointmentForm
-              date={date}
-              appointment={selectedAppointment || undefined}
-              onSuccess={handleFormSuccess}
-              checkTimeConflict={checkTimeConflict}
-              initialStartTime={startTime || undefined}
-              initialEndTime={endTime || undefined}
-              calendarId={calendarId}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <p className="text-muted-foreground mb-4">
-                Selecione um horário na lista à esquerda para criar um novo
-                agendamento ou clique em um agendamento existente para editá-lo.
-              </p>
+        {/* Condição para mostrar a régua de horas ou o card de horário selecionado no mobile */}
+        {isMobile && selectedHour !== null ? (
+          <div className="border rounded-lg p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-4 bg-muted/20 p-3 rounded-lg">
+              <div>
+                <h3 className="font-medium">Horário selecionado</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClearHourSelection}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-        </div>
+            <div className="flex-1">
+              {showForm && (
+                <AppointmentForm
+                  date={date}
+                  appointment={selectedAppointment || undefined}
+                  onSuccess={handleFormSuccess}
+                  checkTimeConflict={checkTimeConflict}
+                  initialStartTime={startTime || undefined}
+                  initialEndTime={endTime || undefined}
+                  calendarId={calendarId}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <DayScheduleGrid
+              appointments={appointments}
+              onHourClick={handleHourClick}
+              onEditAppointment={handleEditAppointment}
+              selectedHour={selectedHour}
+            />
+          </div>
+        )}
+
+        {/* No mobile, mostrar o formulário apenas quando não houver horário selecionado */}
+        {(!isMobile || (isMobile && selectedHour === null)) && (
+          <div className="border rounded-lg p-4">
+            {showForm ? (
+              <AppointmentForm
+                date={date}
+                appointment={selectedAppointment || undefined}
+                onSuccess={handleFormSuccess}
+                checkTimeConflict={checkTimeConflict}
+                initialStartTime={startTime || undefined}
+                initialEndTime={endTime || undefined}
+                calendarId={calendarId}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <p className="text-muted-foreground mb-4">
+                  Selecione um horário na lista à esquerda para criar um novo
+                  agendamento ou clique em um agendamento existente para
+                  editá-lo.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
