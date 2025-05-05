@@ -70,7 +70,7 @@ export function LineDotsChart({ data, config, dataKey }: LineDotsChartProps) {
               offset={5}
               className="fill-foreground"
               fontSize={12}
-              formatter={(value: number) => `R$ ${value.toFixed(2)}`}
+              formatter={(value: number) => `R$${value.toFixed(2)}`}
             />
           </Line>
         </LineChart>

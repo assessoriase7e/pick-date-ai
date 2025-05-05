@@ -36,7 +36,7 @@ export function RevenueChart({
     <Card>
       <CardHeader className="flex-row justify-between gap-5">
         <div>
-          <CardTitle>Receita Duário</CardTitle>
+          <CardTitle>Receita Diária</CardTitle>
           <CardDescription>Gráfico de receita por dia.</CardDescription>
         </div>
         <DatePickerWithRange
