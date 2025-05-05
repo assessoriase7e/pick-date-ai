@@ -144,12 +144,13 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
                   <TableCell>{client.phone}</TableCell>
                   <TableCell>{formatDate(client.birthDate)}</TableCell>
                   <TableCell>
-                    <Link href={`/clients/${client.id}/services`}>
-                      <Button variant="outline" size="icon">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                    </Link>
                     <div className="flex space-x-2">
+                      <Link href={`/clients/${client.id}/services`}>
+                        <Button variant="outline" size="icon">
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      </Link>
+
                       <Link href={`/clients/${client.id}/edit`}>
                         <Button variant="outline" size="icon">
                           <Edit className="h-4 w-4" />
