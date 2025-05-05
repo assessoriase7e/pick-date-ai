@@ -16,7 +16,9 @@ export function CalendarHeader({ setOpen, calendarId }: CalendarHeaderProps) {
 
   return (
     <div className="flex flex-col lg:flex-row justify-between items-center mb-2 lg:mb-8">
-      <h1 className="lg:text-3xl mb-2 font-bold">Agendamento</h1>
+      <h1 className="lg:text-3xl mb-2 lg:mb-0 lg:mr-2 font-bold">
+        Agendamento
+      </h1>
 
       <div className="flex flex-col lg:flex-row gap-2 w-full">
         <Button variant="outline" onClick={() => setShareOpen(true)}>
