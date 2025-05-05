@@ -66,7 +66,7 @@ export function ServiceForm({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: initialData?.name || "",
-      price: initialData?.price || 0,
+      price: initialData?.price || null,
       availableDays: initialData?.availableDays || ([] as Collaborator[]),
       notes: initialData?.notes || "",
       collaboratorIds:
@@ -172,12 +172,12 @@ export function ServiceForm({
               <FormControl>
                 <NumericFormat
                   customInput={Input}
+                  prefix="R$"
+                  placeholder="R$ 0,00"
                   thousandSeparator="."
                   decimalSeparator=","
-                  prefix="R$ "
                   decimalScale={2}
-                  fixedDecimalScale
-                  placeholder="R$ 0,00"
+                  allowNegative={false}
                   value={value}
                   onValueChange={(values) => {
                     onChange(values.floatValue);
