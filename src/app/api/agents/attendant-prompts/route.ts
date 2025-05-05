@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   try {
     let attendantPrompt = null;
     let ragConfig = null;
-    let evolutionInstances = [] as EvolutionInstance[];
+    let evolutionInstances = [] as Partial<EvolutionInstance>[];
     let resolvedUserId = null;
 
     if (userId) {
@@ -59,6 +59,14 @@ export async function GET(req: NextRequest) {
       evolutionInstances = await prisma.evolutionInstance.findMany({
         where: { userId: resolvedUserId },
         orderBy: { createdAt: "desc" },
+        select: {
+          name: true,
+          number: true,
+          webhookUrl: true,
+          userId: true,
+          status: true,
+          id: true,
+        },
       });
     }
 

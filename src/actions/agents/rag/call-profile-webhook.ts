@@ -104,7 +104,7 @@ export const callProfileWebhook = async ({
           .map(
             (service) => `
                 ## ${service.name}
-                Preço: R$ ${service.price || ""}
+                Preço: R$${service.price || ""}
                 Duração: ${service.durationMinutes || ""} minutos
                 Dias Disponíveis: ${service.availableDays?.join(", ") || ""}
                 Observações: ${service.notes || ""}
