@@ -10,7 +10,6 @@ import { CalendarHeader } from "./calendar-header";
 import { CalendarModals } from "./calendar-modals";
 import { EmptyCalendarState } from "./empty-calendar-state";
 import { CalendarTabs } from "./calendar-tabs";
-import { DayDetailsModal } from "./day-details-modal";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
@@ -33,7 +32,6 @@ export function CalendarContent({
   appointments,
   currentDate,
   selectedDay,
-  selectedDayAppointments,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -45,12 +43,10 @@ export function CalendarContent({
   const {
     activeCalendarId,
     setCalendarId,
-    dayDetailsOpen,
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
     openDayDetails,
-    closeDayDetails,
   } = useCalendarQuery({
     initialCalendarId: calendarId,
     initialDate: currentDate,

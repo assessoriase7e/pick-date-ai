@@ -15,10 +15,10 @@ export function CalendarHeader({ setOpen, calendarId }: CalendarHeaderProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex justify-between items-center mb-2 lg:mb-8">
-      <h1 className="lg:text-3xl font-bold">Agendamento</h1>
+    <div className="flex flex-col lg:flex-row justify-between items-center mb-2 lg:mb-8">
+      <h1 className="lg:text-3xl mb-2 font-bold">Agendamento</h1>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col lg:flex-row gap-2 w-full">
         <Button variant="outline" onClick={() => setShareOpen(true)}>
           <Share2 className="mr-2 h-4 w-4" />
           Compartilhar

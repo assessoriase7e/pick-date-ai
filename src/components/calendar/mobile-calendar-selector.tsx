@@ -22,13 +22,15 @@ export function MobileCalendarSelector({
   setCalendarIdQueryParam,
   onLongPress,
 }: MobileCalendarSelectorProps) {
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   const handleTouchStart = (calendar: CalendarFullData) => {
     const timer = setTimeout(() => {
       onLongPress(calendar);
     }, 1000); // 1 segundo para o long press
-    
+
     setLongPressTimer(timer);
   };
 
@@ -58,8 +60,8 @@ export function MobileCalendarSelector({
         </SelectTrigger>
         <SelectContent>
           {calendars.map((calendar) => (
-            <SelectItem 
-              key={calendar.id} 
+            <SelectItem
+              key={calendar.id}
               value={calendar.id}
               onTouchStart={() => handleTouchStart(calendar)}
               onTouchEnd={handleTouchEnd}

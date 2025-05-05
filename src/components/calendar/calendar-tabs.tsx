@@ -95,7 +95,6 @@ export function CalendarTabs({
               goToNextMonth={goToNextMonth}
               goToToday={goToToday}
               selectedDate={selectedDate}
-              openDayDetails={openDayDetails}
               initialAppointments={initialAppointments}
               calendarId={calendar.id}
             />

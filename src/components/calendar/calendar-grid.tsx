@@ -1,12 +1,11 @@
-import { useMemo, useRef, useState, TouchEvent } from "react";
+import { useMemo, useState, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { Button } from "@/components/ui/button";
-import { weekDays } from "@/mocked/calendar";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CalendarDay } from "./calendar-types";
+import { MobileCalendarView } from "./mobile-calendar-view";
+import { DesktopCalendarView } from "./desktop-calendar-view";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -14,16 +13,9 @@ interface CalendarGridProps {
   goToNextMonth: () => void;
   goToToday: () => void;
   selectedDate: Date | null;
-  openDayDetails: (date: Date) => void;
   initialAppointments: Record<string, AppointmentFullData[]>;
   calendarId: string;
 }
-
-type CalendarDay = {
-  date: moment.Moment;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-};
 
 export function CalendarGrid({
   currentDate,
@@ -31,16 +23,48 @@ export function CalendarGrid({
   goToNextMonth,
   goToToday,
   selectedDate,
-  openDayDetails,
   initialAppointments,
   calendarId,
 }: CalendarGridProps) {
   const today = moment();
-  const calendarRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState(moment(currentDate).year());
+  const [isLoading, setIsLoading] = useState(false);
+  const [prevSearchParams, setPrevSearchParams] = useState("");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    // Atualizar o ano selecionado quando a data atual mudar
+    setSelectedYear(moment(currentDate).year());
+  }, [currentDate]);
+
+  // Monitorar mudanças nos parâmetros de busca para controlar o estado de carregamento
+  useEffect(() => {
+    const currentParams = searchParams.toString();
+
+    // Ignorar a primeira carga da página
+    if (isInitialLoad) {
+      setPrevSearchParams(currentParams);
+      setIsInitialLoad(false);
+      return;
+    }
+
+    // Se os parâmetros mudaram, ativar o loading
+    if (currentParams !== prevSearchParams) {
+      setIsLoading(true);
+
+      // Armazenar os parâmetros atuais
+      setPrevSearchParams(currentParams);
+    }
+
+    return () => {
+      setIsLoading(false);
+    };
+  }, [searchParams, prevSearchParams, isInitialLoad]);
 
   const minSwipeDistance = 50;
 
@@ -103,13 +127,13 @@ export function CalendarGrid({
     return appointments;
   };
 
-  const onTouchStart = (e: TouchEvent) => {
+  const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart(e.touches[0].clientX);
   };
 
-  const onTouchMove = (e: TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.touches[0].clientX);
   };
 
   const onTouchEnd = () => {
@@ -132,82 +156,75 @@ export function CalendarGrid({
   };
 
   const handleDayClick = (date: Date) => {
+    // Ativar o loading antes de redirecionar
+    setIsLoading(true);
+
     // Redirecionar para a página de agendamentos do dia
-    router.push(`/calendar/day?calendarId=${calendarId}&date=${date.toISOString()}`);
+    router.push(
+      `/calendar/day?calendarId=${calendarId}&date=${date.toISOString()}`
+    );
+  };
+
+  const handleYearChange = (year: string) => {
+    const newYear = parseInt(year);
+    setSelectedYear(newYear);
+
+    // Ativar o loading antes de redirecionar
+    setIsLoading(true);
+
+    const newDate = new Date(newYear, currentDate.getMonth(), 1);
+
+    router.push(
+      `/calendar?calendarId=${calendarId}&date=${newDate.toISOString()}`
+    );
+  };
+
+  const handleMonthClick = (monthIndex: number) => {
+    // Ativar o loading antes de redirecionar
+    setIsLoading(true);
+
+    const newDate = new Date(currentDate.getFullYear(), monthIndex, 1);
+
+    router.push(
+      `/calendar?calendarId=${calendarId}&date=${newDate.toISOString()}`
+    );
+  };
+
+  const commonProps = {
+    currentDate,
+    selectedDate,
+    calendarDays,
+    calendarId,
+    initialAppointments,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
+    handleDayClick,
+    isSelected,
+    getAppointmentsForDay,
+    formatMonth,
   };
 
   return (
     <div className="w-full">
-      <div
-        ref={calendarRef}
-        className="flex flex-col h-full border rounded-lg"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        {/* Cabeçalho */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
-          <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left">
-            {formatMonth(currentDate)}
-          </h2>
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
-              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={goToToday}>
-              Hoje
-            </Button>
-            <Button variant="outline" size="sm" onClick={goToNextMonth}>
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          </div>
-        </div>
-        {/* Dias da Semana */}
-        <div className="grid grid-cols-7 text-center py-1 sm:py-2 border-b bg-muted/20">
-          {weekDays.map((day, index) => (
-            <div
-              key={index}
-              className="text-[10px] sm:text-xs lg:text-lg font-medium"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-        {/* Dias do Calendário */}
-        <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-          {calendarDays.map((dayObj, index) => (
-            <div
-              key={index}
-              className={cn(
-                "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors",
-                !dayObj.isCurrentMonth && "bg-muted/20",
-                isSelected(dayObj.date) && "ring-2 ring-primary",
-                getAppointmentsForDay(dayObj.date)?.length && "bg-primary/50"
-              )}
-              onClick={() => {
-                handleDayClick(dayObj.date.toDate());
-              }}
-            >
-              <div className="flex flex-col h-full">
-                <span
-                  className={cn(
-                    "lg:text-lg font-medium flex items-center justify-center h-full",
-                    dayObj.isToday && "text-primary"
-                  )}
-                >
-                  {dayObj.date.date()}
-                </span>
-                {getAppointmentsForDay(dayObj.date)?.length > 0 && (
-                  <span className="text-[10px] sm:text-xs mt-1 flex flex-col">
-                    {getAppointmentsForDay(dayObj.date).length}{" "}
-                    <span className="hidden lg:block">agendamento(s)</span>
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <span className="block lg:hidden">
+        <MobileCalendarView
+          {...commonProps}
+          selectedYear={selectedYear}
+          handleYearChange={handleYearChange}
+          handleMonthClick={handleMonthClick}
+          isLoading={isLoading}
+        />
+      </span>
+
+      <span className="hidden lg:block">
+        <DesktopCalendarView
+          {...commonProps}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        />
+      </span>
     </div>
   );
 }

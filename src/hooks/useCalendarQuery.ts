@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 
 interface UseCalendarQueryProps {
@@ -19,6 +19,7 @@ export function useCalendarQuery({
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dayDetailsOpen, setDayDetailsOpen] = useState<boolean>(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,43 +54,30 @@ export function useCalendarQuery({
     revalidatePathAction("/calendar");
   };
 
-  const goToPreviousMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCurrentDate(newDate);
+  // Exemplo de como as funções de navegação poderiam ser implementadas
+  // (Você precisará adaptar ao seu código existente)
 
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("date", newDate.toISOString());
+  const goToPreviousMonth = useCallback(() => {
+    const prevMonth = new Date(currentDate);
+    prevMonth.setMonth(prevMonth.getMonth() - 1);
+    router.push(
+      `/calendar?calendarId=${activeCalendarId}&date=${prevMonth.toISOString()}`
+    );
+  }, [currentDate, activeCalendarId, router]);
 
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
+  const goToNextMonth = useCallback(() => {
+    const nextMonth = new Date(currentDate);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    router.push(
+      `/calendar?calendarId=${activeCalendarId}&date=${nextMonth.toISOString()}`
+    );
+  }, [currentDate, activeCalendarId, router]);
 
-    revalidatePathAction("/calendar");
-  };
-
-  const goToNextMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCurrentDate(newDate);
-
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("date", newDate.toISOString());
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
-
-    revalidatePathAction("/calendar");
-  };
-
-  const goToToday = () => {
-    const today = new Date();
-    setCurrentDate(today);
-
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.delete("date");
-
-    window.history.pushState({}, "", `/calendar?${searchParams.toString()}`);
-
-    revalidatePathAction("/calendar");
-  };
+  const goToToday = useCallback(() => {
+    router.push(
+      `/calendar?calendarId=${activeCalendarId}&date=${new Date().toISOString()}`
+    );
+  }, [activeCalendarId, router]);
 
   const openDayDetails = (date: Date) => {
     setSelectedDay(date);
