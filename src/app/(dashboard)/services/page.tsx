@@ -16,7 +16,7 @@ export default async function ServicesPage({
   const pageParam = Number(page) || 1;
 
   const [servicesResult, collaboratorsResult] = await Promise.all([
-    getServices(pageParam),
+    getServices({ page: pageParam, limit: 30 }),
     getCollaborators(1, 100),
   ]);
 
@@ -25,6 +25,12 @@ export default async function ServicesPage({
     servicesResult.success && servicesResult.pagination
       ? servicesResult.pagination
       : { totalPages: 1, currentPage: 1 };
+
+  // Handle collaborators safely with proper type checking
+  const collaborators = collaboratorsResult.success
+    ? collaboratorsResult.data
+    : [];
+  const services = servicesResult.success ? servicesResult.data : [];
 
   return (
     <div className="container">
@@ -37,8 +43,8 @@ export default async function ServicesPage({
 
       <div className="space-y-8">
         <ServicesSection
-          services={servicesResult.data || []}
-          collaborators={collaboratorsResult.data || []}
+          services={services}
+          collaborators={collaborators}
           pagination={pagination}
         />
       </div>

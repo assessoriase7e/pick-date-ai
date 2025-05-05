@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Scissors } from "lucide-react";
+import { PlusCircle, FileText } from "lucide-react";
 import { CollaboratorModal } from "./collaborator-modal";
 import { deleteCollaborator } from "@/actions/collaborators/delete-collaborator";
 import { Pencil, Trash2 } from "lucide-react";
@@ -118,7 +118,7 @@ export function CollaboratorsSection({
                         size="icon"
                         onClick={() => handleShowServices(collaborator)}
                       >
-                        <Scissors className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
                       </Button>
 
                       <Button
@@ -172,7 +172,7 @@ export function CollaboratorsSection({
                     size="sm"
                     onClick={() => handleShowServices(collaborator)}
                   >
-                    <Scissors className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                     Ver Serviços
                   </Button>
                 </div>

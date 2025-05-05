@@ -3,17 +3,20 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { Collaborator, Prisma, Service } from "@prisma/client";
+import { ServiceFullData } from "@/types/service";
 
 // Tipos de resposta para os serviços
 type GetServicesResponse =
   | {
       success: true;
-      data: ServiceWithCollaborators[];
+      data: ServiceFullData[];
       pagination: { totalPages: number; currentPage: number };
     }
   | { success: false; error: string };
 
+// Updating this type to match ServiceFullData
 type ServiceWithCollaborators = Service & {
+  collaborator: Collaborator | null;
   serviceCollaborators: {
     collaborator: Collaborator;
   }[];
@@ -69,6 +72,7 @@ export async function getServices({
         skip,
         take: limit,
         include: {
+          collaborator: true,
           serviceCollaborators: {
             include: {
               collaborator: true,
@@ -96,7 +100,7 @@ export async function getServices({
 
     return {
       success: true,
-      data: filteredServices,
+      data: filteredServices as ServiceFullData[],
       pagination: {
         totalPages,
         currentPage: page,
