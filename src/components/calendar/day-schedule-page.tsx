@@ -156,7 +156,9 @@ export function DayScheduleContent({
         <h1 className="text-xl font-bold ml-auto text-center tablet:text-start">
           Agendamentos para {formattedDate}
         </h1>
-        <h2 className="px-4 bg-primary rounded-full">{collaborator.name}</h2>
+        <h2 className="p-1 px-6 bg-primary rounded-full text-white">
+          {collaborator.name}
+        </h2>
       </div>
 
       <Separator />
@@ -193,7 +195,7 @@ export function DayScheduleContent({
             </div>
           </div>
         ) : (
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-y-auto h-[calc(100svh-300px)]">
             <DayScheduleGrid
               appointments={appointments}
               onHourClick={handleHourClick}
