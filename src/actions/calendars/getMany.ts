@@ -30,7 +30,7 @@ export async function listCalendars() {
           include: {
             client: true,
             service: true,
-          }
+          },
         },
       },
       orderBy: {

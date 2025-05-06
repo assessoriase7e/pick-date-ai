@@ -29,7 +29,7 @@ export function CalendarGrid({
   const today = moment();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = window.location.pathname;
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const isSharedCalendar = pathname.includes("shared-calendar");
 
   const [touchStart, setTouchStart] = useState<number | null>(null);

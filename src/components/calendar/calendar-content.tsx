@@ -48,7 +48,7 @@ export function CalendarContent({
     goToToday,
     openDayDetails,
   } = useCalendarQuery({
-    initialCalendarId: calendarId,
+    initialCalendarId: calendarId || calendars[0]?.id,
     initialDate: currentDate,
     availableCalendarIds: calendars.map((cal) => cal.id),
   });
