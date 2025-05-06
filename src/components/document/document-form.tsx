@@ -18,6 +18,7 @@ import { fileToBase64, getFileTypeFromName } from "@/lib/utils";
 import { toast } from "sonner";
 import { DocumentRecord } from "@prisma/client";
 import { documentSchema } from "@/validators/document";
+import { useUser } from "@clerk/nextjs";
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
 
@@ -38,6 +39,7 @@ export function DocumentForm({
   const [isLoading, setIsLoading] = useState(false);
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const { user } = useUser();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -63,7 +65,7 @@ export function DocumentForm({
       }
 
       let documentData = {
-        userId: data.userId,
+        userId: user?.id,
         description: data.description,
         documentBase64: "",
         fileName: "",

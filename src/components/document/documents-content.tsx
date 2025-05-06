@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, FileText, Download, File } from "lucide-react";
@@ -26,19 +25,19 @@ type DocumentWithUser = DocumentRecord & {
 };
 
 interface DocumentsContentProps {
-  initialDocuments: DocumentWithUser[];
+  documents: DocumentWithUser[];
   totalPages: number;
   currentPage: number;
 }
 
-export function DocumentsContent({ 
-  initialDocuments, 
-  totalPages, 
-  currentPage 
+export function DocumentsContent({
+  documents,
+  totalPages: initialTotalPages,
+  currentPage,
 }: DocumentsContentProps) {
   const router = useRouter();
-  
-  const [documents, setDocuments] = useState<DocumentWithUser[]>(initialDocuments);
+
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<any | null>(null);
@@ -49,7 +48,6 @@ export function DocumentsContent({
     try {
       const result = await createDocument(data);
       if (result.success) {
-        router.refresh(); // Atualiza a página para buscar os novos dados
         setIsCreateModalOpen(false);
       }
     } catch (error) {
@@ -65,7 +63,6 @@ export function DocumentsContent({
     try {
       const result = await updateDocument(editingDocument.id, data);
       if (result.success) {
-        router.refresh(); // Atualiza a página para buscar os novos dados
         setEditingDocument(null);
       }
     } catch (error) {
@@ -81,7 +78,6 @@ export function DocumentsContent({
     try {
       const result = await deleteDocument(deletingDocument.id);
       if (result.success) {
-        router.refresh(); // Atualiza a página para buscar os novos dados
         setDeletingDocument(null);
       }
     } catch (error) {
@@ -93,13 +89,13 @@ export function DocumentsContent({
 
   function handleDownloadDocument(document: any) {
     const url = createDocumentUrl(document.documentBase64, document.fileType);
-    const a = document.createElement("a");
+    const a = window.document.createElement("a");
     a.href = url;
     a.download =
       document.fileName || `document-${document.id}.${document.fileType}`;
-    document.body.appendChild(a);
+    window.document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    window.document.body.removeChild(a);
   }
 
   return (

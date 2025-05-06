@@ -1,9 +1,6 @@
 import { z } from "zod";
 
 export const documentSchema = z.object({
-  userId: z.string({
-    required_error: "Por favor, selecione um profissional.",
-  }),
   description: z.string().min(1, {
     message: "A descrição é obrigatória.",
   }),

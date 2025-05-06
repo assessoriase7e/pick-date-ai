@@ -6,11 +6,12 @@ import { listDocuments } from "@/actions/documents/getMany";
 export default async function DocumentsPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const page = Number(searchParams.page || "1");
+  const { page: sPage } = await searchParams;
+  const page = Number(sPage || "1");
   const documentsResult = await listDocuments(page);
-  
+
   return (
     <div className="space-y-6">
       <div>
@@ -20,9 +21,13 @@ export default async function DocumentsPage({
         </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <DocumentsContent 
-          initialDocuments={documentsResult.success ? documentsResult.data.documents : []}
-          totalPages={documentsResult.success ? documentsResult.data.totalPages : 0}
+        <DocumentsContent
+          documents={
+            documentsResult.success ? documentsResult.data.documents : []
+          }
+          totalPages={
+            documentsResult.success ? documentsResult.data.totalPages : 0
+          }
           currentPage={page}
         />
       </Suspense>
