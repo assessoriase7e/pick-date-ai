@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -9,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { deleteClientService } from "@/actions/clients/services/delete-client-service";
 import { useToast } from "@/components/ui/use-toast";
@@ -23,15 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { AddClientServiceForm } from "./add-client-service-form";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Pagination } from "@/components/ui/pagination";
 
 interface ClientService {
@@ -72,7 +63,6 @@ interface ClientServicesTableProps {
 export default function ClientServicesTable({
   clientId,
   clientServices,
-  services,
   pagination,
 }: ClientServicesTableProps) {
   const router = useRouter();
@@ -80,12 +70,6 @@ export default function ClientServicesTable({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  const handleAddSuccess = () => {
-    setIsAddDialogOpen(false);
-    router.refresh();
-  };
 
   const handleDeleteClick = (id: string) => {
     setServiceToDelete(id);
@@ -134,18 +118,6 @@ export default function ClientServicesTable({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Link href="/clients">
-            <Button variant="outline" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Serviço
-          </Button>
-        </div>
-
         {/* Visualização Desktop */}
         <div className="rounded-md border hidden md:block">
           <Table>
@@ -248,19 +220,6 @@ export default function ClientServicesTable({
           onPageChange={handlePageChange}
         />
       </div>
-
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Serviço</DialogTitle>
-          </DialogHeader>
-          <AddClientServiceForm
-            clientId={clientId}
-            services={services}
-            onSuccess={handleAddSuccess}
-          />
-        </DialogContent>
-      </Dialog>
 
       <AlertDialog
         open={isDeleteDialogOpen}
