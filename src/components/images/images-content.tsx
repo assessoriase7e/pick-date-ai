@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ImageModal } from "./image-modal";
 import { Pagination } from "@/components/ui/pagination";
-import { ImagePlus, Eye, Pencil, Trash2 } from "lucide-react";
+import { ImagePlus, Eye, Pencil, Trash2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -75,10 +75,7 @@ export function ImagesContent() {
   async function handleCreateImage(data: any) {
     try {
       const result = await createImage(data);
-      if (result.success) {
-        loadImages();
-        setIsCreateModalOpen(false);
-      }
+      result.success && (loadImages(), setIsCreateModalOpen(false));
     } catch (error) {
       console.error("Erro ao criar imagem:", error);
     }
@@ -88,10 +85,7 @@ export function ImagesContent() {
     if (!editingImage) return;
     try {
       const result = await updateImage(editingImage.id, data);
-      if (result.success) {
-        loadImages();
-        setEditingImage(null);
-      }
+      result.success && (loadImages(), setEditingImage(null));
     } catch (error) {
       console.error("Erro ao atualizar imagem:", error);
     }
@@ -101,13 +95,30 @@ export function ImagesContent() {
     if (!deletingImage) return;
     try {
       const result = await deleteImage(deletingImage.id);
-      if (result.success) {
-        loadImages();
-        setDeletingImage(null);
-      }
+      result.success && (loadImages(), setDeletingImage(null));
     } catch (error) {
       console.error("Erro ao excluir imagem:", error);
     }
+  }
+
+  function handleDownloadImage(image: ImageWithProfessional) {
+    const link = document.createElement("a");
+    link.href = image.imageBase64;
+    const mimeType = image.imageBase64.split(";")[0].split(":")[1];
+    let extension = ".jpg";
+    if (mimeType?.includes("png")) extension = ".png";
+    else if (mimeType?.includes("jpeg") || mimeType?.includes("jpg"))
+      extension = ".jpg";
+    else if (mimeType?.includes("gif")) extension = ".gif";
+    else if (mimeType?.includes("webp")) extension = ".webp";
+    else if (mimeType?.includes("svg")) extension = ".svg";
+    const fileName = `${image.description
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}${extension}`;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -126,7 +137,7 @@ export function ImagesContent() {
             <TableRow>
               <TableHead>Descrição</TableHead>
               <TableHead>Data de Criação</TableHead>
-              <TableHead>Ações</TableHead>
+              <TableHead className="w-[150px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -179,6 +190,13 @@ export function ImagesContent() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDownloadImage(image)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -206,9 +224,13 @@ export function ImagesContent() {
                 <div className="space-y-1">
                   <h3 className="font-medium">{image.description}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(image.createdAt), "dd/MM/yyyy 'às' HH:mm", {
-                      locale: ptBR,
-                    })}
+                    {format(
+                      new Date(image.createdAt),
+                      "dd/MM/yyyy 'às' HH:mm",
+                      {
+                        locale: ptBR,
+                      }
+                    )}
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2">
@@ -232,6 +254,13 @@ export function ImagesContent() {
                     onClick={() => setDeletingImage(image)}
                   >
                     <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDownloadImage(image)}
+                  >
+                    <Download className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
