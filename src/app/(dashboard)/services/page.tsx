@@ -37,7 +37,7 @@ export default async function ServicesPage({
       <div>
         <h1 className="text-3xl font-bold">Serviços</h1>
         <p className="text-muted-foreground">
-          Gerencie os links cadastrados no sistema.
+          Gerencie os serviços cadastrados no sistema.
         </p>
       </div>
 
