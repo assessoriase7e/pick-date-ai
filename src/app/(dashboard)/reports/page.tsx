@@ -31,10 +31,17 @@ export default async function ReportsPage({
         todayRevenue: 0,
       };
 
-  const { fromRevenue, toRevenue, fromCollab, toCollab, collaboratorId } =
-    await searchParams;
+  const { 
+    fromRevenue, 
+    toRevenue, 
+    fromMonthlyRevenue, 
+    toMonthlyRevenue, 
+    fromCollab, 
+    toCollab, 
+    collaboratorId 
+  } = await searchParams;
 
-  // Configurar período para o gráfico de receita
+  // Configurar período para o gráfico de receita diária
   const today = moment().endOf("day").toDate();
   const formatedFromRevenue = fromRevenue
     ? moment(fromRevenue as string)
@@ -47,13 +54,32 @@ export default async function ReportsPage({
         .toDate()
     : today;
 
+  // Configurar período para o gráfico de receita mensal
+  const formatedFromMonthlyRevenue = fromMonthlyRevenue
+    ? moment(fromMonthlyRevenue as string)
+        .startOf("day")
+        .toDate()
+    : moment().subtract(12, "months").startOf("month").toDate();
+  const formatedToMonthlyRevenue = toMonthlyRevenue
+    ? moment(toMonthlyRevenue as string)
+        .endOf("day")
+        .toDate()
+    : today;
+
+  // Buscar dados para o gráfico de receita diária
   const revenueResult = await getRevenueByPeriod(
     formatedFromRevenue,
     formatedToRevenue
   );
   const revenueData = revenueResult.success ? revenueResult.data : [];
-  const monthlyRevenueData = revenueResult.success
-    ? revenueResult.monthlyData
+
+  // Buscar dados para o gráfico de receita mensal
+  const monthlyRevenueResult = fromMonthlyRevenue || toMonthlyRevenue
+    ? await getRevenueByPeriod(formatedFromMonthlyRevenue, formatedToMonthlyRevenue)
+    : revenueResult; // Usar os mesmos dados se não houver parâmetros específicos
+  
+  const monthlyRevenueData = monthlyRevenueResult.success
+    ? monthlyRevenueResult.monthlyData
     : [];
 
   // Calcular o faturamento total do período
@@ -119,8 +145,8 @@ export default async function ReportsPage({
               <MonthlyRevenueChart
                 data={monthlyRevenueData}
                 config={monthlyRevenueChartConfig}
-                initialFromDate={formatedFromRevenue}
-                initialToDate={formatedToRevenue}
+                initialFromDate={formatedFromMonthlyRevenue}
+                initialToDate={formatedToMonthlyRevenue}
               />
             </div>
           </Suspense>
