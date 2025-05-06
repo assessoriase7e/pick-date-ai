@@ -2,12 +2,12 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
 import { CalendarFullData } from "@/types/calendar";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue,
 } from "@/components/ui/select";
 
 interface DesktopCalendarTabsProps {
@@ -43,23 +43,25 @@ export function DesktopCalendarTabs({
           </SelectTrigger>
           <SelectContent>
             {calendars.map((calendar) => (
-              <SelectItem 
-                key={calendar.id} 
+              <SelectItem
+                key={calendar.id}
                 value={calendar.id}
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center justify-between w-full">
-                  <span>{calendar.name} | ({calendar.collaborator?.name})</span>
+                  <span>
+                    {calendar.name} | {calendar.collaborator?.name}
+                  </span>
                   <div className="flex items-center space-x-1">
-                    <Edit 
-                      className="h-4 w-4 cursor-pointer" 
+                    <Edit
+                      className="h-4 w-4 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         openEditModal(calendar);
                       }}
                     />
-                    <Trash2 
-                      className="h-4 w-4 cursor-pointer" 
+                    <Trash2
+                      className="h-4 w-4 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDeleteModal(calendar);
