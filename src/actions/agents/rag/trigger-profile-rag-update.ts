@@ -11,21 +11,47 @@ export const triggerProfileRagUpdate = async (userId: string) => {
       return { success: true, message: "Webhook não configurado" };
     }
 
+    // Verificar se há conexão com o webhook
+    try {
+      const response = await fetch(ragConfig.webhookUrl, {
+        method: "HEAD",
+      });
+
+      if (!response.ok) {
+        console.log("Webhook indisponível, ignorando atualização RAG");
+        return {
+          success: true,
+          message: "Webhook indisponível, fluxo ignorado",
+        };
+      }
+    } catch (error) {
+      console.log(
+        "Erro ao verificar conexão com webhook, ignorando atualização RAG"
+      );
+      return {
+        success: true,
+        message: "Erro de conexão com webhook, fluxo ignorado",
+      };
+    }
+
     // Buscar o perfil para obter o nome da empresa
     const profile = await prisma.profile.findUnique({
       where: { userId },
     });
 
     if (!profile || !profile.companyName) {
-      return { success: false, error: "Perfil ou nome da empresa não encontrado" };
+      return {
+        success: false,
+        error: "Perfil ou nome da empresa não encontrado",
+      };
     }
 
     // Formatar o nome da empresa como metadataKey (minúsculo e com underscores)
     const metadataKey = profile.companyName
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '_')
-      .replace(/[^a-z0-9_]/g, '');
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
 
     // Chamar o webhook com os dados do perfil
     return await callProfileWebhook({
