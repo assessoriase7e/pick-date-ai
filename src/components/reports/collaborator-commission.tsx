@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ComboBoxResponsiveField } from "@/components/calendar/combo-box-responsive-field";
+import { SelectWithScroll } from "@/components/calendar/select-with-scroll";
 import { DateRange } from "react-day-picker";
 import { Collaborator } from "@prisma/client";
 import {
@@ -101,7 +101,7 @@ export function CollaboratorCommission({
         </CardDescription>
         <div className="flex flex-col gap-4 mt-4">
           <div className="w-full">
-            <ComboBoxResponsiveField
+            <SelectWithScroll
               label="Colaborador"
               placeholder="Todos os colaboradores"
               options={initialCollaborators}

@@ -44,9 +44,39 @@ const DAYS_OF_WEEK = [
 ];
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
+  // Log para depuração - remover após resolver o problema
+  console.log("initialData recebido:", initialData);
+
   const router = useRouter();
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Processamento adequado dos dados iniciais do businessHours
+  const processInitialBusinessHours = () => {
+    if (initialData?.profile?.businessHours) {
+      // Verificar se já é um array
+      if (Array.isArray(initialData.profile.businessHours)) {
+        return initialData.profile.businessHours;
+      }
+      // Se for um objeto JSON, tentar converter para array
+      try {
+        const parsedHours =
+          typeof initialData.profile.businessHours === "string"
+            ? JSON.parse(initialData.profile.businessHours)
+            : initialData.profile.businessHours;
+
+        return Array.isArray(parsedHours)
+          ? parsedHours
+          : [{ day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" }];
+      } catch (error) {
+        console.error("Erro ao processar horários de funcionamento:", error);
+        return [
+          { day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" },
+        ];
+      }
+    }
+    return [{ day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" }];
+  };
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -56,9 +86,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       whatsapp: initialData?.profile?.whatsapp || "",
       imageUrl: initialData?.imageUrl || "",
       companyName: initialData?.profile?.companyName || "",
-      businessHours: initialData?.profile?.businessHours
-        ? (initialData.profile.businessHours as any[])
-        : [{ day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" }],
+      businessHours: processInitialBusinessHours(),
       address: initialData?.profile?.address || "",
       locationUrl: initialData?.profile?.locationUrl || "",
       documentNumber: initialData?.profile?.documentNumber || "",
@@ -73,10 +101,14 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   // Função para obter os dias disponíveis
   const getAvailableDays = (currentIndex: number) => {
     const selectedDays = fields
-      .map((field, index) => (index !== currentIndex ? form.getValues(`businessHours.${index}.day`) : ""))
+      .map((field, index) =>
+        index !== currentIndex
+          ? form.getValues(`businessHours.${index}.day`)
+          : ""
+      )
       .filter(Boolean);
-    
-    return DAYS_OF_WEEK.filter(day => !selectedDays.includes(day));
+
+    return DAYS_OF_WEEK.filter((day) => !selectedDays.includes(day));
   };
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,14 +117,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!user?.id) {
-      toast.error("Usuário não identificado");
-      return;
-    }
-
     setIsLoading(true);
     try {
-      const result = await updateProfile(user.id, data);
+      const result = await updateProfile(data);
 
       if (result.success) {
         toast.success("Perfil atualizado com sucesso");
