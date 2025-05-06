@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, Play, Pause, Music } from "lucide-react";
+import { Pencil, Trash2, Play, Pause, Music, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,13 +28,13 @@ interface AudiosContentProps {
   currentPage: number;
 }
 
-export function AudiosContent({ 
-  initialAudios, 
-  initialTotalPages, 
-  currentPage 
+export function AudiosContent({
+  initialAudios,
+  initialTotalPages,
+  currentPage,
 }: AudiosContentProps) {
   const router = useRouter();
-  
+
   const [audios, setAudios] = useState<AudioRecord[]>(initialAudios);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,6 @@ export function AudiosContent({
   async function loadAudios() {
     setIsLoading(true);
     const result = await listAudios(currentPage, 20);
-
     if (result.success) {
       setAudios(result.data.audios);
       setTotalPages(result.data.totalPages);
@@ -58,11 +57,9 @@ export function AudiosContent({
   async function handleCreateAudio(data: any) {
     try {
       const result = await createAudio(data);
-
       if (!result.success) {
         throw new Error(result.error);
       }
-
       loadAudios();
       setIsCreateModalOpen(false);
     } catch (error) {
@@ -74,13 +71,10 @@ export function AudiosContent({
   async function handleUpdateAudio(data: any) {
     try {
       if (!editingAudio) return;
-
       const result = await updateAudio(editingAudio.id, data);
-
       if (!result.success) {
         throw new Error(result.error);
       }
-
       loadAudios();
       setEditingAudio(null);
     } catch (error) {
@@ -92,13 +86,10 @@ export function AudiosContent({
   async function handleDeleteAudio() {
     try {
       if (!deletingAudio) return;
-
       const result = await deleteAudio(deletingAudio.id);
-
       if (!result.success) {
         throw new Error(result.error);
       }
-
       loadAudios();
       setDeletingAudio(null);
     } catch (error) {
@@ -116,17 +107,70 @@ export function AudiosContent({
       audioElement.pause();
       setPlayingAudio(null);
     } else {
-      // Pause any currently playing audio
       if (playingAudio) {
         const currentAudio = document.getElementById(
           playingAudio
         ) as HTMLAudioElement;
         if (currentAudio) currentAudio.pause();
       }
-
       audioElement.play();
       setPlayingAudio(audioId);
     }
+  }
+
+  function handleDownloadAudio(audio: AudioRecord) {
+    const audioUrl = createAudioUrl(audio.audioBase64);
+    const link = document.createElement("a");
+    link.href = audioUrl;
+
+    const signatureMap: { [key: string]: string } = {
+      "T2dnUw": ".ogg",
+      "SUQz": ".mp3",
+      "/+M": ".mp3",
+      "AAAA": ".mp3",
+      "UklGRg": ".wav",
+      "GkXfo": ".webm",
+      "AAAAGG": ".mp4",
+      "AAAAHG": ".mp4",
+    };
+
+    let extension = ".mp3";
+    const base64Start = audio.audioBase64.substring(0, 6);
+
+    for (const signature in signatureMap) {
+      if (base64Start.startsWith(signature)) {
+        extension = signatureMap[signature];
+        break;
+      }
+    }
+
+    if (
+      extension === ".mp3" &&
+      !Object.keys(signatureMap).some((sig) => base64Start.startsWith(sig))
+    ) {
+      const mimeType = audioUrl.split(";")[0].split(":")[1];
+      const mimeMap: { [key: string]: string } = {
+        "wav": ".wav",
+        "ogg": ".ogg",
+        "webm": ".webm",
+        "mp4": ".mp4",
+      };
+      const found = Object.entries(mimeMap).find(([key]) =>
+        mimeType.includes(key)
+      );
+      if (found) extension = found[1];
+    }
+
+    const fileName = audio.description
+      ? `${audio.description
+          .replace(/[^a-z0-9]/gi, "_")
+          .toLowerCase()}${extension}`
+      : `audio_${audio.id}${extension}`;
+
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -137,14 +181,13 @@ export function AudiosContent({
         </Button>
       </div>
 
-      {/* Visualização para Desktop */}
       <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[1%]">Áudio</TableHead>
               <TableHead>Descrição</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead className="w-[150px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -168,7 +211,7 @@ export function AudiosContent({
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={(e) => {
+                        onClick={() => {
                           const audioElement = document.getElementById(
                             `audio-${audio.id}`
                           ) as HTMLAudioElement;
@@ -200,6 +243,14 @@ export function AudiosContent({
                       <Button
                         variant="outline"
                         size="icon"
+                        onClick={() => handleDownloadAudio(audio)}
+                        title="Baixar áudio"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => setEditingAudio(audio)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -221,7 +272,6 @@ export function AudiosContent({
         </Table>
       </div>
 
-      {/* Visualização para Mobile */}
       <div className="md:hidden space-y-4">
         {isLoading ? (
           <div className="text-center py-10">Carregando...</div>
@@ -235,7 +285,7 @@ export function AudiosContent({
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={(e) => {
+                    onClick={() => {
                       const audioElement = document.getElementById(
                         `audio-${audio.id}`
                       ) as HTMLAudioElement;
@@ -261,6 +311,14 @@ export function AudiosContent({
                   </audio>
                 </div>
                 <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDownloadAudio(audio)}
+                    title="Baixar áudio"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="icon"
