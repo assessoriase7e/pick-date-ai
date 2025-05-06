@@ -1,3 +1,4 @@
+import { allowedGoogleMapsDomains } from "@/mocked/mapsLinks";
 import * as z from "zod";
 
 const businessHourSchema = z.object({
@@ -18,7 +19,7 @@ export const profileSchema = z.object({
     .string()
     .url("URL inválida")
     .refine(
-      (url) => url.includes("google.com/maps"),
+      (url) => allowedGoogleMapsDomains.some((domain) => url.includes(domain)),
       "URL deve ser um link do Google Maps"
     ),
   documentNumber: z
@@ -26,7 +27,6 @@ export const profileSchema = z.object({
     .min(1, "CPF/CNPJ é obrigatório")
     .refine((value) => {
       const numbers = value.replace(/\D/g, "");
-
       return numbers.length === 11 || numbers.length === 14;
     }, "CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos"),
 });
