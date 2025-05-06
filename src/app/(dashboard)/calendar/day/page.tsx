@@ -29,8 +29,9 @@ export default async function DaySchedulePage({
 
   // Buscar agendamentos do dia
   const response = await getAppointmentsByCalendarAndDate(calendarId, date);
-  const allAppointments = response.success && response.data ? response.data : [];
-  
+  const allAppointments =
+    response.success && response.data ? response.data : [];
+
   // Filtrar agendamentos cancelados
   const appointments = allAppointments.filter(
     (appointment) => appointment.status !== "canceled"

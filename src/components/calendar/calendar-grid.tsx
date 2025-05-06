@@ -29,6 +29,8 @@ export function CalendarGrid({
   const today = moment();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = window.location.pathname;
+  const isSharedCalendar = pathname.includes('shared-calendar');
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -156,38 +158,36 @@ export function CalendarGrid({
   };
 
   const handleDayClick = (date: Date) => {
-    // Ativar o loading antes de redirecionar
     setIsLoading(true);
-
-    // Redirecionar para a página de agendamentos do dia
-    router.push(
-      `/calendar/day?calendarId=${calendarId}&date=${date.toISOString()}`
-    );
+    
+    const baseUrl = isSharedCalendar ? `/shared-calendar/${calendarId}` : '/calendar/day';
+    const params = new URLSearchParams();
+    params.set('calendarId', calendarId);
+    params.set('date', date.toISOString());
+    
+    router.push(`${baseUrl}?${params.toString()}`);
   };
 
   const handleYearChange = (year: string) => {
     const newYear = parseInt(year);
     setSelectedYear(newYear);
-
-    // Ativar o loading antes de redirecionar
     setIsLoading(true);
 
     const newDate = new Date(newYear, currentDate.getMonth(), 1);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('date', newDate.toISOString());
 
-    router.push(
-      `/calendar?calendarId=${calendarId}&date=${newDate.toISOString()}`
-    );
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const handleMonthClick = (monthIndex: number) => {
-    // Ativar o loading antes de redirecionar
     setIsLoading(true);
 
     const newDate = new Date(currentDate.getFullYear(), monthIndex, 1);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('date', newDate.toISOString());
 
-    router.push(
-      `/calendar?calendarId=${calendarId}&date=${newDate.toISOString()}`
-    );
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const commonProps = {
