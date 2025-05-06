@@ -62,12 +62,15 @@ export function ServiceForm({
     useState<string>("none");
   const isEditing = !!initialData;
 
+  // Adicione um console.log para debug
+  console.log("Collaborators recebidos:", collaborators);
+
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: initialData?.name || "",
       price: initialData?.price || null,
-      availableDays: initialData?.availableDays || ([] as Collaborator[]),
+      availableDays: initialData?.availableDays || [],
       notes: initialData?.notes || "",
       collaboratorIds:
         initialData?.serviceCollaborators?.map(
@@ -142,9 +145,7 @@ export function ServiceForm({
     }
   };
 
-  const availableCollaborators = collaborators.filter(
-    (c) => !selectedCollaborators.some((sc) => sc.id === c.id)
-  );
+  const availableCollaborators = collaborators || [];
 
   return (
     <Form {...form}>
@@ -276,11 +277,25 @@ export function ServiceForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Selecione...</SelectItem>
-                  {availableCollaborators.map((collaborator) => (
-                    <SelectItem key={collaborator.id} value={collaborator.id}>
-                      {collaborator.name}
+                  {availableCollaborators.length > 0 ? (
+                    availableCollaborators
+                      .filter(
+                        (c) =>
+                          !selectedCollaborators.some((sc) => sc.id === c.id)
+                      )
+                      .map((collaborator) => (
+                        <SelectItem
+                          key={collaborator.id}
+                          value={collaborator.id}
+                        >
+                          {collaborator.name}
+                        </SelectItem>
+                      ))
+                  ) : (
+                    <SelectItem value="no-options" disabled>
+                      Nenhum profissional disponível
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <Button

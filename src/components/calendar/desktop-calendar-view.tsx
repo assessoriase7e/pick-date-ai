@@ -4,19 +4,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CalendarViewProps } from "./calendar-types";
 import { CalendarDayCell } from "./calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
+import IsTableLoading from "../isTableLoading";
 
 interface DesktopCalendarViewProps extends CalendarViewProps {
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
+  isLoading?: boolean;
 }
 
 export function DesktopCalendarView({
   currentDate,
-  selectedDate,
   calendarDays,
-  calendarId,
-  initialAppointments,
   goToPreviousMonth,
   goToNextMonth,
   goToToday,
@@ -27,17 +26,20 @@ export function DesktopCalendarView({
   onTouchStart,
   onTouchMove,
   onTouchEnd,
+  isLoading = false,
 }: DesktopCalendarViewProps) {
   const calendarRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
       ref={calendarRef}
-      className="flex flex-col h-full border rounded-lg"
+      className="flex flex-col h-full border rounded-lg relative"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      {isLoading && <IsTableLoading isPageChanging={isLoading} />}
+
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
         <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left">

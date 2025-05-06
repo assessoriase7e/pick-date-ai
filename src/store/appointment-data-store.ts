@@ -25,12 +25,13 @@ export const useAppointmentDataStore = create<AppointmentDataState>((set) => ({
   fetchClients: async () => {
     set({ isLoadingClients: true, error: null });
     try {
-      const response = await getClients();
+      const response = await getClients({ limit: 1000, page: 1 });
+
       if (response.success && response.data) {
-        set({ clients: response.data.clients, isLoadingClients: false });
+        set({ clients: response.data, isLoadingClients: false });
       } else {
         set({
-          error: response.error || "Erro ao carregar clientes",
+          error: "Erro ao carregar clientes",
           isLoadingClients: false,
         });
       }

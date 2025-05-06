@@ -216,8 +216,8 @@ export function useAppointmentForm({
 
   return {
     form,
-    clients,
-    services,
+    clients: clients || [],
+    services: services || [],
     isLoading,
     isDeleting,
     isLoadingClients,

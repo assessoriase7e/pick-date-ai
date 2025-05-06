@@ -8,7 +8,6 @@ import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
-import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { Collaborator } from "@prisma/client";
 import { Separator } from "../ui/separator";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -24,19 +23,13 @@ export function DayScheduleContent({
   calendarId,
   date,
   collaborator,
-  appointments: initialAppointments,
+  appointments,
 }: DayScheduleContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentFullData | null>(null);
-  const [appointments, setAppointments] = useState<AppointmentFullData[]>(
-    initialAppointments.map((appointment) => ({
-      ...appointment,
-      startTime: new Date(appointment.startTime),
-      endTime: new Date(appointment.endTime),
-    }))
-  );
+
   const [showForm, setShowForm] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -96,17 +89,6 @@ export function DayScheduleContent({
 
   const handleFormSuccess = async () => {
     try {
-      const response = await getAppointmentsByCalendarAndDate(calendarId, date);
-      if (response.success && response.data) {
-        setAppointments(
-          response.data.map((appointment) => ({
-            ...appointment,
-            startTime: new Date(appointment.startTime),
-            endTime: new Date(appointment.endTime),
-          }))
-        );
-      }
-
       const params = new URLSearchParams(searchParams.toString());
       params.delete("hour");
       params.delete("startTime");

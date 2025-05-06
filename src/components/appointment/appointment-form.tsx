@@ -13,6 +13,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
 import { SelectWithScroll } from "../calendar/select-with-scroll";
+import { useAppointmentDataStore } from "@/store/appointment-data-store";
 
 interface AppointmentFormProps {
   date: Date;
@@ -39,14 +40,10 @@ export function AppointmentForm({
 }: AppointmentFormProps) {
   const {
     form,
-    clients,
-    services,
     isLoading,
     isDeleting,
     isLoadingClients,
-    isLoadingServices,
     isEditing,
-    isServiceAvailableOnDay,
     onSubmit,
     handleDelete,
   } = useAppointmentForm({
@@ -58,6 +55,8 @@ export function AppointmentForm({
     initialStartTime,
     initialEndTime,
   });
+
+  const { clients, services } = useAppointmentDataStore();
 
   return (
     <Form {...form}>
@@ -76,8 +75,12 @@ export function AppointmentForm({
                   getOptionLabel={(option) => option.fullName}
                   getOptionValue={(option) => String(option.id)}
                   label="Cliente"
-                  placeholder="Selecione um cliente"
-                  options={clients}
+                  placeholder={
+                    isLoadingClients
+                      ? "Carregando clientes..."
+                      : "Selecione um cliente"
+                  }
+                  options={clients || []}
                   value={field.value}
                   onChange={field.onChange}
                   error={form.formState.errors.clientId?.message}
@@ -157,15 +160,7 @@ export function AppointmentForm({
           />
         </div>
 
-        <div className="flex justify-end w-full">
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? (
-              <>Salvando...</>
-            ) : (
-              <>{isEditing ? "Atualizar" : "Agendar"}</>
-            )}
-          </Button>
-
+        <div className="flex justify-end w-full gap-2">
           {isEditing && (
             <Button
               type="button"
@@ -176,6 +171,14 @@ export function AppointmentForm({
               {isDeleting ? "Cancelando..." : "Cancelar Agendamento"}
             </Button>
           )}
+
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>Salvando...</>
+            ) : (
+              <>{isEditing ? "Atualizar" : "Agendar"}</>
+            )}
+          </Button>
         </div>
       </form>
     </Form>

@@ -220,6 +220,7 @@ export function CalendarGrid({
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          isLoading={isLoading}
         />
       </span>
     </div>

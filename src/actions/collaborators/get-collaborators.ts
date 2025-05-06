@@ -72,13 +72,15 @@ export async function getCollaborators({
     const [collaborators, total] = await Promise.all([
       prisma.collaborator.findMany({
         where: whereCondition,
-        include: {
-          ServiceCollaborator: {
-            include: {
-              service: true
+        include: serviceId
+          ? {
+              ServiceCollaborator: {
+                include: {
+                  service: true,
+                },
+              },
             }
-          },
-        },
+          : undefined,
         skip,
         take: limit,
         orderBy,

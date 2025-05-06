@@ -39,11 +39,18 @@ export function SelectWithScroll<T>({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Add a null check when filtering options
+  // In the useMemo for filteredOptions, ensure options is an array before filtering
+  
   const filteredOptions = useMemo(() => {
-    return options.filter((option) =>
-      getOptionLabel(option).toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, options, getOptionLabel]);
+    if (!options || !Array.isArray(options)) return [];
+    
+    return options.filter((option) => {
+      if (!searchTerm) return true;
+      const label = getOptionLabel(option).toLowerCase();
+      return label.includes(searchTerm.toLowerCase());
+    });
+  }, [options, searchTerm, getOptionLabel]);
 
   return (
     <div className="flex flex-col">
