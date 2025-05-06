@@ -67,7 +67,7 @@ export function AppointmentForm({
           name="clientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cliente</FormLabel>
+              <FormLabel></FormLabel>
               <SelectWithScroll
                 getOptionLabel={(option) => option.fullName}
                 getOptionValue={(option) => String(option.id)}
@@ -88,12 +88,12 @@ export function AppointmentForm({
           name="serviceId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Serviço</FormLabel>
+              <FormLabel></FormLabel>
               <SelectWithScroll
                 getOptionLabel={(option) => option.name}
                 getOptionValue={(option) => String(option.id)}
-                label="Cliente"
-                placeholder="Selecione um cliente"
+                label="Serviço"
+                placeholder="Selecione um serviço"
                 options={services}
                 value={field.value}
                 onChange={field.onChange}
