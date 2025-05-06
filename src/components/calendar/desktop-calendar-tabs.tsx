@@ -1,6 +1,14 @@
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2 } from "lucide-react";
 import { CalendarFullData } from "@/types/calendar";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
 
 interface DesktopCalendarTabsProps {
   calendars: CalendarFullData[];
@@ -10,6 +18,7 @@ interface DesktopCalendarTabsProps {
   setCalendarIdQueryParam: (id: string) => void;
   openEditModal: (calendar: CalendarFullData) => void;
   openDeleteModal: (calendar: CalendarFullData) => void;
+  selectMode?: boolean;
 }
 
 export function DesktopCalendarTabs({
@@ -20,7 +29,52 @@ export function DesktopCalendarTabs({
   setCalendarIdQueryParam,
   openEditModal,
   openDeleteModal,
+  selectMode = false,
 }: DesktopCalendarTabsProps) {
+  const isMobile = useIsMobile();
+  const shouldUseSelectMode = selectMode || isMobile;
+
+  if (shouldUseSelectMode) {
+    return (
+      <div className="w-full mb-4">
+        <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione um calendário" />
+          </SelectTrigger>
+          <SelectContent>
+            {calendars.map((calendar) => (
+              <SelectItem 
+                key={calendar.id} 
+                value={calendar.id}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>{calendar.name} | ({calendar.collaborator?.name})</span>
+                  <div className="flex items-center space-x-1">
+                    <Edit 
+                      className="h-4 w-4 cursor-pointer" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(calendar);
+                      }}
+                    />
+                    <Trash2 
+                      className="h-4 w-4 cursor-pointer" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteModal(calendar);
+                      }}
+                    />
+                  </div>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
   return (
     <TabsList className="hidden lg:flex w-full h-16 justify-start overflow-x-auto overflow-y-hidden">
       {calendars.map((calendar: CalendarFullData) => (

@@ -15,7 +15,7 @@ export function CalendarHeader({ setOpen, calendarId }: CalendarHeaderProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between items-center mb-2 lg:mb-8">
+    <div className="flex flex-col lg:flex-row justify-between items-center mb-2 lg:mb-8 w-full">
       <h1 className="lg:text-3xl mb-2 lg:mb-0 lg:mr-2 font-bold">
         Agendamento
       </h1>
