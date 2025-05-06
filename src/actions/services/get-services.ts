@@ -25,23 +25,20 @@ type SortOptions = {
   direction?: "asc" | "desc";
 };
 
-type FilterOptions = {
-  name?: string;
-  collaboratorId?: string;
-};
-
 type GetServicesProps = {
   where?: Prisma.ServiceWhereInput;
   page?: number;
   limit?: number;
   sort?: SortOptions;
+  collaboratorId?: string;
 };
 
 export async function getServices({
   page = 1,
-  limit = 20,
+  limit = 10,
   sort,
   where,
+  collaboratorId,
 }: GetServicesProps): Promise<GetServicesResponse> {
   const { userId } = await auth();
   if (!userId) {
@@ -62,9 +59,39 @@ export async function getServices({
       };
     }
 
+    // Construir a query where
+    const finalWhere: Prisma.ServiceWhereInput = { ...where, userId };
+
+    // Se tiver query de nome com contains
+    if (where?.name && typeof where.name === "string") {
+      finalWhere.name = {
+        contains: where.name,
+        mode: "insensitive",
+      };
+    }
+
+    let whereCondition: Prisma.ServiceWhereInput = finalWhere;
+
+    // Se tiver um collaboratorId, buscar tanto na relação direta quanto em ServiceCollaborator
+    if (collaboratorId) {
+      whereCondition = {
+        ...finalWhere,
+        OR: [
+          { collaboratorId },
+          {
+            serviceCollaborators: {
+              some: {
+                collaboratorId,
+              },
+            },
+          },
+        ],
+      };
+    }
+
     const [services, total] = await Promise.all([
       prisma.service.findMany({
-        where,
+        where: whereCondition,
         orderBy,
         skip,
         take: limit,
@@ -78,24 +105,15 @@ export async function getServices({
         },
       }),
       prisma.service.count({
-        where,
+        where: whereCondition,
       }),
     ]);
-
-    let filteredServices = services;
-    if (where?.collaboratorId) {
-      filteredServices = services.filter((service) => {
-        return service.serviceCollaborators.some(
-          (sc) => sc.collaborator.id === where.collaboratorId
-        );
-      });
-    }
 
     const totalPages = Math.ceil(total / limit);
 
     return {
       success: true,
-      data: filteredServices as ServiceFullData[],
+      data: services as ServiceFullData[],
       pagination: {
         totalPages,
         currentPage: page,

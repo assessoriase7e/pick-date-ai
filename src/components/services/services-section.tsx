@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -54,6 +54,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { revalidatePathAction } from "@/actions/revalidate-path";
+import IsTableLoading from "../isTableLoading";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface ServicesSectionProps {
   services: ServiceFullData[];
@@ -62,78 +65,91 @@ interface ServicesSectionProps {
     totalPages: number;
     currentPage: number;
   };
+  initialFilters?: {
+    searchTerm: string;
+    collaboratorFilter: string;
+    sortField: SortField;
+    sortDirection: SortDirection;
+  }
 }
 
 type SortField = "name" | "price" | "durationMinutes" | "commission";
 type SortDirection = "asc" | "desc";
 
 export function ServicesSection({
-  services: initialServices,
+  services,
   collaborators,
-  pagination,
+  pagination: initialPagination,
+  initialFilters,
 }: ServicesSectionProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deletingService, setDeletingService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageChanging, setIsPageChanging] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     show: boolean;
     action: () => Promise<void>;
     message: string;
   }>({ show: false, action: async () => {}, message: "" });
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [collaboratorFilter, setCollaboratorFilter] = useState("all");
-  const [sortField, setSortField] = useState<SortField>("name");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [services, setServices] = useState<ServiceFullData[]>(initialServices);
+  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || "");
+  const [collaboratorFilter, setCollaboratorFilter] = useState(initialFilters?.collaboratorFilter || "all");
+  const [sortField, setSortField] = useState<SortField>(initialFilters?.sortField || "name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(initialFilters?.sortDirection || "asc");
+  const [pagination, setPagination] = useState(initialPagination);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Sincronizar o estado interno com as props
   useEffect(() => {
-    let filteredServices = [...initialServices];
+    setPagination(initialPagination);
+  }, [initialPagination]);
 
-    if (searchTerm) {
-      filteredServices = filteredServices.filter(
-        (service) =>
-          service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          service.price.toString().includes(searchTerm)
-      );
+  // Atualizar a URL quando os filtros mudarem
+  useEffect(() => {
+    if (debouncedSearchTerm === initialFilters?.searchTerm && 
+        collaboratorFilter === initialFilters?.collaboratorFilter &&
+        sortField === initialFilters?.sortField &&
+        sortDirection === initialFilters?.sortDirection) {
+      return;
     }
 
-    if (collaboratorFilter && collaboratorFilter !== "all") {
-      filteredServices = filteredServices.filter((service) => {
-        if (service.collaborator?.id === collaboratorFilter) {
-          return true;
-        }
+    updateUrl(1);
+  }, [debouncedSearchTerm, collaboratorFilter, sortField, sortDirection]);
 
-        return service.serviceCollaborators?.some(
-          (sc) => sc.collaborator?.id === collaboratorFilter
-        );
-      });
+  const updateUrl = (page: number) => {
+    const params = new URLSearchParams();
+    
+    if (page !== 1) {
+      params.set('page', String(page));
     }
-
-    filteredServices.sort((a, b) => {
-      let valueA = a[sortField];
-      let valueB = b[sortField];
-
-      if (typeof valueA === "string") {
-        valueA = valueA.toLowerCase();
-        valueB = typeof valueB === "string" ? valueB.toLowerCase() : valueB;
-      }
-
-      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
-      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    setServices(filteredServices);
-  }, [
-    initialServices,
-    searchTerm,
-    collaboratorFilter,
-    sortField,
-    sortDirection,
-  ]);
+    
+    if (debouncedSearchTerm) {
+      params.set('search', debouncedSearchTerm);
+    }
+    
+    if (collaboratorFilter !== 'all') {
+      params.set('collaborator', collaboratorFilter);
+    }
+    
+    if (sortField !== 'name') {
+      params.set('sortField', sortField);
+    }
+    
+    if (sortDirection !== 'asc') {
+      params.set('sortDirection', sortDirection);
+    }
+    
+    const query = params.toString();
+    const url = `${pathname}${query ? `?${query}` : ''}`;
+    
+    setIsPageChanging(true);
+    revalidatePathAction("/services");
+    router.push(url);
+  };
 
   const handleEdit = (service: any) => {
     setEditingService(service);
@@ -148,7 +164,6 @@ export function ServicesSection({
       if (result.success) {
         toast.success("Serviço excluído com sucesso");
         setDeletingService(null);
-        router.refresh();
       } else {
         toast.error(result.error || "Erro ao excluir serviço");
       }
@@ -162,12 +177,18 @@ export function ServicesSection({
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingService(null);
-    router.refresh();
   };
 
   const handlePageChange = (page: number) => {
-    router.push(`/services?page=${page}`);
+    updateUrl(page);
   };
+
+  // Efeito para detectar quando a página foi totalmente carregada
+  useEffect(() => {
+    if (isPageChanging) {
+      setIsPageChanging(false);
+    }
+  }, [services]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -262,7 +283,7 @@ export function ServicesSection({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       <div className="flex justify-between items-center">
         <div className="flex flex-col sm:flex-row gap-2 w-full max-w-lg">
           <div className="relative w-full">
@@ -297,7 +318,8 @@ export function ServicesSection({
       </div>
 
       {/* Visualização Desktop */}
-      <div className="rounded-md border hidden md:block">
+      <div className="rounded-md border hidden md:block relative">
+        <IsTableLoading isPageChanging={isPageChanging} />
         <Table>
           <TableHeader>
             <TableRow>
@@ -425,6 +447,7 @@ export function ServicesSection({
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         onPageChange={handlePageChange}
+        isLoading={isLoading || isPageChanging}
       />
 
       <ServiceModal

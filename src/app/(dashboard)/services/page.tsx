@@ -6,17 +6,47 @@ import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 interface ServicesPageProps {
   searchParams: Promise<{
     page?: string;
+    search?: string;
+    collaborator?: string;
+    sortField?: string;
+    sortDirection?: string;
   }>;
 }
 
 export default async function ServicesPage({
   searchParams,
 }: ServicesPageProps) {
-  const { page } = await searchParams;
+  const { page, search, collaborator, sortField, sortDirection } =
+    await searchParams;
   const pageParam = Number(page) || 1;
 
+  const where: any = {};
+
+  if (search) {
+    where.name = {
+      contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  const sort = sortField
+    ? {
+        field: sortField,
+        direction: (sortDirection === "desc" ? "desc" : "asc") as
+          | "desc"
+          | "asc",
+      }
+    : undefined;
+
   const [servicesResult, collaboratorsResult] = await Promise.all([
-    getServices({ page: pageParam, limit: 30 }),
+    getServices({
+      page: pageParam,
+      limit: 10,
+      where,
+      sort,
+      collaboratorId:
+        collaborator && collaborator !== "all" ? collaborator : undefined,
+    }),
     getCollaborators(1, 100),
   ]);
 
@@ -44,6 +74,12 @@ export default async function ServicesPage({
           services={services}
           collaborators={collaborators}
           pagination={pagination}
+          initialFilters={{
+            searchTerm: search || "",
+            collaboratorFilter: collaborator || "all",
+            sortField: (sortField as any) || "name",
+            sortDirection: (sortDirection as any) || "asc",
+          }}
         />
       </div>
     </div>
