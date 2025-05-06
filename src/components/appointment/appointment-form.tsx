@@ -61,59 +61,27 @@ export function AppointmentForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="clientId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel></FormLabel>
-              <SelectWithScroll
-                getOptionLabel={(option) => option.fullName}
-                getOptionValue={(option) => String(option.id)}
-                label="Cliente"
-                placeholder="Selecione um cliente"
-                options={clients}
-                value={field.value}
-                onChange={field.onChange}
-                error={form.formState.errors.clientId?.message}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="serviceId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel></FormLabel>
-              <SelectWithScroll
-                getOptionLabel={(option) => option.name}
-                getOptionValue={(option) => String(option.id)}
-                label="Serviço"
-                placeholder="Selecione um serviço"
-                options={services}
-                value={field.value}
-                onChange={field.onChange}
-                error={form.formState.errors.clientId?.message}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 flex flex-col justify-between h-full"
+      >
+        <div className="flex-1">
           <FormField
             control={form.control}
-            name="startTime"
+            name="clientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Horário de Início</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
+                <FormLabel></FormLabel>
+                <SelectWithScroll
+                  getOptionLabel={(option) => option.fullName}
+                  getOptionValue={(option) => String(option.id)}
+                  label="Cliente"
+                  placeholder="Selecione um cliente"
+                  options={clients}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={form.formState.errors.clientId?.message}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -121,12 +89,67 @@ export function AppointmentForm({
 
           <FormField
             control={form.control}
-            name="endTime"
+            name="serviceId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Horário de Término</FormLabel>
+                <FormLabel></FormLabel>
+                <SelectWithScroll
+                  getOptionLabel={(option) => option.name}
+                  getOptionValue={(option) => String(option.id)}
+                  label="Serviço"
+                  placeholder="Selecione um serviço"
+                  options={services}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={form.formState.errors.clientId?.message}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="startTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Horário de Início</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="endTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Horário de Término</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Observações</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} />
+                  <Textarea
+                    placeholder="Adicione observações sobre o agendamento"
+                    className="resize-none"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -134,26 +157,8 @@ export function AppointmentForm({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Adicione observações sobre o agendamento"
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-between mt-6">
-          <Button type="submit" disabled={isLoading}>
+        <div className="flex justify-end w-full">
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (
               <>Salvando...</>
             ) : (
