@@ -149,31 +149,6 @@ export function DayScheduleContent({
     });
   };
 
-  const formatSelectedTime = () => {
-    if (!startTime || !endTime) return "";
-    return `${startTime}`;
-  };
-
-  const refreshAppointments = async () => {
-    try {
-      const response = await getAppointmentsByCalendarAndDate(calendarId, date);
-      if (response.success && response.data) {
-        // Filtrar agendamentos cancelados
-        const activeAppointments = response.data
-          .filter((appointment) => appointment.status !== "canceled")
-          .map((appointment) => ({
-            ...appointment,
-            startTime: new Date(appointment.startTime),
-            endTime: new Date(appointment.endTime),
-          }));
-        setAppointments(activeAppointments);
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar agendamentos:", error);
-      toast.error("Erro ao atualizar agendamentos");
-    }
-  };
-
   return (
     <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
       <Button

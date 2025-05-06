@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { Calendar, Collaborator } from "@prisma/client";
 import { listCollaborators } from "@/actions/collaborators/getMany";
-import { ComboBoxResponsiveField } from "./combo-box-responsive-field";
+import { SelectWithScroll } from "./select-with-scroll";
 
 interface CalendarFormProps {
   onSubmit: (values: CalendarFormValues) => Promise<void>;
@@ -88,7 +88,7 @@ export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
           control={form.control}
           name="collaboratorId"
           render={({ field }) => (
-            <ComboBoxResponsiveField
+            <SelectWithScroll
               label="Profissional"
               placeholder="Selecione um profissional"
               options={collaborators}

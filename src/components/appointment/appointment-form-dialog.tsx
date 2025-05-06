@@ -44,7 +44,7 @@ export function AppointmentFormDialog({
           date={date}
           appointment={appointment || undefined}
           onSuccess={onSuccess}
-          initialStartTime={initialStartTime}
+          initialStartTime={initialStartTime || undefined}
           calendarId={calendarId}
           checkTimeConflict={checkTimeConflict}
         />

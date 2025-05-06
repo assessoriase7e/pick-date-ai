@@ -8,17 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { AppointmentFullData } from "@/types/calendar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
+import { SelectWithScroll } from "../calendar/select-with-scroll";
 
 interface AppointmentFormProps {
   date: Date;
@@ -74,32 +68,16 @@ export function AppointmentForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cliente</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
+              <SelectWithScroll
+                getOptionLabel={(option) => option.fullName}
+                getOptionValue={(option) => String(option.id)}
+                label="Cliente"
+                placeholder="Selecione um cliente"
+                options={clients}
                 value={field.value}
-                disabled={isLoadingClients}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    {isLoadingClients ? (
-                      <div className="flex items-center justify-center w-full">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <SelectValue placeholder="Selecione um cliente" />
-                    )}
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={field.onChange}
+                error={form.formState.errors.clientId?.message}
+              />
               <FormMessage />
             </FormItem>
           )}
@@ -111,43 +89,16 @@ export function AppointmentForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Serviço</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
+              <SelectWithScroll
+                getOptionLabel={(option) => option.name}
+                getOptionValue={(option) => String(option.id)}
+                label="Cliente"
+                placeholder="Selecione um cliente"
+                options={services}
                 value={field.value}
-                disabled={isLoadingServices}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    {isLoadingServices ? (
-                      <div className="flex items-center justify-center w-full">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <SelectValue placeholder="Selecione um serviço" />
-                    )}
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {services.map((service) => {
-                    const isAvailable = isServiceAvailableOnDay(service);
-                    return (
-                      <SelectItem
-                        key={service.id}
-                        value={service.id}
-                        disabled={!isAvailable}
-                        className={
-                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
-                        }
-                      >
-                        {service.name}{" "}
-                        {!isAvailable && "(Indisponível neste dia)"}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+                onChange={field.onChange}
+                error={form.formState.errors.clientId?.message}
+              />
               <FormMessage />
             </FormItem>
           )}
