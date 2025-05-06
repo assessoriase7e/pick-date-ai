@@ -1,7 +1,7 @@
 "use client";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { CalendarGrid } from "./calendar-grid";
+import { PublicCalendarGrid } from "./public-calendar-grid";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter } from "next/navigation";
 
@@ -44,12 +44,6 @@ export function SharedCalendarView({
     router.push(`?${searchParams.toString()}`);
   };
 
-  const openDayDetails = (date: Date) => {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("selectedDay", date.toISOString());
-    router.push(`?${searchParams.toString()}`);
-  };
-
   return (
     <div className="container mx-auto py-8 px-4 h-svh flex flex-col justify-center w-full items-center">
       <div className="mb-8 text-center w-full">
@@ -62,14 +56,14 @@ export function SharedCalendarView({
       </div>
 
       <div className="max-w-4xl mx-auto w-full">
-        <CalendarGrid
+        <PublicCalendarGrid
           currentDate={currentDate}
           goToPreviousMonth={goToPreviousMonth}
           goToNextMonth={goToNextMonth}
           goToToday={goToToday}
           selectedDate={selectedDay}
-          openDayDetails={openDayDetails}
           initialAppointments={initialAppointments}
+          calendarId={calendar.id}
         />
       </div>
     </div>

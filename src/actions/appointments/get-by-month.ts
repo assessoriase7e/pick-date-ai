@@ -14,7 +14,8 @@ type GetAppointmentsByMonthReturn = {
 export async function getAppointmentsByMonth(
   date: Date,
   calendarId: string,
-  requireAuth: boolean = true
+  requireAuth: boolean = true,
+  includeCanceled: boolean = false
 ): Promise<GetAppointmentsByMonthReturn> {
   let userId: string | undefined = undefined;
   if (requireAuth) {
@@ -49,6 +50,10 @@ export async function getAppointmentsByMonth(
 
       if (userId && userId.trim() !== "") {
         whereClause.userId = userId;
+      }
+
+      if (!includeCanceled) {
+        whereClause.status = { not: "canceled" };
       }
 
       const appointments = await prisma.appointment.findMany({

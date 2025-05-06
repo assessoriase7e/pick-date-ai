@@ -2,7 +2,7 @@
 
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
-import { SharedCalendarView } from "@/components/calendar/shared-calendar-view";
+import { SharedCalendarView } from "@/components/public-calendar/shared-calendar-view";
 import { notFound } from "next/navigation";
 import { getCalendarById } from "@/actions/calendars/getById";
 
