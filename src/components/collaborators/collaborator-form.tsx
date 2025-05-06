@@ -28,11 +28,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { collaboratorSchema } from "@/validators/collaborator";
 import { collabRoles } from "@/mocked/collabs";
 
-interface Service {
-  id: string;
-  name: string;
-}
-
 interface CollaboratorFormProps {
   initialData?: any;
   onSuccess?: () => void;

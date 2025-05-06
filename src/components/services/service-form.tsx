@@ -62,9 +62,6 @@ export function ServiceForm({
     useState<string>("none");
   const isEditing = !!initialData;
 
-  // Adicione um console.log para debug
-  console.log("Collaborators recebidos:", collaborators);
-
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {

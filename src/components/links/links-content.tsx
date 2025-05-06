@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import {
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
 import { deleteLink } from "@/actions/links/delete";
-import { listLinks } from "@/actions/links/getMany";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
@@ -30,7 +28,11 @@ type LinksContentProps = {
   currentPage: number;
 };
 
-export function LinksContent({ links, totalPages, currentPage }: LinksContentProps) {
+export function LinksContent({
+  links,
+  totalPages,
+  currentPage,
+}: LinksContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = currentPage || Number(searchParams.get("page") || "1");

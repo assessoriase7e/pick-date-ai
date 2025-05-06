@@ -23,7 +23,6 @@ interface MobileCalendarViewProps extends CalendarViewProps {
 export function MobileCalendarView({
   currentDate,
   calendarDays,
-  goToToday,
   handleDayClick,
   isSelected,
   getAppointmentsForDay,

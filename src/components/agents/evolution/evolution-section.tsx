@@ -72,7 +72,7 @@ export function EvolutionSection({
     setIsQRModalOpen(false);
   };
 
-  const refreshStatus = async (instance: EvolutionInstance) => {
+  const refreshStatus = async () => {
     revalidatePathAction("/agents");
   };
 
@@ -129,7 +129,7 @@ export function EvolutionSection({
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => refreshStatus(instance)}
+                        onClick={() => refreshStatus()}
                       >
                         <RefreshCw className={`h-4 w-4`} />
                       </Button>

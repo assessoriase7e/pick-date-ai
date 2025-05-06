@@ -49,7 +49,6 @@ export function PublicDayScheduleGrid({
         appointmentEnd.isAfter(currentHourStart)
       );
     });
-    console.log("Hour:", hour, "Appointments:", result);
     return result;
   };
 
