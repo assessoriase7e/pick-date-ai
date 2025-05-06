@@ -47,7 +47,10 @@ export default async function ServicesPage({
       collaboratorId:
         collaborator && collaborator !== "all" ? collaborator : undefined,
     }),
-    getCollaborators(1, 100),
+    getCollaborators({
+      page: 1,
+      limit: 100,
+    }),
   ]);
 
   const pagination =
