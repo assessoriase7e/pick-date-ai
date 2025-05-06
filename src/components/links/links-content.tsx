@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
@@ -22,93 +22,71 @@ import { listLinks } from "@/actions/links/getMany";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
+import { useUser } from "@clerk/nextjs";
 
-export function LinksContent() {
+type LinksContentProps = {
+  links: Link[];
+  totalPages: number;
+  currentPage: number;
+};
+
+export function LinksContent({ links, totalPages, currentPage }: LinksContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+  const page = currentPage || Number(searchParams.get("page") || "1");
 
-  const [links, setLinks] = useState<any[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<any | null>(null);
   const [deletingLink, setDeletingLink] = useState<any | null>(null);
 
-  // Fetch links using server action
-  useEffect(() => {
-    async function fetchLinks() {
-      setIsLoading(true);
-      try {
-        const result = await listLinks(page, 10);
-        if (result.success && result.data) {
-          setLinks(result.data.links);
-          setTotalPages(result.data.totalPages);
-        } else {
-          toast.error("Erro ao carregar links");
-        }
-      } catch (error) {
-        console.error("Error fetching links:", error);
-        toast.error("Erro ao carregar links");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchLinks();
-  }, [page]);
+  const { user } = useUser();
 
   async function handleCreateLink(data: any) {
     try {
+      setIsLoading(true);
       const result = await createLink(data);
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      // Refresh links after creating
-      const linksResult = await listLinks(page, 10);
-      if (linksResult.success && linksResult.data) {
-        setLinks(linksResult.data.links);
-        setTotalPages(linksResult.data.totalPages);
-      }
-
+      router.refresh();
       setIsCreateModalOpen(false);
       toast("Link criado com sucesso!");
     } catch (error) {
       console.error("Error creating link:", error);
       toast.error("Erro ao criar link");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handleUpdateLink(data: any) {
     try {
+      setIsLoading(true);
       if (!editingLink) return;
 
-      const result = await updateLink(editingLink.id, data);
+      const result = await updateLink(editingLink.id, user?.id!, data);
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      // Refresh links after updating
-      const linksResult = await listLinks(page, 10);
-      if (linksResult.success && linksResult.data) {
-        setLinks(linksResult.data.links);
-        setTotalPages(linksResult.data.totalPages);
-      }
-
+      router.refresh();
       setEditingLink(null);
       toast("Link atualizado com sucesso!");
     } catch (error) {
       console.error("Error updating link:", error);
       toast.error("Erro ao atualizar link");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handleDeleteLink() {
     try {
+      setIsLoading(true);
       if (!deletingLink) return;
 
       const result = await deleteLink(deletingLink.id);
@@ -117,18 +95,14 @@ export function LinksContent() {
         throw new Error(result.error);
       }
 
-      // Refresh links after deleting
-      const linksResult = await listLinks(page, 10);
-      if (linksResult.success && linksResult.data) {
-        setLinks(linksResult.data.links);
-        setTotalPages(linksResult.data.totalPages);
-      }
-
+      router.refresh();
       setDeletingLink(null);
       toast("Link excluído com sucesso!");
     } catch (error) {
       console.error("Error deleting link:", error);
       toast.error("Erro ao excluir link");
+    } finally {
+      setIsLoading(false);
     }
   }
 

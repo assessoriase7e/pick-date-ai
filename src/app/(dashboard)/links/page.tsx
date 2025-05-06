@@ -1,8 +1,23 @@
 import { Suspense } from "react";
 import { LinksContent } from "@/components/links/links-content";
 import { LoaderCircle } from "lucide-react";
+import { listLinks } from "@/actions/links/getMany";
 
-export default function LinksPage() {
+interface LinksPageProps {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+}
+
+export default async function LinksPage({ searchParams }: LinksPageProps) {
+  const { page: sPage } = await searchParams;
+  const page = Number(sPage || "1");
+  const limit = 10;
+
+  const result = await listLinks(page, limit);
+  const links = result.success ? result.data!.links : [];
+  const totalPages = result.success ? result.data!.totalPages : 1;
+
   return (
     <div className="space-y-6">
       <div>
@@ -12,7 +27,11 @@ export default function LinksPage() {
         </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <LinksContent />
+        <LinksContent
+          links={links}
+          totalPages={totalPages}
+          currentPage={page}
+        />
       </Suspense>
     </div>
   );

@@ -20,6 +20,10 @@ export async function listLinks(page: number = 1, limit: number = 10) {
   try {
     const user = await currentUser();
 
+    if (!user) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
     const skip = (page - 1) * limit;
 
     const [links, total] = await Promise.all([
@@ -27,9 +31,11 @@ export async function listLinks(page: number = 1, limit: number = 10) {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        where: { userId: user?.id as string },
+        where: { userId: user.id },
       }),
-      prisma.link.count(),
+      prisma.link.count({
+        where: { userId: user.id },
+      }),
     ]);
 
     return {
