@@ -119,7 +119,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 max-w-lg"
+        className="space-y-6 max-w-xl mx-auto"
       >
         <div className="grid grid-cols-1 gap-6">
           <FormField
@@ -356,19 +356,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           </AnimatePresence>
         </div>
 
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/profile")}
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Salvando..." : "Salvar Perfil"}
-          </Button>
-        </div>
+        <Button type="submit" disabled={isLoading} className="w-full">
+          {isLoading ? "Salvando..." : "Salvar Perfil"}
+        </Button>
       </form>
     </Form>
   );

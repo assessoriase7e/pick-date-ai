@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ClerkProvider localization={ptBR}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Toaster />
+            <Toaster duration={3000} position="top-center" />
             {children}
           </ThemeProvider>
         </ClerkProvider>
