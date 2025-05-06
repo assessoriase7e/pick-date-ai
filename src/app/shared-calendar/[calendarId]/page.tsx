@@ -19,7 +19,6 @@ export default async function SharedCalendarPage({
   const sParams = await searchParams;
   const { calendarId } = await params;
 
-  // Buscar o calendário pelo ID
   const calendarResponse = await getCalendarById(calendarId);
 
   if (!calendarResponse.success || !calendarResponse.data) {
@@ -28,10 +27,8 @@ export default async function SharedCalendarPage({
 
   const calendar = calendarResponse.data;
 
-  // Obter data atual ou da query
   const currentDate = sParams.date ? new Date(sParams.date) : new Date();
 
-  // Buscar agendamentos do mês
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   const res = await getAppointmentsByMonth(currentDate, calendarId);
 
@@ -53,7 +50,6 @@ export default async function SharedCalendarPage({
     });
   }
 
-  // Verificar se há um dia selecionado para mostrar detalhes
   let selectedDayDate: Date | null = null;
 
   if (sParams.selectedDay) {

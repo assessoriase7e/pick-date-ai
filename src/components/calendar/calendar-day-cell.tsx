@@ -20,11 +20,10 @@ export function CalendarDayCell({
   onClick,
   isMobile = false,
 }: CalendarDayCellProps) {
-  // Filtrar apenas agendamentos ativos
   const activeAppointments = getAppointmentsForDay(dayObj.date).filter(
     (appointment) => appointment.status !== "canceled"
   );
-  
+
   if (isMobile) {
     return (
       <div
@@ -66,8 +65,7 @@ export function CalendarDayCell({
         "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed",
         !dayObj.isCurrentMonth && "bg-muted/20 text-muted",
         isSelected(dayObj.date) && "ring-2 ring-primary",
-        activeAppointments?.length &&
-          "bg-primary border-primary"
+        activeAppointments?.length && "bg-primary border-primary"
       )}
       onClick={onClick}
     >

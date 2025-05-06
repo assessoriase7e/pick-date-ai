@@ -24,7 +24,6 @@ export async function updateService(
       };
     }
 
-    // Verificar se o serviço existe e pertence ao usuário
     const existingService = await prisma.service.findUnique({
       where: {
         id,
@@ -42,7 +41,6 @@ export async function updateService(
       };
     }
 
-    // Atualizar o serviço em uma transação junto com as relações de colaboradores
     const service = await prisma.$transaction(async (tx) => {
       const updatedService = await tx.service.update({
         where: { id },
@@ -65,14 +63,11 @@ export async function updateService(
         },
       });
 
-      // Atualizar relações com colaboradores se fornecido
       if (data.collaboratorIds) {
-        // Obter IDs existentes
         const existingIds = existingService.serviceCollaborators.map(
           (sc) => sc.collaboratorId
         );
 
-        // Identificar IDs a serem removidos e adicionados
         const idsToRemove = existingIds.filter(
           (id) => !data.collaboratorIds?.includes(id)
         );
@@ -80,7 +75,6 @@ export async function updateService(
           (id) => !existingIds.includes(id)
         );
 
-        // Remover relações que não existem mais
         if (idsToRemove.length > 0) {
           await tx.serviceCollaborator.deleteMany({
             where: {
@@ -92,7 +86,6 @@ export async function updateService(
           });
         }
 
-        // Adicionar novas relações
         if (idsToAdd.length > 0) {
           await Promise.all(
             idsToAdd.map((collaboratorId) =>

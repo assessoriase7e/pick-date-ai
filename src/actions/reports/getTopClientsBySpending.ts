@@ -43,7 +43,6 @@ async function fetchTopClientsBySpending(
       },
     });
 
-    // Agrupar por cliente
     const clientData: Record<
       string,
       {
@@ -71,7 +70,6 @@ async function fetchTopClientsBySpending(
       clientData[id].totalSpent += appointment.service?.price || 0;
     });
 
-    // Converter para array e ordenar por gasto total
     const clientsBySpending = Object.values(clientData)
       .sort((a, b) => b.totalSpent - a.totalSpent)
       .slice(0, limit);

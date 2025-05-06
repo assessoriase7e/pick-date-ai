@@ -53,7 +53,6 @@ export function CollaboratorCommission({
   const [commissionData, setCommissionData] = useState(initialCommissionData);
   const [loading, setLoading] = useState(false);
 
-  // Atualiza a URL ao mudar colaborador ou datas
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (selectedCollaborator) {
@@ -66,7 +65,6 @@ export function CollaboratorCommission({
     router.replace(`?${params.toString()}`);
   }, [selectedCollaborator, dateRange, router]);
 
-  // Busca dados ao mudar colaborador ou datas
   useEffect(() => {
     async function fetchCommission() {
       setLoading(true);

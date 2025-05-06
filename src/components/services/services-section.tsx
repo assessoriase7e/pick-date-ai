@@ -83,18 +83,15 @@ export function ServicesSection({
     message: string;
   }>({ show: false, action: async () => {}, message: "" });
 
-  // Filtros e ordenação
   const [searchTerm, setSearchTerm] = useState("");
   const [collaboratorFilter, setCollaboratorFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [services, setServices] = useState<ServiceFullData[]>(initialServices);
 
-  // Aplicar filtros e ordenação
   useEffect(() => {
     let filteredServices = [...initialServices];
 
-    // Aplicar filtro de busca
     if (searchTerm) {
       filteredServices = filteredServices.filter(
         (service) =>
@@ -103,22 +100,18 @@ export function ServicesSection({
       );
     }
 
-    // Aplicar filtro de colaborador
     if (collaboratorFilter && collaboratorFilter !== "all") {
       filteredServices = filteredServices.filter((service) => {
-        // Verificar colaborador principal
         if (service.collaborator?.id === collaboratorFilter) {
           return true;
         }
 
-        // Verificar colaboradores adicionais
         return service.serviceCollaborators?.some(
           (sc) => sc.collaborator?.id === collaboratorFilter
         );
       });
     }
 
-    // Aplicar ordenação
     filteredServices.sort((a, b) => {
       let valueA = a[sortField];
       let valueB = b[sortField];
@@ -188,18 +181,15 @@ export function ServicesSection({
   const formatCollaborators = (service: ServiceFullData) => {
     const allCollaborators = [] as Collaborator[];
 
-    // Adicionar o colaborador principal se existir
     if (service.collaborator) {
       allCollaborators.push(service.collaborator);
     }
 
-    // Adicionar os colaboradores adicionais
     if (
       service.serviceCollaborators &&
       service.serviceCollaborators.length > 0
     ) {
       service.serviceCollaborators.forEach((sc) => {
-        // Evitar duplicatas (caso o colaborador principal também esteja na lista de adicionais)
         if (!allCollaborators.some((c) => c.id === sc.collaborator.id)) {
           allCollaborators.push(sc.collaborator);
         }
@@ -238,7 +228,6 @@ export function ServicesSection({
   };
 
   const getStatusBadge = (service: ServiceFullData) => {
-    // Exemplo: considerando que um serviço está ativo se tiver dias disponíveis
     const isActive = service.availableDays && service.availableDays.length > 0;
 
     return (

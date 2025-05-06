@@ -25,14 +25,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ApiKey } from "@prisma/client"; // Importe o tipo ApiKey
+import { ApiKey } from "@prisma/client";
 import { toast } from "sonner";
 import { createApiKey } from "@/actions/api-key/create";
 import { updateApiKey } from "@/actions/api-key/update";
 import { deleteApiKey } from "@/actions/api-key/delete";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 
-// Interface para o tipo de dado retornado pelo hook/API, incluindo a chave na criação
 interface ApiKeyWithKey extends ApiKey {
   key: string;
 }
@@ -59,7 +58,7 @@ export function ApiKeysContent({
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<string | null>(
     null
   );
-  const [showKeyId, setShowKeyId] = useState<string | null>(null); // Para mostrar/esconder a chave
+  const [showKeyId, setShowKeyId] = useState<string | null>(null);
 
   async function handleCreateApiKey(data: { description?: string }) {
     try {
@@ -132,7 +131,6 @@ export function ApiKeysContent({
       });
   }
 
-  // Limpa a chave recém-gerada quando o modal de alerta é fechado
   function handleAlertClose() {
     setNewlyGeneratedKey(null);
   }
@@ -286,7 +284,9 @@ export function ApiKeysContent({
         {loading ? (
           <div className="text-center py-10">Carregando...</div>
         ) : apiKeys?.length === 0 ? (
-          <div className="text-center py-10">Nenhuma chave de API encontrada.</div>
+          <div className="text-center py-10">
+            Nenhuma chave de API encontrada.
+          </div>
         ) : (
           apiKeys?.map((apiKey) => (
             <div key={apiKey.id} className="rounded-lg border p-4 space-y-3">
@@ -328,9 +328,13 @@ export function ApiKeysContent({
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(apiKey.createdAt), "dd/MM/yyyy 'às' HH:mm", {
-                      locale: ptBR,
-                    })}
+                    {format(
+                      new Date(apiKey.createdAt),
+                      "dd/MM/yyyy 'às' HH:mm",
+                      {
+                        locale: ptBR,
+                      }
+                    )}
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2">

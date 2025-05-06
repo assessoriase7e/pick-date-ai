@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   if (validationResult.isMaster) {
     const body = await req.json();
     userId = body.userId || undefined;
-    req.json = async () => body; // preserve body for later use
+    req.json = async () => body;
   } else {
     userId = validationResult.userId;
   }

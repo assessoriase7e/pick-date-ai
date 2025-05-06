@@ -83,7 +83,6 @@ export function AudioForm({ initialData, onSubmit }: AudioFormProps) {
 
     form.setValue("audioFile", file, { shouldValidate: true });
 
-    // Create audio preview URL
     const audioUrl = URL.createObjectURL(file);
     setAudioPreview(audioUrl);
 

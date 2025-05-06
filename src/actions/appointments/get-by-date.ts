@@ -65,7 +65,7 @@ export async function getAppointmentsByDate(
     },
     [`appointments-date-${date.toISOString()}`],
     {
-      revalidate: 60 * 5, // 5 minutos
+      revalidate: 60 * 5,
       tags: ["appointments", "clients", "services"],
     }
   )();

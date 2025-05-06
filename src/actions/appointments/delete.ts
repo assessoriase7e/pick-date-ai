@@ -15,7 +15,6 @@ export async function deleteAppointment(id: string) {
       };
     }
 
-    // Verificar se o agendamento existe e pertence ao usuário
     const appointment = await prisma.appointment.findFirst({
       where: {
         id,
@@ -32,7 +31,6 @@ export async function deleteAppointment(id: string) {
       };
     }
 
-    // Ao invés de excluir, atualizar o status para "canceled"
     await prisma.appointment.update({
       where: { id },
       data: { status: "canceled" },

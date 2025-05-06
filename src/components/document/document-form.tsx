@@ -101,17 +101,15 @@ export function DocumentForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size for PDFs
     if (file.type === "application/pdf" && file.size > 1 * 1024 * 1024) {
       toast("O arquivo PDF excede o limite de 1MB.");
-      e.target.value = ""; // Clear the input
+      e.target.value = "";
       return;
     }
 
     form.setValue("documentFile", file, { shouldValidate: true });
     setFileName(file.name);
 
-    // For PDF files, we can create a preview
     if (file.type === "application/pdf") {
       const documentUrl = URL.createObjectURL(file);
       setDocumentPreview(documentUrl);

@@ -27,7 +27,6 @@ export function useAgentData() {
       try {
         setIsLoading(true);
 
-        // Carregar prompt do atendente
         const attendantResult = await getAttendantPrompt(user.id);
         if (attendantResult.success && attendantResult.data?.attendantPrompt) {
           const prompt = attendantResult.data.attendantPrompt;
@@ -35,7 +34,6 @@ export function useAgentData() {
           setAttendantEnabled(prompt.isActive);
         }
 
-        // Carregar prompt do SDR
         const sdrResult = await getSdrPrompt(user.id);
         if (sdrResult.success && sdrResult.data?.sdrPrompt) {
           const prompt = sdrResult.data.sdrPrompt;
@@ -43,7 +41,6 @@ export function useAgentData() {
           setSdrEnabled(prompt.isActive);
         }
 
-        // Carregar prompt do Follow Up
         const followUpResult = await getFollowUpPrompt(user.id);
         if (followUpResult.success && followUpResult.data?.followUpPrompt) {
           const prompt = followUpResult.data.followUpPrompt;

@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const apiKeysRoutes = {
   title: "Rotas de Chaves de API",
   routes: [

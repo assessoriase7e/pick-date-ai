@@ -38,7 +38,6 @@ export function RevenueChart({
     to: initialToDate || new Date(),
   });
 
-  // Função para buscar dados quando o intervalo de datas mudar
   const fetchData = async (from: Date, to: Date) => {
     setLoading(true);
     try {
@@ -53,23 +52,19 @@ export function RevenueChart({
     }
   };
 
-  // Atualizar a URL e buscar dados quando o intervalo de datas mudar
   const handleDateChange = (newDateRange: DateRange | undefined) => {
     if (!newDateRange?.from || !newDateRange?.to) return;
-    
+
     setDateRange(newDateRange);
-    
-    // Atualizar URL
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("fromRevenue", newDateRange.from.toISOString());
     params.set("toRevenue", newDateRange.to.toISOString());
     router.push(`?${params.toString()}`, { scroll: false });
-    
-    // Buscar dados
+
     fetchData(newDateRange.from, newDateRange.to);
   };
 
-  // Buscar dados iniciais se necessário
   useEffect(() => {
     if (dateRange?.from && dateRange?.to && initialData.length === 0) {
       fetchData(dateRange.from, dateRange.to);

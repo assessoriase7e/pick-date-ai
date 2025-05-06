@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
-  // Validar API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -29,7 +28,7 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: { profile: true }, // Incluir o perfil de cada usuário
+        include: { profile: true },
         where,
       }),
       prisma.user.count({ where }),
@@ -52,7 +51,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Validar API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {

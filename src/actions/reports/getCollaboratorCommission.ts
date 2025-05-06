@@ -31,13 +31,11 @@ async function fetchCollaboratorCommission(
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Filtro de datas
     const dateFilter: any = {};
     if (from) dateFilter.gte = from;
     if (to) dateFilter.lte = to;
     else dateFilter.lte = new Date();
 
-    // Monta o filtro principal
     const where: any = {
       userId,
     };
@@ -48,7 +46,6 @@ async function fetchCollaboratorCommission(
       where.service = { collaboratorId };
     }
 
-    // Busca os agendamentos com os serviços e colaboradores
     const appointments = await prisma.appointment.findMany({
       where,
       include: {
@@ -65,7 +62,6 @@ async function fetchCollaboratorCommission(
       },
     });
 
-    // Processa os dados agrupando por colaborador
     const collaboratorData: Record<
       string,
       {

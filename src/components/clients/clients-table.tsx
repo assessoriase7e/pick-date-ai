@@ -84,7 +84,6 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
-  // Efeito para detectar cliques no botão "Novo Cliente" da página principal
   useEffect(() => {
     const newClientButton = document.querySelector(".new-client-button");
     if (newClientButton) {

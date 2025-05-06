@@ -26,7 +26,6 @@ export async function updateProfile(data: any) {
       documentNumber: data.documentNumber,
     };
 
-    // Atualizar ou criar o perfil no banco de dados
     const updatedProfile = await prisma.profile.upsert({
       where: { userId },
       update: profileData,
@@ -36,7 +35,6 @@ export async function updateProfile(data: any) {
       },
     });
 
-    // Atualizar dados do usuário se fornecidos (firstName, lastName, imageUrl)
     if (data.firstName || data.lastName || data.imageUrl) {
       await prisma.user.update({
         where: { id: userId },
@@ -48,12 +46,9 @@ export async function updateProfile(data: any) {
       });
     }
 
-    // Acionar a atualização do RAG
     await triggerProfileRagUpdate(userId);
 
-    // Criar/atualizar a chave Redis baseada no whatsapp e nome da empresa
     if (data.whatsapp && data.companyName) {
-      // Formatar a chave: whatsapp_nome_empresa (tudo minúsculo, separado por underline)
       const redisKey = `${data.whatsapp}_${data.companyName}`
         .toLowerCase()
         .replace(/\s+/g, "_");

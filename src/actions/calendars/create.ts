@@ -4,7 +4,6 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-// Accept name and collaboratorId parameters
 export async function createCalendar({
   name,
   collaboratorId,

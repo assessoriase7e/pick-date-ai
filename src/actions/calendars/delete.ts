@@ -14,7 +14,6 @@ export async function deleteCalendar({ id }: { id: string }) {
       };
     }
 
-    // Verificar se o calendário pertence ao usuário
     const existingCalendar = await prisma.calendar.findFirst({
       where: {
         id,
@@ -29,7 +28,6 @@ export async function deleteCalendar({ id }: { id: string }) {
       };
     }
 
-    // Excluir o calendário
     await prisma.calendar.delete({
       where: {
         id,

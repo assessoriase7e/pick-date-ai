@@ -6,7 +6,6 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Permitir acesso à rota de calendário compartilhado sem autenticação
   if (req.nextUrl.pathname.startsWith("/shared-calendar")) {
     return;
   }

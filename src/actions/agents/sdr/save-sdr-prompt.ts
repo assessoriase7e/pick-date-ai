@@ -13,13 +13,11 @@ export async function saveSdrPrompt(params: SaveSdrPromptParams) {
   try {
     const { userId, content, isActive } = params;
 
-    // Verificar se já existe um prompt para este usuário
     const existingPrompt = await prisma.sdrPrompt.findFirst({
       where: { userId },
     });
 
     if (existingPrompt) {
-      // Atualizar o prompt existente
       await prisma.sdrPrompt.update({
         where: { id: existingPrompt.id },
         data: {
@@ -28,7 +26,6 @@ export async function saveSdrPrompt(params: SaveSdrPromptParams) {
         },
       });
     } else {
-      // Criar um novo prompt
       await prisma.sdrPrompt.create({
         data: {
           userId,

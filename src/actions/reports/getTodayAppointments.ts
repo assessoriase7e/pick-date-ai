@@ -98,7 +98,7 @@ export async function getTodayAppointments(): Promise<
           }));
 
         return {
-          success: true as const, // ou simplesmente deixar que o tipo infira corretamente
+          success: true as const,
           data: {
             appointments: formattedAppointments,
             totalPages: 1,

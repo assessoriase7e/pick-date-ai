@@ -8,7 +8,6 @@ import { Separator } from "./ui/separator";
 export function Navbar() {
   const pathname = usePathname();
 
-  // Função para obter o título da página atual
   const getPageTitle = () => {
     if (pathname.startsWith("/audios")) return "Áudios";
     if (pathname.startsWith("/images")) return "Imagens";

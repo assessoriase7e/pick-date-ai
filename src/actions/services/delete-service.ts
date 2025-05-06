@@ -15,7 +15,6 @@ export async function deleteService(id: string) {
       };
     }
 
-    // Verificar se o serviço existe e pertence ao usuário
     const existingService = await prisma.service.findFirst({
       where: {
         id,

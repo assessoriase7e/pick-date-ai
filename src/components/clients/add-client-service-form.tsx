@@ -33,7 +33,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addClientService } from "@/actions/clients/services/add-client-service";
 
-// Add the Service interface
 interface Service {
   id: string;
   name: string;
@@ -50,9 +49,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface AddClientServiceFormProps {
   clientId: string;
-  services: Service[]; // Add the services property
+  services: Service[];
   onSuccess: () => void;
-  onCancel?: () => void; // Make onCancel optional since it's not being used in client-services-table.tsx
+  onCancel?: () => void;
 }
 
 export function AddClientServiceForm({
@@ -74,8 +73,6 @@ export function AddClientServiceForm({
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      // Aqui você adicionaria sua chamada de API para criar o serviço do cliente
-      // Por exemplo:
       const response = await addClientService({
         clientId,
         serviceId: data.serviceId,

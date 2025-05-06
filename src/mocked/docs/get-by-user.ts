@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const getByUserRoutes = {
   title: "Rota de Busca por Usuário",
   routes: [

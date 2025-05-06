@@ -26,7 +26,6 @@ export const clientsRoutes = {
       body: [
         { name: "fullName", type: "string" },
         { name: "phone", type: "string" },
-        // Adicione outros campos obrigatórios se necessário
       ],
       headers: [
         {
@@ -67,7 +66,6 @@ export const clientsRoutes = {
       body: [
         { name: "fullName", type: "string", optional: true },
         { name: "phone", type: "string", optional: true },
-        // Adicione outros campos opcionais se necessário
       ],
       headers: [
         {

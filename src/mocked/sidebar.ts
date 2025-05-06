@@ -33,7 +33,6 @@ export interface UseSidebarRoutesResult {
 export const useSidebarRoutes = (): UseSidebarRoutesResult => {
   const pathname = usePathname();
 
-  // Itens de mídia agrupados
   const mediaItems: SidebarRoute[] = [
     {
       href: "/audios",
@@ -61,7 +60,6 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
     },
   ];
 
-  // Verificar se algum item de mídia está ativo
   const isMediaActive = mediaItems.some((item) => item.isActive);
 
   const routes: SidebarRoute[] = [

@@ -14,13 +14,11 @@ export async function getInstances() {
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Buscar instâncias no banco de dados
     const instances = await prisma.evolutionInstance.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
-    // Buscar status das instâncias na Evolution API
     const response = await fetch(`${evolutionApiUrl}/instance/fetchInstances`, {
       method: "GET",
       headers: {
@@ -30,13 +28,11 @@ export async function getInstances() {
     });
 
     if (!response.ok) {
-      // Se não conseguir buscar status, retorna as instâncias do banco
       return { success: true, data: instances };
     }
 
     const apiInstances = await response.json();
 
-    // Atualizar status das instâncias
     const updatedInstances = await Promise.all(
       instances.map(async (instance) => {
         const apiInstance = apiInstances.find(
@@ -45,7 +41,6 @@ export async function getInstances() {
 
         const status = apiInstance?.connectionStatus || "disconnected";
 
-        // Atualizar status no banco de dados
         if (status !== instance.status) {
           await prisma.evolutionInstance.update({
             where: { id: instance.id },

@@ -20,7 +20,6 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Buscar dados do dashboard
   const dashboardResult = await getDashboardData();
   const dashboardData = dashboardResult.success
     ? dashboardResult.data
@@ -31,17 +30,16 @@ export default async function ReportsPage({
         todayRevenue: 0,
       };
 
-  const { 
-    fromRevenue, 
-    toRevenue, 
-    fromMonthlyRevenue, 
-    toMonthlyRevenue, 
-    fromCollab, 
-    toCollab, 
-    collaboratorId 
+  const {
+    fromRevenue,
+    toRevenue,
+    fromMonthlyRevenue,
+    toMonthlyRevenue,
+    fromCollab,
+    toCollab,
+    collaboratorId,
   } = await searchParams;
 
-  // Configurar período para o gráfico de receita diária
   const today = moment().endOf("day").toDate();
   const formatedFromRevenue = fromRevenue
     ? moment(fromRevenue as string)
@@ -54,7 +52,6 @@ export default async function ReportsPage({
         .toDate()
     : today;
 
-  // Configurar período para o gráfico de receita mensal
   const formatedFromMonthlyRevenue = fromMonthlyRevenue
     ? moment(fromMonthlyRevenue as string)
         .startOf("day")
@@ -66,26 +63,29 @@ export default async function ReportsPage({
         .toDate()
     : today;
 
-  // Buscar dados para o gráfico de receita diária
   const revenueResult = await getRevenueByPeriod(
     formatedFromRevenue,
     formatedToRevenue
   );
   const revenueData = revenueResult.success ? revenueResult.data : [];
 
-  // Buscar dados para o gráfico de receita mensal
-  const monthlyRevenueResult = fromMonthlyRevenue || toMonthlyRevenue
-    ? await getRevenueByPeriod(formatedFromMonthlyRevenue, formatedToMonthlyRevenue)
-    : revenueResult; // Usar os mesmos dados se não houver parâmetros específicos
-  
+  const monthlyRevenueResult =
+    fromMonthlyRevenue || toMonthlyRevenue
+      ? await getRevenueByPeriod(
+          formatedFromMonthlyRevenue,
+          formatedToMonthlyRevenue
+        )
+      : revenueResult;
+
   const monthlyRevenueData = monthlyRevenueResult.success
     ? monthlyRevenueResult.monthlyData
     : [];
 
-  // Calcular o faturamento total do período
-  const periodRevenue = revenueData.reduce((total, item) => total + item.revenue, 0);
+  const periodRevenue = revenueData.reduce(
+    (total, item) => total + item.revenue,
+    0
+  );
 
-  // Configurar período para os dados do colaborador
   const formatedFromCollab = fromCollab
     ? moment(fromCollab as string)
         .startOf("day")
@@ -97,7 +97,6 @@ export default async function ReportsPage({
         .toDate()
     : today;
 
-  // Buscar dados de comissão de colaboradores
   const collaboratorsResult = await getCollaborators();
   const collaborators = collaboratorsResult.success
     ? collaboratorsResult.data
@@ -110,7 +109,6 @@ export default async function ReportsPage({
   );
   const commissionData = commissionResult.success ? commissionResult.data : [];
 
-  // Buscar top clientes
   const topClientsResult = await getTopClientsByServices(5);
   const topClients = topClientsResult.success ? topClientsResult.data : [];
 

@@ -12,7 +12,6 @@ export const readFileAsText = (file: File): Promise<string> => {
       return;
     }
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      // PDF: usar pdfjs para extrair texto
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
@@ -40,7 +39,6 @@ export const readFileAsText = (file: File): Promise<string> => {
       };
       reader.readAsArrayBuffer(file);
     } else {
-      // TXT: leitura normal
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {

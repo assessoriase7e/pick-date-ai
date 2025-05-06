@@ -29,7 +29,7 @@ export function MobileCalendarSelector({
   const handleTouchStart = (calendar: CalendarFullData) => {
     const timer = setTimeout(() => {
       onLongPress(calendar);
-    }, 1000); // 1 segundo para o long press
+    }, 1000);
 
     setLongPressTimer(timer);
   };
@@ -42,7 +42,6 @@ export function MobileCalendarSelector({
   };
 
   const handleTouchMove = () => {
-    // Cancelar o timer se o usuário mover o dedo
     if (longPressTimer) {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);

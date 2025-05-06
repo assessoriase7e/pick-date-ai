@@ -5,7 +5,6 @@ import { auth } from "@clerk/nextjs/server";
 import { Collaborator, Prisma, Service } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
 
-// Tipos de resposta para os serviços
 type GetServicesResponse =
   | {
       success: true;
@@ -14,7 +13,6 @@ type GetServicesResponse =
     }
   | { success: false; error: string };
 
-// Updating this type to match ServiceFullData
 type ServiceWithCollaborators = Service & {
   collaborator: Collaborator | null;
   serviceCollaborators: {
@@ -56,7 +54,6 @@ export async function getServices({
   try {
     const skip = (page - 1) * limit;
 
-    // Construir a ordenação
     let orderBy: any = { createdAt: "desc" };
 
     if (sort?.field) {
@@ -85,11 +82,9 @@ export async function getServices({
       }),
     ]);
 
-    // Se houver filtro por collaboratorId, filtramos após a consulta
     let filteredServices = services;
     if (where?.collaboratorId) {
       filteredServices = services.filter((service) => {
-        // Verificar colaboradores
         return service.serviceCollaborators.some(
           (sc) => sc.collaborator.id === where.collaboratorId
         );

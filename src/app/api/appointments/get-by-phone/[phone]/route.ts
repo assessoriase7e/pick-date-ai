@@ -58,7 +58,6 @@ export async function PATCH(
   try {
     const body = await req.json();
 
-    // Verificar se o agendamento existe e pertence ao usuário
     const existingAppointment = await prisma.appointment.findFirst({
       where: { id: params.id, userId: userId },
     });
@@ -70,7 +69,6 @@ export async function PATCH(
       );
     }
 
-    // Validação (idealmente com Zod)
     const {
       clientId,
       serviceId,
@@ -81,7 +79,6 @@ export async function PATCH(
       status,
     } = body;
 
-    // Verificar conflito de horário se startTime ou endTime forem alterados
     if (startTime || endTime) {
       const checkStartTime = startTime
         ? new Date(startTime)
@@ -91,7 +88,6 @@ export async function PATCH(
         : existingAppointment.endTime;
       const checkCalendarId = calendarId || existingAppointment.calendarId;
 
-      // Verificar se o novo calendário pertence ao usuário (se for alterado)
       if (calendarId && calendarId !== existingAppointment.calendarId) {
         const calendar = await prisma.calendar.findFirst({
           where: { id: calendarId, userId: userId },
@@ -107,7 +103,7 @@ export async function PATCH(
       const conflictingAppointment = await prisma.appointment.findFirst({
         where: {
           calendarId: checkCalendarId,
-          id: { not: params.id }, // Excluir o próprio agendamento da verificação
+          id: { not: params.id },
           status: "scheduled",
           OR: [
             {
@@ -137,8 +133,8 @@ export async function PATCH(
     if (calendarId) updateData.calendarId = calendarId;
     if (startTime) updateData.startTime = new Date(startTime);
     if (endTime) updateData.endTime = new Date(endTime);
-    if (notes !== undefined) updateData.notes = notes; // Permitir definir como null ou string vazia
-    if (status) updateData.status = status; // Permitir atualização de status
+    if (notes !== undefined) updateData.notes = notes;
+    if (status) updateData.status = status;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
@@ -185,7 +181,6 @@ export async function DELETE(
   const userId = validationResult.userId;
 
   try {
-    // Verificar se o agendamento existe e pertence ao usuário antes de deletar
     const appointment = await prisma.appointment.findFirst({
       where: { id: params.id, userId: userId },
     });
@@ -204,7 +199,7 @@ export async function DELETE(
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("Error deleting appointment:", error);
-    // Prisma error code for record not found during delete
+
     if ((error as any).code === "P2025") {
       return NextResponse.json(
         { error: "Appointment not found" },

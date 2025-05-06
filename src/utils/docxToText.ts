@@ -1,12 +1,11 @@
 import mammoth from "mammoth";
 
-// Função para converter HTML em texto preservando quebras de linha
 function htmlToPlainText(html: string): string {
   return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<[^>]+>/g, '') // remove outras tags
-    .replace(/\n{3,}/g, '\n\n') // evita excesso de linhas em branco
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 

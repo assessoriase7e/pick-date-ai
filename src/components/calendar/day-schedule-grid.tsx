@@ -17,7 +17,6 @@ export function DayScheduleGrid({
   onEditAppointment,
   selectedHour,
 }: DayScheduleGridProps) {
-  // Filtrar apenas agendamentos não cancelados
   const activeAppointments = appointments.filter(
     (appointment) => appointment.status !== "canceled"
   );
@@ -82,14 +81,12 @@ export function DayScheduleGrid({
               const endHour = appointment.endTime.getHours();
               const endMinutes = appointment.endTime.getMinutes();
 
-              // Ajuste para o novo layout de horas
               const hourIndex = hoursOfDay.indexOf(startHour);
               if (hourIndex === -1) return null;
 
               const startPosition = startHour * 60 + startMinutes;
               const duration = endHour * 60 + endMinutes - startPosition;
 
-              // Cálculo ajustado para o novo layout
               const rowStart = hourIndex + 1;
               const rowSpan = Math.ceil(duration / 60);
               const rowEnd = rowStart + rowSpan;

@@ -12,7 +12,6 @@ export const callRagWebhook = async ({
   metadataKey: string;
 }) => {
   try {
-    // Verificar se o webhook e metadata estão definidos
     if (!webhookUrl || !metadataKey) {
       return {
         success: true,

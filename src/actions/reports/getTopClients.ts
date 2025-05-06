@@ -29,7 +29,6 @@ export const getTopClientsByServices = async (
 
   const cachedFetch = unstable_cache(
     async () => {
-      // Aqui sabemos que userId é válido
       const services = await prisma.appointment.findMany({
         where: {
           userId,

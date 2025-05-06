@@ -16,7 +16,6 @@ export default async function CollaboratorsPage({
 
   const collabs = await getCollaborators(pageParam);
 
-  // Ensure pagination is never undefined
   const pagination = collabs.success
     ? {
         totalPages: collabs.pagination?.totalPages ?? 1,

@@ -15,7 +15,6 @@ export async function deleteCollaborator(id: string) {
       };
     }
 
-    // Verifica se o colaborador existe e pertence ao usuário
     const collaborator = await prisma.collaborator.findFirst({
       where: {
         id,
@@ -30,7 +29,6 @@ export async function deleteCollaborator(id: string) {
       };
     }
 
-    // Exclui o colaborador
     await prisma.collaborator.delete({
       where: {
         id,

@@ -40,7 +40,6 @@ export function YearInputCalendar({
     value ? new Date(value) : new Date()
   );
 
-  // Atualiza o mês do calendário quando o valor muda externamente
   React.useEffect(() => {
     if (value) {
       setCalendarMonth(new Date(value));
@@ -49,18 +48,15 @@ export function YearInputCalendar({
     }
   }, [value]);
 
-  // Função para lidar com a seleção de data
   const handleSelect = (date?: Date) => {
     onChange(date);
     setOpen(false);
   };
 
-  // Função para prevenir o fechamento do drawer ao clicar no conteúdo
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  // Conteúdo do calendário
   const calendarContent = (
     <Calendar
       mode="single"

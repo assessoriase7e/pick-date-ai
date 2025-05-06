@@ -30,14 +30,11 @@ export const getDashboardData = async (): Promise<
 
   const cachedFetch = unstable_cache(
     async (): Promise<DashboardDataSuccess> => {
-      // Datas com moment
       const today = moment().startOf("day").toDate();
       const tomorrow = moment().add(1, "day").startOf("day").toDate();
 
-      // Contagem de clientes
       const clientCount = await prisma.client.count({ where: { userId } });
 
-      // Agendamentos concluídos antes de hoje
       const completedAppointmentsCount = await prisma.appointment.count({
         where: {
           userId,
@@ -46,7 +43,6 @@ export const getDashboardData = async (): Promise<
         },
       });
 
-      // Agendamentos futuros
       const futureAppointmentsCount = await prisma.appointment.count({
         where: {
           userId,
@@ -54,7 +50,6 @@ export const getDashboardData = async (): Promise<
         },
       });
 
-      // Agendamentos de hoje
       const todayAppointments = await prisma.appointment.findMany({
         where: {
           userId,

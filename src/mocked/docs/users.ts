@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const usersRoutes = {
   title: "Rotas de Usuários",
   routes: [

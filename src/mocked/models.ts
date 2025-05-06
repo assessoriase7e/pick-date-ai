@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 
-const blacklistedModels = ["user", "apiKey", "records", "professional"]; // adicione aqui os nomes dos models a ignorar
+const blacklistedModels = ["user", "apiKey", "records", "professional"];
 
 export function getPrismaModelNames(): string[] {
   return Object.keys(prisma).filter((key) => {

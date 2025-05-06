@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const linksRoutes = {
   title: "Rotas de Links",
   routes: [

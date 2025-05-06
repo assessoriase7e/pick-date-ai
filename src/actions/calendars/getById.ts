@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { CalendarFullData } from "@/types/calendar";
@@ -40,7 +39,7 @@ export async function getCalendarById(
       },
       [`calendar-by-id-${calendarId}`],
       {
-        revalidate: 60 * 5, // 5 minutos
+        revalidate: 60 * 5,
         tags: ["calendars", "collaborators"],
       }
     );

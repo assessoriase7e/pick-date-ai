@@ -36,10 +36,9 @@ export async function GET(req: NextRequest) {
 
     const recordsPromises = modelNames.map(async (modelName) => {
       try {
-        // @ts-ignore
         const where: any = { id: { in: ids } };
         if (userId) where.userId = userId;
-        // @ts-ignore
+
         const records = await prisma[modelName].findMany({
           where,
           include: { professional: true },
@@ -93,7 +92,6 @@ export async function GET(req: NextRequest) {
           }
         });
 
-        // Always include base64 if it exists, regardless of whether it was requested
         if (record.base64) {
           filteredRecord.base64 = record.base64;
         }

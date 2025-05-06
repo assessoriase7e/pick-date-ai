@@ -26,7 +26,6 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
 
     const { id, name, workingHours, phone, profession, description } = params;
 
-    // Verificar se o colaborador existe e pertence ao usuário
     const existingCollaborator = await prisma.collaborator.findUnique({
       where: {
         id,
@@ -41,7 +40,6 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
       };
     }
 
-    // Atualizar o colaborador
     const collaborator = await prisma.collaborator.update({
       where: {
         id,

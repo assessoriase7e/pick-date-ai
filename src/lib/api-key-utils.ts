@@ -23,7 +23,6 @@ export async function validateApiKey(
     return { isValid: false };
   }
 
-  // Check master key
   if (MASTER_API_KEY && apiKey === MASTER_API_KEY) {
     return { isValid: true, isMaster: true };
   }

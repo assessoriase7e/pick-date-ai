@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
 
 const evolutionSchema = z.object({
@@ -20,7 +19,6 @@ export async function createEvolution(data: z.infer<typeof evolutionSchema>) {
       };
     }
 
-    // Temporary solution - just return mock data without database interaction
     const mockEvolution = {
       id: `mock-${Date.now()}`,
       userId: data.userId,

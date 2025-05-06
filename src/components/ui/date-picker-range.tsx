@@ -44,7 +44,6 @@ export function DatePickerWithRange({
       onDateChange(range);
     }
 
-    // Só fecha e atualiza a URL se ambas as datas estiverem selecionadas
     if (range?.from && range?.to) {
       const params = new URLSearchParams(searchParams.toString());
 

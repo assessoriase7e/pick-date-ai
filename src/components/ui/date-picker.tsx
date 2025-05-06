@@ -13,11 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 interface DatePickerProps {
   date: Date | undefined;
@@ -30,7 +26,7 @@ function useIsMobile() {
 
   React.useEffect(() => {
     const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen(); // inicial
+    checkScreen();
     window.addEventListener("resize", checkScreen);
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
@@ -59,7 +55,11 @@ export function DatePicker({ date, onDateChange, label }: DatePickerProps) {
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP", { locale: ptBR }) : <span>{label || "Selecione uma data"}</span>}
+            {date ? (
+              format(date, "PPP", { locale: ptBR })
+            ) : (
+              <span>{label || "Selecione uma data"}</span>
+            )}
           </Button>
         </DrawerTrigger>
         <DrawerContent>
@@ -88,7 +88,11 @@ export function DatePicker({ date, onDateChange, label }: DatePickerProps) {
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP", { locale: ptBR }) : <span>{label || "Selecione uma data"}</span>}
+          {date ? (
+            format(date, "PPP", { locale: ptBR })
+          ) : (
+            <span>{label || "Selecione uma data"}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

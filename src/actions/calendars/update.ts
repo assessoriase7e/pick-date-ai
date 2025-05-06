@@ -24,7 +24,6 @@ export async function updateCalendar({
       };
     }
 
-    // Verificar se o calendário pertence ao usuário
     const existingCalendar = await prisma.calendar.findFirst({
       where: {
         id,
@@ -39,14 +38,12 @@ export async function updateCalendar({
       };
     }
 
-    // Validar os dados
     const validatedData = calendarSchema.parse({
       name,
       userId,
       collaboratorId,
     });
 
-    // Atualizar o calendário
     const calendar = await prisma.calendar.update({
       where: {
         id,

@@ -27,7 +27,6 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Validar os dados
     const validation = updateInstanceSchema.safeParse(data);
     if (!validation.success) {
       return {
@@ -36,7 +35,6 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
       };
     }
 
-    // Verificar se a instância existe e pertence ao usuário
     const existingInstance = await prisma.evolutionInstance.findFirst({
       where: {
         id: data.id,
@@ -51,7 +49,6 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
       };
     }
 
-    // Atualizar instância na Evolution API
     const response = await fetch(
       `${evolutionApiUrl}/instance/update/${existingInstance.name}`,
       {
@@ -78,7 +75,6 @@ export async function updateInstance(data: UpdateInstanceFormValues) {
       };
     }
 
-    // Atualizar instância no banco de dados
     const instance = await prisma.evolutionInstance.update({
       where: { id: data.id },
       data: {

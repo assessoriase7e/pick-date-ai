@@ -43,7 +43,7 @@ interface ClientService {
     id: string;
     name: string;
   };
-  // Novos campos
+
   isAppointment?: boolean;
   startTime?: Date;
   endTime?: Date;
@@ -82,7 +82,6 @@ export default function ClientServicesTable({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Add this function to handle successful service addition
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
     router.refresh();

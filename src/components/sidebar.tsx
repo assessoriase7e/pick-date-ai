@@ -20,7 +20,6 @@ export function Sidebar() {
   const { routes } = useSidebarRoutes();
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detectar se é dispositivo móvel
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);

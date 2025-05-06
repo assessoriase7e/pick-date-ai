@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const documentsRoutes = {
   title: "Rotas de Documentos",
   routes: [

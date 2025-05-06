@@ -25,7 +25,6 @@ export async function createCollaborator(params: CreateCollaboratorParams) {
 
     const { name, workingHours, phone, profession, description } = params;
 
-    // Criar o colaborador
     const collaborator = await prisma.collaborator.create({
       data: {
         name,

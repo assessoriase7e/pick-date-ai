@@ -16,7 +16,6 @@ export async function deleteInstance(id: string) {
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Verificar se a instância existe e pertence ao usuário
     const instance = await prisma.evolutionInstance.findFirst({
       where: {
         id,
@@ -31,7 +30,6 @@ export async function deleteInstance(id: string) {
       };
     }
 
-    // Excluir instância na Evolution API
     await fetch(`${evolutionApiUrl}/instance/delete/${instance.name}`, {
       method: "DELETE",
       headers: {
@@ -40,7 +38,6 @@ export async function deleteInstance(id: string) {
       },
     });
 
-    // Excluir instância no banco de dados
     await prisma.evolutionInstance.delete({
       where: { id },
     });

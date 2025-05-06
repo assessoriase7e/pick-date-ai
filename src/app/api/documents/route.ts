@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -36,7 +35,6 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Add standardized base64 field to each document
     const responseDocuments = documents.map((doc) => ({
       ...doc,
       base64: doc.documentBase64,
@@ -57,7 +55,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {

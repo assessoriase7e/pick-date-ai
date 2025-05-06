@@ -44,21 +44,18 @@ const DAYS_OF_WEEK = [
 ];
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
-  // Log para depuração - remover após resolver o problema
   console.log("initialData recebido:", initialData);
 
   const router = useRouter();
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Processamento adequado dos dados iniciais do businessHours
   const processInitialBusinessHours = () => {
     if (initialData?.profile?.businessHours) {
-      // Verificar se já é um array
       if (Array.isArray(initialData.profile.businessHours)) {
         return initialData.profile.businessHours;
       }
-      // Se for um objeto JSON, tentar converter para array
+
       try {
         const parsedHours =
           typeof initialData.profile.businessHours === "string"
@@ -98,7 +95,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     name: "businessHours",
   });
 
-  // Função para obter os dias disponíveis
   const getAvailableDays = (currentIndex: number) => {
     const selectedDays = fields
       .map((field, index) =>

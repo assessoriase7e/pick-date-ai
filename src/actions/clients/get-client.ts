@@ -25,8 +25,8 @@ export async function getClient(id: string) {
     },
     [`client-${id}`],
     {
-      revalidate: 60 * 5, // 5 minutos
-      tags: ["clients"]
+      revalidate: 60 * 5,
+      tags: ["clients"],
     }
   )();
 }

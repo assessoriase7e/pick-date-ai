@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 
 export async function GET(req: NextRequest) {
-  // Validar API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -57,7 +56,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {

@@ -50,10 +50,8 @@ async function fetchRevenueByPeriod(
       const monthStr = moment(appointment.endTime).format("YYYY-MM");
       const price = appointment.service?.price || 0;
 
-      // Agrupa por dia
       revenueMap[dateStr] = (revenueMap[dateStr] || 0) + price;
 
-      // Agrupa por mês
       monthlyRevenueMap[monthStr] = (monthlyRevenueMap[monthStr] || 0) + price;
     }
 
@@ -86,7 +84,6 @@ export const getRevenueByPeriod = async (
     return { success: false, error: "Usuário não autenticado." };
   }
 
-  // Cria uma chave única baseada no período e usuário
   const fromStr = from.toISOString().split("T")[0];
   const toStr = to.toISOString().split("T")[0];
   const cacheKey = `revenue-${userId}-${fromStr}-${toStr}`;
@@ -94,7 +91,7 @@ export const getRevenueByPeriod = async (
   const cachedFetch = unstable_cache(
     () => fetchRevenueByPeriod(userId, from, to),
     [cacheKey],
-    { revalidate: 60 * 30, tags: ["revenue", "appointments"] } // Cache por 30 minutos
+    { revalidate: 60 * 30, tags: ["revenue", "appointments"] }
   );
 
   return cachedFetch();

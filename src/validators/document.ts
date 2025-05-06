@@ -8,11 +8,10 @@ export const documentSchema = z.object({
     .instanceof(File, { message: "O arquivo é obrigatório." })
     .refine(
       (file) => {
-        // Limit file size to 1MB for PDFs
         if (file.type === "application/pdf") {
-          return file.size <= 1 * 1024 * 1024; // 1MB
+          return file.size <= 1 * 1024 * 1024;
         }
-        // Keep the original 10MB limit for other file types
+
         return file.size <= 10 * 1024 * 1024;
       },
       {

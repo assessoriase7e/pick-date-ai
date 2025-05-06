@@ -34,7 +34,6 @@ export function MobileCalendarView({
 }: MobileCalendarViewProps) {
   const monthsScrollRef = useRef<HTMLDivElement>(null);
 
-  // Gerar anos para o select (10 anos para trás e 10 para frente)
   const years = useMemo(() => {
     const currentYear = moment().year();
     const yearList = [];
@@ -44,7 +43,6 @@ export function MobileCalendarView({
     return yearList;
   }, []);
 
-  // Gerar meses para a lista horizontal
   const months = useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => {
       return {

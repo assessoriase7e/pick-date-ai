@@ -3,8 +3,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-// Components reutilizáveis
-
 const PaginationContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -71,8 +69,6 @@ export {
   PaginationButton as PaginationPrevious,
   PaginationButton as PaginationNext,
 };
-
-// Componente principal
 
 interface PaginationProps {
   currentPage: number;

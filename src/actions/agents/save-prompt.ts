@@ -27,7 +27,6 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
       };
     }
 
-    // Verificar se já existe um prompt deste tipo para o usuário
     const existingPrompt = await prisma.prompt.findFirst({
       where: {
         userId: data.userId,
@@ -48,7 +47,6 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
     };
 
     if (existingPrompt) {
-      // Atualizar o prompt existente
       prompt = await prisma.prompt.update({
         where: {
           id: existingPrompt.id,
@@ -56,7 +54,6 @@ export async function savePrompt(data: z.infer<typeof promptSchema>) {
         data: promptData,
       });
     } else {
-      // Criar um novo prompt
       prompt = await prisma.prompt.create({
         data: {
           userId: data.userId,

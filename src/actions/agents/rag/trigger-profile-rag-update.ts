@@ -6,12 +6,10 @@ import { ragConfig } from "@/config/rag";
 
 export const triggerProfileRagUpdate = async (userId: string) => {
   try {
-    // Verificar se a URL do webhook está configurada
     if (!ragConfig.webhookUrl) {
       return { success: true, message: "Webhook não configurado" };
     }
 
-    // Verificar se há conexão com o webhook
     try {
       const response = await fetch(ragConfig.webhookUrl, {
         method: "HEAD",
@@ -34,7 +32,6 @@ export const triggerProfileRagUpdate = async (userId: string) => {
       };
     }
 
-    // Buscar o perfil para obter o nome da empresa
     const profile = await prisma.profile.findUnique({
       where: { userId },
     });
@@ -46,14 +43,12 @@ export const triggerProfileRagUpdate = async (userId: string) => {
       };
     }
 
-    // Formatar o nome da empresa como metadataKey (minúsculo e com underscores)
     const metadataKey = profile.companyName
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "_")
       .replace(/[^a-z0-9_]/g, "");
 
-    // Chamar o webhook com os dados do perfil
     return await callProfileWebhook({
       userId,
       webhookUrl: ragConfig.webhookUrl,

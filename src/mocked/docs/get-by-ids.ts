@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const getByIdsRoutes = {
   title: "Rota de Busca por IDs",
   routes: [

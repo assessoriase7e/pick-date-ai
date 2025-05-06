@@ -29,7 +29,6 @@ export async function createService(data: ServiceFormValues) {
       },
     });
 
-    // Criar relações com colaboradores
     if (data.collaboratorIds && data.collaboratorIds.length > 0) {
       await Promise.all(
         data.collaboratorIds.map(async (collaboratorId) => {

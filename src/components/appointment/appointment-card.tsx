@@ -2,7 +2,7 @@ import { Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentFullData } from "@/types/calendar";
-import React from "react"; // Import React
+import React from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";

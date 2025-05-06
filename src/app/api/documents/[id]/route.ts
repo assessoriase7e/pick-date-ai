@@ -6,7 +6,6 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -28,7 +27,6 @@ export async function GET(
       );
     }
 
-    // Add standardized base64 field
     const responseDocument = {
       ...document,
       base64: document.documentBase64,
@@ -48,7 +46,6 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {
@@ -59,7 +56,6 @@ export async function PATCH(
     const body = await req.json();
     const { description, userId, documentBase64, fileName, fileType } = body;
 
-    // Create an update object with only the fields that are provided
     const updateData: any = {};
     if (description !== undefined) updateData.description = description;
     if (userId !== undefined) updateData.userId = userId;
@@ -68,7 +64,6 @@ export async function PATCH(
     if (fileName !== undefined) updateData.fileName = fileName;
     if (fileType !== undefined) updateData.fileType = fileType;
 
-    // Check if there's anything to update
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update provided" },
@@ -98,7 +93,6 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Validate API Key
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
   if (!validationResult.isValid) {

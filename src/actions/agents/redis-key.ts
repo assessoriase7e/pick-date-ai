@@ -20,7 +20,6 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
       };
     }
 
-    // Verificar se já existe uma chave Redis para o usuário
     const existingKey = await prisma.redisKey.findFirst({
       where: {
         userId: data.userId,
@@ -30,7 +29,6 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
     let redisKey;
 
     if (existingKey) {
-      // Atualizar a chave existente
       redisKey = await prisma.redisKey.update({
         where: {
           id: existingKey.id,
@@ -40,7 +38,6 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
         },
       });
     } else {
-      // Criar uma nova chave
       redisKey = await prisma.redisKey.create({
         data: {
           userId: data.userId,

@@ -30,7 +30,6 @@ export async function GET(req: NextRequest) {
         },
       });
     } else if (phone) {
-      // Busca o perfil pelo telefone
       const profile = await prisma.profile.findFirst({
         where: { whatsapp: phone },
         include: { user: true },

@@ -14,7 +14,6 @@ export async function listCollaborators(serviceId?: string) {
   }
 
   try {
-    // Se um serviceId for fornecido, busca colaboradores associados a esse serviço
     if (serviceId) {
       const collaborators = await prisma.collaborator.findMany({
         where: {
@@ -39,7 +38,6 @@ export async function listCollaborators(serviceId?: string) {
       };
     }
 
-    // Caso contrário, retorna todos os colaboradores
     const collaborators = await prisma.collaborator.findMany({
       where: {
         userId: user.id,
@@ -51,7 +49,6 @@ export async function listCollaborators(serviceId?: string) {
         name: "asc",
       },
     });
-
 
     return {
       success: true,

@@ -57,7 +57,6 @@ export function DayDetailsModal({
       moment(dayDetails.date).format("DD/MM/YYYY")
   );
 
-  // Pré-carregar dados quando o modal é aberto
   const { fetchClients, fetchServices } = useAppointmentDataStore();
 
   useEffect(() => {
@@ -67,7 +66,6 @@ export function DayDetailsModal({
     }
   }, [dayDetails, calendarId, fetchClients, fetchServices]);
 
-  // Handlers
   const handleFormSuccess = async () => {
     setShowAppointmentForm(false);
 
@@ -118,7 +116,6 @@ export function DayDetailsModal({
     }
   };
 
-  // Verificar conflitos de horário
   const checkTimeConflict = (
     startTime: Date,
     endTime: Date,
@@ -138,7 +135,6 @@ export function DayDetailsModal({
     });
   };
 
-  // Formatação da data para exibição
   const formattedDate = moment(dayDetails.date).format("DD/MM/YYYY");
 
   return (

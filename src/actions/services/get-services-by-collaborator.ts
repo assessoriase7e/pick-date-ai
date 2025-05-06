@@ -23,7 +23,6 @@ export async function getServicesByCollaborator(
   }
 
   try {
-    // Buscar serviços através da tabela ServiceCollaborator
     const serviceCollaborators = await prisma.serviceCollaborator.findMany({
       where: {
         collaboratorId,
@@ -36,7 +35,6 @@ export async function getServicesByCollaborator(
       },
     });
 
-    // Extrair apenas os serviços da relação
     const services = serviceCollaborators.map((sc) => sc.service);
 
     return {

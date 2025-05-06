@@ -20,13 +20,11 @@ export default async function ServicesPage({
     getCollaborators(1, 100),
   ]);
 
-  // Ensure pagination is never undefined
   const pagination =
     servicesResult.success && servicesResult.pagination
       ? servicesResult.pagination
       : { totalPages: 1, currentPage: 1 };
 
-  // Handle collaborators safely with proper type checking
   const collaborators = collaboratorsResult.success
     ? collaboratorsResult.data
     : [];

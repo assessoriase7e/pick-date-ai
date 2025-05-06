@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription, // Adicionado
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,25 +34,22 @@ export function ApiKeyModal({
     if (initialData) {
       setDescription(initialData.description || "");
     } else {
-      setDescription(""); // Reset para criação
+      setDescription("");
     }
-  }, [initialData, isOpen]); // Resetar quando abrir ou mudar initialData
+  }, [initialData, isOpen]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await onSubmit({ description: description || undefined }); // Envia undefined se vazio
-      // onClose(); // O fechamento é tratado no componente pai após sucesso
+      await onSubmit({ description: description || undefined });
     } catch (error) {
       console.error("Erro no submit do modal:", error);
-      // Poderia adicionar um toast de erro aqui também
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  // Resetar estado ao fechar
   function handleClose() {
     setDescription("");
     setIsSubmitting(false);
@@ -66,9 +63,9 @@ export function ApiKeyModal({
           <DialogTitle>{title}</DialogTitle>
           {/* Adiciona descrição se for criação */}
           {!initialData && (
-             <DialogDescription>
-                Insira uma descrição opcional para identificar sua chave de API.
-             </DialogDescription>
+            <DialogDescription>
+              Insira uma descrição opcional para identificar sua chave de API.
+            </DialogDescription>
           )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,11 +80,20 @@ export function ApiKeyModal({
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : (initialData ? "Salvar Alterações" : "Gerar Chave")}
+              {isSubmitting
+                ? "Salvando..."
+                : initialData
+                ? "Salvar Alterações"
+                : "Gerar Chave"}
             </Button>
           </DialogFooter>
         </form>

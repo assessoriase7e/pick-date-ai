@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 
 export async function deleteClientService(id: string, clientId: string) {
   try {
-    // Primeiro, tenta encontrar o registro na tabela clientService
     const clientService = await prisma.clientService.findUnique({
       where: { id },
     });
@@ -15,18 +14,15 @@ export async function deleteClientService(id: string, clientId: string) {
         where: { id },
       });
     } else {
-      // Se não encontrou, verifica se é um agendamento
       const appointment = await prisma.appointment.findUnique({
         where: { id },
       });
 
       if (appointment) {
-        // Se for um agendamento, exclui da tabela appointment
         await prisma.appointment.delete({
           where: { id },
         });
       } else {
-        // Se não encontrou em nenhuma tabela, retorna erro
         return {
           success: false,
           error: "Registro não encontrado",

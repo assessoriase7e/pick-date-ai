@@ -18,18 +18,16 @@ export async function GET(
   try {
     const { id: userId } = await params;
 
-    // Get fields from query parameters
     const url = new URL(req.url);
     const fieldsParam = url.searchParams.get("fields");
     const fields = fieldsParam ? fieldsParam.split(",") : null;
 
     const unifiedRecords: any[] = [];
-    const links: any[] = []; // New array to store links
+    const links: any[] = [];
 
     for (const modelName of modelNames) {
       try {
         try {
-          // @ts-ignore
           const records = await prisma[modelName].findMany({
             where: { userId },
           });
@@ -37,7 +35,6 @@ export async function GET(
           records.forEach((record: any) => {
             const standardizedRecord = { ...record };
 
-            // Extract links from description or other fields if they contain URLs
             if (record.description) {
               const urlRegex = /(https?:\/\/[^\s]+)/g;
               const foundLinks = record.description.match(urlRegex);
@@ -63,7 +60,6 @@ export async function GET(
                 delete standardizedRecord[key];
               }
 
-              // Check if any other field contains URLs
               if (
                 typeof standardizedRecord[key] === "string" &&
                 key !== "description"
@@ -85,29 +81,24 @@ export async function GET(
               }
             }
 
-            // Filter fields if specified in query
             if (fields) {
               const filteredRecord: any = {};
 
-              // Always include id and type
               filteredRecord.id = standardizedRecord.id;
               filteredRecord.type = modelName;
 
-              // Add requested fields
               fields.forEach((field) => {
                 if (field in standardizedRecord) {
                   filteredRecord[field] = standardizedRecord[field];
                 }
               });
 
-              // Always include base64 if it exists, regardless of whether it was requested
               if (standardizedRecord.base64) {
                 filteredRecord.base64 = standardizedRecord.base64;
               }
 
               unifiedRecords.push(filteredRecord);
             } else {
-              // No fields specified, include all
               unifiedRecords.push({
                 ...standardizedRecord,
                 type: modelName,
@@ -127,7 +118,7 @@ export async function GET(
 
     return NextResponse.json({
       data: unifiedRecords,
-      links: links, // Include the links array in the response
+      links: links,
     });
   } catch (error) {
     console.error("Error fetching professional records:", error);

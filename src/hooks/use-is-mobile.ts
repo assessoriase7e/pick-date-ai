@@ -7,7 +7,7 @@ export function useIsMobile() {
 
   useEffect(() => {
     const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen(); // inicial
+    checkScreen();
     window.addEventListener("resize", checkScreen);
     return () => window.removeEventListener("resize", checkScreen);
   }, []);

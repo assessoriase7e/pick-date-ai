@@ -23,7 +23,6 @@ export async function addClientService({
   date,
 }: AddClientServiceParams): Promise<AddClientServiceResult> {
   try {
-    // Verificar se o cliente existe
     const client = await prisma.client.findUnique({
       where: { id: clientId },
     });
@@ -35,7 +34,6 @@ export async function addClientService({
       };
     }
 
-    // Verificar se o serviço existe
     const service = await prisma.service.findUnique({
       where: { id: serviceId },
     });
@@ -47,7 +45,6 @@ export async function addClientService({
       };
     }
 
-    // Criar o registro de serviço para o cliente
     const clientService = await prisma.clientService.create({
       data: {
         clientId,
@@ -56,7 +53,6 @@ export async function addClientService({
       },
     });
 
-    // Revalidar o caminho para atualizar a UI
     revalidatePath(`/clients/${clientId}/services`);
 
     return {

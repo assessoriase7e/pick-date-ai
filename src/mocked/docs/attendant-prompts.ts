@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const attendantPromptsRoutes = {
   title: "Rotas de Prompts de Atendente",
   routes: [

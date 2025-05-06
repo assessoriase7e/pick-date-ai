@@ -27,8 +27,8 @@ export async function getClients() {
     },
     ["clients-list"],
     {
-      revalidate: 60 * 5, // 5 minutos
-      tags: ["clients"]
+      revalidate: 60 * 5,
+      tags: ["clients"],
     }
   )();
 }

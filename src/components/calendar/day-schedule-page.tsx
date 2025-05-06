@@ -40,7 +40,6 @@ export function DayScheduleContent({
   const [showForm, setShowForm] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // Obter o horário selecionado dos search params
   const selectedHour = searchParams.get("hour")
     ? parseInt(searchParams.get("hour")!)
     : null;
@@ -51,7 +50,6 @@ export function DayScheduleContent({
     .locale("pt-br")
     .format("DD [de] MMMM [de] YYYY");
 
-  // Efeito para mostrar o formulário quando houver horário selecionado
   useEffect(() => {
     if (selectedHour !== null || startTime || selectedAppointment) {
       setShowForm(true);
@@ -63,24 +61,19 @@ export function DayScheduleContent({
   };
 
   const handleHourClick = (hour: number) => {
-    // Calcular horário de término (1 hora depois)
     const endHour = (hour + 1) % 24;
 
-    // Atualizar URL com os parâmetros
     const params = new URLSearchParams(searchParams.toString());
     params.set("hour", hour.toString());
     params.set("startTime", `${hour.toString().padStart(2, "0")}:00`);
     params.set("endTime", `${endHour.toString().padStart(2, "0")}:00`);
 
-    // Limpar appointment selecionado
     setSelectedAppointment(null);
 
-    // Navegar para a mesma página com os novos parâmetros
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const handleEditAppointment = (appointment: AppointmentFullData) => {
-    // Limpar parâmetros de hora e definir o appointment
     const params = new URLSearchParams(searchParams.toString());
     params.delete("hour");
     params.delete("startTime");
@@ -91,7 +84,6 @@ export function DayScheduleContent({
   };
 
   const handleClearHourSelection = () => {
-    // Limpar parâmetros e estado
     const params = new URLSearchParams(searchParams.toString());
     params.delete("hour");
     params.delete("startTime");
@@ -115,7 +107,6 @@ export function DayScheduleContent({
         );
       }
 
-      // Limpar parâmetros e estado após sucesso
       const params = new URLSearchParams(searchParams.toString());
       params.delete("hour");
       params.delete("startTime");

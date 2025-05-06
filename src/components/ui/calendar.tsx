@@ -13,11 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
@@ -28,25 +24,20 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  // Estado para o ano exibido
   const [year, setYear] = React.useState<number>(
     props.month ? props.month.getFullYear() : new Date().getFullYear()
   );
-  
-  // Estado para controlar a abertura do drawer
+
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  
-  // Verificar se é mobile
+
   const isMobile = useMediaQuery("(max-width: 640px)");
 
-  // Atualiza o ano quando o mês muda externamente
   React.useEffect(() => {
     if (props.month) {
       setYear(props.month.getFullYear());
     }
   }, [props.month]);
 
-  // Lista de anos de 1900 até o ano atual
   const currentYear = new Date().getFullYear();
   const years = React.useMemo(() => {
     const yearsList = [];
@@ -56,7 +47,6 @@ function Calendar({
     return yearsList;
   }, [currentYear]);
 
-  // Manipula a troca de ano
   const handleYearChange = (newYear: string) => {
     const y = parseInt(newYear, 10);
     setYear(y);
@@ -68,7 +58,6 @@ function Calendar({
     }
   };
 
-  // Componente de seleção de ano para desktop
   const DesktopYearSelect = () => (
     <Select value={year.toString()} onValueChange={handleYearChange}>
       <SelectTrigger className="w-20 ml-1">
@@ -84,7 +73,6 @@ function Calendar({
     </Select>
   );
 
-  // Componente de seleção de ano para mobile (com drawer)
   const MobileYearSelect = () => (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       <DrawerTrigger asChild>

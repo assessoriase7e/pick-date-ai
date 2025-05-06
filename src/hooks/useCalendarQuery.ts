@@ -54,9 +54,6 @@ export function useCalendarQuery({
     revalidatePathAction("/calendar");
   };
 
-  // Exemplo de como as funções de navegação poderiam ser implementadas
-  // (Você precisará adaptar ao seu código existente)
-
   const goToPreviousMonth = useCallback(() => {
     const prevMonth = new Date(currentDate);
     prevMonth.setMonth(prevMonth.getMonth() - 1);

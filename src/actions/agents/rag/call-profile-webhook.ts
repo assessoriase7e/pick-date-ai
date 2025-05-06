@@ -12,27 +12,22 @@ export const callProfileWebhook = async ({
   metadataKey: string;
 }) => {
   try {
-    // Verificar se o webhook está configurado
     if (!webhookUrl || !metadataKey) {
       return { success: true, message: "Webhook não configurado" };
     }
 
-    // Get profile data
     const profile = await prisma.profile.findUnique({
       where: { userId },
     });
 
-    // Get services data
     const services = await prisma.service.findMany({
       where: { userId },
     });
 
-    // Get links data
     const links = await prisma.link.findMany({
       where: { userId },
     });
 
-    // Get collborators data
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
       include: {
@@ -40,7 +35,6 @@ export const callProfileWebhook = async ({
       },
     });
 
-    // Testar se o webhook aceita POST antes de enviar dados
     const optionsResponse = await fetch(webhookUrl, {
       method: "OPTIONS",
     });
@@ -52,10 +46,9 @@ export const callProfileWebhook = async ({
       };
     }
 
-    // Função auxiliar para formatar horários de funcionamento
     function formatBusinessHours(businessHours: any[]): string {
       if (!Array.isArray(businessHours)) return "";
-      // Agrupa por dia e pega o menor openTime e maior closeTime para cada dia
+
       const grouped: Record<string, { open: string; close: string }[]> = {};
       businessHours.forEach((item) => {
         if (!grouped[item.day]) grouped[item.day] = [];
@@ -64,7 +57,6 @@ export const callProfileWebhook = async ({
 
       return Object.entries(grouped)
         .map(([day, intervals]) => {
-          // Se houver mais de um intervalo para o mesmo dia, mostra todos
           return intervals
             .map(
               (interval) => `${day}: Das ${interval.open} às ${interval.close}`
@@ -73,7 +65,7 @@ export const callProfileWebhook = async ({
         })
         .join("\n");
     }
-    // Formatar os dados para o treinamento RAG
+
     const formattedContent = `
         # Perfil da Empresa
         Nome da Empresa: ${profile?.companyName || ""}
@@ -140,7 +132,6 @@ export const callProfileWebhook = async ({
           .join("\n")}
         `;
 
-    // Enviar para o webhook
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {

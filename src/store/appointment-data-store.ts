@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { getClients } from "@/actions/clients/get-clients";
-import { getServices } from "@/actions/services/get-services";
 import { Client, Service } from "@prisma/client";
 import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 import { getServicesByCollaborator } from "@/actions/services/get-services-by-collaborator";
@@ -58,7 +57,6 @@ export const useAppointmentDataStore = create<AppointmentDataState>((set) => ({
         return;
       }
 
-      // Usar a nova server action para buscar serviços pelo ID do colaborador
       const response = await getServicesByCollaborator(collab.collaboratorId);
 
       if (response.success && response.data) {

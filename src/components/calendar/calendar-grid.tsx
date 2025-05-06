@@ -30,7 +30,7 @@ export function CalendarGrid({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = window.location.pathname;
-  const isSharedCalendar = pathname.includes('shared-calendar');
+  const isSharedCalendar = pathname.includes("shared-calendar");
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -40,26 +40,21 @@ export function CalendarGrid({
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Atualizar o ano selecionado quando a data atual mudar
     setSelectedYear(moment(currentDate).year());
   }, [currentDate]);
 
-  // Monitorar mudanças nos parâmetros de busca para controlar o estado de carregamento
   useEffect(() => {
     const currentParams = searchParams.toString();
 
-    // Ignorar a primeira carga da página
     if (isInitialLoad) {
       setPrevSearchParams(currentParams);
       setIsInitialLoad(false);
       return;
     }
 
-    // Se os parâmetros mudaram, ativar o loading
     if (currentParams !== prevSearchParams) {
       setIsLoading(true);
 
-      // Armazenar os parâmetros atuais
       setPrevSearchParams(currentParams);
     }
 
@@ -159,12 +154,14 @@ export function CalendarGrid({
 
   const handleDayClick = (date: Date) => {
     setIsLoading(true);
-    
-    const baseUrl = isSharedCalendar ? `/shared-calendar/${calendarId}` : '/calendar/day';
+
+    const baseUrl = isSharedCalendar
+      ? `/shared-calendar/${calendarId}`
+      : "/calendar/day";
     const params = new URLSearchParams();
-    params.set('calendarId', calendarId);
-    params.set('date', date.toISOString());
-    
+    params.set("calendarId", calendarId);
+    params.set("date", date.toISOString());
+
     router.push(`${baseUrl}?${params.toString()}`);
   };
 
@@ -175,7 +172,7 @@ export function CalendarGrid({
 
     const newDate = new Date(newYear, currentDate.getMonth(), 1);
     const params = new URLSearchParams(searchParams.toString());
-    params.set('date', newDate.toISOString());
+    params.set("date", newDate.toISOString());
 
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
@@ -185,7 +182,7 @@ export function CalendarGrid({
 
     const newDate = new Date(currentDate.getFullYear(), monthIndex, 1);
     const params = new URLSearchParams(searchParams.toString());
-    params.set('date', newDate.toISOString());
+    params.set("date", newDate.toISOString());
 
     router.push(`${window.location.pathname}?${params.toString()}`);
   };

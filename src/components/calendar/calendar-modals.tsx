@@ -60,14 +60,12 @@ export function CalendarModals({
     },
   });
 
-  // Resetar o formulário quando o modal é aberto
   useEffect(() => {
     if (open) {
       form.reset({ name: "" });
     }
   }, [open, form]);
 
-  // Atualizar o formulário de edição quando o calendário selecionado muda
   useEffect(() => {
     if (selectedCalendar && editOpen) {
       editForm.reset({ name: selectedCalendar.name });
@@ -140,7 +138,6 @@ export function CreateCalendarModal({
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
 
-  // Use o estado externo se fornecido, caso contrário use o interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = setExternalOpen || setInternalOpen;
 
@@ -178,7 +175,6 @@ export function CreateCalendarModal({
   );
 }
 
-// Modal de Edição
 export function EditCalendarModal({ calendar }: { calendar: Calendar }) {
   const [open, setOpen] = useState(false);
 

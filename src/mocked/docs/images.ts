@@ -1,5 +1,3 @@
-// apiDocsData.ts
-
 export const imagesRoutes = {
   title: "Rotas de Imagens",
   routes: [
