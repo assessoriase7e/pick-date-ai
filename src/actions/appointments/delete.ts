@@ -32,8 +32,10 @@ export async function deleteAppointment(id: string) {
       };
     }
 
-    await prisma.appointment.delete({
+    // Ao invés de excluir, atualizar o status para "canceled"
+    await prisma.appointment.update({
       where: { id },
+      data: { status: "canceled" },
     });
 
     revalidatePath("/calendar");
@@ -42,10 +44,10 @@ export async function deleteAppointment(id: string) {
       success: true,
     };
   } catch (error) {
-    console.error("Erro ao excluir agendamento:", error);
+    console.error("Erro ao cancelar agendamento:", error);
     return {
       success: false,
-      error: "Falha ao excluir agendamento",
+      error: "Falha ao cancelar agendamento",
     };
   }
 }

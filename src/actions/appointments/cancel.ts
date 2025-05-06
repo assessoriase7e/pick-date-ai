@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { cancelAppointmentSchema } from "@/validators/calendar";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 export async function cancelAppointment(
   data: z.infer<typeof cancelAppointmentSchema>
@@ -26,6 +27,8 @@ export async function cancelAppointment(
         status: "cancelled",
       },
     });
+
+    revalidatePath(`/calendar/day?calendarId${appointment.calendarId}`);
 
     return {
       success: true,

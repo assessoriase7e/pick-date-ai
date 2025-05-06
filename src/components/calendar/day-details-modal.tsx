@@ -16,7 +16,6 @@ import { deleteAppointment } from "@/actions/appointments/delete";
 import { AppointmentFormDialog } from "../appointment/appointment-form-dialog";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
-import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { useAppointmentDataStore } from "@/store/appointment-data-store";
 
 interface DayDetailsModalProps {
@@ -50,6 +49,7 @@ export function DayDetailsModal({
   );
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [initialStartTime, setInitialStartTime] = useState<string | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [localAppointments, setLocalAppointments] = useState<
     AppointmentFullData[]
   >(
@@ -70,44 +70,9 @@ export function DayDetailsModal({
     }
   }, [dayDetails, calendarId, fetchClients, fetchServices]);
 
-  // Function to reload appointments
-  const reloadAppointments = async () => {
-    if (!dayDetails) return;
-
-    try {
-      const response = await getAppointmentsByCalendarAndDate(
-        calendarId,
-        dayDetails.date
-      );
-      if (response.success && response.data) {
-        setLocalAppointments(
-          response.data.map((appointment) => ({
-            ...appointment,
-            startTime: new Date(appointment.startTime),
-            endTime: new Date(appointment.endTime),
-          }))
-        );
-
-        // Update global appointments state in CalendarContent
-        const dateKey = dayDetails.date.toISOString().split("T")[0];
-        window.dispatchEvent(
-          new CustomEvent("appointmentUpdated", {
-            detail: {
-              dateKey,
-              appointments: response.data,
-            },
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Erro ao recarregar agendamentos:", error);
-    }
-  };
-
   // Handlers
   const handleFormSuccess = async () => {
     setShowAppointmentForm(false);
-    await reloadAppointments();
 
     if (dayDetails && updateAppointmentsForDate) {
       const dateKey = dayDetails.date.toISOString().split("T")[0];
@@ -132,6 +97,7 @@ export function DayDetailsModal({
   const handleHourClick = (hour: number) => {
     setSelectedAppointment(null);
     setInitialStartTime(`${hour.toString().padStart(2, "0")}:00`);
+    setSelectedHour(hour);
     setShowAppointmentForm(true);
   };
 
@@ -142,9 +108,8 @@ export function DayDetailsModal({
     try {
       const result = await deleteAppointment(appointmentToDelete);
       if (result.success) {
-        toast.success("Agendamento excluído com sucesso");
+        toast.success("Agendamento cancelado com sucesso");
         setAppointmentToDelete(null);
-        await reloadAppointments();
       } else {
         toast.error(result.error || "Erro ao excluir agendamento");
       }
@@ -201,6 +166,7 @@ export function DayDetailsModal({
               appointments={localAppointments}
               onHourClick={handleHourClick}
               onEditAppointment={handleEditAppointment}
+              selectedHour={selectedHour}
             />
           </div>
 

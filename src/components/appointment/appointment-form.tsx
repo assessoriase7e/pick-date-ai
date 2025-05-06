@@ -201,7 +201,15 @@ export function AppointmentForm({
           )}
         />
 
-        <div className="flex justify-between pt-4">
+        <div className="flex justify-between mt-6">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>Salvando...</>
+            ) : (
+              <>{isEditing ? "Atualizar" : "Agendar"}</>
+            )}
+          </Button>
+
           {isEditing && (
             <Button
               type="button"
@@ -209,16 +217,9 @@ export function AppointmentForm({
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Excluindo..." : "Excluir"}
+              {isDeleting ? "Cancelando..." : "Cancelar Agendamento"}
             </Button>
           )}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className={isEditing ? "" : "w-full"}
-          >
-            {isLoading ? "Salvando..." : "Salvar"}
-          </Button>
         </div>
       </form>
     </Form>

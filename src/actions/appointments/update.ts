@@ -56,7 +56,7 @@ export async function updateAppointment(
             ],
           },
         ],
-        status: "scheduled",
+        status: "scheduled", // Verificar apenas agendamentos ativos
       },
     });
 

@@ -20,6 +20,11 @@ export function CalendarDayCell({
   onClick,
   isMobile = false,
 }: CalendarDayCellProps) {
+  // Filtrar apenas agendamentos ativos
+  const activeAppointments = getAppointmentsForDay(dayObj.date).filter(
+    (appointment) => appointment.status !== "canceled"
+  );
+  
   if (isMobile) {
     return (
       <div
@@ -28,7 +33,7 @@ export function CalendarDayCell({
           "border rounded-lg p-3 mb-2 hover:bg-muted/30 cursor-pointer transition-colors",
           isSelected(dayObj.date) && "ring-2 ring-primary",
           dayObj.isToday && "border-primary",
-          getAppointmentsForDay(dayObj.date)?.length && "bg-primary"
+          activeAppointments?.length && "bg-primary"
         )}
         onClick={onClick}
       >
@@ -44,9 +49,9 @@ export function CalendarDayCell({
             </span>
             <span className="ml-2 text-sm">{dayObj.date.format("ddd")}</span>
           </div>
-          {getAppointmentsForDay(dayObj.date)?.length > 0 && (
+          {activeAppointments?.length > 0 && (
             <span className="text-sm bg-primary px-2 py-1 rounded-full">
-              {getAppointmentsForDay(dayObj.date).length} agendamento(s)
+              {activeAppointments.length} agendamento(s)
             </span>
           )}
         </div>
@@ -61,7 +66,7 @@ export function CalendarDayCell({
         "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed",
         !dayObj.isCurrentMonth && "bg-muted/20 text-muted",
         isSelected(dayObj.date) && "ring-2 ring-primary",
-        getAppointmentsForDay(dayObj.date)?.length &&
+        activeAppointments?.length &&
           "bg-primary border-primary"
       )}
       onClick={onClick}

@@ -17,7 +17,10 @@ export function DayScheduleGrid({
   onEditAppointment,
   selectedHour,
 }: DayScheduleGridProps) {
-
+  // Filtrar apenas agendamentos não cancelados
+  const activeAppointments = appointments.filter(
+    (appointment) => appointment.status !== "canceled"
+  );
 
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");
@@ -73,7 +76,7 @@ export function DayScheduleGrid({
 
           {/* Grid absoluto para todo o dia */}
           <div className="absolute inset-0 grid grid-rows-[repeat(24,80px)]">
-            {appointments.map((appointment) => {
+            {activeAppointments.map((appointment) => {
               const startHour = appointment.startTime.getHours();
               const startMinutes = appointment.startTime.getMinutes();
               const endHour = appointment.endTime.getHours();

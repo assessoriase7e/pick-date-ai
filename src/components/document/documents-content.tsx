@@ -238,16 +238,14 @@ export function DocumentsContent({
         )}
       </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(newPage: number) => {
-            router.push(`/documents?page=${newPage}`);
-          }}
-          isLoading={isLoading}
-        />
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(newPage: number) => {
+          router.push(`/documents?page=${newPage}`);
+        }}
+        isLoading={isLoading}
+      />
 
       <DocumentModal
         isOpen={isCreateModalOpen}

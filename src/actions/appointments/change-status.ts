@@ -13,7 +13,7 @@ export async function changeAppointmentStatus(
       data: { status },
     });
 
-    revalidatePath("/calendar");
+    revalidatePath(`/calendar/day?calendarId${appointment.calendarId}`);
 
     return {
       success: true,

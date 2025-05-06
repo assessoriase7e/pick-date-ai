@@ -43,6 +43,11 @@ export default async function CalendarPage({
         return;
       }
 
+      // Ignorar agendamentos cancelados
+      if (appointment.status === "canceled") {
+        return;
+      }
+
       // Formatar a data da chave usando moment
       const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
 
@@ -66,7 +71,10 @@ export default async function CalendarPage({
     );
 
     if (dayResponse.success && dayResponse.data) {
-      selectedDayAppointments = dayResponse.data;
+      // Filtrar agendamentos cancelados
+      selectedDayAppointments = dayResponse.data.filter(
+        (appointment) => appointment.status !== "canceled"
+      );
     }
   }
 
