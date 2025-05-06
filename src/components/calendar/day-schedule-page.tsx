@@ -137,6 +137,7 @@ export function DayScheduleContent({
   ): boolean => {
     return appointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
+      if (appointment.status !== "scheduled") return false;
 
       const appointmentStart = new Date(appointment.startTime);
       const appointmentEnd = new Date(appointment.endTime);

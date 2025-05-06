@@ -45,6 +45,8 @@ export async function createAppointment(
             },
           },
         ],
+        status: "scheduled",
+        calendarId: data.calendarId,
       },
     });
 

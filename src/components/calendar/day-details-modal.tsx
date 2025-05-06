@@ -50,14 +50,11 @@ export function DayDetailsModal({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [initialStartTime, setInitialStartTime] = useState<string | null>(null);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
-  const [localAppointments, setLocalAppointments] = useState<
-    AppointmentFullData[]
-  >(
-    appointments.map((appointment) => ({
-      ...appointment,
-      startTime: new Date(appointment.startTime),
-      endTime: new Date(appointment.endTime),
-    }))
+
+  const localAppointments = appointments.filter(
+    (appointment) =>
+      moment(appointment.startTime).format("DD/MM/YYYY") ===
+      moment(dayDetails.date).format("DD/MM/YYYY")
   );
 
   // Pré-carregar dados quando o modal é aberto
