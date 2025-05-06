@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +21,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { profileSchema, ProfileFormValues } from "@/validators/profile";
 import { updateProfile } from "@/actions/profile/update";
 import { formatDocument } from "@/lib/format-utils";
-import { useUser } from "@clerk/nextjs";
 import { PatternFormat } from "react-number-format";
+import { daysOfWeek } from "@/mocked/daysOfWeek";
 
 interface CombinedProfileData extends Partial<User> {
   profile?: Partial<Profile> | null;
@@ -33,21 +32,8 @@ interface ProfileFormProps {
   initialData?: CombinedProfileData;
 }
 
-const DAYS_OF_WEEK = [
-  "Segunda-feira",
-  "Terça-feira",
-  "Quarta-feira",
-  "Quinta-feira",
-  "Sexta-feira",
-  "Sábado",
-  "Domingo",
-];
-
 export function ProfileForm({ initialData }: ProfileFormProps) {
-  console.log("initialData recebido:", initialData);
-
   const router = useRouter();
-  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
   const processInitialBusinessHours = () => {
@@ -64,15 +50,13 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
         return Array.isArray(parsedHours)
           ? parsedHours
-          : [{ day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" }];
+          : [{ day: daysOfWeek[0], openTime: "08:00", closeTime: "18:00" }];
       } catch (error) {
         console.error("Erro ao processar horários de funcionamento:", error);
-        return [
-          { day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" },
-        ];
+        return [{ day: daysOfWeek[0], openTime: "08:00", closeTime: "18:00" }];
       }
     }
-    return [{ day: DAYS_OF_WEEK[0], openTime: "08:00", closeTime: "18:00" }];
+    return [{ day: daysOfWeek[0], openTime: "08:00", closeTime: "18:00" }];
   };
 
   const form = useForm<ProfileFormValues>({
@@ -104,7 +88,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       )
       .filter(Boolean);
 
-    return DAYS_OF_WEEK.filter((day) => !selectedDays.includes(day));
+    return daysOfWeek.filter((day) => !selectedDays.includes(day));
   };
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,7 +155,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
             name="whatsapp"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Whatsapp</FormLabel>
+                <FormLabel>Whatsapp da Empresa</FormLabel>
                 <FormControl>
                   <PatternFormat
                     format="(##) #####-####"
@@ -195,7 +179,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
             name="companyName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome da Empresa/Profissional</FormLabel>
+                <FormLabel>Nome da Empresa</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Nome da empresa ou profissional"
@@ -255,6 +239,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                     onChange={(e) => {
                       handleDocumentChange(e);
                     }}
+                    className="w-full"
                   />
                 </FormControl>
                 <FormMessage />
