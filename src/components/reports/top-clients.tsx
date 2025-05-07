@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 interface TopClientsProps {
   topClientsByServices: {
@@ -43,6 +44,8 @@ export function TopClients({
   topClientsByServices,
   topClientsBySpending,
 }: TopClientsProps) {
+  const [activeTab, setActiveTab] = useState("services");
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -59,7 +62,7 @@ export function TopClients({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="services">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="hidden md:block">
             <TabsList className="mb-4">
               <TabsTrigger value="services">
@@ -70,7 +73,7 @@ export function TopClients({
           </div>
 
           <div className="block md:hidden mb-4">
-            <Select defaultValue="services">
+            <Select value={activeTab} onValueChange={setActiveTab}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione a visualização" />
               </SelectTrigger>
