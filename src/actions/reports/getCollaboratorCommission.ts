@@ -1,8 +1,7 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { unstable_cache } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 type CollaboratorCommissionSuccess = {
   success: true;
@@ -36,14 +35,20 @@ async function fetchCollaboratorCommission(
     if (to) dateFilter.lte = to;
     else dateFilter.lte = new Date();
 
-    const where: any = {
+    const where: Prisma.AppointmentWhereInput = {
       userId,
     };
     if (Object.keys(dateFilter).length > 0) {
       where.startTime = dateFilter;
     }
     if (collaboratorId) {
-      where.service = { collaboratorId };
+      where.service = {
+        serviceCollaborators: {
+          some: {
+            collaboratorId
+          }
+        }
+      };
     }
 
     const appointments = await prisma.appointment.findMany({
@@ -51,10 +56,14 @@ async function fetchCollaboratorCommission(
       include: {
         service: {
           include: {
-            collaborator: {
-              select: {
-                id: true,
-                name: true,
+            serviceCollaborators: {
+              include: {
+                collaborator: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
@@ -75,24 +84,27 @@ async function fetchCollaboratorCommission(
 
     appointments.forEach((appointment) => {
       const service = appointment.service;
-      const collaborator = service?.collaborator;
-      if (!collaborator || typeof service?.commission !== "number") return;
+      if (!service || typeof service.commission !== "number") return;
 
-      const id = collaborator.id;
-      if (!collaboratorData[id]) {
-        collaboratorData[id] = {
-          collaboratorId: id,
-          name: collaborator.name,
-          totalServices: 0,
-          totalRevenue: 0,
-          totalCommission: 0,
-        };
-      }
+      service.serviceCollaborators.forEach((sc) => {
+        const collaborator = sc.collaborator;
+        const id = collaborator.id;
+        
+        if (!collaboratorData[id]) {
+          collaboratorData[id] = {
+            collaboratorId: id,
+            name: collaborator.name,
+            totalServices: 0,
+            totalRevenue: 0,
+            totalCommission: 0,
+          };
+        }
 
-      collaboratorData[id].totalServices += 1;
-      collaboratorData[id].totalRevenue += service.price || 0;
-      collaboratorData[id].totalCommission +=
-        (service.price || 0) * (service.commission / 100);
+        collaboratorData[id].totalServices += 1;
+        collaboratorData[id].totalRevenue += service.price || 0;
+        collaboratorData[id].totalCommission +=
+          (service.price || 0) * (service.commission / 100);
+      });
     });
 
     const result = Object.values(collaboratorData).map((collab) => ({
@@ -126,17 +138,5 @@ export const getCollaboratorCommission = async (
     return { success: false, error: "Usuário não autenticado" };
   }
 
-  const fromStr = from ? from.toISOString().split("T")[0] : "none";
-  const toStr = to ? to.toISOString().split("T")[0] : "none";
-  const collabStr = collaboratorId || "all";
-  const cacheKey = `commission-${collabStr}-${fromStr}-${toStr}`;
-
-  return unstable_cache(
-    () => fetchCollaboratorCommission(userId, collaboratorId, from, to),
-    [cacheKey, userId],
-    {
-      revalidate: 60 * 15,
-      tags: ["collaborators", "commission", "appointments"],
-    }
-  )();
+  return fetchCollaboratorCommission(userId, collaboratorId, from, to);
 };

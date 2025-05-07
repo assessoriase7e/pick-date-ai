@@ -51,7 +51,7 @@ export function TopClients({
   };
 
   return (
-    <Card className="col-span-1 lg:col-span-3 w-full">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Top Clientes</CardTitle>
         <CardDescription>
@@ -75,7 +75,9 @@ export function TopClients({
                 <SelectValue placeholder="Selecione a visualização" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="services">Por Quantidade de Serviços</SelectItem>
+                <SelectItem value="services">
+                  Por Quantidade de Serviços
+                </SelectItem>
                 <SelectItem value="spending">Por Valor Gasto</SelectItem>
               </SelectContent>
             </Select>

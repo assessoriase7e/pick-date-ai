@@ -45,7 +45,7 @@ export default async function ReportsPage({
     ? moment(fromRevenue as string)
         .startOf("day")
         .toDate()
-    : moment().subtract(30, "days").startOf("day").toDate();
+    : moment().subtract(1, "M").startOf("day").toDate();
   const formatedToRevenue = toRevenue
     ? moment(toRevenue as string)
         .endOf("day")
@@ -88,7 +88,7 @@ export default async function ReportsPage({
     ? moment(fromCollab as string)
         .startOf("day")
         .toDate()
-    : moment().subtract(30, "days").startOf("day").toDate();
+    : moment().subtract(1, "M").startOf("day").toDate();
   const formatedToCollab = toCollab
     ? moment(toCollab as string)
         .endOf("day")
@@ -105,6 +105,9 @@ export default async function ReportsPage({
     formatedFromCollab,
     formatedToCollab
   );
+
+  console.log(commissionResult); // tod
+
   const commissionData = commissionResult.success ? commissionResult.data : [];
 
   const topClientsResult = await getTopClientsByServices(5);
@@ -162,7 +165,7 @@ export default async function ReportsPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <CollaboratorCommission
             initialCollaborators={collaborators}
