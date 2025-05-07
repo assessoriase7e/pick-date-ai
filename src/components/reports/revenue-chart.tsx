@@ -34,8 +34,8 @@ export function RevenueChart({
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: initialFromDate || moment().subtract(30, "days").toDate(),
-    to: initialToDate || new Date(),
+    from: initialFromDate || moment().startOf("day").toDate(),
+    to: initialToDate || moment().add(1, "M").toDate(),
   });
 
   const fetchData = async (from: Date, to: Date) => {

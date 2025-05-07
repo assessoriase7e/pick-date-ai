@@ -53,15 +53,13 @@ export default async function ReportsPage({
     : today;
 
   const formatedFromMonthlyRevenue = fromMonthlyRevenue
-    ? moment(fromMonthlyRevenue as string)
-        .startOf("day")
-        .toDate()
-    : moment().subtract(12, "months").startOf("month").toDate();
+    ? moment(fromMonthlyRevenue as string).toDate()
+    : moment().startOf("day").toDate();
   const formatedToMonthlyRevenue = toMonthlyRevenue
     ? moment(toMonthlyRevenue as string)
         .endOf("day")
         .toDate()
-    : today;
+    : moment().add(1, "month").endOf("day").toDate();
 
   const revenueResult = await getRevenueByPeriod(
     formatedFromRevenue,

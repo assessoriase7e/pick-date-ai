@@ -1,9 +1,7 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import moment from "moment";
-import { unstable_cache } from "next/cache";
 
 type DailyRevenue = {
   date: string;
@@ -28,10 +26,11 @@ async function fetchRevenueByPeriod(
     const appointments = await prisma.appointment.findMany({
       where: {
         userId: userId,
-        createdAt: {
+        endTime: {
           gte: from,
           lte: to,
         },
+        status: "scheduled",
       },
       include: {
         service: {
@@ -84,15 +83,5 @@ export const getRevenueByPeriod = async (
     return { success: false, error: "Usuário não autenticado." };
   }
 
-  const fromStr = from.toISOString().split("T")[0];
-  const toStr = to.toISOString().split("T")[0];
-  const cacheKey = `revenue-${userId}-${fromStr}-${toStr}`;
-
-  const cachedFetch = unstable_cache(
-    () => fetchRevenueByPeriod(userId, from, to),
-    [cacheKey],
-    { revalidate: 60 * 30, tags: ["revenue", "appointments"] }
-  );
-
-  return cachedFetch();
+  return fetchRevenueByPeriod(userId, from, to);
 };

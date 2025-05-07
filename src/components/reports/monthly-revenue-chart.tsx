@@ -34,10 +34,8 @@ export function MonthlyRevenueChart({
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from:
-      initialFromDate ||
-      moment().subtract(12, "months").startOf("month").toDate(),
-    to: initialToDate || new Date(),
+    from: initialFromDate || moment().startOf("day").toDate(),
+    to: initialToDate || moment().endOf("day").add(1, "M").toDate(),
   });
 
   const fetchData = async (from: Date, to: Date) => {

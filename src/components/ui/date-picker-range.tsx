@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import moment from "moment";
 
 interface DatePickerWithRangeProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -29,12 +30,16 @@ interface DatePickerWithRangeProps
 
 export function DatePickerWithRange({
   className,
-  date,
+  date = {
+    from: moment().toDate(),
+    to: moment().add(1, "month").toDate(),
+  },
   fromKey,
   toKey,
   onDateChange,
 }: DatePickerWithRangeProps) {
-  const [open, setOpen] = React.useState(false);
+  const [openFrom, setOpenFrom] = React.useState(false);
+  const [openTo, setOpenTo] = React.useState(false);
   const isMobile = useIsMobile();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,87 +56,158 @@ export function DatePickerWithRange({
       params.set(toKey, range.to.toISOString());
 
       router.push(`?${params.toString()}`);
-      setOpen(false);
+      setOpenFrom(false);
+      setOpenTo(false);
     }
   };
 
-  const dateDisplay = React.useMemo(() => {
-    if (!date?.from) return <span>Selecione um período</span>;
+  const handleSelectFrom = (selected: Date | undefined) => {
+    const newRange: DateRange = {
+      from: selected ?? undefined,
+      to: date?.to,
+    };
+    handleSelect(newRange);
+    setOpenFrom(false);
+  };
 
-    return date.to ? (
-      <>
-        {format(date.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-        {format(date.to, "dd/MM/yyyy", { locale: ptBR })}
-      </>
-    ) : (
-      format(date.from, "dd/MM/yyyy", { locale: ptBR })
-    );
-  }, [date]);
+  const handleSelectTo = (selected: Date | undefined) => {
+    const newRange: DateRange = {
+      from: date?.from,
+      to: selected ?? undefined,
+    };
+    handleSelect(newRange);
+    setOpenTo(false);
+  };
+
+  const dateDisplayFrom = React.useMemo(() => {
+    return date?.from
+      ? format(date.from, "dd/MM/yyyy", { locale: ptBR })
+      : "Data inicial";
+  }, [date?.from]);
+
+  const dateDisplayTo = React.useMemo(() => {
+    return date?.to
+      ? format(date.to, "dd/MM/yyyy", { locale: ptBR })
+      : "Data final";
+  }, [date?.to]);
 
   if (isMobile) {
     return (
       <div className={cn("grid gap-2", className)}>
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>
-            <Button
-              id="date"
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateDisplay}
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <div className="p-4">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={handleSelect}
-                numberOfMonths={1}
-                locale={ptBR}
-                className="mx-auto"
-              />
-            </div>
-          </DrawerContent>
-        </Drawer>
+        <div className="flex gap-2">
+          <Drawer open={openFrom} onOpenChange={setOpenFrom}>
+            <DrawerTrigger asChild>
+              <Button
+                id="date-from"
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !date?.from && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateDisplayFrom}
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <div className="p-4 space-y-4">
+                <div className="flex items-center justify-center flex-col">
+                  <p className="text-sm font-medium mb-2">Data inicial</p>
+                  <Calendar
+                    mode="single"
+                    selected={date?.from}
+                    onSelect={handleSelectFrom}
+                    locale={ptBR}
+                    className="mx-auto"
+                  />
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+          <Drawer open={openTo} onOpenChange={setOpenTo}>
+            <DrawerTrigger asChild>
+              <Button
+                id="date-to"
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !date?.to && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateDisplayTo}
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <div className="p-4 space-y-4">
+                <div className="flex items-center justify-center flex-col">
+                  <p className="text-sm font-medium mb-2">Data final</p>
+                  <Calendar
+                    mode="single"
+                    selected={date?.to}
+                    onSelect={handleSelectTo}
+                    locale={ptBR}
+                    className="mx-auto"
+                  />
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </div>
       </div>
     );
   }
 
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {dateDisplay}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={handleSelect}
-            numberOfMonths={2}
-            locale={ptBR}
-          />
-        </PopoverContent>
-      </Popover>
+      <div className="flex gap-2">
+        <Popover open={openFrom} onOpenChange={setOpenFrom}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date-from"
+              variant={"outline"}
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date?.from && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateDisplayFrom}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date?.from}
+              onSelect={handleSelectFrom}
+              locale={ptBR}
+            />
+          </PopoverContent>
+        </Popover>
+        <Popover open={openTo} onOpenChange={setOpenTo}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date-to"
+              variant={"outline"}
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date?.to && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateDisplayTo}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date?.to}
+              onSelect={handleSelectTo}
+              locale={ptBR}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

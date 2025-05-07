@@ -25,7 +25,7 @@ export default async function CalendarPage({
 
   const currentDate = sParams.date
     ? moment(sParams.date).toDate()
-    : moment().toDate();
+    : moment().startOf("day").toDate();
 
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   const res = await getAppointmentsByMonth(currentDate, calendarId);
