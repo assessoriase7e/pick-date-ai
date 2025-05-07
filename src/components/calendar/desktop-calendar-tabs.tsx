@@ -78,7 +78,7 @@ export function DesktopCalendarTabs({
   }
 
   return (
-    <TabsList className="hidden lg:flex w-full h-16 justify-start overflow-x-auto overflow-y-hidden">
+    <TabsList className="hidden lg:flex w-full justify-start overflow-x-auto overflow-y-hidden pr-20">
       {calendars.map((calendar: CalendarFullData) => (
         <TabsTrigger
           key={calendar.id}
@@ -97,7 +97,7 @@ export function DesktopCalendarTabs({
           <span className="flex items-center">
             {calendar.name} | ({calendar.collaborator?.name})
             <div
-              className={`calendar-actions ml-2 flex items-center justify-center space-x-1 transition-all duration-200 ${
+              className={`calendar-actions  flex items-center justify-center space-x-1 transition-all duration-200 ${
                 hoveredTab === calendar.id
                   ? "opacity-100 max-w-20"
                   : "opacity-0 max-w-0 overflow-hidden"
