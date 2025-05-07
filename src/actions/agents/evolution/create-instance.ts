@@ -28,6 +28,30 @@ export async function createInstance(data: CreateInstanceFormValues) {
       };
     }
 
+    // Verificar se a instância já existe
+    const checkResponse = await fetch(
+      `${evolutionApiUrl}/instance/fetchInstances`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": evolutionApiKey,
+        },
+      }
+    );
+
+    const instances = await checkResponse.json();
+    const instanceExists = instances.some(
+      (instance: any) => instance.instanceName === data.name
+    );
+
+    if (instanceExists) {
+      return {
+        success: false,
+        error: "Nome da instância precisa ser único",
+      };
+    }
+
     let webhookUrl = "";
     if (data.type === "attendant") {
       webhookUrl = attendantWebHookUrl;
@@ -70,6 +94,7 @@ export async function createInstance(data: CreateInstanceFormValues) {
         qrCode: result.qrcode.base64,
         webhookUrl,
         apiKey: result.apiKey || evolutionApiKey,
+        type: data.type,
         userId,
       },
     });

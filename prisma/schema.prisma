@@ -267,14 +267,17 @@ model EvolutionInstance {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   number     String
-  qrCode     String
+  qrCode     String?
   webhookUrl String?
-  apiKey     String
-  status     String   @default("pending")
+  apiKey     String?
+  status     String   @default("close")
+  type       String   @default("attendant")
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("evolutioninstance")
 }
 
 model Service {

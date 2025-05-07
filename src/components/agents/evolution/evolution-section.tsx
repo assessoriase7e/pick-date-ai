@@ -114,6 +114,7 @@ export function EvolutionSection({
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Número</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -123,6 +124,15 @@ export function EvolutionSection({
                 <TableRow key={instance.id}>
                   <TableCell className="font-medium">{instance.name}</TableCell>
                   <TableCell>{instance.number}</TableCell>
+                  <TableCell>
+                    {instance.type === "attendant"
+                      ? "Recepcionista"
+                      : instance.type === "sdr"
+                      ? "SDR"
+                      : instance.type === "followup"
+                      ? "Follow-up"
+                      : instance.type}
+                  </TableCell>
                   <TableCell>{getStatusBadge(instance.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
