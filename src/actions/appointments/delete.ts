@@ -37,6 +37,7 @@ export async function deleteAppointment(id: string) {
     });
 
     revalidatePath("/calendar");
+    revalidatePath("/reports");
 
     return {
       success: true,

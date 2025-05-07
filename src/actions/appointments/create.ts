@@ -70,6 +70,7 @@ export async function createAppointment(
     });
 
     revalidatePath("/calendar");
+    revalidatePath("/reports");
 
     return {
       success: true,

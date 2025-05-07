@@ -42,6 +42,7 @@ export async function saveClient(data: any) {
     }
 
     revalidatePath("/clients");
+    revalidatePath("/reports");
 
     return {
       success: true,

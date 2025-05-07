@@ -15,6 +15,7 @@ export async function deleteClient(id: string) {
 
     revalidatePath("/clients");
     revalidateTag("services");
+    revalidatePath("/reports");
 
     return {
       success: true,
