@@ -15,6 +15,7 @@ interface CalendarGridProps {
   selectedDate: Date | null;
   initialAppointments: Record<string, AppointmentFullData[]>;
   calendarId: string;
+  loading?: boolean;
 }
 
 export function CalendarGrid({
@@ -25,11 +26,13 @@ export function CalendarGrid({
   selectedDate,
   initialAppointments,
   calendarId,
+  loading,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const pathname =
+    typeof window !== "undefined" ? window.location.pathname : "";
   const isSharedCalendar = pathname.includes("shared-calendar");
 
   const [touchStart, setTouchStart] = useState<number | null>(null);

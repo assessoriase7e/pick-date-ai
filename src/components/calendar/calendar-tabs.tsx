@@ -7,6 +7,8 @@ import { CalendarActionsModal } from "./calendar-actions-modal";
 import { DesktopCalendarTabs } from "./desktop-calendar-tabs";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { revalidatePathAction } from "@/actions/revalidate-path";
+import IsTableLoading from "../isTableLoading";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
@@ -38,17 +40,24 @@ export function CalendarTabs({
   goToNextMonth,
   goToToday,
   selectedDate,
-  openDayDetails,
   initialAppointments,
 }: CalendarTabsProps) {
   const [showActionsModal, setShowActionsModal] = useState<boolean>(false);
   const [selectedCalendar, setSelectedCalendar] =
     useState<CalendarFullData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const isMobile = useIsMobile();
 
-  const handleChangeCalendar = (id: string) => {
+  const handleChangeCalendar = async (id: string) => {
+    setLoading(true);
+
     setCalendarId(id);
+    await revalidatePathAction("/calendar");
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 50);
   };
 
   return (
@@ -69,7 +78,7 @@ export function CalendarTabs({
       <Tabs
         value={calendarId}
         onValueChange={handleChangeCalendar}
-        className="h-full flex flex-col gap-2"
+        className="h-full flex flex-col gap-2 relative"
       >
         {!isMobile && (
           <DesktopCalendarTabs
@@ -82,6 +91,8 @@ export function CalendarTabs({
             openDeleteModal={openDeleteModal}
           />
         )}
+
+        <IsTableLoading isPageChanging={loading} />
 
         {calendars.map((calendar) => (
           <TabsContent
