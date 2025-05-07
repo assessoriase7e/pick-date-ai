@@ -6,10 +6,6 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (req.nextUrl.pathname.startsWith("/shared-calendar")) {
-    return;
-  }
-
   const { userId, redirectToSignIn } = await auth();
 
   if (!userId && isProtectedRoute(req)) {

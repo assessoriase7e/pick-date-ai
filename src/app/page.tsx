@@ -1,17 +1,9 @@
 import { Hero } from "@/components/hero";
-import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default async function Home() {
-  const user = await currentUser();
-
-  if (user) {
-    redirect("/calendar");
-  }
-
   return (
     <main>
       <div className="h-20 w-full border-b border-border flex  items-center">
