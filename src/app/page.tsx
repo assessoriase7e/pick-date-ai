@@ -1,6 +1,9 @@
 import { Hero } from "@/components/hero";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default async function Home() {
@@ -13,9 +16,25 @@ export default async function Home() {
             <p className="font-semibold text-2xl">Pick Date AI</p>
           </div>
 
-          <Link href="/sign-in">
-            <Button>Entrar</Button>
-          </Link>
+          <SignedOut>
+            <Link href="/sign-in">
+              <Button variant="outline">Entrar</Button>
+            </Link>
+          </SignedOut>
+
+          <SignedIn>
+            <div className="flex items-center justify-center gap-2">
+              <Link href="/calendar">
+                <Button>
+                  Painel <ChevronRight />
+                </Button>
+              </Link>
+
+              <Separator orientation="vertical" className="h-10" />
+
+              <UserButton />
+            </div>
+          </SignedIn>
         </div>
       </div>
       <Hero />
