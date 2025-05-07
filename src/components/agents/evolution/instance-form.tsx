@@ -18,6 +18,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   createInstance,
   CreateInstanceFormValues,
 } from "@/actions/agents/evolution/create-instance";
@@ -47,7 +54,7 @@ export function InstanceForm({
       name: initialData?.name || "",
       number: initialData?.number || profilePhone || "",
       qrCode: initialData?.qrCode ?? true,
-      webhookUrl: initialData?.webhookUrl || "",
+      type: initialData?.type || "attendant",
     },
   });
 
@@ -140,13 +147,30 @@ export function InstanceForm({
 
         <FormField
           control={form.control}
-          name="webhookUrl"
+          name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Webhook URL</FormLabel>
-              <FormControl>
-                <Input placeholder="https://exemplo.com/webhook" {...field} />
-              </FormControl>
+              <FormLabel>Tipo de Instância</FormLabel>
+              <Select
+                disabled={isEditing}
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="attendant">Recepcionista</SelectItem>
+                  <SelectItem value="sdr" disabled>
+                    SDR (Em Breve)
+                  </SelectItem>
+                  <SelectItem value="followup" disabled>
+                    Follow-up (Em Breve)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

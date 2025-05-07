@@ -5,12 +5,12 @@ export const evolutionFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   number: z.string().min(1, "Número é obrigatório"),
   qrCode: z.boolean(),
-  webhookUrl: z.string().url("URL inválida").optional().or(z.literal("")),
+  type: z.enum(["attendant", "sdr", "followup"]),
 });
 
 export const createInstanceSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   number: z.string().min(1, "Número é obrigatório"),
   qrCode: z.boolean().default(true),
-  webhookUrl: z.string().url().optional().or(z.literal("")),
+  type: z.enum(["attendant", "sdr", "followup"]),
 });
