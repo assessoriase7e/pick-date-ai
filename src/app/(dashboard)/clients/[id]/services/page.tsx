@@ -2,6 +2,9 @@ import { getClient } from "@/actions/clients/get-client";
 import { getClientServices } from "@/actions/clients/services/get-client-services";
 import { getServices } from "@/actions/services/get-services";
 import ClientServicesTable from "@/components/clients/client-services-table";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface ClientServicesPageProps {
@@ -34,7 +37,14 @@ export default async function ClientServicesPage({
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-2">
+      <Link href="/clients">
+        <Button variant="outline">
+          <ChevronLeft />
+          Voltar
+        </Button>
+      </Link>
+
+      <h1 className="text-2xl font-bold my-4 text-end">
         Serviços do Cliente: {clientResult.data.client.fullName}
       </h1>
 

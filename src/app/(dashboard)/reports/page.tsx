@@ -106,8 +106,6 @@ export default async function ReportsPage({
     formatedToCollab
   );
 
-  console.log(commissionResult); // tod
-
   const commissionData = commissionResult.success ? commissionResult.data : [];
 
   const topClientsResult = await getTopClientsByServices(5);
