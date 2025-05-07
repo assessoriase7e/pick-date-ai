@@ -6,26 +6,22 @@ import { ragConfig } from "@/config/rag";
 
 export const triggerProfileRagUpdate = async (userId: string) => {
   try {
-    if (!ragConfig.webhookUrl) {
+    if (!process.env.RAG_WEBHOOK_URL) {
       return { success: true, message: "Webhook não configurado" };
     }
 
     try {
-      const response = await fetch(ragConfig.webhookUrl, {
-        method: "HEAD",
+      const response = await fetch(process.env.RAG_WEBHOOK_URL, {
+        method: "OPTIONS",
       });
 
       if (!response.ok) {
-        console.log("Webhook indisponível, ignorando atualização RAG");
         return {
           success: true,
           message: "Webhook indisponível, fluxo ignorado",
         };
       }
     } catch (error) {
-      console.log(
-        "Erro ao verificar conexão com webhook, ignorando atualização RAG"
-      );
       return {
         success: true,
         message: "Erro de conexão com webhook, fluxo ignorado",
