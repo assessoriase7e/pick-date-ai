@@ -19,7 +19,7 @@ export default async function SharedCalendarPage({
   const sParams = await searchParams;
   const { calendarId } = await params;
 
-  const calendarResponse = await getCalendarById(calendarId);
+  const calendarResponse = await getCalendarById(calendarId, false);
 
   if (!calendarResponse.success || !calendarResponse.data) {
     return notFound();
@@ -30,7 +30,7 @@ export default async function SharedCalendarPage({
   const currentDate = sParams.date ? new Date(sParams.date) : new Date();
 
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
-  const res = await getAppointmentsByMonth(currentDate, calendarId);
+  const res = await getAppointmentsByMonth(currentDate, calendarId, false);
 
   if (res?.success && res?.data) {
     res.data.forEach((appointment: any) => {

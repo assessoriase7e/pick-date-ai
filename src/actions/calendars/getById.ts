@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { CalendarFullData } from "@/types/calendar";
+import { auth } from "@clerk/nextjs/server";
 
 type GetCalendarByIdResponse = {
   success: boolean;
@@ -11,40 +12,42 @@ type GetCalendarByIdResponse = {
 };
 
 export async function getCalendarById(
-  calendarId: string
+  calendarId: string,
+  requireAuth: boolean = true
 ): Promise<GetCalendarByIdResponse> {
   try {
-    const cachedFetch = unstable_cache(
-      async () => {
-        const calendar = await prisma.calendar.findUnique({
-          where: {
-            id: calendarId,
-          },
-          include: {
-            collaborator: true,
-          },
-        });
-
-        if (!calendar) {
-          return {
-            success: false,
-            error: "Calendário não encontrado",
-          };
-        }
-
+    let userId: string | undefined = undefined;
+    if (requireAuth) {
+      const { userId: authUserId } = await auth();
+      if (!authUserId) {
         return {
-          success: true,
-          data: calendar as unknown as CalendarFullData,
+          success: false,
+          error: "Não autorizado",
         };
-      },
-      [`calendar-by-id-${calendarId}`],
-      {
-        revalidate: 60 * 5,
-        tags: ["calendars", "collaborators"],
       }
-    );
+      userId = authUserId;
+    }
 
-    return cachedFetch();
+    // Se requireAuth for true, busca pelo calendarId e userId
+    // Se for false, busca apenas pelo calendarId
+    const calendar = await prisma.calendar.findFirst({
+      where: requireAuth ? { id: calendarId, userId } : { id: calendarId },
+      include: {
+        collaborator: true,
+      },
+    });
+
+    if (!calendar) {
+      return {
+        success: false,
+        error: "Calendário não encontrado",
+      };
+    }
+
+    return {
+      success: true,
+      data: calendar as unknown as CalendarFullData,
+    };
   } catch (error) {
     console.error("[GET_CALENDAR_BY_ID]", error);
     return {

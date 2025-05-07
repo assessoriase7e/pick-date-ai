@@ -6,30 +6,37 @@ import { startOfDay, endOfDay } from "date-fns";
 
 export async function getAppointmentsByCalendarAndDate(
   calendarId: string,
-  date: Date
+  date: Date,
+  requireAuth: boolean = true
 ) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return {
-        success: false,
-        error: "Não autorizado",
-      } as const;
+    let userId: string | undefined = undefined;
+    if (requireAuth) {
+      const { userId: authUserId } = await auth();
+      if (!authUserId) {
+        return {
+          success: false,
+          error: "Não autorizado",
+        } as const;
+      }
+      userId = authUserId;
     }
 
-    const calendar = await prisma.calendar.findFirst({
-      where: {
-        id: calendarId,
-        userId,
-      },
-    });
+    // Se requireAuth for true, verifica se o calendário pertence ao usuário
+    if (requireAuth) {
+      const calendar = await prisma.calendar.findFirst({
+        where: {
+          id: calendarId,
+          userId,
+        },
+      });
 
-    if (!calendar) {
-      return {
-        success: false,
-        error: "Calendário não encontrado",
-      } as const;
+      if (!calendar) {
+        return {
+          success: false,
+          error: "Calendário não encontrado",
+        } as const;
+      }
     }
 
     const dayStart = startOfDay(date);

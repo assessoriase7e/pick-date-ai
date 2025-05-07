@@ -14,23 +14,26 @@ type GetCalendarCollaboratorResponse = {
 };
 
 export async function getCalendarCollaborator(
-  calendarId: string
+  calendarId: string,
+  requireAuth: boolean = true
 ): Promise<GetCalendarCollaboratorResponse> {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return {
-        success: false,
-        error: "Usuário não autenticado",
-      };
+    let userId: string | undefined = undefined;
+    if (requireAuth) {
+      const { userId: authUserId } = await auth();
+      if (!authUserId) {
+        return {
+          success: false,
+          error: "Usuário não autenticado",
+        };
+      }
+      userId = authUserId;
     }
 
+    // Se requireAuth for true, busca pelo calendarId e userId
+    // Se for false, busca apenas pelo calendarId
     const calendar = await prisma.calendar.findFirst({
-      where: {
-        id: calendarId,
-        userId,
-      },
+      where: requireAuth ? { id: calendarId, userId } : { id: calendarId },
       include: {
         collaborator: true,
       },
