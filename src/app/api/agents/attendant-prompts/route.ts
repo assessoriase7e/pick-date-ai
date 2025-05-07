@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (userId) {
       resolvedUserId = userId;
       attendantPrompt = await prisma.attendantPrompt.findUnique({
-        where: { userId },
+        where: { userId, isActive: true },
         include: {
           user: true,
         },
