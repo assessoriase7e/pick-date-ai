@@ -5,7 +5,7 @@ import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { MobileCalendarSelector } from "./mobile-calendar-selector";
 import { CalendarActionsModal } from "./calendar-actions-modal";
 import { DesktopCalendarTabs } from "./desktop-calendar-tabs";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import IsTableLoading from "../isTableLoading";
@@ -46,19 +46,26 @@ export function CalendarTabs({
   const [selectedCalendar, setSelectedCalendar] =
     useState<CalendarFullData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [pendingCalendarId, setPendingCalendarId] = useState<string | null>(null);
+  const prevCalendarId = useRef<string>(calendarId);
 
   const isMobile = useIsMobile();
 
   const handleChangeCalendar = async (id: string) => {
     setLoading(true);
-
+    setPendingCalendarId(id);
     setCalendarId(id);
     await revalidatePathAction("/calendar");
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 50);
+    // Não desativa o loading aqui!
   };
+
+  useEffect(() => {
+    if (pendingCalendarId && calendarId === pendingCalendarId) {
+      setLoading(false);
+      setPendingCalendarId(null);
+    }
+    prevCalendarId.current = calendarId;
+  }, [calendarId, pendingCalendarId]);
 
   return (
     <div className="flex-1 overflow-hidden">
