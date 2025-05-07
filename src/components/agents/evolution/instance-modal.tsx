@@ -14,6 +14,7 @@ interface InstanceModalProps {
   onClose: () => void;
   initialData?: any;
   profilePhone?: string;
+  companyName?: string;
 }
 
 export function InstanceModal({
@@ -21,6 +22,7 @@ export function InstanceModal({
   onClose,
   initialData,
   profilePhone,
+  companyName,
 }: InstanceModalProps) {
   const title = initialData ? "Editar Instância" : "Nova Instância";
   const description = initialData
@@ -38,6 +40,7 @@ export function InstanceModal({
           initialData={initialData}
           onSuccess={onClose}
           profilePhone={profilePhone}
+          companyName={companyName}
         />
       </DialogContent>
     </Dialog>

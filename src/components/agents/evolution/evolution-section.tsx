@@ -24,32 +24,39 @@ import { QRCodeModal } from "./qrcode-modal";
 import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
 import { EvolutionInstance } from "@prisma/client";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface EvolutionSectionProps {
   profilePhone?: string;
   instances: EvolutionInstance[];
+  companyName?: string;
 }
 
 export function EvolutionSection({
   profilePhone,
   instances,
+  companyName,
 }: EvolutionSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [instanceToDelete, setInstanceToDelete] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta instância?")) {
-      try {
-        const result = await deleteInstance(id);
-        if (result.success) {
-          toast.success("Instância excluída com sucesso");
-        } else {
-          toast.error(result.error || "Erro ao excluir instância");
-        }
-      } catch (error) {
-        toast.error("Ocorreu um erro ao excluir a instância");
+  const handleDelete = async () => {
+    if (!instanceToDelete) return;
+    try {
+      const result = await deleteInstance(instanceToDelete);
+      if (result.success) {
+        toast.success("Instância excluída com sucesso");
+      } else {
+        toast.error(result.error || "Erro ao excluir instância");
       }
+    } catch (error) {
+      toast.error("Ocorreu um erro ao excluir a instância");
+    } finally {
+      setDeleteDialogOpen(false);
+      setInstanceToDelete(null);
     }
   };
 
@@ -146,7 +153,10 @@ export function EvolutionSection({
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleDelete(instance.id)}
+                        onClick={() => {
+                          setInstanceToDelete(instance.id);
+                          setDeleteDialogOpen(true);
+                        }}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -180,6 +190,7 @@ export function EvolutionSection({
         onClose={handleModalClose}
         initialData={selectedInstance}
         profilePhone={profilePhone}
+        companyName={companyName}
       />
 
       {selectedInstance && (
@@ -189,6 +200,22 @@ export function EvolutionSection({
           instance={selectedInstance}
         />
       )}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar exclusão</DialogTitle>
+          </DialogHeader>
+          <div>Tem certeza que deseja excluir esta instância?</div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

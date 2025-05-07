@@ -38,6 +38,7 @@ export default async function AgentesPage() {
         <EvolutionSection
           instances={instances || []}
           profilePhone={profile?.whatsapp || ""}
+          companyName={profile?.companyName || ""}
         />
       </div>
     </div>

@@ -38,12 +38,14 @@ interface InstanceFormProps {
   initialData?: any;
   onSuccess: () => void;
   profilePhone?: string;
+  companyName?: string;
 }
 
 export function InstanceForm({
   initialData,
   onSuccess,
   profilePhone,
+  companyName,
 }: InstanceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!initialData;
@@ -51,7 +53,6 @@ export function InstanceForm({
   const form = useForm<z.infer<typeof evolutionFormSchema>>({
     resolver: zodResolver(evolutionFormSchema),
     defaultValues: {
-      name: initialData?.name || "",
       number: initialData?.number || profilePhone || "",
       qrCode: initialData?.qrCode ?? true,
       type: initialData?.type || "attendant",
@@ -61,8 +62,20 @@ export function InstanceForm({
   const onSubmit = async (values: z.infer<typeof evolutionFormSchema>) => {
     setIsLoading(true);
     try {
+      const cleanNumber = values.number.replace(/\D/g, "");
+      const company = (companyName || "empresa")
+        .toLowerCase()
+        .replace(/\s+/g, "_");
+      const instanceName = `${cleanNumber}@${company}`;
+      const submissionValues = {
+        ...values,
+        name: instanceName,
+      };
+
       if (isEditing) {
-        const result = await updateInstance(values as UpdateInstanceFormValues);
+        const result = await updateInstance(
+          submissionValues as UpdateInstanceFormValues
+        );
         if (result.success) {
           toast.success("Instância atualizada com sucesso");
           onSuccess();
@@ -70,7 +83,9 @@ export function InstanceForm({
           toast.error(result.error || "Erro ao atualizar instância");
         }
       } else {
-        const result = await createInstance(values as CreateInstanceFormValues);
+        const result = await createInstance(
+          submissionValues as CreateInstanceFormValues
+        );
         if (result.success) {
           toast.success("Instância criada com sucesso");
           onSuccess();
@@ -88,20 +103,7 @@ export function InstanceForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome da instância" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        {/* Removemos o campo de nome pois será gerado automaticamente */}
         <FormField
           control={form.control}
           name="number"
