@@ -94,7 +94,7 @@ export function DatePickerWithRange({
   if (isMobile) {
     return (
       <div className={cn("grid gap-2", className)}>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <Drawer open={openFrom} onOpenChange={setOpenFrom}>
             <DrawerTrigger asChild>
               <Button
@@ -105,7 +105,7 @@ export function DatePickerWithRange({
                   !date?.from && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 hidden lg:block" />
                 {dateDisplayFrom}
               </Button>
             </DrawerTrigger>
@@ -134,7 +134,7 @@ export function DatePickerWithRange({
                   !date?.to && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 hidden lg:block" />
                 {dateDisplayTo}
               </Button>
             </DrawerTrigger>

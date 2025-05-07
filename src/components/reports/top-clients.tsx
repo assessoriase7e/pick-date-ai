@@ -16,6 +16,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TopClientsProps {
   topClientsByServices: {
@@ -53,12 +60,26 @@ export function TopClients({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="services">
-          <TabsList className="mb-4">
-            <TabsTrigger value="services">
-              Por Quantidade de Serviços
-            </TabsTrigger>
-            <TabsTrigger value="spending">Por Valor Gasto</TabsTrigger>
-          </TabsList>
+          <div className="hidden md:block">
+            <TabsList className="mb-4">
+              <TabsTrigger value="services">
+                Por Quantidade de Serviços
+              </TabsTrigger>
+              <TabsTrigger value="spending">Por Valor Gasto</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <div className="block md:hidden mb-4">
+            <Select defaultValue="services">
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione a visualização" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="services">Por Quantidade de Serviços</SelectItem>
+                <SelectItem value="spending">Por Valor Gasto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <TabsContent value="services">
             {topClientsByServices.length === 0 ? (

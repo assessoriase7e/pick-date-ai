@@ -137,30 +137,32 @@ export default async function ReportsPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="flex flex-col lg:flex-row gap-5 col-span-1 lg:col-span-4">
           <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-            <div className="flex-1">
-              <MonthlyRevenueChart
-                data={monthlyRevenueData}
-                config={monthlyRevenueChartConfig}
-                initialFromDate={formatedFromMonthlyRevenue}
-                initialToDate={formatedToMonthlyRevenue}
-              />
-            </div>
-          </Suspense>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <Suspense fallback={<LoaderCircle className="animate-spin" />}>
+                  <MonthlyRevenueChart
+                    data={monthlyRevenueData}
+                    config={monthlyRevenueChartConfig}
+                    initialFromDate={formatedFromMonthlyRevenue}
+                    initialToDate={formatedToMonthlyRevenue}
+                  />
+                </Suspense>
 
-          <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-            <div className="flex-1">
-              <RevenueChart
-                data={revenueData}
-                config={revenueChartConfig}
-                initialFromDate={formatedFromRevenue}
-                initialToDate={formatedToRevenue}
-              />
+                <Suspense fallback={<LoaderCircle className="animate-spin" />}>
+                  <RevenueChart
+                    data={revenueData}
+                    config={revenueChartConfig}
+                    initialFromDate={formatedFromRevenue}
+                    initialToDate={formatedToRevenue}
+                  />
+                </Suspense>
+              </div>
             </div>
           </Suspense>
         </div>
       </div>
 
-      <div className="flex gap-5 w-full">
+      <div className="grid grid-cols-1 gap-5 w-full">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <CollaboratorCommission
             initialCollaborators={collaborators}

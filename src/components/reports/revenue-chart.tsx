@@ -73,7 +73,7 @@ export function RevenueChart({
 
   return (
     <Card>
-      <CardHeader className="flex-row justify-between gap-5">
+      <CardHeader className="lg:flex-row justify-between gap-5">
         <div>
           <CardTitle>Receita Diária</CardTitle>
           <CardDescription>Gráfico de receita por dia.</CardDescription>
