@@ -81,15 +81,14 @@ export function DayScheduleGrid({
               const endHour = appointment.endTime.getHours();
               const endMinutes = appointment.endTime.getMinutes();
 
-              const hourIndex = hoursOfDay.indexOf(startHour);
-              if (hourIndex === -1) return null;
+              const firstGridHour = hoursOfDay[0];
 
-              const startPosition = startHour * 60 + startMinutes;
-              const duration = endHour * 60 + endMinutes - startPosition;
+              const startInMinutes = startHour * 60 + startMinutes;
+              const endInMinutes = endHour * 60 + endMinutes;
+              const duration = endInMinutes - startInMinutes;
 
-              const rowStart = hourIndex + 1;
-              const rowSpan = Math.ceil(duration / 60);
-              const rowEnd = rowStart + rowSpan;
+              const top = ((startInMinutes - firstGridHour * 60) / 60) * 80;
+              const height = (duration / 60) * 80;
 
               return (
                 <AppointmentCard
@@ -97,15 +96,15 @@ export function DayScheduleGrid({
                   appointment={appointment}
                   onEdit={() => onEditAppointment(appointment)}
                   style={{
-                    gridRow: `${rowStart} / ${rowEnd}`,
-                    position: "relative",
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: `${top}px`,
+                    height: `${height}px`,
                     width: "100%",
-                    marginTop: `${(startPosition % 60) * (80 / 60)}px`,
-                    height: `${duration * (80 / 60)}px`,
+                    zIndex: 20,
                   }}
-                  duration={moment(appointment.startTime).diff(
-                    appointment.endTime
-                  )}
+                  duration={duration}
                 />
               );
             })}
