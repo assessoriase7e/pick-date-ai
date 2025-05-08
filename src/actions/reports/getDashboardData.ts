@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import moment from "moment";
-import { unstable_cache } from "next/cache";
 
 type DashboardDataSuccess = {
   success: true;
@@ -28,67 +27,60 @@ export const getDashboardData = async (): Promise<
     return { success: false, error: "Usuário não autenticado" };
   }
 
-  const cachedFetch = unstable_cache(
-    async (): Promise<DashboardDataSuccess> => {
-      const today = moment().startOf("day").toDate();
-      const tomorrow = moment().add(1, "day").startOf("day").toDate();
-
-      const clientCount = await prisma.client.count({ where: { userId } });
-
-      const completedAppointmentsCount = await prisma.appointment.count({
-        where: {
-          userId,
-          startTime: { lt: today },
-          status: "scheduled",
-        },
-      });
-
-      const futureAppointmentsCount = await prisma.appointment.count({
-        where: {
-          userId,
-          startTime: { gte: today },
-        },
-      });
-
-      const todayAppointments = await prisma.appointment.findMany({
-        where: {
-          userId,
-          startTime: { gte: today, lt: tomorrow },
-          status: "scheduled",
-        },
-        include: {
-          service: {
-            select: { price: true },
-          },
-        },
-      });
-
-      const todayRevenue = todayAppointments.reduce(
-        (total, appointment) =>
-          total +
-          (appointment.finalPrice ||
-            appointment.servicePrice ||
-            appointment.service?.price ||
-            0),
-        0
-      );
-
-      return {
-        success: true,
-        data: {
-          clientCount,
-          completedAppointmentsCount,
-          futureAppointmentsCount,
-          todayRevenue,
-        },
-      } satisfies DashboardDataSuccess;
-    },
-    ["dashboard-data", userId],
-    { revalidate: 60 * 5, tags: ["dashboard"] }
-  );
-
   try {
-    return await cachedFetch();
+    const today = moment().startOf("day").toDate();
+    const tomorrow = moment().add(1, "day").startOf("day").toDate();
+
+    const clientCount = await prisma.client.count({ where: { userId } });
+
+    const completedAppointmentsCount = await prisma.appointment.count({
+      where: {
+        userId,
+        startTime: { lt: today },
+        status: "scheduled",
+      },
+    });
+
+    const futureAppointmentsCount = await prisma.appointment.count({
+      where: {
+        userId,
+        startTime: { gte: moment(today).add(1, "day").toDate() },
+        status: "scheduled",
+      },
+    });
+
+    const todayAppointments = await prisma.appointment.findMany({
+      where: {
+        userId,
+        startTime: { gte: today, lt: tomorrow },
+        status: "scheduled",
+      },
+      include: {
+        service: {
+          select: { price: true },
+        },
+      },
+    });
+
+    const todayRevenue = todayAppointments.reduce(
+      (total, appointment) =>
+        total +
+        (appointment.finalPrice ||
+          appointment.servicePrice ||
+          appointment.service?.price ||
+          0),
+      0
+    );
+
+    return {
+      success: true,
+      data: {
+        clientCount,
+        completedAppointmentsCount,
+        futureAppointmentsCount,
+        todayRevenue,
+      },
+    };
   } catch (error) {
     console.error("Erro ao buscar dados do dashboard:", error);
     return { success: false, error: "Falha ao buscar dados do dashboard" };

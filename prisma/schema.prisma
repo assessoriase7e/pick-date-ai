@@ -373,28 +373,32 @@ model Collaborator {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   ServiceCollaborator ServiceCollaborator[]
+  Appointment         Appointment[]
 
   @@map("collaborator")
 }
 
 model Appointment {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  clientId    String   @db.ObjectId
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceId   String   @db.ObjectId
-  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  calendarId  String   @db.ObjectId
-  calendar    Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  startTime   DateTime
-  endTime     DateTime
-  notes       String?
-  status      String   @default("scheduled")
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  servicePrice Float?   // Preço original do serviço no momento do agendamento
-  finalPrice   Float?   // Preço final que pode ser ajustado
-  
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  startTime    DateTime
+  endTime      DateTime
+  status       String   @default("scheduled")
+  notes        String?
+  servicePrice Float?
+  finalPrice   Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  clientId       String        @db.ObjectId
+  client         Client        @relation(fields: [clientId], references: [id])
+  serviceId      String        @db.ObjectId
+  service        Service       @relation(fields: [serviceId], references: [id])
+  calendarId     String        @db.ObjectId
+  calendar       Calendar      @relation(fields: [calendarId], references: [id])
+  collaboratorId String?       @db.ObjectId
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+
   @@map("appointment")
 }

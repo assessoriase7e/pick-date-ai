@@ -17,6 +17,19 @@ export async function createAppointment(
       };
     }
 
+    // Buscar o calendário para obter o collaboratorId
+    const calendar = await prisma.calendar.findUnique({
+      where: { id: data.calendarId },
+      select: { collaboratorId: true }
+    });
+
+    if (!calendar) {
+      return {
+        success: false,
+        error: "Calendário não encontrado",
+      };
+    }
+
     const conflictingAppointment = await prisma.appointment.findFirst({
       where: {
         OR: [
@@ -74,10 +87,12 @@ export async function createAppointment(
         ...data,
         status: data.status || "scheduled",
         userId,
+        collaboratorId: calendar.collaboratorId, // Adiciona o collaboratorId do calendário
       },
       include: {
         client: true,
         service: true,
+        collaborator: true,
       },
     });
 
