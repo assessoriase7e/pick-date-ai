@@ -83,8 +83,8 @@ export function AppointmentForm({
               <FormItem>
                 <FormLabel></FormLabel>
                 <SelectWithScroll
-                  getOptionLabel={(option) => option.fullName}
-                  getOptionValue={(option) => String(option.id)}
+                  getOptionLabel={(option) => option?.fullName}
+                  getOptionValue={(option) => option?.id}
                   label="Cliente"
                   placeholder={
                     isLoadingClients
@@ -108,8 +108,8 @@ export function AppointmentForm({
               <FormItem>
                 <FormLabel></FormLabel>
                 <SelectWithScroll
-                  getOptionLabel={(option) => option.name}
-                  getOptionValue={(option) => String(option.id)}
+                  getOptionLabel={(option) => option?.name}
+                  getOptionValue={(option) => option?.id}
                   label="Serviço"
                   placeholder="Selecione um serviço"
                   options={services}
