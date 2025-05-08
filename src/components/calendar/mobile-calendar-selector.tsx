@@ -58,7 +58,7 @@ export function MobileCalendarSelector({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {calendars.map((calendar) => (
+          {calendars.map((calendar: CalendarFullData) => (
             <SelectItem
               key={calendar.id}
               value={calendar.id}
@@ -69,7 +69,7 @@ export function MobileCalendarSelector({
             >
               <span className="flex items-center justify-between w-full">
                 <span>
-                  {calendar.name} | ({calendar.collaborator?.name})
+                  {calendar.name} | {calendar.collaborator?.name}
                 </span>
               </span>
             </SelectItem>
