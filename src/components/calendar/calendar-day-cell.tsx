@@ -155,7 +155,7 @@ export function CalendarDayCell({
           <span
             className={cn(
               "lg:text-lg font-medium flex items-center justify-center h-full select-none",
-              dayObj.isToday && "text-foreground"
+              dayObj.isToday && "text-background dark:text-foreground"
             )}
             style={{
               WebkitTouchCallout: "none",
@@ -169,7 +169,7 @@ export function CalendarDayCell({
             {dayObj.date.date()}
           </span>
           {activeAppointments.length > 0 && (
-            <span className="text-[10px] sm:text-xs bottom-1 flex absolute select-none">
+            <span className="text-[10px] sm:text-xs bottom-1 flex absolute select-none text-background dark:text-foreground">
               {activeAppointments.length}{" "}
               <span className="hidden lg:block ml-1">agendamento(s)</span>
             </span>
