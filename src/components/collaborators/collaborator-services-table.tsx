@@ -1,5 +1,5 @@
 "use client";
-import { collabColumns } from "@/columns/collaborator";
+import { useCollabServiceColumns } from "@/hooks/collaborator";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -32,6 +32,7 @@ export function CollaboratorServicesTable({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { collabColumns } = useCollabServiceColumns();
 
   const table = useReactTable({
     data,
