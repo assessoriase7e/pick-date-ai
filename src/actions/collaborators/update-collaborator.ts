@@ -36,7 +36,7 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
     if (!existingCollaborator) {
       return {
         success: false,
-        error: "Colaborador não encontrado",
+        error: "Profissional não encontrado",
       };
     }
 
@@ -63,7 +63,7 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
     console.error("[UPDATE_COLLABORATOR_ERROR]", error);
     return {
       success: false,
-      error: "Ocorreu um erro ao atualizar o colaborador",
+      error: "Ocorreu um erro ao atualizar o profissional",
     };
   }
 }

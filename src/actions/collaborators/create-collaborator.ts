@@ -46,7 +46,7 @@ export async function createCollaborator(params: CreateCollaboratorParams) {
     console.error("[CREATE_COLLABORATOR_ERROR]", error);
     return {
       success: false,
-      error: "Ocorreu um erro ao criar o colaborador",
+      error: "Ocorreu um erro ao criar o profissional",
     };
   }
 }

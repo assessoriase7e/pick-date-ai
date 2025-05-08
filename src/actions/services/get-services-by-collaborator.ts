@@ -42,10 +42,10 @@ export async function getServicesByCollaborator(
       data: services,
     };
   } catch (error) {
-    console.error("Erro ao buscar serviços do colaborador:", error);
+    console.error("Erro ao buscar serviços do profissional:", error);
     return {
       success: false,
-      error: "Falha ao buscar serviços do colaborador",
+      error: "Falha ao buscar serviços do profissional",
     };
   }
 }

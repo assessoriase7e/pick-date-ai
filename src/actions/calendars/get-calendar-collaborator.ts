@@ -54,10 +54,10 @@ export async function getCalendarCollaborator(
       },
     };
   } catch (error) {
-    console.error("Erro ao buscar colaborador do calendário:", error);
+    console.error("Erro ao buscar profissional do calendário:", error);
     return {
       success: false,
-      error: "Falha ao buscar colaborador do calendário",
+      error: "Falha ao buscar profissional do calendário",
     };
   }
 }

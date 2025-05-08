@@ -28,7 +28,7 @@ export async function getAppointmentsByCollaborator(
 
     const skip = (page - 1) * limit;
 
-    // Buscar calendários associados ao colaborador
+    // Buscar calendários associados ao profissional
     const calendars = await prisma.calendar.findMany({
       where: {
         collaboratorId,
@@ -52,7 +52,7 @@ export async function getAppointmentsByCollaborator(
 
     const calendarIds = calendars.map((calendar) => calendar.id);
 
-    // Buscar agendamentos dos calendários do colaborador
+    // Buscar agendamentos dos calendários do profissional
     const [appointments, total] = await Promise.all([
       prisma.appointment.findMany({
         where: {
@@ -104,10 +104,10 @@ export async function getAppointmentsByCollaborator(
       },
     };
   } catch (error) {
-    console.error("Erro ao buscar agendamentos do colaborador:", error);
+    console.error("Erro ao buscar agendamentos do profissional:", error);
     return {
       success: false,
-      error: "Falha ao buscar agendamentos do colaborador",
+      error: "Falha ao buscar agendamentos do profissional",
     };
   }
 }

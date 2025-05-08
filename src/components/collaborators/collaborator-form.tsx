@@ -67,10 +67,12 @@ export function CollaboratorForm({
 
       if (result.success) {
         toast({
-          title: initialData ? "Colaborador atualizado" : "Colaborador criado",
+          title: initialData
+            ? "Profissional atualizado"
+            : "Profissional criado",
           description: initialData
-            ? "O colaborador foi atualizado com sucesso."
-            : "O colaborador foi criado com sucesso.",
+            ? "O profissional foi atualizado com sucesso."
+            : "O profissional foi criado com sucesso.",
         });
 
         if (onSuccess) {
@@ -80,8 +82,8 @@ export function CollaboratorForm({
         toast({
           variant: "destructive",
           title: initialData
-            ? "Erro ao atualizar colaborador"
-            : "Erro ao criar colaborador",
+            ? "Erro ao atualizar profissional"
+            : "Erro ao criar profissional",
           description:
             result.error || "Ocorreu um erro ao processar a solicitação.",
         });
@@ -90,8 +92,8 @@ export function CollaboratorForm({
       toast({
         variant: "destructive",
         title: initialData
-          ? "Erro ao atualizar colaborador"
-          : "Erro ao criar colaborador",
+          ? "Erro ao atualizar profissional"
+          : "Erro ao criar profissional",
         description: "Ocorreu um erro ao processar a solicitação.",
       });
     } finally {
@@ -109,7 +111,7 @@ export function CollaboratorForm({
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do colaborador" {...field} />
+                <Input placeholder="Nome do profissional" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -129,7 +131,7 @@ export function CollaboratorForm({
                 />
               </FormControl>
               <FormDescription>
-                Informe os dias e horários em que o colaborador atende.
+                Informe os dias e horários em que o profissional atende.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -183,7 +185,7 @@ export function CollaboratorForm({
               <FormLabel>Descrição</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Descreva o colaborador, suas habilidades e experiência"
+                  placeholder="Descreva o profissional, suas habilidades e experiência"
                   className="resize-none"
                   {...field}
                 />

@@ -69,17 +69,17 @@ export function CollaboratorCommission({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Comissão de Colaboradores</CardTitle>
+        <CardTitle>Comissão de Profissionales</CardTitle>
         <CardDescription>
-          Visualize as comissões dos colaboradores por período
+          Visualize as comissões dos profissionales por período
         </CardDescription>
         <div className="flex flex-col gap-4 mt-4">
           <div className="w-full">
             <SelectWithScroll
-              label="Colaborador"
-              placeholder="Todos os colaboradores"
+              label="Profissional"
+              placeholder="Todos os profissionales"
               options={[
-                { id: "all", name: "Todos os colaboradores" }, // Opção para limpar o filtro
+                { id: "all", name: "Todos os profissionales" }, // Opção para limpar o filtro
                 ...collaborators,
               ]}
               value={selectedCollaborator ?? ""}
@@ -112,7 +112,7 @@ export function CollaboratorCommission({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Colaborador</TableHead>
+                  <TableHead>Profissional</TableHead>
                   <TableHead className="text-right">
                     Total de Serviços
                   </TableHead>

@@ -25,7 +25,7 @@ export async function deleteCollaborator(id: string) {
     if (!collaborator) {
       return {
         success: false,
-        error: "Colaborador não encontrado",
+        error: "Profissional não encontrado",
       };
     }
 
@@ -44,7 +44,7 @@ export async function deleteCollaborator(id: string) {
     console.error("[COLLABORATOR_DELETE]", error);
     return {
       success: false,
-      error: "Falha ao excluir colaborador",
+      error: "Falha ao excluir profissional",
     };
   }
 }

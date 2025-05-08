@@ -52,7 +52,7 @@ export const useAppointmentDataStore = create<AppointmentDataState>((set) => ({
 
       if (!collab?.collaboratorId) {
         set({
-          error: "Colaborador não encontrado para este calendário",
+          error: "Profissional não encontrado para este calendário",
           isLoadingServices: false,
         });
         return;

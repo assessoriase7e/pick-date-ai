@@ -20,10 +20,10 @@ export function CollaboratorModal({
   onClose,
   initialData,
 }: CollaboratorModalProps) {
-  const title = initialData ? "Editar Colaborador" : "Novo Colaborador";
+  const title = initialData ? "Editar Profissional" : "Novo Profissional";
   const description = initialData
-    ? "Edite as informações do colaborador."
-    : "Adicione um novo colaborador ao sistema.";
+    ? "Edite as informações do profissional."
+    : "Adicione um novo profissional ao sistema.";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -32,10 +32,7 @@ export function CollaboratorModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <CollaboratorForm
-          initialData={initialData}
-          onSuccess={onClose}
-        />
+        <CollaboratorForm initialData={initialData} onSuccess={onClose} />
       </DialogContent>
     </Dialog>
   );

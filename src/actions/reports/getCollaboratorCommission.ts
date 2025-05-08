@@ -85,7 +85,7 @@ async function fetchCollaboratorCommission(
         const collaborator = sc.collaborator;
         if (!collaborator) return;
 
-        // Verifica se devemos incluir apenas um colaborador específico
+        // Verifica se devemos incluir apenas um profissional específico
         if (collaboratorId && collaborator.id !== collaboratorId) return;
 
         const id = collaborator.id;
@@ -119,10 +119,10 @@ async function fetchCollaboratorCommission(
       data: result,
     };
   } catch (error) {
-    console.error("Erro ao buscar comissão de colaboradores:", error);
+    console.error("Erro ao buscar comissão de profissionales:", error);
     return {
       success: false,
-      error: "Falha ao buscar comissão de colaboradores",
+      error: "Falha ao buscar comissão de profissionales",
     };
   }
 }

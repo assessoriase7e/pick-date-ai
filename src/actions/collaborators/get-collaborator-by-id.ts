@@ -39,7 +39,7 @@ export async function getCollaboratorById(
     if (!collaborator) {
       return {
         success: false,
-        error: "Colaborador não encontrado",
+        error: "Profissional não encontrado",
       };
     }
 
@@ -51,7 +51,7 @@ export async function getCollaboratorById(
     console.error("[GET_COLLABORATOR_BY_ID_ERROR]", error);
     return {
       success: false,
-      error: "Erro ao buscar colaborador",
+      error: "Erro ao buscar profissional",
     };
   }
 }
