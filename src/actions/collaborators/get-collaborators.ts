@@ -105,7 +105,7 @@ export async function getCollaborators({
     console.error("[GET_COLLABORATORS_ERROR]", error);
     return {
       success: false,
-      error: "Erro ao buscar profissionales",
+      error: "Erro ao buscar profissionais",
     };
   }
 }

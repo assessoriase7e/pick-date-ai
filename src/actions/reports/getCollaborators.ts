@@ -48,7 +48,7 @@ export const getCollaborators = async (
       data: collaborators,
     };
   } catch (error) {
-    console.error("Erro ao buscar profissionales:", error);
-    return { success: false, error: "Falha ao buscar profissionales" };
+    console.error("Erro ao buscar profissionais:", error);
+    return { success: false, error: "Falha ao buscar profissionais" };
   }
 };

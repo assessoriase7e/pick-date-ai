@@ -60,9 +60,9 @@ export default async function CollaboratorsPage({
   return (
     <div className="container">
       <div>
-        <h1 className="text-3xl font-bold">Profissionales</h1>
+        <h1 className="text-3xl font-bold">Profissionais</h1>
         <p className="text-muted-foreground">
-          Gerencie os profissionales cadastrados no sistema.
+          Gerencie os profissionais cadastrados no sistema.
         </p>
       </div>
 

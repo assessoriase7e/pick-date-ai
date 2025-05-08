@@ -48,7 +48,7 @@ export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
           setCollaborators(response.data);
         }
       } catch (error) {
-        console.error("Erro ao carregar profissionales:", error);
+        console.error("Erro ao carregar profissionais:", error);
       }
     };
 

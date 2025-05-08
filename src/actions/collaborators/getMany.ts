@@ -58,7 +58,7 @@ export async function listCollaborators(serviceId?: string) {
     console.error("[LIST_COLLABORATORS_ERROR]", error);
     return {
       success: false,
-      error: "Erro ao buscar profissionales",
+      error: "Erro ao buscar profissionais",
     };
   }
 }

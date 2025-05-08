@@ -119,10 +119,10 @@ async function fetchCollaboratorCommission(
       data: result,
     };
   } catch (error) {
-    console.error("Erro ao buscar comissão de profissionales:", error);
+    console.error("Erro ao buscar comissão de profissionais:", error);
     return {
       success: false,
-      error: "Falha ao buscar comissão de profissionales",
+      error: "Falha ao buscar comissão de profissionais",
     };
   }
 }
