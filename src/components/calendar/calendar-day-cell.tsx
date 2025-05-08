@@ -142,7 +142,7 @@ export function CalendarDayCell({
       <div
         key={index}
         className={cn(
-          "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed",
+          "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed group",
           !dayObj.isCurrentMonth && "bg-muted/20 text-muted",
           isSelected(dayObj.date) && "ring-2 ring-primary",
           activeAppointments?.length && "bg-primary border-primary"
@@ -155,7 +155,9 @@ export function CalendarDayCell({
           <span
             className={cn(
               "lg:text-lg font-medium flex items-center justify-center h-full select-none",
-              dayObj.isToday && "text-background dark:text-foreground"
+              dayObj.isToday &&
+                " group-hover:text-foreground dark:text-foreground",
+              activeAppointments.length > 0 && "text-background"
             )}
             style={{
               WebkitTouchCallout: "none",
@@ -169,7 +171,7 @@ export function CalendarDayCell({
             {dayObj.date.date()}
           </span>
           {activeAppointments.length > 0 && (
-            <span className="text-[10px] sm:text-xs bottom-1 flex absolute select-none text-background dark:text-foreground">
+            <span className="text-[10px] sm:text-xs bottom-1 flex absolute select-none text-background group-hover:text-foreground dark:text-foreground">
               {activeAppointments.length}{" "}
               <span className="hidden lg:block ml-1">agendamento(s)</span>
             </span>
