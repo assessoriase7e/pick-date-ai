@@ -56,19 +56,15 @@ export function CalendarDayCell({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isMobile && activeAppointments.length > 0) {
+      e.preventDefault();
       setIsTouching(true);
       touchTimerRef.current = setTimeout(() => {
         setShowDetails(true);
-        e.preventDefault();
       }, 1500);
     }
   };
 
   const handleTouchEnd = () => {
-    if (touchTimerRef.current) {
-      clearTimeout(touchTimerRef.current);
-      touchTimerRef.current = null;
-    }
     setIsTouching(false);
   };
 
@@ -86,7 +82,7 @@ export function CalendarDayCell({
         <div
           key={index}
           className={cn(
-            "border rounded-lg p-3 mb-2 hover:bg-muted/30 cursor-pointer transition-colors group",
+            "border rounded-lg p-3 mb-2 hover:bg-muted/30 cursor-pointer transition-colors group select-none",
             isSelected(dayObj.date) && "ring-2 ring-primary",
             dayObj.isToday && "border-primary",
             activeAppointments?.length && "bg-primary",
@@ -103,15 +99,17 @@ export function CalendarDayCell({
               <span
                 className={cn(
                   "text-lg font-medium",
-                  dayObj.isToday && "text-foreground"
+                  dayObj.isToday && "text-foreground select-none"
                 )}
               >
                 {dayObj.date.date()}
               </span>
-              <span className="ml-2 text-sm">{dayObj.date.format("ddd")}</span>
+              <span className="ml-2 text-sm select-none">
+                {dayObj.date.format("ddd")}
+              </span>
             </div>
             {activeAppointments?.length > 0 && (
-              <span className="text-sm bg-primary px-2 py-1 rounded-full">
+              <span className="text-sm bg-primary px-2 py-1 rounded-full select-none">
                 {activeAppointments.length} agendamento(s)
               </span>
             )}
