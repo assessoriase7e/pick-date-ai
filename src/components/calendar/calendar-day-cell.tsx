@@ -61,7 +61,7 @@ export function CalendarDayCell({
         touchTimerRef.current = setTimeout(() => {
           setShowDetails(true);
           touchTimerRef.current = null;
-        }, 1500);
+        }, 1000);
       }
     }
   };
@@ -104,6 +104,7 @@ export function CalendarDayCell({
                   "text-lg font-medium select-none",
                   dayObj.isToday && "text-foreground"
                 )}
+                style={{ userSelect: "none" }}
               >
                 {dayObj.date.date()}
               </span>
@@ -149,6 +150,7 @@ export function CalendarDayCell({
               "lg:text-lg font-medium flex items-center justify-center h-full select-none",
               dayObj.isToday && "text-foreground"
             )}
+            style={{ userSelect: "none" }}
           >
             {dayObj.date.date()}
           </span>
