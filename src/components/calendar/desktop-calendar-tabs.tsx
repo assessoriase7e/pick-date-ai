@@ -95,7 +95,7 @@ export function DesktopCalendarTabs({
           }}
         >
           <span className="flex items-center">
-            {calendar.name} | ({calendar.collaborator?.name})
+            {calendar.name} | {calendar.collaborator?.name}
             <div
               className={`calendar-actions  flex items-center justify-center space-x-1 transition-all duration-200 ${
                 hoveredTab === calendar.id
