@@ -37,19 +37,8 @@ async function fetchCollaboratorCommission(
 
     const where: Prisma.AppointmentWhereInput = {
       userId,
+      startTime: dateFilter,
     };
-    if (Object.keys(dateFilter).length > 0) {
-      where.startTime = dateFilter;
-    }
-    if (collaboratorId) {
-      where.service = {
-        serviceCollaborators: {
-          some: {
-            collaboratorId,
-          },
-        },
-      };
-    }
 
     const appointments = await prisma.appointment.findMany({
       where,
@@ -86,7 +75,6 @@ async function fetchCollaboratorCommission(
       const serviceCollaborators =
         appointment.service?.serviceCollaborators || [];
 
-      // Usar finalPrice em vez do preço do serviço
       const appointmentPrice =
         appointment.finalPrice ||
         appointment.servicePrice ||
@@ -96,6 +84,9 @@ async function fetchCollaboratorCommission(
       serviceCollaborators.forEach((sc) => {
         const collaborator = sc.collaborator;
         if (!collaborator) return;
+
+        // Verifica se devemos incluir apenas um colaborador específico
+        if (collaboratorId && collaborator.id !== collaboratorId) return;
 
         const id = collaborator.id;
         if (!collaboratorData[id]) {

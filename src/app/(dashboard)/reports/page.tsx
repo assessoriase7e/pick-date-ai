@@ -166,10 +166,10 @@ export default async function ReportsPage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <CollaboratorCommission
-            initialCollaborators={collaborators}
-            initialCommissionData={commissionData}
-            initialSelectedCollaborator={collaboratorId as string | undefined}
-            initialDateRange={{
+            collaborators={collaborators}
+            commissionData={commissionData}
+            selectedCollaborator={collaboratorId as string | undefined}
+            dateRange={{
               from: formatedFromCollab,
               to: formatedToCollab,
             }}

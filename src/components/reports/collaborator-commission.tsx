@@ -19,75 +19,51 @@ import {
 } from "@/components/ui/table";
 import { DatePickerWithRange } from "../ui/date-picker-range";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getCollaboratorCommission } from "@/actions/reports/getCollaboratorCommission";
-import { useEffect, useState } from "react";
 
 interface CollaboratorCommissionProps {
-  initialCollaborators: Collaborator[];
-  initialCommissionData: {
+  collaborators: Collaborator[];
+  commissionData: {
     collaboratorId: string;
     name: string;
     totalServices: number;
     totalRevenue: number;
     commission: number;
   }[];
-  initialSelectedCollaborator?: string;
-  initialDateRange: DateRange;
+  selectedCollaborator?: string;
+  dateRange: DateRange;
 }
 
 export function CollaboratorCommission({
-  initialCollaborators,
-  initialCommissionData,
-  initialSelectedCollaborator,
-  initialDateRange,
+  collaborators,
+  commissionData,
+  selectedCollaborator,
+  dateRange,
 }: CollaboratorCommissionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [selectedCollaborator, setSelectedCollaborator] = useState<
-    string | undefined
-  >(initialSelectedCollaborator);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(
-    initialDateRange
-  );
-  const [commissionData, setCommissionData] = useState(initialCommissionData);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (selectedCollaborator) {
-      params.set("collaboratorId", selectedCollaborator);
-    } else {
-      params.delete("collaboratorId");
-    }
-    if (dateRange?.from) params.set("fromCollab", dateRange.from.toISOString());
-    if (dateRange?.to) params.set("toCollab", dateRange.to.toISOString());
-    router.replace(`?${params.toString()}`);
-  }, [selectedCollaborator, dateRange, router]);
-
-  useEffect(() => {
-    async function fetchCommission() {
-      setLoading(true);
-      const result = await getCollaboratorCommission(
-        selectedCollaborator,
-        dateRange?.from,
-        dateRange?.to
-      );
-      if (result.success) {
-        setCommissionData(result.data);
-      } else {
-        setCommissionData([]);
-      }
-      setLoading(false);
-    }
-    fetchCommission();
-  }, [selectedCollaborator, dateRange]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(value);
+  };
+
+  const handleCollaboratorChange = (value: string | undefined) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value !== "all") {
+      params.set("collaboratorId", value as string);
+    } else {
+      params.delete("collaboratorId");
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (range?.from) params.set("fromCollab", range.from.toISOString());
+    if (range?.to) params.set("toCollab", range.to.toISOString());
+    router.push(`?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -102,9 +78,16 @@ export function CollaboratorCommission({
             <SelectWithScroll
               label="Colaborador"
               placeholder="Todos os colaboradores"
-              options={initialCollaborators}
-              value={selectedCollaborator}
-              onChange={setSelectedCollaborator}
+              options={[
+                { id: "all", name: "Todos os colaboradores" }, // Opção para limpar o filtro
+                ...collaborators,
+              ]}
+              value={selectedCollaborator ?? ""}
+              onChange={(value) =>
+                handleCollaboratorChange(
+                  value && value !== "" ? value : undefined
+                )
+              }
               getOptionLabel={(option) => option.name}
               getOptionValue={(option) => option.id}
             />
@@ -112,7 +95,7 @@ export function CollaboratorCommission({
           <div className="w-full">
             <DatePickerWithRange
               date={dateRange}
-              onDateChange={setDateRange}
+              onDateChange={handleDateChange}
               fromKey="fromCollab"
               toKey="toCollab"
             />
@@ -120,11 +103,7 @@ export function CollaboratorCommission({
         </div>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Carregando...
-          </div>
-        ) : commissionData.length === 0 ? (
+        {commissionData.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhum dado encontrado para o período selecionado
           </div>
