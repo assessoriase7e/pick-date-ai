@@ -13,7 +13,7 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
   try {
     const { userId } = await auth();
 
-    if (!userId || userId !== data.userId) {
+    if (!userId) {
       return {
         success: false,
         error: "Não autorizado",
@@ -22,7 +22,7 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
 
     const existingKey = await prisma.redisKey.findFirst({
       where: {
-        userId: data.userId,
+        userId,
       },
     });
 
