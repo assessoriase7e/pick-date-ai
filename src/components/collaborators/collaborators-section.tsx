@@ -24,6 +24,7 @@ import { ServiceFullData } from "@/types/service";
 import { useDebounce } from "@/hooks/use-debounce";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import IsTableLoading from "../isTableLoading";
+import Link from "next/link";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -247,12 +248,12 @@ export function CollaboratorsSection({
 
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleShowServices(collaborator)}
-                      >
-                        <FileText className="h-4 w-4" />
+                      <Button variant="outline" size="icon" asChild>
+                        <Link
+                          href={`/collaborators/${collaborator.id}/services`}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Link>
                       </Button>
 
                       <Button
