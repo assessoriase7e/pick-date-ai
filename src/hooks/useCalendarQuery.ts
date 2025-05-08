@@ -23,30 +23,46 @@ export function useCalendarQuery({
   const setCalendarId = (id: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("calendarId", id);
+    if (activeDate) {
+      params.set("date", activeDate.toISOString());
+    }
     router.push(`/calendar?${params.toString()}`);
   };
+
+  const setDate = useCallback(
+    (date: Date) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("calendarId", activeCalendarId);
+      params.set("date", date.toISOString());
+      router.push(`/calendar?${params.toString()}`);
+    },
+    [activeCalendarId, router, searchParams]
+  );
 
   const goToPreviousMonth = useCallback(() => {
     const prevMonth = new Date(activeDate);
     prevMonth.setMonth(prevMonth.getMonth() - 1);
-    router.push(
-      `/calendar?calendarId=${activeCalendarId}&date=${prevMonth.toISOString()}`
-    );
-  }, [activeDate, activeCalendarId, router]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("calendarId", activeCalendarId);
+    params.set("date", prevMonth.toISOString());
+    router.push(`/calendar?${params.toString()}`);
+  }, [activeDate, activeCalendarId, router, searchParams]);
 
   const goToNextMonth = useCallback(() => {
     const nextMonth = new Date(activeDate);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
-    router.push(
-      `/calendar?calendarId=${activeCalendarId}&date=${nextMonth.toISOString()}`
-    );
-  }, [activeDate, activeCalendarId, router]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("calendarId", activeCalendarId);
+    params.set("date", nextMonth.toISOString());
+    router.push(`/calendar?${params.toString()}`);
+  }, [activeDate, activeCalendarId, router, searchParams]);
 
   const goToToday = useCallback(() => {
-    router.push(
-      `/calendar?calendarId=${activeCalendarId}&date=${new Date().toISOString()}`
-    );
-  }, [activeCalendarId, router]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("calendarId", activeCalendarId);
+    params.set("date", new Date().toISOString());
+    router.push(`/calendar?${params.toString()}`);
+  }, [activeCalendarId, router, searchParams]);
 
   const openDayDetails = (date: Date) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -62,7 +78,9 @@ export function useCalendarQuery({
 
   return {
     activeCalendarId,
+    activeDate,
     setCalendarId,
+    setDate,
     goToPreviousMonth,
     goToNextMonth,
     goToToday,

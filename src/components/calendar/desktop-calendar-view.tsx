@@ -1,10 +1,18 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CalendarViewProps } from "./calendar-types";
 import { CalendarDayCell } from "./calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
 import IsTableLoading from "../isTableLoading";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useRouter, useSearchParams } from "next/navigation";
+import { MonthYearPicker } from "../ui/month-year-picker";
 
 interface DesktopCalendarViewProps extends CalendarViewProps {
   onTouchStart: (e: React.TouchEvent) => void;
@@ -27,8 +35,29 @@ export function DesktopCalendarView({
   onTouchMove,
   onTouchEnd,
   isLoading = false,
+  calendarId,
 }: DesktopCalendarViewProps) {
   const calendarRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      const params = new URLSearchParams(searchParams.toString());
+      const existingParams = Array.from(params.entries());
+      params.set("calendarId", calendarId);
+      params.set("date", date.toISOString());
+
+      existingParams.forEach(([key, value]) => {
+        if (key !== "calendarId" && key !== "date") {
+          params.set(key, value);
+        }
+      });
+
+      router.push(`/calendar?${params.toString()}`);
+    }
+  };
 
   return (
     <div
@@ -42,9 +71,25 @@ export function DesktopCalendarView({
 
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
-        <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left">
-          {formatMonth(currentDate)}
-        </h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <div>
+              <h2 className="text-lg lg:text-2xl font-semibold text-center sm:text-left cursor-pointer hover:text-primary transition-colors capitalize">
+                {formatMonth(currentDate)}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Clique para selecionar data
+              </p>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] p-6">
+            <DialogTitle></DialogTitle>
+            <MonthYearPicker
+              currentDate={currentDate}
+              onMonthChange={handleDateSelect}
+            />
+          </DialogContent>
+        </Dialog>
         <div className="flex items-center space-x-1 sm:space-x-2">
           <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
