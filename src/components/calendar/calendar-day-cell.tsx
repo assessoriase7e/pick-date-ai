@@ -104,7 +104,14 @@ export function CalendarDayCell({
                   "text-lg font-medium select-none",
                   dayObj.isToday && "text-foreground"
                 )}
-                style={{ userSelect: "none" }}
+                style={{
+                  WebkitTouchCallout: "none",
+                  WebkitUserSelect: "none",
+                  KhtmlUserSelect: "none",
+                  MozUserSelect: "none",
+                  msUserSelect: "none",
+                  userSelect: "none",
+                }}
               >
                 {dayObj.date.date()}
               </span>
@@ -150,7 +157,14 @@ export function CalendarDayCell({
               "lg:text-lg font-medium flex items-center justify-center h-full select-none",
               dayObj.isToday && "text-foreground"
             )}
-            style={{ userSelect: "none" }}
+            style={{
+              WebkitTouchCallout: "none",
+              WebkitUserSelect: "none",
+              KhtmlUserSelect: "none",
+              MozUserSelect: "none",
+              msUserSelect: "none",
+              userSelect: "none",
+            }}
           >
             {dayObj.date.date()}
           </span>
