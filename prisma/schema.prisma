@@ -378,21 +378,23 @@ model Collaborator {
 }
 
 model Appointment {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  clientId   String   @db.ObjectId
-  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceId  String   @db.ObjectId
-  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  calendarId String   @db.ObjectId
-  calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  startTime  DateTime
-  endTime    DateTime
-  notes      String?
-  status     String   @default("scheduled")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId     String?
-
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId    String   @db.ObjectId
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceId   String   @db.ObjectId
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  calendarId  String   @db.ObjectId
+  calendar    Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  startTime   DateTime
+  endTime     DateTime
+  notes       String?
+  status      String   @default("scheduled")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  servicePrice Float?   // Preço original do serviço no momento do agendamento
+  finalPrice   Float?   // Preço final que pode ser ajustado
+  
   @@map("appointment")
 }

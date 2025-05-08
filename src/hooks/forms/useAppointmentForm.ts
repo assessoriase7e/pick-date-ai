@@ -78,14 +78,29 @@ export function useAppointmentForm({
           endTime: moment(appointment.endTime).format("HH:mm"),
           notes: appointment.notes || "",
           calendarId,
+          servicePrice: appointment.servicePrice || null,
+          finalPrice: appointment.finalPrice || appointment.servicePrice || null,
         }
       : {
           startTime: defaultStartTime,
           endTime: defaultEndTime,
           notes: "",
           calendarId,
+          servicePrice: null,
+          finalPrice: null,
         },
   });
+
+  const updatePriceFromService = (serviceId: string) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (service) {
+      form.setValue("servicePrice", service.price);
+      // Só atualiza o preço final se não estiver editando ou se o preço final for nulo
+      if (!isEditing || !form.getValues("finalPrice")) {
+        form.setValue("finalPrice", service.price);
+      }
+    }
+  };
 
   const isServiceAvailableOnDay = (service: Service): boolean => {
     if (!service.availableDays || service.availableDays.length === 0) {
@@ -129,6 +144,8 @@ export function useAppointmentForm({
         endTime: end,
         notes: "",
         calendarId,
+        servicePrice: null,
+        finalPrice: null,
       });
     }
   }, [date, initialStartTime, initialEndTime, calendarId, isEditing]);
@@ -171,6 +188,8 @@ export function useAppointmentForm({
         endTime,
         notes: values.notes || null,
         status: "scheduled",
+        servicePrice: values.servicePrice ?? null,
+        finalPrice: values.finalPrice ?? null,
       };
 
       let result;
@@ -226,5 +245,6 @@ export function useAppointmentForm({
     isServiceAvailableOnDay,
     onSubmit,
     handleDelete,
+    updatePriceFromService,
   };
 }

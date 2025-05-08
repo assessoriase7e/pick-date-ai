@@ -26,13 +26,16 @@ export const updateAppointmentSchema = z.object({
   notes: z.string().nullable(),
 });
 
+// Adicione ao schema de validação existente
 export const createAppointmentSchema = z.object({
-  clientId: z.string(),
-  serviceId: z.string(),
-  calendarId: z.string(),
-  startTime: z.string(),
-  endTime: z.string(),
-  notes: z.string().optional(),
+  clientId: z.string().min(1, "Cliente é obrigatório"),
+  serviceId: z.string().min(1, "Serviço é obrigatório"),
+  startTime: z.string().min(1, "Horário de início é obrigatório"),
+  endTime: z.string().min(1, "Horário de término é obrigatório"),
+  notes: z.string().optional().nullable(),
+  calendarId: z.string().min(1, "Calendário é obrigatório"),
+  servicePrice: z.number().nullable().optional(),
+  finalPrice: z.number().nullable().optional(),
 });
 
 export const getAppointmentsByDateSchema = z.object({

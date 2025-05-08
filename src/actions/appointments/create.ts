@@ -57,6 +57,18 @@ export async function createAppointment(
       };
     }
 
+    // Se não houver preço definido, busca o preço do serviço
+    if (!data.servicePrice || !data.finalPrice) {
+      const service = await prisma.service.findUnique({
+        where: { id: data.serviceId },
+      });
+      
+      if (service) {
+        data.servicePrice = data.servicePrice || service.price;
+        data.finalPrice = data.finalPrice || service.price;
+      }
+    }
+
     const appointment = await prisma.appointment.create({
       data: {
         ...data,

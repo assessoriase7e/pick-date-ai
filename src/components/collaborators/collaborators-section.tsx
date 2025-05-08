@@ -168,8 +168,8 @@ export function CollaboratorsSection({
   };
 
   const handleShowServices = (collaborator: CollaboratorFullData) => {
-    const services = collaborator.ServiceCollaborator.map((sc) => sc.service);
-    setSelectedServices(services);
+    const services = collaborator?.ServiceCollaborator?.map((sc) => sc.service);
+    setSelectedServices(services || []);
     setIsServicesDialogOpen(true);
   };
 
