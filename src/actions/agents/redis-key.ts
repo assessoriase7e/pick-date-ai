@@ -40,7 +40,7 @@ export async function saveRedisKey(data: z.infer<typeof redisKeySchema>) {
     } else {
       redisKey = await prisma.redisKey.create({
         data: {
-          userId: data.userId,
+          userId: userId,
           key: data.key,
         },
       });
