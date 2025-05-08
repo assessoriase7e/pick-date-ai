@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 import { ServiceFormValues } from "@/validators/service";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function createService(data: ServiceFormValues) {
   try {
@@ -44,6 +45,8 @@ export async function createService(data: ServiceFormValues) {
 
     revalidatePath("/services");
     revalidatePath("/collaborators");
+
+    await updateRagContent(user.id);
 
     return {
       success: true,

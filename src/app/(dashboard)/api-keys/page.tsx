@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import { getApiKeys } from "@/actions/api-key/getMany";
 import { audioRoutes } from "@/mocked/docs/audio";
-import { usersRoutes } from "@/mocked/docs/users";
 import { documentsRoutes } from "@/mocked/docs/documents";
 import { imagesRoutes } from "@/mocked/docs/images";
 import { linksRoutes } from "@/mocked/docs/links";
@@ -47,7 +46,6 @@ export default async function ApiKeysPage({
             <AccordionContent>
               <div className="space-y-8">
                 <ApiDocsAccordion doc={audioRoutes} />
-                <ApiDocsAccordion doc={usersRoutes} />
                 <ApiDocsAccordion doc={documentsRoutes} />
                 <ApiDocsAccordion doc={imagesRoutes} />
                 <ApiDocsAccordion doc={linksRoutes} />

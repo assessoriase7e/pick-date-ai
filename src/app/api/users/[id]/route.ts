@@ -7,6 +7,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const paramsResolved = await params;
+  const { searchParams } = new URL(req.url);
+  const includeBase64 = searchParams.get("base64") === "true";
 
   const apiKeyHeader = req.headers.get("Authorization");
   const validationResult = await validateApiKey(apiKeyHeader);
@@ -17,7 +19,29 @@ export async function GET(
   try {
     const user = await prisma.user.findUnique({
       where: { id: paramsResolved.id },
-      include: { profile: true },
+      include: {
+        audios: {
+          select: {
+            id: true,
+            description: true,
+            ...(includeBase64 && { audioBase64: true }),
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            description: true,
+            ...(includeBase64 && { imageBase64: true }),
+          },
+        },
+        documents: {
+          select: {
+            id: true,
+            description: true,
+            ...(includeBase64 && { documentBase64: true }),
+          },
+        },
+      },
     });
 
     if (!user) {

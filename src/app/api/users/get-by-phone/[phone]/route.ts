@@ -15,11 +15,11 @@ export async function GET(
 
   try {
     const profile = await prisma.profile.findFirst({
-      where: { phone: paramsResolved.phone },
+      where: { whatsapp: paramsResolved.phone },
       include: { user: true },
     });
 
-    if (!profile || !profile.user) {
+    if (!profile) {
       return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
 
