@@ -145,7 +145,8 @@ export function CalendarDayCell({
           "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed group",
           !dayObj.isCurrentMonth && "bg-muted/20 text-muted",
           isSelected(dayObj.date) && "ring-2 ring-primary",
-          activeAppointments?.length && "bg-primary border-primary"
+          activeAppointments?.length > 0 &&
+            "bg-primary border-primary text-background group-hover:text-primary"
         )}
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
@@ -156,8 +157,7 @@ export function CalendarDayCell({
             className={cn(
               "lg:text-lg font-medium flex items-center justify-center h-full select-none",
               dayObj.isToday &&
-                " group-hover:text-foreground dark:text-foreground",
-              activeAppointments.length > 0 && "text-background"
+                " group-hover:text-foreground dark:text-foreground"
             )}
             style={{
               WebkitTouchCallout: "none",
