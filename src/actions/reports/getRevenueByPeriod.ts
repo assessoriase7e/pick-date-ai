@@ -47,7 +47,12 @@ async function fetchRevenueByPeriod(
     for (const appointment of appointments) {
       const dateStr = appointment.endTime.toISOString().split("T")[0];
       const monthStr = moment(appointment.endTime).format("YYYY-MM");
-      const price = appointment.service?.price || 0;
+      // Usar finalPrice em vez do preço do serviço
+      const price =
+        appointment.finalPrice ||
+        appointment.servicePrice ||
+        appointment.service?.price ||
+        0;
 
       revenueMap[dateStr] = (revenueMap[dateStr] || 0) + price;
 

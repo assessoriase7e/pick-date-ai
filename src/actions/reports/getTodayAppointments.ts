@@ -58,6 +58,7 @@ export async function getTodayAppointments(): Promise<
               select: {
                 id: true,
                 name: true,
+                price: true,
               },
             },
             calendar: {

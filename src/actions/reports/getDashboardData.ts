@@ -64,7 +64,12 @@ export const getDashboardData = async (): Promise<
       });
 
       const todayRevenue = todayAppointments.reduce(
-        (total, appointment) => total + (appointment.service?.price || 0),
+        (total, appointment) =>
+          total +
+          (appointment.finalPrice ||
+            appointment.servicePrice ||
+            appointment.service?.price ||
+            0),
         0
       );
 

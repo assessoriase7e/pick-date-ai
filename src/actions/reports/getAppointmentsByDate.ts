@@ -38,7 +38,7 @@ export async function getAppointmentsByDate(
 
     const whereClause: any = {
       userId,
-      startTime: { gte: from }
+      startTime: { gte: from },
     };
 
     if (to) {
@@ -57,13 +57,14 @@ export async function getAppointmentsByDate(
                 select: {
                   id: true,
                   fullName: true,
-                }
+                },
               },
               service: {
                 select: {
                   id: true,
                   name: true,
-                }
+                  price: true,
+                },
               },
               calendar: {
                 select: {
@@ -71,45 +72,56 @@ export async function getAppointmentsByDate(
                     select: {
                       id: true,
                       name: true,
-                    }
-                  }
-                }
-              }
+                    },
+                  },
+                },
+              },
             },
             orderBy: { startTime: "asc" },
             skip,
-            take: limit
+            take: limit,
           }),
           prisma.appointment.count({
-            where: whereClause
-          })
+            where: whereClause,
+          }),
         ]);
 
-        const formattedAppointments: AppointmentWithRelations[] = appointments.map(appointment => ({
-          ...appointment,
-          client: appointment.client ? {
-            id: appointment.client.id,
-            name: appointment.client.fullName
-          } : null,
-          service: appointment.service ? {
-            id: appointment.service.id,
-            name: appointment.service.name
-          } : null,
-          collaborator: appointment.calendar?.collaborator ? {
-            id: appointment.calendar.collaborator.id,
-            name: appointment.calendar.collaborator.name
-          } : null
-        }));
+        const formattedAppointments: AppointmentWithRelations[] =
+          appointments.map((appointment) => ({
+            ...appointment,
+            client: appointment.client
+              ? {
+                  id: appointment.client.id,
+                  name: appointment.client.fullName,
+                }
+              : null,
+            service: appointment.service
+              ? {
+                  id: appointment.service.id,
+                  name: appointment.service.name,
+                }
+              : null,
+            collaborator: appointment.calendar?.collaborator
+              ? {
+                  id: appointment.calendar.collaborator.id,
+                  name: appointment.calendar.collaborator.name,
+                }
+              : null,
+          }));
 
         return {
           success: true,
           data: {
             appointments: formattedAppointments,
-            totalPages: Math.ceil(total / limit)
-          }
+            totalPages: Math.ceil(total / limit),
+          },
         };
       },
-      [`appointments-by-date-${userId}-${from.toISOString()}-${to?.toISOString() || 'none'}-${page}-${limit}`],
+      [
+        `appointments-by-date-${userId}-${from.toISOString()}-${
+          to?.toISOString() || "none"
+        }-${page}-${limit}`,
+      ],
       { revalidate: 60 * 5, tags: ["appointments"] }
     );
 

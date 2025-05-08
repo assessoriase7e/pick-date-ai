@@ -45,9 +45,9 @@ async function fetchCollaboratorCommission(
       where.service = {
         serviceCollaborators: {
           some: {
-            collaboratorId
-          }
-        }
+            collaboratorId,
+          },
+        },
       };
     }
 
@@ -78,32 +78,40 @@ async function fetchCollaboratorCommission(
         name: string;
         totalServices: number;
         totalRevenue: number;
-        totalCommission: number;
+        commission: number;
       }
     > = {};
 
     appointments.forEach((appointment) => {
-      const service = appointment.service;
-      if (!service || typeof service.commission !== "number") return;
+      const serviceCollaborators =
+        appointment.service?.serviceCollaborators || [];
 
-      service.serviceCollaborators.forEach((sc) => {
+      // Usar finalPrice em vez do preço do serviço
+      const appointmentPrice =
+        appointment.finalPrice ||
+        appointment.servicePrice ||
+        appointment.service?.price ||
+        0;
+
+      serviceCollaborators.forEach((sc) => {
         const collaborator = sc.collaborator;
+        if (!collaborator) return;
+
         const id = collaborator.id;
-        
         if (!collaboratorData[id]) {
           collaboratorData[id] = {
             collaboratorId: id,
             name: collaborator.name,
             totalServices: 0,
             totalRevenue: 0,
-            totalCommission: 0,
+            commission: 0,
           };
         }
 
         collaboratorData[id].totalServices += 1;
-        collaboratorData[id].totalRevenue += service.price || 0;
-        collaboratorData[id].totalCommission +=
-          (service.price || 0) * (service.commission / 100);
+        collaboratorData[id].totalRevenue += appointmentPrice;
+        collaboratorData[id].commission +=
+          (appointmentPrice * (appointment.service?.commission || 0)) / 100;
       });
     });
 
@@ -112,7 +120,7 @@ async function fetchCollaboratorCommission(
       name: collab.name,
       totalServices: collab.totalServices,
       totalRevenue: collab.totalRevenue,
-      commission: collab.totalCommission,
+      commission: collab.commission,
     }));
 
     return {

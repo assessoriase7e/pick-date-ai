@@ -72,7 +72,12 @@ export const getTopClientsByServices = async (
         }
 
         clientData[id].serviceCount += 1;
-        clientData[id].totalSpent += service.service?.price || 0;
+        // Usar finalPrice em vez do preço do serviço
+        clientData[id].totalSpent +=
+          service.finalPrice ||
+          service.servicePrice ||
+          service.service?.price ||
+          0;
       });
 
       const clientsByServices = Object.values(clientData)

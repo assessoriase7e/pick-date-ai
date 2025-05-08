@@ -67,7 +67,12 @@ async function fetchTopClientsBySpending(
       }
 
       clientData[id].serviceCount += 1;
-      clientData[id].totalSpent += appointment.service?.price || 0;
+      // Usar finalPrice em vez do preço do serviço
+      clientData[id].totalSpent +=
+        appointment.finalPrice ||
+        appointment.servicePrice ||
+        appointment.service?.price ||
+        0;
     });
 
     const clientsBySpending = Object.values(clientData)
