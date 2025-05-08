@@ -54,18 +54,21 @@ export function CalendarDayCell({
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = () => {
     if (isMobile && activeAppointments.length > 0) {
-      e.preventDefault();
       setIsTouching(true);
-      touchTimerRef.current = setTimeout(() => {
-        setShowDetails(true);
-      }, 1500);
+      if (!touchTimerRef.current) {
+        touchTimerRef.current = setTimeout(() => {
+          setShowDetails(true);
+          touchTimerRef.current = null;
+        }, 1500);
+      }
     }
   };
 
   const handleTouchEnd = () => {
     setIsTouching(false);
+    // Timer não é limpo aqui para permitir que o modal abra após o tempo se já tiver passado
   };
 
   const handleTouchMove = () => {
@@ -82,7 +85,7 @@ export function CalendarDayCell({
         <div
           key={index}
           className={cn(
-            "border rounded-lg p-3 mb-2 hover:bg-muted/30 cursor-pointer transition-colors group select-none",
+            "border rounded-lg p-3 mb-2 hover:bg-muted/30 cursor-pointer transition-colors group",
             isSelected(dayObj.date) && "ring-2 ring-primary",
             dayObj.isToday && "border-primary",
             activeAppointments?.length && "bg-primary",
@@ -98,8 +101,8 @@ export function CalendarDayCell({
             <div className="flex items-center">
               <span
                 className={cn(
-                  "text-lg font-medium",
-                  dayObj.isToday && "text-foreground select-none"
+                  "text-lg font-medium select-none",
+                  dayObj.isToday && "text-foreground"
                 )}
               >
                 {dayObj.date.date()}
@@ -143,14 +146,14 @@ export function CalendarDayCell({
         <div className="flex flex-col h-full relative">
           <span
             className={cn(
-              "lg:text-lg font-medium flex items-center justify-center h-full",
+              "lg:text-lg font-medium flex items-center justify-center h-full select-none",
               dayObj.isToday && "text-foreground"
             )}
           >
             {dayObj.date.date()}
           </span>
           {activeAppointments.length > 0 && (
-            <span className="text-[10px] sm:text-xs bottom-1 flex absolute">
+            <span className="text-[10px] sm:text-xs bottom-1 flex absolute select-none">
               {activeAppointments.length}{" "}
               <span className="hidden lg:block ml-1">agendamento(s)</span>
             </span>
