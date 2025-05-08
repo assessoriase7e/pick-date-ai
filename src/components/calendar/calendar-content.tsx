@@ -172,7 +172,7 @@ export function CalendarContent({
         goToToday={goToToday}
         selectedDate={selectedDay}
         openDayDetails={openDayDetails}
-        initialAppointments={appointments}
+        appointments={appointments}
       />
 
       <CalendarModals

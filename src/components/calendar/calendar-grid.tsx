@@ -13,7 +13,7 @@ interface CalendarGridProps {
   goToNextMonth: () => void;
   goToToday: () => void;
   selectedDate: Date | null;
-  initialAppointments: Record<string, AppointmentFullData[]>;
+  appointments: Record<string, AppointmentFullData[]>;
   calendarId: string;
   loading?: boolean;
 }
@@ -24,9 +24,8 @@ export function CalendarGrid({
   goToNextMonth,
   goToToday,
   selectedDate,
-  initialAppointments,
+  appointments,
   calendarId,
-  loading,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
@@ -57,7 +56,6 @@ export function CalendarGrid({
 
     if (currentParams !== prevSearchParams) {
       setIsLoading(true);
-
       setPrevSearchParams(currentParams);
     }
 
@@ -123,8 +121,7 @@ export function CalendarGrid({
 
   const getAppointmentsForDay = (day: moment.Moment) => {
     const dateKey = day.format("YYYY-MM-DD");
-    const appointments = initialAppointments[dateKey] || [];
-    return appointments;
+    return appointments[dateKey] || [];
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -195,7 +192,7 @@ export function CalendarGrid({
     selectedDate,
     calendarDays,
     calendarId,
-    initialAppointments,
+    initialAppointments: appointments,
     goToPreviousMonth,
     goToNextMonth,
     goToToday,

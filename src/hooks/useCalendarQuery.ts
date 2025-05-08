@@ -1,7 +1,6 @@
 "use client";
 import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { revalidatePathAction } from "@/actions/revalidate-path";
 
 interface UseCalendarQueryProps {
   initialCalendarId: string;
@@ -25,7 +24,6 @@ export function useCalendarQuery({
     const params = new URLSearchParams(searchParams.toString());
     params.set("calendarId", id);
     router.push(`/calendar?${params.toString()}`);
-    revalidatePathAction("/calendar");
   };
 
   const goToPreviousMonth = useCallback(() => {
@@ -54,7 +52,6 @@ export function useCalendarQuery({
     const params = new URLSearchParams(searchParams.toString());
     params.set("selectedDay", date.toISOString());
     router.push(`/calendar?${params.toString()}`);
-    revalidatePathAction("/calendar");
   };
 
   const closeDayDetails = () => {

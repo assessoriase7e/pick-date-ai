@@ -5,9 +5,8 @@ import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { MobileCalendarSelector } from "./mobile-calendar-selector";
 import { CalendarActionsModal } from "./calendar-actions-modal";
 import { DesktopCalendarTabs } from "./desktop-calendar-tabs";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { revalidatePathAction } from "@/actions/revalidate-path";
 import IsTableLoading from "../isTableLoading";
 
 interface CalendarTabsProps {
@@ -24,7 +23,7 @@ interface CalendarTabsProps {
   goToToday: () => void;
   selectedDate: Date | null;
   openDayDetails: (date: Date) => void;
-  initialAppointments: Record<string, AppointmentFullData[]>;
+  appointments: Record<string, AppointmentFullData[]>;
 }
 
 export function CalendarTabs({
@@ -40,32 +39,23 @@ export function CalendarTabs({
   goToNextMonth,
   goToToday,
   selectedDate,
-  initialAppointments,
+  appointments,
 }: CalendarTabsProps) {
   const [showActionsModal, setShowActionsModal] = useState<boolean>(false);
   const [selectedCalendar, setSelectedCalendar] =
     useState<CalendarFullData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [pendingCalendarId, setPendingCalendarId] = useState<string | null>(null);
-  const prevCalendarId = useRef<string>(calendarId);
 
   const isMobile = useIsMobile();
 
   const handleChangeCalendar = async (id: string) => {
     setLoading(true);
-    setPendingCalendarId(id);
     setCalendarId(id);
-    await revalidatePathAction("/calendar");
-    // Não desativa o loading aqui!
   };
 
   useEffect(() => {
-    if (pendingCalendarId && calendarId === pendingCalendarId) {
-      setLoading(false);
-      setPendingCalendarId(null);
-    }
-    prevCalendarId.current = calendarId;
-  }, [calendarId, pendingCalendarId]);
+    setLoading(false);
+  }, [calendarId]);
 
   return (
     <div className="flex-1 overflow-hidden">
@@ -113,7 +103,7 @@ export function CalendarTabs({
               goToNextMonth={goToNextMonth}
               goToToday={goToToday}
               selectedDate={selectedDate}
-              initialAppointments={initialAppointments}
+              appointments={appointments}
               calendarId={calendar.id}
             />
           </TabsContent>
