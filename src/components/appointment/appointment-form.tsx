@@ -7,27 +7,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { AppointmentFullData } from "@/types/calendar";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
 import { SelectWithScroll } from "../calendar/select-with-scroll";
 import { useAppointmentDataStore } from "@/store/appointment-data-store";
-
-interface AppointmentFormProps {
-  date: Date;
-  appointment?: AppointmentFullData;
-  onSuccess: () => void;
-  checkTimeConflict: (
-    startTime: Date,
-    endTime: Date,
-    excludeId?: string
-  ) => boolean;
-  initialStartTime?: string;
-  initialEndTime?: string;
-  calendarId: string;
-}
+import { AppointmentFormProps } from "@/validators/appointment";
+import { NumericFormat } from "react-number-format";
+import { useEffect } from "react";
 
 export function AppointmentForm({
   date,
@@ -46,6 +34,7 @@ export function AppointmentForm({
     isEditing,
     onSubmit,
     handleDelete,
+    updatePriceFromService,
   } = useAppointmentForm({
     date,
     appointment,
@@ -57,6 +46,28 @@ export function AppointmentForm({
   });
 
   const { clients, services } = useAppointmentDataStore();
+
+  // Atualiza o preço quando o serviço é selecionado
+  useEffect(() => {
+    const serviceId = form.watch("serviceId");
+    if (serviceId) {
+      updatePriceFromService(serviceId);
+    }
+  }, [form.watch("serviceId")]);
+
+  // Reseta o formulário quando o appointment ou os tempos iniciais mudam
+  useEffect(() => {
+    form.reset({
+      clientId: appointment?.clientId || "",
+      serviceId: appointment?.serviceId || "",
+      startTime: initialStartTime || "09:00",
+      endTime: initialEndTime || "10:00",
+      notes: appointment?.notes || "",
+      calendarId,
+      servicePrice: appointment?.servicePrice || null,
+      finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
+    });
+  }, [appointment, initialStartTime, initialEndTime, calendarId]);
 
   return (
     <Form {...form}>
@@ -111,6 +122,32 @@ export function AppointmentForm({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="finalPrice"
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Preço</FormLabel>
+                <FormControl>
+                  <NumericFormat
+                    customInput={Input}
+                    prefix="R$"
+                    placeholder="R$ 0,00"
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    decimalScale={2}
+                    allowNegative={false}
+                    value={value}
+                    onValueChange={(values) => {
+                      onChange(values.floatValue);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -152,6 +189,7 @@ export function AppointmentForm({
                     placeholder="Adicione observações sobre o agendamento"
                     className="resize-none"
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />

@@ -95,6 +95,7 @@ export function DayScheduleContent({
       params.delete("endTime");
       router.push(`${window.location.pathname}?${params.toString()}`);
 
+      // Limpa o estado do formulário
       setShowForm(false);
       setSelectedAppointment(null);
     } catch (error) {
