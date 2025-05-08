@@ -62,6 +62,8 @@ export async function GET(req: NextRequest) {
           name: true,
           number: true,
           webhookUrl: true,
+          apiKey: true,
+          type: true,
           userId: true,
           status: true,
           id: true,

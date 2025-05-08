@@ -84,7 +84,7 @@ export function InstanceForm({
         }
       } else {
         const result = await createInstance(
-          submissionValues as CreateInstanceFormValues
+          submissionValues
         );
         if (result.success) {
           toast.success("Instância criada com sucesso");

@@ -12,7 +12,9 @@ const attendantWebHookUrl = process.env.ATTENDANT_WEBHOOK_URL || "";
 
 export type CreateInstanceFormValues = z.infer<typeof createInstanceSchema>;
 
-export async function createInstance(data: CreateInstanceFormValues) {
+export async function createInstance(
+  data: CreateInstanceFormValues & { name: string }
+) {
   try {
     const { userId } = await auth();
 
@@ -72,7 +74,6 @@ export async function createInstance(data: CreateInstanceFormValues) {
         webhook: {
           url: webhookUrl,
           base64: true,
-          byevents: true,
           events: ["MESSAGES_UPSERT"],
         },
       }),
@@ -93,7 +94,7 @@ export async function createInstance(data: CreateInstanceFormValues) {
         number: data.number,
         qrCode: result.qrcode.base64,
         webhookUrl,
-        apiKey: result.apiKey || evolutionApiKey,
+        apiKey: result.hash || evolutionApiKey,
         type: data.type,
         userId,
       },
