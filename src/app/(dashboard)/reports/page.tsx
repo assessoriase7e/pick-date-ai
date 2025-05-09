@@ -14,6 +14,10 @@ import { RevenueChart } from "@/components/reports/revenue-chart";
 import { revenueChartConfig } from "@/constants/chartConfig";
 import { MonthlyRevenueChart } from "@/components/reports/monthly-revenue-chart";
 import { monthlyRevenueChartConfig } from "@/constants/chartConfig";
+import { CanceledAppointments } from "@/components/reports/canceled-appointments";
+import { ScheduledAppointments } from "@/components/reports/scheduled-appointments";
+import { getCanceledAppointments } from "@/actions/reports/getCanceledAppointments";
+import { getScheduledAppointments } from "@/actions/reports/getScheduledAppointments";
 
 export default async function ReportsPage({
   searchParams,
@@ -38,6 +42,10 @@ export default async function ReportsPage({
     fromCollab,
     toCollab,
     collaboratorId,
+    fromCanceled,
+    toCanceled,
+    fromScheduled,
+    toScheduled,
   } = await searchParams;
 
   const today = moment().endOf("day").toDate();
@@ -116,6 +124,47 @@ export default async function ReportsPage({
     ? topClientsBySpendingResult.data
     : [];
 
+  // Datas para agendamentos cancelados
+  const formatedFromCanceled = fromCanceled
+    ? moment(fromCanceled as string)
+        .startOf("day")
+        .toDate()
+    : moment().subtract(1, "M").startOf("day").toDate();
+  const formatedToCanceled = toCanceled
+    ? moment(toCanceled as string)
+        .endOf("day")
+        .toDate()
+    : today;
+
+  // Datas para agendamentos agendados
+  const formatedFromScheduled = fromScheduled
+    ? moment(fromScheduled as string)
+        .startOf("day")
+        .toDate()
+    : moment().startOf("day").toDate();
+  const formatedToScheduled = toScheduled
+    ? moment(toScheduled as string)
+        .endOf("day")
+        .toDate()
+    : moment().add(1, "M").endOf("day").toDate();
+
+  // Buscar dados de agendamentos cancelados e agendados
+  const canceledAppointmentsResult = await getCanceledAppointments(
+    formatedFromCanceled,
+    formatedToCanceled
+  );
+  const canceledAppointments = canceledAppointmentsResult.success
+    ? canceledAppointmentsResult.data
+    : [];
+
+  const scheduledAppointmentsResult = await getScheduledAppointments(
+    formatedFromScheduled,
+    formatedToScheduled
+  );
+  const scheduledAppointments = scheduledAppointmentsResult.success
+    ? scheduledAppointmentsResult.data
+    : [];
+
   return (
     <div className="space-y-6 border border-border border-dashed p-5 rounded-lg">
       <div>
@@ -180,6 +229,25 @@ export default async function ReportsPage({
           <TopClients
             topClientsByServices={topClients}
             topClientsBySpending={topClientsBySpending}
+          />
+        </Suspense>
+      </div>
+
+      {/* Novos componentes de agendamentos */}
+      <div className="grid grid-cols-1 gap-5 w-full">
+        <Suspense fallback={<LoaderCircle className="animate-spin" />}>
+          <Suspense fallback={<LoaderCircle className="animate-spin" />}>
+            <ScheduledAppointments
+              initialAppointments={scheduledAppointments}
+              initialFromDate={formatedFromScheduled}
+              initialToDate={formatedToScheduled}
+            />
+          </Suspense>
+
+          <CanceledAppointments
+            initialAppointments={canceledAppointments}
+            initialFromDate={formatedFromCanceled}
+            initialToDate={formatedToCanceled}
           />
         </Suspense>
       </div>
