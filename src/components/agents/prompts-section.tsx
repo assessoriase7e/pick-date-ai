@@ -32,8 +32,8 @@ export function PromptsSection({ attendantPrompt }: PromptsProps) {
         </TabsList>
 
         <TabsContent value="attendant">
-          <AttendantTab 
-            isLoading={isLoading} 
+          <AttendantTab
+            isLoading={isLoading}
             setIsLoading={setIsLoading}
             initialData={attendantPrompt}
           />

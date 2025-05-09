@@ -48,7 +48,7 @@ export const triggerProfileRagUpdate = async (userId: string) => {
     return await callProfileWebhook({
       userId,
       webhookUrl: ragConfig.webhookUrl,
-      metadataKey,
+      metadataKey: `${profile.whatsapp}_${metadataKey}`,
     });
   } catch (error) {
     console.error("Erro ao acionar atualização RAG do perfil:", error);
