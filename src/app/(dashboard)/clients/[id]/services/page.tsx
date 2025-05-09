@@ -36,17 +36,18 @@ export default async function ClientServicesPage({
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <Link href="/clients">
-        <Button variant="outline">
-          <ChevronLeft />
-          Voltar
-        </Button>
-      </Link>
+    <div className="container mx-auto">
+      <div className="flex items-center gap-2">
+        <Link href="/clients">
+          <Button variant="outline">
+            <ChevronLeft />
+          </Button>
+        </Link>
 
-      <h1 className="text-2xl font-bold my-4 text-end">
-        Serviços do Cliente: {clientResult.data.client.fullName}
-      </h1>
+        <h1 className="text-2xl font-bold my-4 text-end">
+          Serviços do Cliente: {clientResult.data.client.fullName}
+        </h1>
+      </div>
 
       {!clientServicesResult.success ? (
         <div className="p-4 bg-red-50 text-red-500 rounded-md">

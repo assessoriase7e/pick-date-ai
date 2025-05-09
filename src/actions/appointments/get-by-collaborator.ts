@@ -1,8 +1,6 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { format } from "date-fns";
 
 type GetAppointmentsByCollaboratorResponse =
   | {
@@ -85,19 +83,9 @@ export async function getAppointmentsByCollaborator(
       }),
     ]);
 
-    // Formatar os dados para a tabela
-    const formattedAppointments = appointments.map((appointment) => ({
-      id: appointment.id,
-      clientName: appointment.client?.fullName || "Cliente não informado",
-      serviceName: appointment.service?.name || "Serviço não informado",
-      price: appointment.finalPrice || appointment.servicePrice || 0,
-      date: appointment.startTime,
-      formattedDate: format(appointment.startTime, "dd/MM/yyyy HH:mm"),
-    }));
-
     return {
       success: true,
-      data: formattedAppointments,
+      data: appointments,
       pagination: {
         totalPages: Math.ceil(total / limit),
         currentPage: page,

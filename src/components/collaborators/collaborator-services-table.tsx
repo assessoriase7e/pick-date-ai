@@ -1,6 +1,4 @@
 "use client";
-import { useCollabServiceColumns } from "@/hooks/collaborator";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,13 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/pagination";
+import { AppointmentFullData } from "@/types/calendar";
 
 interface CollaboratorServicesTableProps {
   data: any[];
@@ -30,108 +24,105 @@ export function CollaboratorServicesTable({
   pagination,
 }: CollaboratorServicesTableProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { collabColumns } = useCollabServiceColumns();
 
-  const table = useReactTable({
-    data,
-    columns: collabColumns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  const createPageURL = (pageNumber: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", pageNumber.toString());
-    return `${pathname}?${params.toString()}`;
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("pt-BR");
   };
 
-  const handlePreviousPage = () => {
-    if (pagination.currentPage > 1) {
-      router.push(createPageURL(pagination.currentPage - 1));
-    }
+  const formatTime = (date: Date | undefined) => {
+    if (!date) return "";
+    return new Date(date).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
-  const handleNextPage = () => {
-    if (pagination.currentPage < pagination.totalPages) {
-      router.push(createPageURL(pagination.currentPage + 1));
-    }
+  const handlePageChange = (page: number) => {
+    router.push(`?page=${page}`);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
+    <>
+      <div className="space-y-4">
+        {/* Visualização Desktop */}
+        <div className="rounded-md border hidden md:block">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={collabColumns.length}
-                  className="h-24 text-center"
-                >
-                  Nenhum serviço encontrado.
-                </TableCell>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Descrição</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-6 text-muted-foreground"
+                  >
+                    Nenhum serviço encontrado
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((appointment: AppointmentFullData) => (
+                  <TableRow key={appointment.id}>
+                    <TableCell>{appointment.service?.name || 'Serviço não encontrado'}</TableCell>
+                    <TableCell>{formatDate(appointment.startTime)}</TableCell>
+                    <TableCell>
+                      {appointment.startTime && appointment.endTime
+                        ? `${formatTime(appointment.startTime)} - ${formatTime(
+                            appointment.endTime
+                          )}`
+                        : "-"}
+                    </TableCell>
+                    <TableCell>{appointment.notes || "-"}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Visualização Mobile */}
+        <div className="md:hidden space-y-4">
+          {data.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground rounded-md border">
+              Nenhum serviço encontrado
+            </div>
+          ) : (
+            data.map((appointment) => (
+              <div
+                key={appointment.id}
+                className="rounded-md border p-4 space-y-3"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <h3 className="font-medium">{appointment.service?.name || 'Serviço não encontrado'}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(appointment.date)}
+                    </p>
+                    {appointment.notes && (
+                      <p className="text-sm text-muted-foreground">
+                        {appointment.notes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      {pagination.totalPages > 0 && (
-        <div className="flex items-center justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={pagination.currentPage <= 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-sm">
-            Página {pagination.currentPage} de {pagination.totalPages}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={pagination.currentPage >= pagination.totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-    </div>
+      <div className="mt-4">
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+    </>
   );
 }

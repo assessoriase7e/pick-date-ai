@@ -1,29 +1,28 @@
 "use server";
-
 import { getCollaboratorById } from "@/actions/collaborators/get-collaborator-by-id";
 import { getAppointmentsByCollaborator } from "@/actions/appointments/get-by-collaborator";
 import { CollaboratorServicesTable } from "@/components/collaborators/collaborator-services-table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface CollaboratorServicesPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 export default async function CollaboratorServicesPage({
   params,
   searchParams,
 }: CollaboratorServicesPageProps) {
-  const { id } = params;
-  const page = Number(searchParams.page) || 1;
+  const { id } = await params;
+  const { page: sPage } = await searchParams;
+  const page = Number(sPage) || 1;
 
   const [collaboratorResult, appointmentsResult] = await Promise.all([
     getCollaboratorById(id),
@@ -42,6 +41,8 @@ export default async function CollaboratorServicesPage({
     ? appointmentsResult.pagination
     : { totalPages: 0, currentPage: 1 };
 
+  console.log(appointments);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -57,17 +58,7 @@ export default async function CollaboratorServicesPage({
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Serviços Realizados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CollaboratorServicesTable
-            data={appointments}
-            pagination={pagination}
-          />
-        </CardContent>
-      </Card>
+      <CollaboratorServicesTable data={appointments} pagination={pagination} />
     </div>
   );
 }

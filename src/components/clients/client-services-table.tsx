@@ -69,11 +69,6 @@ export default function ClientServicesTable({
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteClick = (id: string) => {
-    setServiceToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
-
   const handleConfirmDelete = async () => {
     if (!serviceToDelete) return;
 
