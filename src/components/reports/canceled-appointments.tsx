@@ -33,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { Input } from "../ui/input";
+import { AppointmentMobileCard } from "./appointment-mobile-card";
 
 interface CanceledAppointmentsProps {
   initialAppointments: {
@@ -228,7 +229,8 @@ export function CanceledAppointments({
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-md border">
+            {/* Visualização Desktop */}
+            <div className="rounded-md border hidden md:block">
               <Table>
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -273,6 +275,14 @@ export function CanceledAppointments({
                 </TableBody>
               </Table>
             </div>
+
+            {/* Visualização Mobile */}
+            <div className="md:hidden space-y-4">
+              {table.getRowModel().rows.map((row) => (
+                <AppointmentMobileCard key={row.id} row={row} />
+              ))}
+            </div>
+
             <div className="flex items-center justify-end space-x-2">
               <Button
                 variant="outline"

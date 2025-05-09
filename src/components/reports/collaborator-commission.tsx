@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/table";
 import { DatePickerWithRange } from "../ui/date-picker-range";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CommissionMobileCard } from "./commission-mobile-card";
+
+interface CommissionMobileCardProps {
+  name: string;
+  totalServices: number;
+  totalRevenue: number;
+  commission: number;
+}
 
 interface CollaboratorCommissionProps {
   collaborators: Collaborator[];
@@ -108,35 +116,51 @@ export function CollaboratorCommission({
             Nenhum dado encontrado para o período selecionado
           </div>
         ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Profissional</TableHead>
-                  <TableHead className="text-right">
-                    Total de Serviços
-                  </TableHead>
-                  <TableHead className="text-right">Faturamento</TableHead>
-                  <TableHead className="text-right">Comissão</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {commissionData.map((item) => (
-                  <TableRow key={item.collaboratorId}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="text-right">
-                      {item.totalServices}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.totalRevenue)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.commission)}
-                    </TableCell>
+          <div className="space-y-4">
+            {/* Visualização Desktop */}
+            <div className="rounded-md border hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Profissional</TableHead>
+                    <TableHead className="text-right">
+                      Total de Serviços
+                    </TableHead>
+                    <TableHead className="text-right">Faturamento</TableHead>
+                    <TableHead className="text-right">Comissão</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {commissionData.map((item) => (
+                    <TableRow key={item.collaboratorId}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell className="text-right">
+                        {item.totalServices}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(item.totalRevenue)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(item.commission)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Visualização Mobile */}
+            <div className="md:hidden space-y-4">
+              {commissionData.map((item) => (
+                <CommissionMobileCard
+                  key={item.collaboratorId}
+                  name={item.name}
+                  totalServices={item.totalServices}
+                  totalRevenue={item.totalRevenue}
+                  commission={item.commission}
+                />
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
