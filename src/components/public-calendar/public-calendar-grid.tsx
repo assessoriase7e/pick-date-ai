@@ -4,7 +4,7 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import { AppointmentFullData } from "@/types/calendar";
 import { CalendarDay } from "../calendar/calendar-types";
-import { DesktopCalendarView } from "../calendar/desktop-calendar-view";
+import { DesktopCalendarView } from "../calendar/views/desktop-calendar-view";
 import { PublicDayDetailsModal } from "./public-day-details-modal";
 
 interface PublicCalendarGridProps {

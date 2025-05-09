@@ -1,13 +1,13 @@
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 
-import { CalendarGrid } from "./calendar-grid";
+import { CalendarGrid } from "../calendar-grid";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
-import { MobileCalendarSelector } from "./mobile-calendar-selector";
-import { CalendarActionsModal } from "./calendar-actions-modal";
+import { MobileCalendarSelector } from "../mobile-calendar-selector";
+import { CalendarActionsModal } from "../calendar-actions-modal";
 import { DesktopCalendarTabs } from "./desktop-calendar-tabs";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import IsTableLoading from "../isTableLoading";
+import IsTableLoading from "../../isTableLoading";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];

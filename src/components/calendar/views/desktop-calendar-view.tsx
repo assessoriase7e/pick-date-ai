@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { CalendarViewProps } from "./calendar-types";
-import { CalendarDayCell } from "./calendar-day-cell";
+import { CalendarViewProps } from "../calendar-types";
+import { CalendarDayCell } from "../dayCell/calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
-import IsTableLoading from "../isTableLoading";
+import IsTableLoading from "../../isTableLoading";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MonthYearPicker } from "../ui/month-year-picker";
+import { MonthYearPicker } from "../../ui/month-year-picker";
 
 interface DesktopCalendarViewProps extends CalendarViewProps {
   onTouchStart: (e: React.TouchEvent) => void;

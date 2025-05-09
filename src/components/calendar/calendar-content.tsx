@@ -9,7 +9,7 @@ import { deleteCalendar } from "@/actions/calendars/delete";
 import { CalendarHeader } from "./calendar-header";
 import { CalendarModals } from "./calendar-modals";
 import { EmptyCalendarState } from "./empty-calendar-state";
-import { CalendarTabs } from "./calendar-tabs";
+import { CalendarTabs } from "./tabs/calendar-tabs";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
@@ -30,7 +30,6 @@ export function DayScheduleContent({
   const searchParams = useSearchParams();
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentFullData | null>(null);
-
   const [showForm, setShowForm] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -185,8 +184,7 @@ export function DayScheduleContent({
             <div className="flex flex-col items-center justify-center h-full text-center">
               <p className="text-muted-foreground mb-4">
                 Selecione um horário na lista à esquerda para criar um novo
-                agendamento ou clique em um agendamento existente para
-                editá-lo.
+                agendamento ou clique em um agendamento existente para editá-lo.
               </p>
             </div>
           )}
