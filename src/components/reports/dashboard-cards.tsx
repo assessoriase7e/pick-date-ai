@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { BirthdayCard } from "./birthday-card";
 
 interface DashboardCardProps {
   title: string;
@@ -97,6 +98,12 @@ interface DashboardCardsProps {
   futureAppointmentsCount: number;
   todayRevenue: number;
   periodRevenue?: number;
+  canceledAppointmentsCount: number;
+  birthdayClients: Array<{
+    id: string;
+    fullName: string;
+    birthDate: string;
+  }>;
   onDateChange?: (range: DateRange | undefined) => void;
 }
 
@@ -106,6 +113,8 @@ export function DashboardCards({
   futureAppointmentsCount,
   todayRevenue,
   periodRevenue,
+  canceledAppointmentsCount,
+  birthdayClients,
   onDateChange,
 }: DashboardCardsProps) {
   const currencyFormatter = (value: number) => {
@@ -120,7 +129,7 @@ export function DashboardCards({
   const toRevenue = searchParams.get("toRevenue");
 
   return (
-    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <DashboardCard title="Clientes Atuais" value={clientCount} icon={Users} />
 
       <DashboardCard
@@ -136,6 +145,12 @@ export function DashboardCards({
       />
 
       <DashboardCard
+        title="Agendamentos Cancelados"
+        value={canceledAppointmentsCount}
+        icon={Calendar}
+      />
+
+      <DashboardCard
         title={
           fromRevenue && toRevenue ? "Faturamento Período" : "Faturamento Hoje"
         }
@@ -145,6 +160,8 @@ export function DashboardCards({
         showDatePicker={true}
         onDateChange={onDateChange}
       />
+
+      <BirthdayCard birthdayClients={birthdayClients} />
     </div>
   );
 }

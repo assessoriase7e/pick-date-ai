@@ -18,12 +18,15 @@ import { CanceledAppointments } from "@/components/reports/canceled-appointments
 import { ScheduledAppointments } from "@/components/reports/scheduled-appointments";
 import { getCanceledAppointments } from "@/actions/reports/getCanceledAppointments";
 import { getScheduledAppointments } from "@/actions/reports/getScheduledAppointments";
+import { prisma } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 
 export default async function ReportsPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const user = await currentUser();
   const dashboardResult = await getDashboardData();
   const dashboardData = dashboardResult.success
     ? dashboardResult.data
@@ -165,6 +168,30 @@ export default async function ReportsPage({
     ? scheduledAppointmentsResult.data
     : [];
 
+  // Buscar aniversariantes do mês atual
+  const currentMonth = moment().month() + 1;
+  const birthdayClientsResult = await prisma.client.findMany({
+    where: {
+      userId: user?.id,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      birthDate: true,
+    },
+  });
+
+  const birthdayClients = birthdayClientsResult
+    .filter((client) => {
+      const birthMonth = moment(client.birthDate).month() + 1;
+      return birthMonth === currentMonth;
+    })
+    .map((client) => ({
+      id: client.id,
+      fullName: client.fullName,
+      birthDate: client.birthDate.toISOString(),
+    }));
+
   return (
     <div className="space-y-6 border border-border border-dashed p-5 rounded-lg">
       <div>
@@ -181,6 +208,8 @@ export default async function ReportsPage({
           futureAppointmentsCount={dashboardData.futureAppointmentsCount}
           todayRevenue={dashboardData.todayRevenue}
           periodRevenue={fromRevenue && toRevenue ? periodRevenue : undefined}
+          canceledAppointmentsCount={canceledAppointments.length}
+          birthdayClients={birthdayClients}
         />
       </Suspense>
 
@@ -236,20 +265,18 @@ export default async function ReportsPage({
       {/* Novos componentes de agendamentos */}
       <div className="grid grid-cols-1 gap-5 w-full">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-            <ScheduledAppointments
-              initialAppointments={scheduledAppointments}
-              initialFromDate={formatedFromScheduled}
-              initialToDate={formatedToScheduled}
-            />
-          </Suspense>
-
-          <CanceledAppointments
-            initialAppointments={canceledAppointments}
-            initialFromDate={formatedFromCanceled}
-            initialToDate={formatedToCanceled}
+          <ScheduledAppointments
+            initialAppointments={scheduledAppointments}
+            initialFromDate={formatedFromScheduled}
+            initialToDate={formatedToScheduled}
           />
         </Suspense>
+
+        <CanceledAppointments
+          initialAppointments={canceledAppointments}
+          initialFromDate={formatedFromCanceled}
+          initialToDate={formatedToCanceled}
+        />
       </div>
     </div>
   );

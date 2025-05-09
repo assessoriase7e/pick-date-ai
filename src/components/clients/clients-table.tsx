@@ -80,7 +80,6 @@ export default function ClientsTable({
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isPageChanging, setIsPageChanging] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(
