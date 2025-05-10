@@ -74,7 +74,7 @@ export function ServiceForm({
           (sc: any) => sc.collaboratorId
         ) || [],
       durationMinutes: initialData?.durationMinutes || 30,
-      commission: initialData?.commission || 0,
+      commission: initialData?.commission,
       isActive:
         initialData?.isActive !== undefined ? initialData.isActive : true,
     },
@@ -118,6 +118,7 @@ export function ServiceForm({
       ...values,
       notes: values.notes || null,
       collaboratorIds: values.collaboratorIds || [],
+      commission: values.commission || null,
     };
 
     try {
@@ -375,6 +376,7 @@ export function ServiceForm({
                   max={100}
                   placeholder="Comissão em porcentagem"
                   {...field}
+                  value={field.value || 0}
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>

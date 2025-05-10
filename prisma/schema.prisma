@@ -286,13 +286,11 @@ model Service {
   price                Float
   availableDays        String[]
   notes                String?
-  collaboratorId       String?               @db.ObjectId
-  collaborator         Collaborator?         @relation(fields: [collaboratorId], references: [id], onDelete: SetNull)
   serviceCollaborators ServiceCollaborator[]
   userId               String
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   durationMinutes      Int                   @default(30)
-  commission           Float                 @default(0)
+  commission           Float?                @default(0)
   isActive             Boolean               @default(true)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -367,8 +365,6 @@ model Collaborator {
   workingHours        String
   userId              String
   user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  services            Service[]
-  serviceIds          String[]              @db.ObjectId
   calendars           Calendar[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
