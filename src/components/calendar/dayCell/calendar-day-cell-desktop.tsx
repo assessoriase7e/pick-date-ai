@@ -49,7 +49,7 @@ export function CalendarDayCellDesktop({
 
   // Nova constante para hover com agendamento
   const hoverDayNumberWithAppointment =
-    "group-hover:text-background dark:group-hover:text-background transition group-hover:text-primary";
+    "group-hover:text-background dark:group-hover:text-background transition group-hover:text-primary text-background dark:text-foreground";
 
   const appointmentCountStyles =
     "text-[10px] sm:text-xs bottom-1 flex absolute select-none dark:text-foreground group-hover:text-primary dark:group-hover:text-background transition ";
