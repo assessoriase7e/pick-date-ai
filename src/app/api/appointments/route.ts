@@ -1,156 +1,279 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
-import { z } from "zod";
+import moment from "moment";
+import { Prisma } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("Authorization");
-  const validationResult = await validateApiKey(apiKeyHeader);
-  if (!validationResult.isValid) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
-
-  let userId: string | undefined = undefined;
-  if (validationResult.isMaster) {
-    const body = await req.json();
-    userId = body.userId || undefined;
-    req.json = async () => body;
-  } else {
-    userId = validationResult.userId;
-  }
-
   try {
-    const body = await req.json();
-    const {
-      clientId,
-      serviceId,
-      calendarId,
-      startTime,
-      endTime,
-      notes,
-      status,
-    } = body;
+    const apiKeyHeader = req.headers.get("Authorization");
+    const validationResult = await validateApiKey(apiKeyHeader);
 
-    if (
-      !userId ||
-      !clientId ||
-      !serviceId ||
-      !calendarId ||
-      !startTime ||
-      !endTime
-    ) {
+    if (!validationResult.isValid) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const businessPhone = searchParams.get("business-phone");
+
+    if (!businessPhone) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "O parâmetro 'business-phone' é obrigatório na URL" },
         { status: 400 }
       );
     }
 
-    const calendar = await prisma.calendar.findFirst({
-      where: { id: calendarId, userId: userId },
+    const body = await req.json();
+    const {
+      startTime,
+      endTime,
+      clientId,
+      serviceId,
+      calendarId,
+      collaboratorId,
+      finalPrice,
+    } = body;
+
+    const userProfile = await prisma.profile.findFirst({
+      where: { whatsapp: businessPhone },
+      include: { user: true },
     });
-    if (!calendar) {
+
+    if (!userProfile) {
       return NextResponse.json(
-        { error: "Calendar not found or access denied" },
+        {
+          error: "Usuário não encontrado com este número de telefone comercial",
+        },
         { status: 404 }
-      );
-    }
-
-    const conflictingAppointment = await prisma.appointment.findFirst({
-      where: {
-        calendarId,
-        status: "scheduled",
-        OR: [
-          {
-            startTime: { lte: new Date(startTime) },
-            endTime: { gt: new Date(startTime) },
-          },
-          {
-            startTime: { lt: new Date(endTime) },
-            endTime: { gte: new Date(endTime) },
-          },
-          {
-            startTime: { gte: new Date(startTime) },
-            endTime: { lte: new Date(endTime) },
-          },
-        ],
-      },
-    });
-
-    if (conflictingAppointment) {
-      return NextResponse.json(
-        { error: "Appointment conflict" },
-        { status: 409 }
       );
     }
 
     const appointment = await prisma.appointment.create({
       data: {
+        startTime: moment(startTime).toDate(),
+        endTime: moment(endTime).toDate(),
         clientId,
         serviceId,
         calendarId,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        notes,
-        status: status || "scheduled",
-        userId: userId,
+        collaboratorId,
+        finalPrice: Number(finalPrice),
+        userId: userProfile.user.id,
       },
       include: {
         client: true,
         service: true,
         calendar: true,
+        collaborator: true,
       },
     });
 
     return NextResponse.json(appointment, { status: 201 });
   } catch (error) {
-    console.error("Error creating appointment:", error);
-    if (error instanceof z.ZodError) {
+    console.error("Erro ao criar agendamento:", error);
+    return NextResponse.json(
+      { error: "Erro ao criar agendamento" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const apiKeyHeader = req.headers.get("Authorization");
+    const validationResult = await validateApiKey(apiKeyHeader);
+
+    if (!validationResult.isValid) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const appointmentId = searchParams.get("id");
+
+    if (!appointmentId) {
       return NextResponse.json(
-        { error: "Invalid data", details: error.flatten().fieldErrors },
+        { error: "O parâmetro 'id' é obrigatório na URL" },
         { status: 400 }
       );
     }
+
+    const body = await req.json();
+
+    // Monta dinamicamente apenas os campos presentes no body
+    const dataToUpdate: Prisma.AppointmentUpdateInput = {};
+    if (body.startTime !== undefined)
+      dataToUpdate.startTime = new Date(body.startTime);
+    if (body.endTime !== undefined)
+      dataToUpdate.endTime = new Date(body.endTime);
+    if (body.status !== undefined) dataToUpdate.status = body.status;
+    if (body.notes !== undefined) dataToUpdate.notes = body.notes;
+    if (body.servicePrice !== undefined)
+      dataToUpdate.servicePrice = body.servicePrice;
+    if (body.finalPrice !== undefined)
+      dataToUpdate.finalPrice = body.finalPrice;
+
+    if (Object.keys(dataToUpdate).length === 0) {
+      return NextResponse.json(
+        { error: "Nenhum campo para atualizar foi enviado" },
+        { status: 400 }
+      );
+    }
+
+    const appointment = await prisma.appointment.findFirst({
+      where: {
+        id: appointmentId,
+      },
+    });
+
+    if (!appointment) {
+      return NextResponse.json(
+        { error: "Agendamento não encontrado" },
+        { status: 204 }
+      );
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: dataToUpdate,
+      include: {
+        client: true,
+        service: true,
+        calendar: true,
+        collaborator: true,
+      },
+    });
+
+    return NextResponse.json(updatedAppointment);
+  } catch (error) {
+    console.error("Erro ao atualizar agendamento:", error);
     return NextResponse.json(
-      { error: "Failed to create appointment" },
+      { error: "Erro ao atualizar agendamento" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const apiKeyHeader = req.headers.get("Authorization");
+    const validationResult = await validateApiKey(apiKeyHeader);
+
+    if (!validationResult.isValid) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const appointmentId = searchParams.get("id");
+
+    if (!appointmentId) {
+      return NextResponse.json(
+        { error: "O parâmetro 'id' é obrigatório na URL" },
+        { status: 400 }
+      );
+    }
+
+    const appointment = await prisma.appointment.findFirst({
+      where: {
+        id: appointmentId,
+      },
+    });
+
+    if (!appointment) {
+      return NextResponse.json(
+        { error: "Agendamento não encontrado" },
+        { status: 204 }
+      );
+    }
+
+    await prisma.appointment.delete({
+      where: { id: appointmentId },
+    });
+
+    return new NextResponse(null, { status: 200 });
+  } catch (error) {
+    console.error("Erro ao excluir agendamento:", error);
+    return NextResponse.json(
+      { error: "Erro ao excluir agendamento" },
       { status: 500 }
     );
   }
 }
 
 export async function GET(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("Authorization");
-  const validationResult = await validateApiKey(apiKeyHeader);
-  if (!validationResult.isValid) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
-
-  const { searchParams } = new URL(req.url);
-  let userId: string | undefined = undefined;
-  if (validationResult.isMaster) {
-    userId = searchParams.get("userId") || undefined;
-  } else {
-    userId = validationResult.userId;
-  }
-
   try {
-    const where = userId ? { userId } : {};
+    const apiKeyHeader = req.headers.get("Authorization");
+    const validationResult = await validateApiKey(apiKeyHeader);
+
+    if (!validationResult.isValid) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const businessPhone = searchParams.get("business-phone");
+    const clientPhone = searchParams.get("client-phone");
+
+    if (!businessPhone) {
+      return NextResponse.json(
+        { error: "O parâmetro 'business-phone' é obrigatório na URL" },
+        { status: 400 }
+      );
+    }
+
+    if (!clientPhone) {
+      return NextResponse.json(
+        { error: "O parâmetro 'client-phone' é obrigatório na URL" },
+        { status: 400 }
+      );
+    }
+
+    const userProfile = await prisma.profile.findFirst({
+      where: { whatsapp: businessPhone },
+      include: { user: true },
+    });
+
+    if (!userProfile) {
+      return NextResponse.json(
+        {
+          error: "Usuário não encontrado com este número de telefone comercial",
+        },
+        { status: 404 }
+      );
+    }
+
+    const client = await prisma.client.findFirst({
+      where: {
+        phone: clientPhone,
+        userId: userProfile.user.id,
+      },
+    });
+
+    if (!client) {
+      return NextResponse.json(
+        { error: "Cliente não encontrado" },
+        { status: 204 }
+      );
+    }
+
     const appointments = await prisma.appointment.findMany({
-      where,
+      where: {
+        clientId: client.id,
+        userId: userProfile.user.id,
+      },
       include: {
         client: true,
         service: true,
         calendar: true,
+        collaborator: true,
       },
       orderBy: {
-        startTime: "asc",
+        startTime: "desc",
       },
     });
 
     return NextResponse.json(appointments);
   } catch (error) {
-    console.error("Error fetching appointments:", error);
+    console.error("Erro ao buscar agendamentos:", error);
     return NextResponse.json(
-      { error: "Failed to fetch appointments" },
+      { error: "Erro ao buscar agendamentos" },
       { status: 500 }
     );
   }
