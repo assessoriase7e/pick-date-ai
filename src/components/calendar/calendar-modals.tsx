@@ -20,6 +20,7 @@ import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { createCalendar } from "@/actions/calendars/create";
 import { Calendar } from "@prisma/client";
+import { CollaboratorFullData } from "@/types/collaborator";
 
 interface CalendarModalsProps {
   open: boolean;
@@ -32,6 +33,7 @@ interface CalendarModalsProps {
   handleCreateCalendar: (values: CalendarFormValues) => Promise<void>;
   handleEditCalendar: (values: CalendarFormValues) => Promise<void>;
   handleDeleteCalendar: () => Promise<void>;
+  collaborators: CollaboratorFullData[];
 }
 
 export function CalendarModals({
@@ -45,6 +47,7 @@ export function CalendarModals({
   handleCreateCalendar,
   handleEditCalendar,
   handleDeleteCalendar,
+  collaborators,
 }: CalendarModalsProps) {
   const form = useForm<CalendarFormValues>({
     resolver: zodResolver(calendarSchema),
@@ -80,7 +83,10 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Criar Novo Calendário</DialogTitle>
           </DialogHeader>
-          <CalendarForm onSubmit={handleCreateCalendar} />
+          <CalendarForm
+            onSubmit={handleCreateCalendar}
+            collaborators={collaborators}
+          />
         </DialogContent>
       </Dialog>
 
@@ -93,6 +99,7 @@ export function CalendarModals({
           <CalendarForm
             onSubmit={handleEditCalendar}
             calendar={selectedCalendar}
+            collaborators={collaborators}
           />
         </DialogContent>
       </Dialog>
@@ -132,9 +139,11 @@ export function CalendarModals({
 export function CreateCalendarModal({
   externalOpen,
   setExternalOpen,
+  collaborators,
 }: {
   externalOpen?: boolean;
   setExternalOpen?: (open: boolean) => void;
+  collaborators: CollaboratorFullData[];
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -169,13 +178,19 @@ export function CreateCalendarModal({
           </DialogDescription>
         </DialogHeader>
 
-        <CalendarForm onSubmit={handleSubmit} />
+        <CalendarForm onSubmit={handleSubmit} collaborators={collaborators} />
       </DialogContent>
     </Dialog>
   );
 }
 
-export function EditCalendarModal({ calendar }: { calendar: Calendar }) {
+export function EditCalendarModal({
+  calendar,
+  collaborators,
+}: {
+  calendar: Calendar;
+  collaborators: CollaboratorFullData[];
+}) {
   const [open, setOpen] = useState(false);
 
   const handleSubmit = async (values: CalendarFormValues) => {
@@ -211,7 +226,11 @@ export function EditCalendarModal({ calendar }: { calendar: Calendar }) {
           </DialogDescription>
         </DialogHeader>
 
-        <CalendarForm onSubmit={handleSubmit} calendar={calendar} />
+        <CalendarForm
+          onSubmit={handleSubmit}
+          calendar={calendar}
+          collaborators={collaborators}
+        />
       </DialogContent>
     </Dialog>
   );

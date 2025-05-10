@@ -14,6 +14,7 @@ import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useCalendarQuery } from "@/hooks/useCalendarQuery";
+import { CollaboratorFullData } from "@/types/collaborator";
 
 moment.locale("pt-br");
 
@@ -24,6 +25,7 @@ interface CalendarContentProps {
   currentDate: Date;
   selectedDay: Date | null;
   selectedDayAppointments: AppointmentFullData[];
+  collaborators: CollaboratorFullData[];
 }
 
 export function CalendarContent({
@@ -32,6 +34,7 @@ export function CalendarContent({
   appointments,
   currentDate,
   selectedDay,
+  collaborators,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -185,6 +188,7 @@ export function CalendarContent({
         handleCreateCalendar={handleCreateCalendar}
         handleEditCalendar={handleEditCalendar}
         handleDeleteCalendar={handleDeleteCalendar}
+        collaborators={collaborators}
         selectedCalendar={selectedCalendar}
       />
     </div>

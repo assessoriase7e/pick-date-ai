@@ -4,6 +4,7 @@ import { CalendarContent } from "../../../components/calendar/calendar-content";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 import moment from "moment";
 
 export default async function CalendarPage({
@@ -17,8 +18,13 @@ export default async function CalendarPage({
 }) {
   const sParams = await searchParams;
 
-  const response = await listCalendars();
+  const [response, collaboratorsResponse] = await Promise.all([
+    listCalendars(),
+    getCollaborators({ limit: 100 }),
+  ]);
+
   const calendars = response.success && response.data ? response.data : [];
+  const collaborators = collaboratorsResponse.success ? collaboratorsResponse.data : [];
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
   const calendarId = sParams.calendarId || initialCalendarId;
@@ -79,6 +85,7 @@ export default async function CalendarPage({
       currentDate={currentDate}
       selectedDay={selectedDayDate}
       selectedDayAppointments={selectedDayAppointments}
+      collaborators={collaborators}
     />
   );
 }

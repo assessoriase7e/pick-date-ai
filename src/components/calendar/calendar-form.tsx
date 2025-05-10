@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarFormValues, calendarSchema } from "@/validators/calendar";
@@ -14,24 +14,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { Calendar, Collaborator } from "@prisma/client";
-import { listCollaborators } from "@/actions/collaborators/getMany";
+import { Calendar } from "@prisma/client";
 import { SelectWithScroll } from "./select-with-scroll";
+import { CollaboratorFullData } from "@/types/collaborator";
 
 interface CalendarFormProps {
   onSubmit: (values: CalendarFormValues) => Promise<void>;
   calendar?: Calendar;
+  collaborators: CollaboratorFullData[];
 }
 
-export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
+export function CalendarForm({
+  onSubmit,
+  calendar,
+  collaborators,
+}: CalendarFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
   const form = useForm<CalendarFormValues>({
     resolver: zodResolver(calendarSchema),
     defaultValues: calendar
       ? {
-          name: calendar.name,
+          name: calendar?.name || "",
           collaboratorId: calendar.collaboratorId || undefined,
         }
       : {
@@ -39,21 +43,6 @@ export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
           collaboratorId: undefined,
         },
   });
-
-  useEffect(() => {
-    const loadCollaborators = async () => {
-      try {
-        const response = await listCollaborators();
-        if (response.success && response.data) {
-          setCollaborators(response.data);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar profissionais:", error);
-      }
-    };
-
-    loadCollaborators();
-  }, []);
 
   const handleSubmit = async (values: CalendarFormValues) => {
     setIsLoading(true);
@@ -94,7 +83,7 @@ export function CalendarForm({ onSubmit, calendar }: CalendarFormProps) {
               options={collaborators}
               value={field.value}
               onChange={field.onChange}
-              getOptionLabel={(option) => option.name}
+              getOptionLabel={(option) => option?.name}
               getOptionValue={(option) => String(option.id)}
               error={form.formState.errors.collaboratorId?.message}
             />
