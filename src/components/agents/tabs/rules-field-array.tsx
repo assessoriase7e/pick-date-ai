@@ -25,7 +25,7 @@ export function RulesFieldArray({ control, name }: RulesFieldArrayProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <FormLabel>Regras</FormLabel>
+        <FormLabel>Regras Personalizadas</FormLabel>
         <Button
           type="button"
           variant="outline"
@@ -39,7 +39,8 @@ export function RulesFieldArray({ control, name }: RulesFieldArrayProps) {
 
       {fields.length === 0 && (
         <div className="text-sm text-muted-foreground py-4 text-center border rounded-md">
-          Nenhuma regra adicionada. Clique em "Adicionar" para começar.
+          Nenhuma regra personalizada adicionada. Clique em "Adicionar" para
+          começar.
         </div>
       )}
 

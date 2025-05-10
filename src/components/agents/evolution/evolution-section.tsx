@@ -9,14 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Trash, Bolt, QrCode, RefreshCw } from "lucide-react";
 import { InstanceModal } from "./instance-modal";
@@ -24,7 +16,14 @@ import { QRCodeModal } from "./qrcode-modal";
 import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
 import { EvolutionInstance } from "@prisma/client";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface EvolutionSectionProps {
   profilePhone?: string;
@@ -116,39 +115,39 @@ export function EvolutionSection({
             Nenhuma instância encontrada. Crie uma nova instância para começar.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Número</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {instances.map((instance) => (
-                <TableRow key={instance.id}>
-                  <TableCell className="font-medium">{instance.name}</TableCell>
-                  <TableCell>{instance.number}</TableCell>
-                  <TableCell>
-                    {instance.type === "attendant"
-                      ? "Recepcionista"
-                      : instance.type === "sdr"
-                      ? "SDR"
-                      : instance.type === "followup"
-                      ? "Follow-up"
-                      : instance.type}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(instance.status)}</TableCell>
-                  <TableCell className="text-right">
+          <div className="grid grid-cols-1 gap-4">
+            {instances.map((instance) => (
+              <Card key={instance.id} className="space-y-2">
+                <CardHeader className="items-center justify-between">
+                  <div className="flex gap-2 items-center">
+                    <CardTitle className="text-lg">{instance.name}</CardTitle>
+                    <Separator orientation="vertical" className="h-10" />
+                    <CardDescription>{instance.number}</CardDescription>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {instance.type === "attendant"
+                          ? "Recepcionista"
+                          : instance.type === "sdr"
+                          ? "SDR"
+                          : instance.type === "followup"
+                          ? "Follow-up"
+                          : instance.type}
+                      </span>
+                      <Separator orientation="vertical" className="h-10" />
+                      {getStatusBadge(instance.status)}
+                    </div>
+
+                    <Separator orientation="vertical" className="h-10" />
+
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => refreshStatus()}
                       >
-                        <RefreshCw className={`h-4 w-4`} />
+                        <RefreshCw className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -177,11 +176,11 @@ export function EvolutionSection({
                         </Button>
                       )}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
         )}
       </CardContent>
 
@@ -207,7 +206,10 @@ export function EvolutionSection({
           </DialogHeader>
           <div>Tem certeza que deseja excluir esta instância?</div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancelar
             </Button>
             <Button variant="destructive" onClick={handleDelete}>

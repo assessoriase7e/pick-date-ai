@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -14,13 +15,17 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { speechStyleOptions } from "@/data/attendant-mock-data";
 import { ExpressionFieldArray } from "./expression-field-array";
 import { SchedulingScriptFieldArray } from "./scheduling-script-field-array";
 import { RulesFieldArray } from "./rules-field-array";
 import { MessageSquare, Coffee, Handshake } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { parseExpressionInterpretation, parseSchedulingScript, parseRules } from "@/utils/form-parsers";
+import {
+  parseExpressionInterpretation,
+  parseSchedulingScript,
+  parseRules,
+} from "@/utils/form-parsers";
+import { defaultRules } from "@/mocked/attendant-mock-data";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -84,7 +89,7 @@ export function AttendantTab({
       schedulingScript: parseSchedulingScript(
         initialData?.schedulingScript || ""
       ),
-      rules: parseRules(initialData?.rules || ""),
+      rules: initialData?.rules ? parseRules(initialData.rules) : defaultRules,
     },
   });
 
@@ -105,8 +110,11 @@ export function AttendantTab({
         .map((item) => item.step)
         .join("\n");
 
-      // Formatar regras
-      const rulesText = values.rules.map((item) => item.rule).join("\n");
+      // Formatar regras (incluindo as mockadas)
+      const userRules = values.rules.map((item) => item.rule);
+      const mockedRules = defaultRules.map((item) => item.rule);
+      const allRules = [...userRules, ...mockedRules];
+      const rulesText = allRules.join("\n");
 
       // Enviar o valor do estilo diretamente, sem buscar no speechStyleOptions
       const speechStyleText = values.speechStyle;
@@ -127,8 +135,6 @@ export function AttendantTab({
       if (setIsLoading) setIsLoading(false);
     }
   };
-
-  const selectedSpeechStyle = form.watch("speechStyle");
 
   return (
     <div className="space-y-4 mt-4">
@@ -247,7 +253,6 @@ export function AttendantTab({
                     <FormLabel htmlFor="attendant-active">Ativar</FormLabel>
                   </div>
                   <FormMessage />
-                  <Separator />
                 </FormItem>
               )}
             />
