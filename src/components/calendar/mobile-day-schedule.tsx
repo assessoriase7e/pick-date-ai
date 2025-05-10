@@ -17,6 +17,8 @@ interface MobileDayScheduleProps {
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;
+  clients: any[];
+  services: any[];
 }
 
 export function MobileDaySchedule({
@@ -24,6 +26,8 @@ export function MobileDaySchedule({
   date,
   collaborator,
   appointments,
+  clients,
+  services,
 }: MobileDayScheduleProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -159,6 +163,8 @@ export function MobileDaySchedule({
               initialStartTime={startTime || undefined}
               initialEndTime={endTime || undefined}
               calendarId={calendarId}
+              clients={clients}
+              services={services}
             />
           </div>
         </DrawerContent>

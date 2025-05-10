@@ -24,7 +24,9 @@ export default async function CalendarPage({
   ]);
 
   const calendars = response.success && response.data ? response.data : [];
-  const collaborators = collaboratorsResponse.success ? collaboratorsResponse.data : [];
+  const collaborators = collaboratorsResponse.success
+    ? collaboratorsResponse.data
+    : [];
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
   const calendarId = sParams.calendarId || initialCalendarId;

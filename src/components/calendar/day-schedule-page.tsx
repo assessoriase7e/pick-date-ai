@@ -18,6 +18,8 @@ interface DayScheduleContentProps {
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;
+  clients: any[];
+  services: any[];
 }
 
 export function DayScheduleContent({
@@ -25,6 +27,8 @@ export function DayScheduleContent({
   date,
   collaborator,
   appointments,
+  clients,
+  services,
 }: DayScheduleContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,6 +61,8 @@ export function DayScheduleContent({
         date={date}
         collaborator={collaborator}
         appointments={appointments}
+        clients={clients}
+        services={services}
       />
     );
   }
@@ -179,6 +185,8 @@ export function DayScheduleContent({
               initialStartTime={startTime || undefined}
               initialEndTime={endTime || undefined}
               calendarId={calendarId}
+              clients={clients}
+              services={services}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">

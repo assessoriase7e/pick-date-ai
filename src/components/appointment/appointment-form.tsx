@@ -10,13 +10,26 @@ import {
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
 import { SelectWithScroll } from "../calendar/select-with-scroll";
-import { useAppointmentDataStore } from "@/store/appointment-data-store";
 import { AppointmentFormProps } from "@/validators/appointment";
 import { NumericFormat } from "react-number-format";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import moment from "moment";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createAppointmentSchema } from "@/validators/calendar";
+import { toast } from "sonner";
+import { createAppointment } from "@/actions/appointments/create";
+import { updateAppointment } from "@/actions/appointments/update";
+import { deleteAppointment } from "@/actions/appointments/delete";
+import { z } from "zod";
+
+type FormValues = z.infer<typeof createAppointmentSchema>;
+
+interface ExtendedAppointmentFormProps extends AppointmentFormProps {
+  clients: any[];
+  services: any[];
+}
 
 export function AppointmentForm({
   date,
@@ -26,27 +39,63 @@ export function AppointmentForm({
   initialStartTime,
   initialEndTime,
   calendarId,
-}: AppointmentFormProps) {
-  const {
-    form,
-    isLoading,
-    isDeleting,
-    isLoadingClients,
-    isEditing,
-    onSubmit,
-    handleDelete,
-    updatePriceFromService,
-  } = useAppointmentForm({
-    date,
-    appointment,
-    onSuccess,
-    checkTimeConflict,
-    calendarId,
-    initialStartTime,
-    initialEndTime,
+  clients,
+  services,
+}: ExtendedAppointmentFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedServiceDuration, setSelectedServiceDuration] = useState<
+    number | null
+  >(null);
+
+  const isEditing = !!appointment;
+
+  const calculateDefaultEndTime = (startTime: string): string => {
+    return moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
+  };
+
+  const defaultStartTime = appointment
+    ? moment(appointment.startTime).format("HH:mm")
+    : initialStartTime ?? "09:00";
+
+  const defaultEndTime = appointment
+    ? moment(appointment.endTime).format("HH:mm")
+    : initialEndTime ?? calculateDefaultEndTime(defaultStartTime);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(createAppointmentSchema),
+    defaultValues: appointment
+      ? {
+          clientId: appointment.clientId,
+          serviceId: appointment.serviceId,
+          startTime: moment(appointment.startTime).format("HH:mm"),
+          endTime: moment(appointment.endTime).format("HH:mm"),
+          notes: appointment.notes || "",
+          calendarId,
+          servicePrice: appointment.servicePrice || null,
+          finalPrice:
+            appointment.finalPrice || appointment.servicePrice || null,
+        }
+      : {
+          startTime: defaultStartTime,
+          endTime: defaultEndTime,
+          notes: "",
+          calendarId,
+          servicePrice: null,
+          finalPrice: null,
+        },
   });
 
-  const { clients, services } = useAppointmentDataStore();
+  const updatePriceFromService = (serviceId: string) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (service) {
+      form.setValue("servicePrice", service.price);
+      // Só atualiza o preço final se não estiver editando ou se o preço final for nulo
+      if (!isEditing || !form.getValues("finalPrice")) {
+        form.setValue("finalPrice", service.price);
+      }
+    }
+  };
 
   // Atualiza o preço quando o serviço é selecionado
   useEffect(() => {
@@ -55,6 +104,24 @@ export function AppointmentForm({
       updatePriceFromService(serviceId);
     }
   }, [form.watch("serviceId")]);
+
+  // Atualiza a duração do serviço quando o serviço é selecionado
+  useEffect(() => {
+    const serviceId = form.watch("serviceId");
+    const service = services.find((s) => s.id === serviceId);
+    setSelectedServiceDuration(service?.durationMinutes ?? null);
+  }, [form.watch("serviceId"), services]);
+
+  // Atualiza o horário de término baseado na duração do serviço
+  useEffect(() => {
+    const startTime = form.watch("startTime");
+    if (selectedServiceDuration && startTime) {
+      const newEndTime = moment(startTime, "HH:mm")
+        .add(selectedServiceDuration, "minutes")
+        .format("HH:mm");
+      form.setValue("endTime", newEndTime);
+    }
+  }, [selectedServiceDuration, form.watch("startTime")]);
 
   // Reseta o formulário quando o appointment ou os tempos iniciais mudam
   useEffect(() => {
@@ -81,6 +148,90 @@ export function AppointmentForm({
     calendarId,
   ]);
 
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const [startHour, startMinute] = values.startTime.split(":").map(Number);
+      const [endHour, endMinute] = values.endTime.split(":").map(Number);
+
+      const startTime = new Date(date);
+      startTime.setHours(startHour, startMinute, 0, 0);
+
+      const endTime = new Date(date);
+      endTime.setHours(endHour, endMinute, 0, 0);
+
+      if (endTime <= startTime) {
+        toast.error(
+          "O horário de término deve ser depois do horário de início"
+        );
+        return;
+      }
+
+      const hasConflict = checkTimeConflict(
+        startTime,
+        endTime,
+        appointment?.id
+      );
+      if (hasConflict) {
+        toast.error("Já existe um agendamento nesse horário");
+        return;
+      }
+
+      setIsLoading(true);
+
+      const appointmentData = {
+        clientId: values.clientId,
+        serviceId: values.serviceId,
+        calendarId,
+        startTime,
+        endTime,
+        notes: values.notes || null,
+        status: "scheduled",
+        servicePrice: values.servicePrice ?? null,
+        finalPrice: values.finalPrice ?? null,
+        collaboratorId: appointment?.collaboratorId || null,
+      };
+
+      let result;
+
+      if (isEditing && appointment) {
+        result = await updateAppointment(appointment.id!, {
+          ...appointmentData,
+          status: appointment.status || "scheduled",
+        });
+        if (!result.success) throw new Error(result.error);
+        toast.success("Agendamento atualizado com sucesso!");
+      } else {
+        result = await createAppointment(appointmentData);
+        if (!result.success) throw new Error(result.error);
+        toast.success("Agendamento criado com sucesso!");
+      }
+
+      onSuccess();
+    } catch (error) {
+      console.error("Erro ao salvar agendamento:", error);
+      toast.error("Ocorreu um erro ao salvar o agendamento");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!appointment?.id) return;
+
+    try {
+      setIsDeleting(true);
+      const result = await deleteAppointment(appointment.id);
+      if (!result.success) throw new Error(result.error);
+      toast.success("Agendamento excluído com sucesso!");
+      onSuccess();
+    } catch (error) {
+      console.error("Erro ao excluir agendamento:", error);
+      toast.error("Ocorreu um erro ao excluir o agendamento");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Form {...form}>
       <form
@@ -98,11 +249,7 @@ export function AppointmentForm({
                   getOptionLabel={(option) => option?.fullName}
                   getOptionValue={(option) => option?.id}
                   label="Cliente"
-                  placeholder={
-                    isLoadingClients
-                      ? "Carregando clientes..."
-                      : "Selecione um cliente"
-                  }
+                  placeholder="Selecione um cliente"
                   options={clients || []}
                   value={field.value}
                   onChange={field.onChange}

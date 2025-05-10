@@ -2,7 +2,9 @@
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 import { DayScheduleContent } from "@/components/calendar/day-schedule-page";
+import { getClients } from "@/actions/clients/get-clients";
 import moment from "moment";
+import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
 
 export default async function DaySchedulePage({
   searchParams,
@@ -27,22 +29,43 @@ export default async function DaySchedulePage({
   const calendarId = sParams.calendarId;
   const date = moment(sParams.date).toDate();
 
-  const response = await getAppointmentsByCalendarAndDate(calendarId, date);
+  // Buscar dados em paralelo para melhor performance
+  const [
+    appointmentsResponse,
+    collaboratorResponse,
+    clientsResponse,
+    servicesResponse,
+  ] = await Promise.all([
+    getAppointmentsByCalendarAndDate(calendarId, date),
+    getCalendarCollaborator(calendarId),
+    getClients(),
+    getServicesByCalendar(calendarId),
+  ]);
+
   const allAppointments =
-    response.success && response.data ? response.data : [];
+    appointmentsResponse.success && appointmentsResponse.data
+      ? appointmentsResponse.data
+      : [];
 
   const appointments = allAppointments.filter(
     (appointment) => appointment.status !== "canceled"
   );
 
-  const collaborator = await getCalendarCollaborator(calendarId);
+  const clients =
+    clientsResponse.success && clientsResponse.data ? clientsResponse.data : [];
+  const services =
+    servicesResponse.success && servicesResponse.data
+      ? servicesResponse.data
+      : [];
 
   return (
     <DayScheduleContent
       calendarId={calendarId}
       date={date}
       appointments={appointments}
-      collaborator={collaborator.data?.collaborator!}
+      collaborator={collaboratorResponse.data?.collaborator!}
+      clients={clients}
+      services={services}
     />
   );
 }
