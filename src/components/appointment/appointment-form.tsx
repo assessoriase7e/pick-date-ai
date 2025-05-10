@@ -16,6 +16,7 @@ import { useAppointmentDataStore } from "@/store/appointment-data-store";
 import { AppointmentFormProps } from "@/validators/appointment";
 import { NumericFormat } from "react-number-format";
 import { useEffect } from "react";
+import moment from "moment";
 
 export function AppointmentForm({
   date,
@@ -60,14 +61,25 @@ export function AppointmentForm({
     form.reset({
       clientId: appointment?.clientId || "",
       serviceId: appointment?.serviceId || "",
-      startTime: initialStartTime || "09:00",
-      endTime: initialEndTime || "10:00",
+      startTime: appointment?.startTime
+        ? moment(appointment.startTime).format("HH:mm")
+        : initialStartTime || "09:00",
+      endTime: appointment?.endTime
+        ? moment(appointment.endTime).format("HH:mm")
+        : initialEndTime || "10:00",
       notes: appointment?.notes || "",
       calendarId,
       servicePrice: appointment?.servicePrice || null,
       finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
     });
-  }, [appointment, initialStartTime, initialEndTime, calendarId]);
+  }, [
+    appointment,
+    appointment?.startTime,
+    appointment?.endTime,
+    initialStartTime,
+    initialEndTime,
+    calendarId,
+  ]);
 
   return (
     <Form {...form}>

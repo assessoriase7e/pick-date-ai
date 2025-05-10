@@ -71,17 +71,6 @@ export function MobileDaySchedule({
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
-  const handleClearHourSelection = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("hour");
-    params.delete("startTime");
-    params.delete("endTime");
-    router.push(`${window.location.pathname}?${params.toString()}`);
-
-    setShowForm(false);
-    setSelectedAppointment(null);
-  };
-
   const handleFormSuccess = async () => {
     try {
       const params = new URLSearchParams(searchParams.toString());
