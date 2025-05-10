@@ -18,15 +18,13 @@ export async function listCollaborators(serviceId?: string) {
       const collaborators = await prisma.collaborator.findMany({
         where: {
           userId: user.id,
-          services: {
+          ServiceCollaborator: {
             some: {
-              id: serviceId,
+              serviceId: serviceId,
             },
           },
         },
-        include: {
-          services: true,
-        },
+
         orderBy: {
           name: "asc",
         },
@@ -43,7 +41,11 @@ export async function listCollaborators(serviceId?: string) {
         userId: user.id,
       },
       include: {
-        services: true,
+        ServiceCollaborator: {
+          include: {
+            service: true,
+          },
+        },
       },
       orderBy: {
         name: "asc",
