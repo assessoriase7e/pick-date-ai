@@ -77,7 +77,6 @@ export async function getServices({
       whereCondition = {
         ...finalWhere,
         OR: [
-          { collaboratorId },
           {
             serviceCollaborators: {
               some: {
@@ -96,7 +95,6 @@ export async function getServices({
         skip,
         take: limit,
         include: {
-          collaborator: true,
           serviceCollaborators: {
             include: {
               collaborator: true,
