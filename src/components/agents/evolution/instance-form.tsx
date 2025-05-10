@@ -24,10 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  createInstance,
-  CreateInstanceFormValues,
-} from "@/actions/agents/evolution/create-instance";
+import { createInstance } from "@/actions/agents/evolution/create-instance";
 import {
   updateInstance,
   UpdateInstanceFormValues,
@@ -83,9 +80,7 @@ export function InstanceForm({
           toast.error(result.error || "Erro ao atualizar instância");
         }
       } else {
-        const result = await createInstance(
-          submissionValues
-        );
+        const result = await createInstance(submissionValues);
         if (result.success) {
           toast.success("Instância criada com sucesso");
           onSuccess();

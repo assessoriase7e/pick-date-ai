@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { ExpressionFieldArray } from "./expression-field-array";
 import { SchedulingScriptFieldArray } from "./scheduling-script-field-array";
 import { RulesFieldArray } from "./rules-field-array";
@@ -26,6 +25,11 @@ import {
   parseRules,
 } from "@/utils/form-parsers";
 import { defaultRules } from "@/mocked/attendant-mock-data";
+import { PatternFormat } from "react-number-format";
+import {
+  attendantFormSchema,
+  AttendantFormValues,
+} from "@/validators/attendant";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -42,32 +46,6 @@ interface AttendantTabProps {
   };
 }
 
-const expressionSchema = z.object({
-  expression: z.string(),
-  translation: z.string(),
-});
-
-const schedulingStepSchema = z.object({
-  step: z.string(),
-});
-
-const ruleSchema = z.object({
-  rule: z.string(),
-});
-
-const formSchema = z.object({
-  isActive: z.boolean(),
-  presentation: z.string().min(1, "A apresentação é obrigatória"),
-  speechStyle: z.string().min(1, "O estilo de fala é obrigatório"),
-  expressionInterpretation: z.array(expressionSchema),
-  schedulingScript: z
-    .array(schedulingStepSchema)
-    .min(3, "Adicione pelo menos 3 passos no script de agendamento"),
-  rules: z.array(ruleSchema),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 export function AttendantTab({
   onSave,
   isLoading,
@@ -77,8 +55,8 @@ export function AttendantTab({
   const { user } = useUser();
   const { handleSaveAttendantPrompt } = useAttendantHandler();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<AttendantFormValues>({
+    resolver: zodResolver(attendantFormSchema),
     defaultValues: {
       isActive: initialData?.isActive || false,
       presentation: initialData?.presentation || "",
@@ -90,10 +68,11 @@ export function AttendantTab({
         initialData?.schedulingScript || ""
       ),
       rules: initialData?.rules ? parseRules(initialData.rules) : defaultRules,
+      suportPhone: "",
     },
   });
 
-  const handleSave = async (values: FormValues) => {
+  const handleSave = async (values: AttendantFormValues) => {
     if (onSave) {
       return onSave();
     }
@@ -236,6 +215,33 @@ export function AttendantTab({
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="suportPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Whatsapp do suporte</FormLabel>
+                <FormControl>
+                  <PatternFormat
+                    customInput={Input}
+                    format="+55(##)#####-####"
+                    placeholder="(00)00000-0000"
+                    value={field.value}
+                    onValueChange={(values) => {
+                      field.onChange(values.value);
+                    }}
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  Quando o agente identificar que o cliente necessita de
+                  suporte, uma mensagem será enviada nesse whatsapp com o nome e
+                  telefone do mesmo.
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="flex justify-between items-center">
             <FormField
               control={form.control}
@@ -256,6 +262,7 @@ export function AttendantTab({
                 </FormItem>
               )}
             />
+
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Salvando..." : "Salvar"}

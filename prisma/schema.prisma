@@ -152,6 +152,7 @@ model AttendantPrompt {
   schedulingScript         String
   rules                    String
   formattedContent         String
+  suportPhone              String?
   userId                   String   @unique
   user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
