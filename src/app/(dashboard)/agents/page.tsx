@@ -31,10 +31,10 @@ export default async function AgentesPage() {
   const hasProfile = profile?.companyName;
 
   return (
-    <div className="container relative">
+    <div className="container relative mx-auto max-w-2xl">
       <h1 className="text-3xl font-bold mb-8">Agentes</h1>
 
-      <div className="space-y-8">
+      <div className="space-y-8 w-full">
         <PromptsSection attendantPrompt={attendantPrompt} />
 
         <Separator className="my-6" />

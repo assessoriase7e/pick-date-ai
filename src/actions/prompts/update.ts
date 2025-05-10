@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { promptSchema } from "@/validators/prompts";
+import { promptSchema } from "@/validators/attendant";
 
 export async function updatePrompt(
   id: string,

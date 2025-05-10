@@ -21,14 +21,18 @@ export function PromptsSection({ attendantPrompt }: PromptsProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <h2 className="text-2xl font-bold">Prompts</h2>
 
-      <Tabs defaultValue="attendant" className="">
-        <TabsList className="grid w-full max-w-lg grid-cols-3">
+      <Tabs defaultValue="attendant" className="flex flex-col">
+        <TabsList className="grid w-full grid-cols-3 flex-1">
           <TabsTrigger value="attendant">Atendente</TabsTrigger>
-          <TabsTrigger value="sdr">SDR</TabsTrigger>
-          <TabsTrigger value="followup">Follow Up</TabsTrigger>
+          <TabsTrigger value="sdr" disabled>
+            SDR
+          </TabsTrigger>
+          <TabsTrigger value="followup" disabled>
+            Follow Up
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendant">
