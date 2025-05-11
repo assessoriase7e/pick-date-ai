@@ -70,7 +70,7 @@ interface ServicesSectionProps {
     collaboratorFilter: string;
     sortField: SortField;
     sortDirection: SortDirection;
-  }
+  };
 }
 
 type SortField = "name" | "price" | "durationMinutes" | "commission";
@@ -95,10 +95,18 @@ export function ServicesSection({
     message: string;
   }>({ show: false, action: async () => {}, message: "" });
 
-  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || "");
-  const [collaboratorFilter, setCollaboratorFilter] = useState(initialFilters?.collaboratorFilter || "all");
-  const [sortField, setSortField] = useState<SortField>(initialFilters?.sortField || "name");
-  const [sortDirection, setSortDirection] = useState<SortDirection>(initialFilters?.sortDirection || "asc");
+  const [searchTerm, setSearchTerm] = useState(
+    initialFilters?.searchTerm || ""
+  );
+  const [collaboratorFilter, setCollaboratorFilter] = useState(
+    initialFilters?.collaboratorFilter || "all"
+  );
+  const [sortField, setSortField] = useState<SortField>(
+    initialFilters?.sortField || "name"
+  );
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    initialFilters?.sortDirection || "asc"
+  );
   const [pagination, setPagination] = useState(initialPagination);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -110,10 +118,12 @@ export function ServicesSection({
 
   // Atualizar a URL quando os filtros mudarem
   useEffect(() => {
-    if (debouncedSearchTerm === initialFilters?.searchTerm && 
-        collaboratorFilter === initialFilters?.collaboratorFilter &&
-        sortField === initialFilters?.sortField &&
-        sortDirection === initialFilters?.sortDirection) {
+    if (
+      debouncedSearchTerm === initialFilters?.searchTerm &&
+      collaboratorFilter === initialFilters?.collaboratorFilter &&
+      sortField === initialFilters?.sortField &&
+      sortDirection === initialFilters?.sortDirection
+    ) {
       return;
     }
 
@@ -122,30 +132,30 @@ export function ServicesSection({
 
   const updateUrl = (page: number) => {
     const params = new URLSearchParams();
-    
+
     if (page !== 1) {
-      params.set('page', String(page));
+      params.set("page", String(page));
     }
-    
+
     if (debouncedSearchTerm) {
-      params.set('search', debouncedSearchTerm);
+      params.set("search", debouncedSearchTerm);
     }
-    
-    if (collaboratorFilter !== 'all') {
-      params.set('collaborator', collaboratorFilter);
+
+    if (collaboratorFilter !== "all") {
+      params.set("collaborator", collaboratorFilter);
     }
-    
-    if (sortField !== 'name') {
-      params.set('sortField', sortField);
+
+    if (sortField !== "name") {
+      params.set("sortField", sortField);
     }
-    
-    if (sortDirection !== 'asc') {
-      params.set('sortDirection', sortDirection);
+
+    if (sortDirection !== "asc") {
+      params.set("sortDirection", sortDirection);
     }
-    
+
     const query = params.toString();
-    const url = `${pathname}${query ? `?${query}` : ''}`;
-    
+    const url = `${pathname}${query ? `?${query}` : ""}`;
+
     setIsPageChanging(true);
     revalidatePathAction("/services");
     router.push(url);
@@ -202,14 +212,7 @@ export function ServicesSection({
   const formatCollaborators = (service: ServiceFullData) => {
     const allCollaborators = [] as Collaborator[];
 
-    if (service.collaborator) {
-      allCollaborators.push(service.collaborator);
-    }
-
-    if (
-      service.serviceCollaborators &&
-      service.serviceCollaborators.length > 0
-    ) {
+    if (service.serviceCollaborators && Array.isArray(service.serviceCollaborators)) {
       service.serviceCollaborators.forEach((sc) => {
         if (!allCollaborators.some((c) => c.id === sc.collaborator.id)) {
           allCollaborators.push(sc.collaborator);
@@ -396,7 +399,9 @@ export function ServicesSection({
                     {getStatusBadge(service)}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {service.collaborator?.name}
+                    {typeof formatCollaborators(service) === 'string' 
+                      ? formatCollaborators(service) 
+                      : 'Múltiplos profissionais'}
                   </p>
                 </div>
                 <div className="flex space-x-2">

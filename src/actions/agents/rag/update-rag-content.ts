@@ -38,7 +38,11 @@ export const updateRagContent = async (userId: string) => {
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
       include: {
-        services: true,
+        ServiceCollaborator: {
+          include: {
+            service: true,
+          },
+        },
       },
     });
 
@@ -121,9 +125,9 @@ export const updateRagContent = async (userId: string) => {
                 Descrição: ${collaborator.description || ""}
                 Horário de Trabalho: ${collaborator.workingHours || ""}
                 Serviços: ${
-                  collaborator.services
-                    .map((service) => service.name)
-                    .join(", ") || ""
+                  collaborator.ServiceCollaborator.map(
+                    (sc) => sc.service.name
+                  ).join(", ") || ""
                 }
                 `
           )
