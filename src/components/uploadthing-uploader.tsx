@@ -32,6 +32,7 @@ export function UploadthingUploader({
       onClientUploadComplete={(res) => {
         if (res && res.length > 0) {
           const file = res[0];
+          console.log(file);
           onUploadComplete({
             fileUrl: file.ufsUrl,
             fileName: file.name,
@@ -42,6 +43,7 @@ export function UploadthingUploader({
       }}
       onUploadError={(error: Error) => {
         toast(`Erro: ${error.message}`);
+        console.error(error);
         if (onUploadError) {
           onUploadError(error);
         }
