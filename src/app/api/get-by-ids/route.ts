@@ -39,9 +39,15 @@ export async function GET(req: NextRequest) {
         const where: any = { id: { in: ids } };
         if (userId) where.userId = userId;
 
-        const records = await prisma[modelName].findMany({
+        const records = await (
+          prisma[modelName as keyof typeof prisma] as any
+        ).findMany({
           where,
-          include: { professional: true },
+          omit: {
+            userId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
         });
 
         return records.map((record: any) => {

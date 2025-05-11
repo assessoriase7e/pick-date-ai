@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/db";
 
-const blacklistedModels = ["user", "apiKey", "records", "professional"];
+const whitelistedModels = [
+  "audioRecord",
+  "imageRecord",
+  "documentRecord",
+  "link",
+];
 
 export function getPrismaModelNames(): string[] {
   return Object.keys(prisma).filter((key) => {
@@ -9,7 +14,7 @@ export function getPrismaModelNames(): string[] {
       typeof model === "object" &&
       model !== null &&
       typeof model.findMany === "function" &&
-      !blacklistedModels.includes(key)
+      whitelistedModels.includes(key)
     );
   });
 }
