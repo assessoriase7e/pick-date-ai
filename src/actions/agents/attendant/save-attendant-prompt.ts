@@ -12,6 +12,7 @@ interface SaveAttendantPromptParams {
   expressionInterpretation: string;
   schedulingScript: string;
   rules: string;
+  suportPhone?: string;
 }
 
 export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
@@ -25,6 +26,7 @@ export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
       expressionInterpretation,
       schedulingScript,
       rules,
+      suportPhone,
     } = params;
 
     const formattedContent = `Apresentação: ${presentation}\n\nEstilo da Fala: ${speechStyle}\n\nInterpretação de Expressões: ${expressionInterpretation}\n\nScript de Agendamento: ${schedulingScript}\n\nRegras: ${rules}`;
@@ -40,6 +42,7 @@ export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
         schedulingScript,
         rules,
         formattedContent,
+        suportPhone,
       },
       create: {
         userId,
@@ -51,6 +54,7 @@ export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
         schedulingScript,
         rules,
         formattedContent,
+        suportPhone,
       },
     });
 

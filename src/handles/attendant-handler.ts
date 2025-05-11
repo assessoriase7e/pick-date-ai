@@ -10,7 +10,8 @@ export const useAttendantHandler = () => {
     speechStyle: string,
     expressionInterpretation: string,
     schedulingScript: string,
-    rules: string
+    rules: string,
+    suportPhone: string
   ) => {
     if (!userId) {
       toast.error("Usuário não identificado");
@@ -27,6 +28,7 @@ export const useAttendantHandler = () => {
         expressionInterpretation,
         schedulingScript,
         rules,
+        suportPhone,
       });
 
       if (result.success) {

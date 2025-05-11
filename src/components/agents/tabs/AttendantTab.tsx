@@ -43,6 +43,7 @@ interface AttendantTabProps {
     expressionInterpretation: string;
     schedulingScript: string;
     rules: string;
+    suportPhone: string | null;
   };
 }
 
@@ -54,6 +55,8 @@ export function AttendantTab({
 }: AttendantTabProps) {
   const { user } = useUser();
   const { handleSaveAttendantPrompt } = useAttendantHandler();
+
+  console.log(initialData);
 
   const form = useForm<AttendantFormValues>({
     resolver: zodResolver(attendantFormSchema),
@@ -68,7 +71,7 @@ export function AttendantTab({
         initialData?.schedulingScript || ""
       ),
       rules: initialData?.rules ? parseRules(initialData.rules) : defaultRules,
-      suportPhone: "",
+      suportPhone: initialData?.suportPhone || "",
     },
   });
 
@@ -108,7 +111,8 @@ export function AttendantTab({
         speechStyleText,
         expressionText,
         scriptText,
-        rulesText
+        rulesText,
+        values.suportPhone
       );
     } finally {
       if (setIsLoading) setIsLoading(false);

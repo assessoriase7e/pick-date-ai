@@ -14,6 +14,7 @@ interface PromptsProps {
     expressionInterpretation: string;
     schedulingScript: string;
     rules: string;
+    suportPhone: string | null;
   };
 }
 

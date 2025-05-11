@@ -25,6 +25,7 @@ export default async function AgentesPage() {
           attendantData.attendantPrompt.expressionInterpretation,
         schedulingScript: attendantData.attendantPrompt.schedulingScript,
         rules: attendantData.attendantPrompt.rules,
+        suportPhone: attendantData.attendantPrompt.suportPhone,
       }
     : undefined;
 
