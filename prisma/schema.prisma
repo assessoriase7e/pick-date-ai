@@ -21,6 +21,7 @@ model User {
   audios       AudioRecord[]
   images       ImageRecord[]
   documents    DocumentRecord[]
+  files        FileRecord[]
   links        Link[]
   prompts      Prompt[]
   ragFiles     RagFile[]
@@ -398,4 +399,18 @@ model Appointment {
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
 
   @@map("appointment")
+}
+
+model FileRecord {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fileUrl     String
+  fileName    String
+  fileType    String
+  description String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("filerecord")
 }
