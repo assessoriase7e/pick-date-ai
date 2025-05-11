@@ -35,6 +35,7 @@ import { updateImage } from "@/actions/images/update";
 import { deleteImage } from "@/actions/images/delete";
 import { ImageWithProfessional } from "@/types/professionals";
 import { useState } from "react";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 type ImagesContentProps = {
   initialData: {
@@ -67,7 +68,7 @@ export function ImagesContent({ initialData, page }: ImagesContentProps) {
       const result = await createImage(data);
       if (result.success) {
         setIsCreateModalOpen(false);
-        router.refresh();
+        revalidatePathAction("/images");
       }
     } catch (error) {
       console.error("Erro ao criar imagem:", error);
@@ -80,7 +81,7 @@ export function ImagesContent({ initialData, page }: ImagesContentProps) {
       const result = await updateImage(editingImage.id, data);
       if (result.success) {
         setEditingImage(null);
-        router.refresh();
+        revalidatePathAction("/images");
       }
     } catch (error) {
       console.error("Erro ao atualizar imagem:", error);

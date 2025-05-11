@@ -12,6 +12,18 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { ImageRecord } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ImageFormValues, imageSchema } from "@/validators/image";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -27,23 +39,35 @@ export function ImageModal({
   initialData,
 }: ImageModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [description, setDescription] = useState(
-    initialData?.description || ""
-  );
   const { user } = useUser();
-
+  const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.imageBase64 || null
   );
+
+  const form = useForm<ImageFormValues>({
+    resolver: zodResolver(imageSchema),
+    defaultValues: {
+      description: initialData?.description || "",
+      imageFile: undefined,
+    },
+  });
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+    if (file.size > 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar imagem",
+        description: "A imagem deve ter no máximo 1 MB",
+      });
+      e.target.value = "";
       return;
     }
+
+    form.setValue("imageFile", file, { shouldValidate: true });
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -52,21 +76,20 @@ export function ImageModal({
     reader.readAsDataURL(file);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!imagePreview || !description) return;
+  async function handleSubmit(values: ImageFormValues) {
+    if (!imagePreview) return;
 
     try {
       setIsLoading(true);
       await onSubmit({
         imageBase64: imagePreview,
-        description,
+        description: values.description,
         userId: user?.id,
       });
-      setDescription("");
+      form.reset();
       setImagePreview(null);
     } catch (error) {
-      console.error("Error submitting image:", error);
+      console.error("Erro ao enviar imagem:", error);
     } finally {
       setIsLoading(false);
     }
@@ -78,50 +101,74 @@ export function ImageModal({
         <DialogHeader>
           <DialogTitle>Nova Imagem</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={isLoading}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="imageFile"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Imagem</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  {imagePreview && (
+                    <div className="relative w-full h-48">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        fill
+                        className="object-contain rounded-md"
+                      />
+                    </div>
+                  )}
+                </FormItem>
+              )}
             />
-            {imagePreview && (
-              <div className="relative w-full h-48">
-                <Image
-                  src={imagePreview}
-                  alt="Preview"
-                  fill
-                  className="object-contain rounded-md"
-                />
-              </div>
-            )}
-          </div>
 
-          <Textarea
-            placeholder="Descrição da imagem"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={isLoading}
-          />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descrição da imagem"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || !imagePreview || !description}
-            >
-              {isLoading ? "Enviando..." : "Enviar"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isLoading || !imagePreview}>
+                {isLoading ? "Enviando..." : "Enviar"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
