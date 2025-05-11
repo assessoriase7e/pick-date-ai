@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
-import { getPrismaModelNames } from "@/mocked/models";
 
 export async function GET(req: NextRequest) {
   const apiKeyHeader = req.headers.get("Authorization");
@@ -9,7 +8,9 @@ export async function GET(req: NextRequest) {
   if (!validationResult.isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const modelNames = getPrismaModelNames();
+  
+  // Definindo apenas os modelos de arquivo e link
+  const modelNames = ["FileRecord", "Link"];
 
   const { searchParams } = new URL(req.url);
   const ids = searchParams.getAll("id");

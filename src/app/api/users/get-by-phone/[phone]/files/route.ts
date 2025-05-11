@@ -26,18 +26,8 @@ export async function GET(
       );
     }
 
-    const [audios, images, documents, links] = await Promise.all([
-      prisma.audioRecord.findMany({
-        where: { userId: profile.user.id },
-        select: { id: true, description: true },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.imageRecord.findMany({
-        where: { userId: profile.user.id },
-        select: { id: true, description: true },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.documentRecord.findMany({
+    const [files, links] = await Promise.all([
+      prisma.fileRecord.findMany({
         where: { userId: profile.user.id },
         select: { id: true, description: true },
         orderBy: { createdAt: "desc" },
@@ -50,12 +40,9 @@ export async function GET(
     ]);
 
     return NextResponse.json({
-      audios,
-      images,
-      documents,
+      files,
       links,
-      totalFiles:
-        audios.length + images.length + documents.length + links.length,
+      totalFiles: files.length + links.length,
     });
   } catch (error) {
     console.error("Erro ao buscar arquivos:", error);
