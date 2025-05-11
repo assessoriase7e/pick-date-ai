@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ImageModal } from "./image-modal";
 import { Pagination } from "@/components/ui/pagination";
@@ -34,17 +33,23 @@ import {
 import { createImage } from "@/actions/images/create";
 import { updateImage } from "@/actions/images/update";
 import { deleteImage } from "@/actions/images/delete";
-import { listImages } from "@/actions/images/getMany";
 import { ImageWithProfessional } from "@/types/professionals";
+import { useState } from "react";
 
-export function ImagesContent() {
+type ImagesContentProps = {
+  initialData: {
+    success: boolean;
+    data?: {
+      images: ImageWithProfessional[];
+      totalPages: number;
+    };
+    error?: string;
+  };
+  page: number;
+};
+
+export function ImagesContent({ initialData, page }: ImagesContentProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
-
-  const [images, setImages] = useState<ImageWithProfessional[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingImage, setEditingImage] =
     useState<ImageWithProfessional | null>(null);
@@ -53,29 +58,17 @@ export function ImagesContent() {
   const [viewingImage, setViewingImage] =
     useState<ImageWithProfessional | null>(null);
 
-  async function loadImages() {
-    setIsLoading(true);
-    try {
-      const result = await listImages(page);
-      if (result.success) {
-        setImages(result.data!.images);
-        setTotalPages(result.data!.totalPages);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar imagens:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadImages();
-  }, [page]);
+  const { images = [], totalPages = 0 } = initialData.success
+    ? initialData.data!
+    : { images: [], totalPages: 0 };
 
   async function handleCreateImage(data: any) {
     try {
       const result = await createImage(data);
-      result.success && (loadImages(), setIsCreateModalOpen(false));
+      if (result.success) {
+        setIsCreateModalOpen(false);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Erro ao criar imagem:", error);
     }
@@ -85,7 +78,10 @@ export function ImagesContent() {
     if (!editingImage) return;
     try {
       const result = await updateImage(editingImage.id, data);
-      result.success && (loadImages(), setEditingImage(null));
+      if (result.success) {
+        setEditingImage(null);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Erro ao atualizar imagem:", error);
     }
@@ -95,7 +91,10 @@ export function ImagesContent() {
     if (!deletingImage) return;
     try {
       const result = await deleteImage(deletingImage.id);
-      result.success && (loadImages(), setDeletingImage(null));
+      if (result.success) {
+        setDeletingImage(null);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Erro ao excluir imagem:", error);
     }
@@ -141,13 +140,7 @@ export function ImagesContent() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : images.length === 0 ? (
+            {images.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10">
                   Nenhuma imagem encontrada.
@@ -209,11 +202,7 @@ export function ImagesContent() {
 
       {/* Visualização Mobile */}
       <div className="md:hidden space-y-4">
-        {isLoading ? (
-          <div className="text-center py-6 text-muted-foreground rounded-md border">
-            Carregando...
-          </div>
-        ) : images.length === 0 ? (
+        {images.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground rounded-md border">
             Nenhuma imagem encontrada
           </div>
@@ -276,7 +265,6 @@ export function ImagesContent() {
           onPageChange={(newPage: number) => {
             router.push(`/images?page=${newPage}`);
           }}
-          isLoading={isLoading}
         />
       )}
 
