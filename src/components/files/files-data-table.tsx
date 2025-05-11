@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -41,6 +40,16 @@ import { ptBR } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { EditFileModal } from "./edit-file-modal";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
 interface FileRecord {
   id: string;
@@ -48,6 +57,7 @@ interface FileRecord {
   description: string;
   fileType: string;
   createdAt: string;
+  fileUrl: string;
 }
 
 interface DataTableProps {
@@ -61,6 +71,10 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<FileRecord | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -77,22 +91,35 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
     onGlobalFilterChange: setGlobalFilter,
   });
 
-  const handleEdit = (id: string) => {
-    router.push(`/files/${id}/edit`);
+  const handleEdit = (file: FileRecord) => {
+    setSelectedFile(file);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este arquivo?")) {
-      setIsDeleting(id);
-      const result = await deleteFile(id);
-      setIsDeleting(null);
+    setFileToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-      if (result.success) {
-        router.refresh();
-      } else {
-        alert("Erro ao excluir arquivo: " + result.error);
-      }
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
+
+    setIsDeleting(fileToDelete);
+    const result = await deleteFile(fileToDelete);
+    setIsDeleting(null);
+    setIsDeleteDialogOpen(false);
+    setFileToDelete(null);
+
+    if (result.success) {
+      router.refresh();
+    } else {
+      alert("Erro ao excluir arquivo: " + result.error);
     }
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedFile(null);
   };
 
   return (
@@ -149,7 +176,7 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEdit(row.original.id)}
+                        onClick={() => handleEdit(row.original)}
                       >
                         <FileEdit className="h-4 w-4 mr-1" />
                       </Button>
@@ -213,7 +240,7 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => handleEdit(row.original.id)}
+                            onClick={() => handleEdit(row.original)}
                           >
                             <FileEdit className="h-4 w-4 mr-2" />
                             Editar
@@ -265,6 +292,34 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
           Próxima
         </Button>
       </div>
+
+      {/* Modal de Edição */}
+      <EditFileModal
+        isOpen={isEditModalOpen}
+        onClose={closeEditModal}
+        file={selectedFile}
+      />
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este arquivo? Esta ação não pode
+              ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button onClick={confirmDelete} disabled={isDeleting !== null}>
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
