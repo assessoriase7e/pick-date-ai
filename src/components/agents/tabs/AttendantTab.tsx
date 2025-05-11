@@ -56,8 +56,6 @@ export function AttendantTab({
   const { user } = useUser();
   const { handleSaveAttendantPrompt } = useAttendantHandler();
 
-  console.log(initialData);
-
   const form = useForm<AttendantFormValues>({
     resolver: zodResolver(attendantFormSchema),
     defaultValues: {
@@ -70,7 +68,8 @@ export function AttendantTab({
       schedulingScript: parseSchedulingScript(
         initialData?.schedulingScript || ""
       ),
-      rules: initialData?.rules ? parseRules(initialData.rules) : defaultRules,
+      // Alteração: só mostrar as regras personalizadas no formulário
+      rules: initialData?.rules ? parseRules(initialData.rules) : [],
       suportPhone: initialData?.suportPhone || "",
     },
   });
@@ -92,11 +91,12 @@ export function AttendantTab({
         .map((item) => item.step)
         .join("\n");
 
-      // Formatar regras (incluindo as mockadas)
+      // Formatar regras: concatenar as personalizadas com as mockadas apenas na hora de salvar
       const userRules = values.rules.map((item) => item.rule);
       const mockedRules = defaultRules.map((item) => item.rule);
-      const allRules = [...userRules, ...mockedRules];
-      const rulesText = allRules.join("\n");
+      
+      // Usar um delimitador claro para separar regras personalizadas das mockadas
+      const rulesText = userRules.join("\n") + "\n\n### REGRAS PADRÃO ###\n\n" + mockedRules.join("\n");
 
       // Enviar o valor do estilo diretamente, sem buscar no speechStyleOptions
       const speechStyleText = values.speechStyle;

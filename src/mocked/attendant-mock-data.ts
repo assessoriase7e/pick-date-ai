@@ -54,4 +54,7 @@ export const defaultRules = [
   {
     rule: "Não responda perguntas que não estejam relacionadas aos serviços.",
   },
+  {
+    rule: "Se o cliente tiver dúvida sobre serviço, envie arquivos se possível.",
+  },
 ];
