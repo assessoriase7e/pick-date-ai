@@ -23,6 +23,7 @@ export default async function ApiKeysPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
+  return <></>;
   const { page: sParamsPage } = await searchParams;
   const page = Number(sParamsPage || "1");
   const { apiKeys, currentPage, totalPages } = await getApiKeys(page);

@@ -3,7 +3,6 @@ import {
   Bot,
   Calendar,
   FileIcon,
-  KeyRound,
   Link,
   Music,
   Scissors,
@@ -119,12 +118,12 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       label: "Perfil",
       isActive: pathname === "/profile",
     },
-    {
-      href: "/api-keys",
-      icon: KeyRound,
-      label: "API Keys",
-      isActive: pathname.startsWith("/api-keys"),
-    },
+    // {
+    //   href: "/api-keys",
+    //   icon: KeyRound,
+    //   label: "API Keys",
+    //   isActive: pathname.startsWith("/api-keys"),
+    // },
   ];
 
   return { routes };
