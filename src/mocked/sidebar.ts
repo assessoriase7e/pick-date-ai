@@ -2,16 +2,13 @@ import {
   LucideIcon,
   Bot,
   Calendar,
-  FileIcon,
   Link,
-  Music,
   Scissors,
   User,
   Users,
-  Image,
   SquareUser,
   BarChart3,
-  FolderIcon,
+  File,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -31,35 +28,6 @@ export interface UseSidebarRoutesResult {
 
 export const useSidebarRoutes = (): UseSidebarRoutesResult => {
   const pathname = usePathname();
-
-  const mediaItems: SidebarRoute[] = [
-    {
-      href: "/audios",
-      icon: Music,
-      label: "Áudios",
-      isActive: pathname.startsWith("/audios"),
-    },
-    {
-      href: "/images",
-      icon: Image,
-      label: "Imagens",
-      isActive: pathname.startsWith("/images"),
-    },
-    {
-      href: "/documents",
-      icon: FileIcon,
-      label: "Documentos",
-      isActive: pathname.startsWith("/documents"),
-    },
-    {
-      href: "/links",
-      icon: Link,
-      label: "Links",
-      isActive: pathname === "/links",
-    },
-  ];
-
-  const isMediaActive = mediaItems.some((item) => item.isActive);
 
   const routes: SidebarRoute[] = [
     {
@@ -91,12 +59,16 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       isActive: pathname === "/collaborators",
     },
     {
-      label: "Mídia",
-      icon: FolderIcon,
-      href: "#",
-      isActive: isMediaActive,
-      items: mediaItems,
-      type: "submenu",
+      href: "/files",
+      icon: File,
+      label: "Arquivos",
+      isActive: pathname === "/files",
+    },
+    {
+      href: "/links",
+      icon: Link,
+      label: "Links",
+      isActive: pathname === "/links",
     },
     {
       label: "Agentes",
