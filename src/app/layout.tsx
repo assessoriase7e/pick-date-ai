@@ -1,13 +1,23 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/lib/uploadthing";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 
-const inter = Inter({ subsets: ["latin"] });
+async function UTSSR() {
+  await connection();
+  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
+}
+
+const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Pick Date AI",
@@ -21,10 +31,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={montserrat.className}>
         <ClerkProvider localization={ptBR}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Toaster duration={3000} position="top-center" />
+            <Suspense>
+              <UTSSR />
+            </Suspense>
             {children}
           </ThemeProvider>
         </ClerkProvider>
