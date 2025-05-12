@@ -53,6 +53,7 @@ export async function GET(
       where: {
         id,
         userId: userProfile.user.id,
+        isActive: true,
       },
     });
 

@@ -36,10 +36,10 @@ export async function GET(req: NextRequest) {
     }
 
     const calendars = await prisma.calendar.findMany({
-      where: { userId: userProfile.user.id },
+      where: { AND: [{ userId: userProfile.user.id }, { isActive: true }] },
       include: {
-        collaborator: true
-      }
+        collaborator: true,
+      },
     });
 
     return NextResponse.json(calendars);
@@ -95,8 +95,8 @@ export async function POST(req: NextRequest) {
         userId: userProfile.user.id,
       },
       include: {
-        collaborator: true
-      }
+        collaborator: true,
+      },
     });
 
     return NextResponse.json(calendar, { status: 201 });
