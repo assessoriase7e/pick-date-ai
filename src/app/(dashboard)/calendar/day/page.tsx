@@ -5,6 +5,7 @@ import { DayScheduleContent } from "@/components/calendar/day-schedule-page";
 import { getClients } from "@/actions/clients/get-clients";
 import moment from "moment";
 import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
+import { getCalendarById } from "@/actions/calendars/getById";
 
 export default async function DaySchedulePage({
   searchParams,
@@ -35,11 +36,13 @@ export default async function DaySchedulePage({
     collaboratorResponse,
     clientsResponse,
     servicesResponse,
+    getCalendarByIdResponse,
   ] = await Promise.all([
     getAppointmentsByCalendarAndDate(calendarId, date),
     getCalendarCollaborator(calendarId),
     getClients(),
     getServicesByCalendar(calendarId),
+    getCalendarById(calendarId),
   ]);
 
   const allAppointments =
@@ -66,6 +69,7 @@ export default async function DaySchedulePage({
       collaborator={collaboratorResponse.data?.collaborator!}
       clients={clients}
       services={services}
+      calendar={getCalendarByIdResponse.data!}
     />
   );
 }

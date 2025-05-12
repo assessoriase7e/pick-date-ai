@@ -305,15 +305,16 @@ model ClientService {
 }
 
 model Calendar {
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
   name           String
-  userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  appointments   Appointment[]
+  collaboratorId String?      @db.ObjectId
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
-  collaboratorId String?       @db.ObjectId
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  appointments   Appointment[]
 
   @@map("calendar")
 }

@@ -60,6 +60,7 @@ export const calendarSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   userId: z.string().optional(),
   collaboratorId: z.string({ required_error: "Profissional é obrigatório" }),
+  isActive: z.boolean(),
 });
 
 export type CalendarFormValues = z.infer<typeof calendarSchema>;

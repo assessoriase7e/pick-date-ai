@@ -8,7 +8,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
-import { Collaborator } from "@prisma/client";
+import { Calendar, Collaborator } from "@prisma/client";
 import { Separator } from "../ui/separator";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { MobileDaySchedule } from "./mobile-day-schedule";
@@ -20,6 +20,7 @@ interface DayScheduleContentProps {
   collaborator: Collaborator;
   clients: any[];
   services: any[];
+  calendar: Calendar;
 }
 
 export function DayScheduleContent({
@@ -29,6 +30,7 @@ export function DayScheduleContent({
   appointments,
   clients,
   services,
+  calendar,
 }: DayScheduleContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,17 +95,6 @@ export function DayScheduleContent({
 
     setSelectedAppointment(appointment);
     router.push(`${window.location.pathname}?${params.toString()}`);
-  };
-
-  const handleClearHourSelection = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("hour");
-    params.delete("startTime");
-    params.delete("endTime");
-    router.push(`${window.location.pathname}?${params.toString()}`);
-
-    setShowForm(false);
-    setSelectedAppointment(null);
   };
 
   const handleFormSuccess = async () => {
@@ -187,6 +178,7 @@ export function DayScheduleContent({
               calendarId={calendarId}
               clients={clients}
               services={services}
+              calendar={calendar}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">

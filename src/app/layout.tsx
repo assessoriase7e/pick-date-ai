@@ -4,13 +4,13 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
-import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { Toaster } from "@/components/ui/sonner";
 
 async function UTSSR() {
   await connection();
@@ -35,6 +35,7 @@ export default function RootLayout({
         <ClerkProvider localization={ptBR}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Toaster duration={3000} position="top-center" />
+
             <Suspense>
               <UTSSR />
             </Suspense>

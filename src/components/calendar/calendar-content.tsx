@@ -16,6 +16,7 @@ import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useCalendarQuery } from "@/hooks/useCalendarQuery";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
+import { Calendar } from "@prisma/client";
 
 moment.locale("pt-br");
 
@@ -92,11 +93,14 @@ export function CalendarContent({
   const handleEditCalendar = async (values: CalendarFormValues) => {
     if (!selectedCalendar) return;
 
+    console.log(values);
+
     try {
       await updateCalendar({
         id: selectedCalendar.id,
         name: values.name,
         collaboratorId: values.collaboratorId,
+        isActive: values.isActive,
       });
 
       setEditOpen(false);
@@ -148,12 +152,12 @@ export function CalendarContent({
     }
   };
 
-  const openEditModal = (calendar: any) => {
+  const openEditModal = (calendar: Calendar) => {
     setSelectedCalendar(calendar);
     setEditOpen(true);
   };
 
-  const openDeleteModal = (calendar: any) => {
+  const openDeleteModal = (calendar: Calendar) => {
     setSelectedCalendar(calendar);
     setDeleteOpen(true);
   };

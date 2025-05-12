@@ -23,12 +23,22 @@ import { createAppointment } from "@/actions/appointments/create";
 import { updateAppointment } from "@/actions/appointments/update";
 import { deleteAppointment } from "@/actions/appointments/delete";
 import { z } from "zod";
+import { Calendar, Client, Service } from "@prisma/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
 interface ExtendedAppointmentFormProps extends AppointmentFormProps {
-  clients: any[];
-  services: any[];
+  clients: Client[];
+  services: Service[];
+  calendar: Calendar;
 }
 
 export function AppointmentForm({
@@ -41,6 +51,7 @@ export function AppointmentForm({
   calendarId,
   clients,
   services,
+  calendar,
 }: ExtendedAppointmentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -150,6 +161,13 @@ export function AppointmentForm({
 
   const onSubmit = async (values: FormValues) => {
     try {
+      if (!calendar.isActive) {
+        toast.error(
+          "Esta agenda está inativa e não permite novos agendamentos"
+        );
+        return;
+      }
+
       const [startHour, startMinute] = values.startTime.split(":").map(Number);
       const [endHour, endMinute] = values.endTime.split(":").map(Number);
 
@@ -214,6 +232,25 @@ export function AppointmentForm({
       setIsLoading(false);
     }
   };
+
+  if (!calendar.isActive && !isEditing) {
+    return (
+      <Dialog open={true}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agenda Inativa</DialogTitle>
+            <DialogDescription>
+              Esta agenda está temporariamente inativa e não está aceitando
+              novos agendamentos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={onSuccess}>Entendi</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const handleDelete = async () => {
     if (!appointment?.id) return;

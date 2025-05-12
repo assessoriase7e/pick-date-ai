@@ -9,10 +9,12 @@ export async function updateCalendar({
   id,
   name,
   collaboratorId,
+  isActive,
 }: {
   id: string;
   name: string;
   collaboratorId?: string;
+  isActive?: boolean;
 }) {
   try {
     const { userId } = await auth();
@@ -42,6 +44,7 @@ export async function updateCalendar({
       name,
       userId,
       collaboratorId,
+      isActive,
     });
 
     const calendar = await prisma.calendar.update({
@@ -51,6 +54,7 @@ export async function updateCalendar({
       data: {
         name: validatedData.name,
         collaboratorId: validatedData.collaboratorId,
+        isActive: validatedData.isActive,
       },
     });
 

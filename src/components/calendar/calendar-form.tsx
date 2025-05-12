@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { Calendar } from "@prisma/client";
 import { SelectWithScroll } from "./select-with-scroll";
 import { CollaboratorFullData } from "@/types/collaborator";
+import { Switch } from "../ui/switch";
 
 interface CalendarFormProps {
   onSubmit: (values: CalendarFormValues) => Promise<void>;
@@ -37,10 +39,12 @@ export function CalendarForm({
       ? {
           name: calendar?.name || "",
           collaboratorId: calendar.collaboratorId || undefined,
+          isActive: calendar?.isActive ?? true,
         }
       : {
           name: "",
           collaboratorId: undefined,
+          isActive: true,
         },
   });
 
@@ -87,6 +91,27 @@ export function CalendarForm({
               getOptionValue={(option) => String(option.id)}
               error={form.formState.errors.collaboratorId?.message}
             />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="isActive"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel>Status da Agenda</FormLabel>
+                <FormDescription>
+                  Defina se esta agenda está ativa ou inativa
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
           )}
         />
 
