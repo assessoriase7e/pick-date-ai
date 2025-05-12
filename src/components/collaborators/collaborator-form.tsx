@@ -27,6 +27,7 @@ import { updateCollaborator } from "@/actions/collaborators/update-collaborator"
 import { useToast } from "@/components/ui/use-toast";
 import { collaboratorSchema } from "@/validators/collaborator";
 import { collabRoles } from "@/mocked/collabs";
+import { PatternFormat } from "react-number-format";
 
 interface CollaboratorFormProps {
   initialData?: any;
@@ -145,7 +146,16 @@ export function CollaboratorForm({
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input placeholder="(00) 00000-0000" {...field} />
+                <PatternFormat
+                  format="(##) #####-####"
+                  mask="_"
+                  customInput={Input}
+                  placeholder="(00) 00000-0000"
+                  value={field.value}
+                  onValueChange={(values) => {
+                    field.onChange(values.value);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
