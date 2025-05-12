@@ -45,6 +45,7 @@ async function getCollaboratorCommissionData(
         where: { collaboratorId },
         select: { serviceId: true },
       });
+
       serviceIds = serviceCollaborators.map((sc) => sc.serviceId);
       if (serviceIds.length === 0) {
         return { success: true, data: [] };

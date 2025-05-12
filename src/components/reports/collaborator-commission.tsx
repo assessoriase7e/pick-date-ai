@@ -74,6 +74,11 @@ export function CollaboratorCommission({
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
+  // Filtrar os dados de comissão com base no colaborador selecionado
+  const filteredCommissionData = selectedCollaborator
+    ? commissionData.filter(item => item.collaboratorId === selectedCollaborator)
+    : commissionData;
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -111,7 +116,7 @@ export function CollaboratorCommission({
         </div>
       </CardHeader>
       <CardContent>
-        {commissionData.length === 0 ? (
+        {filteredCommissionData.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhum dado encontrado para o período selecionado
           </div>
@@ -131,7 +136,7 @@ export function CollaboratorCommission({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {commissionData.map((item) => (
+                  {filteredCommissionData.map((item) => (
                     <TableRow key={item.collaboratorId}>
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell className="text-right">
@@ -151,7 +156,7 @@ export function CollaboratorCommission({
 
             {/* Visualização Mobile */}
             <div className="md:hidden space-y-4">
-              {commissionData.map((item) => (
+              {filteredCommissionData.map((item) => (
                 <CommissionMobileCard
                   key={item.collaboratorId}
                   name={item.name}
