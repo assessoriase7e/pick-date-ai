@@ -32,7 +32,6 @@ export function UploadthingUploader({
       onClientUploadComplete={(res) => {
         if (res && res.length > 0) {
           const file = res[0];
-          console.log(file);
           onUploadComplete({
             fileUrl: file.ufsUrl,
             fileName: file.name,

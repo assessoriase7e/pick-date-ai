@@ -38,7 +38,11 @@ export const getCollaborators = async (
     const collaborators = await prisma.collaborator.findMany({
       where: whereCondition,
       include: {
-        services: true,
+        ServiceCollaborator: {
+          include: {
+            service: true,
+          },
+        },
       },
       orderBy: { name: "asc" },
     });

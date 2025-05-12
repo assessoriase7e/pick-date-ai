@@ -38,12 +38,29 @@ async function getCollaboratorCommissionData(
       lte: to ?? new Date(),
     };
 
+    // Se colaboradorId foi informado, buscar os serviços relacionados a ele via ServiceCollaborator
+    let serviceIds: string[] | undefined = undefined;
+    if (collaboratorId) {
+      const serviceCollaborators = await prisma.serviceCollaborator.findMany({
+        where: { collaboratorId },
+        select: { serviceId: true },
+      });
+      serviceIds = serviceCollaborators.map((sc) => sc.serviceId);
+      if (serviceIds.length === 0) {
+        return { success: true, data: [] };
+      }
+    }
+
     const appointments = await prisma.appointment.findMany({
       where: {
         userId,
         status: "scheduled",
         endTime: dateRange,
-        ...(collaboratorId && { collaboratorId }),
+        ...(collaboratorId
+          ? {
+              serviceId: { in: serviceIds },
+            }
+          : {}),
       },
       select: {
         finalPrice: true,
@@ -76,7 +93,10 @@ async function getCollaboratorCommissionData(
         0;
 
       const commissionPercent = appointment.service?.commission ?? 0;
-      const commission = calculateCommission(appointmentPrice, commissionPercent);
+      const commission = calculateCommission(
+        appointmentPrice,
+        commissionPercent
+      );
 
       const collaborator = appointment.collaborator;
 
