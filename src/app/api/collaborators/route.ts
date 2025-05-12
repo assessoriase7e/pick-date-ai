@@ -36,15 +36,43 @@ export async function GET(req: NextRequest) {
     }
 
     const collaborators = await prisma.collaborator.findMany({
-      where: { userId: userProfile.user.id },
+      where: { 
+        userId: userProfile.user.id,
+        AND: [
+          {
+            calendars: {
+              some: {
+                isActive: true
+              }
+            }
+          },
+          {
+            ServiceCollaborator: {
+              some: {
+                service: {
+                  isActive: true
+                }
+              }
+            }
+          }
+        ]
+      },
       include: {
         calendars: {
+          where: {
+            isActive: true
+          },
           select: {
             id: true,
             name: true,
           },
         },
         ServiceCollaborator: {
+          where: {
+            service: {
+              isActive: true
+            }
+          },
           include: {
             service: {
               select: {
