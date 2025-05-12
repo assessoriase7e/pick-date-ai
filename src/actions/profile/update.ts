@@ -17,6 +17,22 @@ export async function updateProfile(data: any) {
       };
     }
 
+    if (data.whatsapp) {
+      const existingProfile = await prisma.profile.findFirst({
+        where: {
+          whatsapp: data.whatsapp,
+          userId: { not: userId },
+        },
+      });
+
+      if (existingProfile) {
+        return {
+          success: false,
+          error: "Já existe um perfil cadastrado com este número de WhatsApp",
+        };
+      }
+    }
+
     const profileData = {
       whatsapp: data.whatsapp,
       companyName: data.companyName,

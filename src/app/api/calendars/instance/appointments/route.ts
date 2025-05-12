@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 import moment from "moment";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   try {
     const apiKeyHeader = req.headers.get("Authorization");
     const validationResult = await validateApiKey(apiKeyHeader);
@@ -15,32 +12,33 @@ export async function GET(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const { id } = await params;
-
     const { searchParams } = new URL(req.url);
+    const instance = searchParams.get("instance");
     const date = searchParams.get("date");
 
-    if (!date) {
+    if (!instance) {
       return NextResponse.json(
-        { error: "O parâmetro 'date' é obrigatório na URL" },
+        { error: "Instância não fornecida" },
         { status: 400 }
       );
     }
 
-    const calendar = await prisma.calendar.findFirst({
-      where: {
-        id,
-        isActive: true,
-      },
+    if (!date) {
+      return NextResponse.json(
+        { error: "Data não fornecida" },
+        { status: 400 }
+      );
+    }
+
+    const evolutionInstance = await prisma.evolutionInstance.findFirst({
+      where: { name: instance },
+      include: { user: true },
     });
 
-    if (!calendar) {
+    if (!evolutionInstance) {
       return NextResponse.json(
-        {
-          message:
-            "Calendário não encontrado. Profissional não possuí agenda ou está com agenda fechada",
-        },
-        { status: 200 }
+        { error: "Instância não encontrada" },
+        { status: 404 }
       );
     }
 
@@ -49,7 +47,7 @@ export async function GET(
 
     const appointments = await prisma.appointment.findMany({
       where: {
-        calendarId: id,
+        userId: evolutionInstance.userId,
         startTime: {
           gte: startDate,
           lte: endDate,
@@ -58,6 +56,7 @@ export async function GET(
       include: {
         client: true,
         service: true,
+        calendar: true,
         collaborator: true,
       },
       orderBy: {

@@ -22,6 +22,9 @@ export const defaultRules = [
     rule: "A duração depende do serviço (consultar base de conhecimento).",
   },
   {
+    rule: "Você está num fluxo do N8N, portanto é uma execução por vez, você não pode tomar decisões autônomas.",
+  },
+  {
     rule: "Sempre verifique se o horário final do agendamento não ultrapassa o horário final do expediente da empresa.",
   },
   {

@@ -38,7 +38,7 @@ export async function PUT(
         {
           error: "Usuário não encontrado com este número de telefone comercial",
         },
-        { status: 404 }
+        { status: 204 }
       );
     }
 

@@ -56,8 +56,6 @@ export async function createInstance(
       };
     }
 
-    console.log("instances", instances);
-
     const numberExists = instances.some((instance: any) => {
       return instance.number === data.number;
     });
