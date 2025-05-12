@@ -15,6 +15,7 @@ import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useCalendarQuery } from "@/hooks/useCalendarQuery";
 import { CollaboratorFullData } from "@/types/collaborator";
+import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 
 moment.locale("pt-br");
 
@@ -121,6 +122,10 @@ export function CalendarContent({
     if (!selectedCalendar) return;
 
     try {
+      // Delete future appointments
+      await deleteManyAppointments({ selectedCalendar });
+
+      // Deleta calendar
       await deleteCalendar({
         id: selectedCalendar.id,
       });
@@ -131,7 +136,7 @@ export function CalendarContent({
       setSelectedCalendar(null);
       toast({
         title: "Sucesso",
-        description: "Calendário excluído com sucesso",
+        description: "Calendário e agendamentos futuros excluídos com sucesso",
       });
     } catch (error) {
       console.error("Erro ao excluir calendário:", error);
