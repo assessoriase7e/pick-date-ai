@@ -48,7 +48,7 @@ export const getScheduledAppointments = async (
           },
         },
         calendar: {
-          select: {
+          include: {
             collaborator: {
               select: {
                 name: true,
@@ -69,8 +69,9 @@ export const getScheduledAppointments = async (
       date: moment(appointment.startTime).format("DD/MM/YYYY"),
       time: moment(appointment.startTime).format("HH:mm"),
       collaboratorName:
-        appointment.calendar?.collaborator?.name ||
-        "Profissional não encontrado",
+        appointment.calendar && appointment.calendar.collaborator
+          ? appointment.calendar.collaborator.name
+          : "Profissional não encontrado",
     }));
 
     return { success: true, data: formattedAppointments };
