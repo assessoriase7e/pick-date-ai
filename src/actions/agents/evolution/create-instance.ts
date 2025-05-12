@@ -56,10 +56,10 @@ export async function createInstance(
       };
     }
 
-    // Verificar se já existe uma instância com o mesmo número
+    console.log("instances", instances);
+
     const numberExists = instances.some((instance: any) => {
-      const instanceData = instance.instance || instance;
-      return instanceData.owner === `${data.number}@s.whatsapp.net`;
+      return instance.number === data.number;
     });
 
     if (numberExists) {
