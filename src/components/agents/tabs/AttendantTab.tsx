@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { useAttendantHandler } from "@/handles/attendant-handler";
 import { useUser } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import {
@@ -30,6 +29,8 @@ import {
   attendantFormSchema,
   AttendantFormValues,
 } from "@/validators/attendant";
+import { saveAttendantPrompt } from "@/actions/agents/attendant/save-attendant-prompt";
+import { toast } from "@/components/ui/use-toast";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -54,7 +55,6 @@ export function AttendantTab({
   initialData,
 }: AttendantTabProps) {
   const { user } = useUser();
-  const { handleSaveAttendantPrompt } = useAttendantHandler();
 
   const form = useForm<AttendantFormValues>({
     resolver: zodResolver(attendantFormSchema),
@@ -94,26 +94,34 @@ export function AttendantTab({
       // Formatar regras: concatenar as personalizadas com as mockadas apenas na hora de salvar
       const userRules = values.rules.map((item) => item.rule);
       const mockedRules = defaultRules.map((item) => item.rule);
-      
+
       // Usar um delimitador claro para separar regras personalizadas das mockadas
-      const rulesText = userRules.join("\n") + "\n\n### REGRAS PADRÃO ###\n\n" + mockedRules.join("\n");
+      const rulesText =
+        userRules.join("\n") +
+        "\n\n### REGRAS PADRÃO ###\n\n" +
+        mockedRules.join("\n");
 
       // Enviar o valor do estilo diretamente, sem buscar no speechStyleOptions
       const speechStyleText = values.speechStyle;
 
       const content = `Apresentação: ${values.presentation}\n\nEstilo da Fala: ${speechStyleText}\n\nInterpretação de Expressões: ${expressionText}\n\nScript de Agendamento: ${scriptText}\n\nRegras: ${rulesText}`;
 
-      await handleSaveAttendantPrompt(
-        user?.id,
+      await saveAttendantPrompt({
         content,
-        values.isActive,
-        values.presentation,
-        speechStyleText,
-        expressionText,
-        scriptText,
-        rulesText,
-        values.suportPhone
-      );
+        isActive: values.isActive,
+        userId: user?.id as string,
+        suportPhone: values.suportPhone,
+        expressionInterpretation: expressionText,
+        schedulingScript: scriptText,
+        rules: rulesText,
+        presentation: values.presentation,
+        speechStyle: speechStyleText,
+      });
+
+      toast({
+        title: "Prompt salvo com sucesso!",
+        description: "O prompt foi salvo com sucesso!",
+      });
     } finally {
       if (setIsLoading) setIsLoading(false);
     }

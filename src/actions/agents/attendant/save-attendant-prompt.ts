@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 
 interface SaveAttendantPromptParams {
   userId: string;
@@ -17,6 +18,15 @@ interface SaveAttendantPromptParams {
 
 export async function saveAttendantPrompt(params: SaveAttendantPromptParams) {
   try {
+    const { userId: authUserId } = await auth();
+
+    if (!authUserId || authUserId !== params.userId) {
+      return {
+        success: false,
+        error: "Não autorizado",
+      };
+    }
+
     const {
       userId,
       content,

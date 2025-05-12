@@ -19,11 +19,11 @@ export const attendantFormSchema = z.object({
   isActive: z.boolean(),
   presentation: z.string().min(1, "A apresentação é obrigatória"),
   speechStyle: z.string().min(1, "O estilo de fala é obrigatório"),
-  expressionInterpretation: z.array(expressionSchema),
+  expressionInterpretation: z.array(expressionSchema).min(1, "Adicione pelo menos uma expressão"),
   schedulingScript: z
     .array(schedulingStepSchema)
     .min(3, "Adicione pelo menos 3 passos no script de agendamento"),
-  rules: z.array(ruleSchema),
+  rules: z.array(ruleSchema).min(1, "Adicione pelo menos uma regra"),
   suportPhone: z.string().min(1, "O número é obrigatório"),
 });
 
