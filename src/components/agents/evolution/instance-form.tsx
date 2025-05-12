@@ -50,7 +50,7 @@ export function InstanceForm({
   const form = useForm<z.infer<typeof evolutionFormSchema>>({
     resolver: zodResolver(evolutionFormSchema),
     defaultValues: {
-      number: initialData?.number || profilePhone || "",
+      number: initialData?.number || "",
       qrCode: initialData?.qrCode ?? true,
       type: initialData?.type || "attendant",
     },

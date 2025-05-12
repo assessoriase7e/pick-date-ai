@@ -101,12 +101,7 @@ export function EvolutionSection({
             <CardTitle>Whatsapp</CardTitle>
             <CardDescription>Canais de atendimento conectados</CardDescription>
           </div>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            disabled={instances.length > 0}
-          >
-            Nova Instância
-          </Button>
+          <Button onClick={() => setIsModalOpen(true)}>Nova Instância</Button>
         </div>
       </CardHeader>
       <CardContent>

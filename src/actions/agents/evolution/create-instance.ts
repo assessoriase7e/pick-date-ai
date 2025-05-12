@@ -43,6 +43,8 @@ export async function createInstance(
     );
 
     const instances = await checkResponse.json();
+
+    // Verificar se já existe uma instância com o mesmo nome
     const instanceExists = instances.some(
       (instance: any) => instance.instanceName === data.name
     );
@@ -51,6 +53,19 @@ export async function createInstance(
       return {
         success: false,
         error: "Nome da instância precisa ser único",
+      };
+    }
+
+    // Verificar se já existe uma instância com o mesmo número
+    const numberExists = instances.some((instance: any) => {
+      const instanceData = instance.instance || instance;
+      return instanceData.owner === `${data.number}@s.whatsapp.net`;
+    });
+
+    if (numberExists) {
+      return {
+        success: false,
+        error: "Já existe uma instância conectada a este número",
       };
     }
 
