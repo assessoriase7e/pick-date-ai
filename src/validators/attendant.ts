@@ -19,29 +19,12 @@ export const attendantFormSchema = z.object({
   isActive: z.boolean(),
   presentation: z.string().min(1, "A apresentação é obrigatória"),
   speechStyle: z.string().min(1, "O estilo de fala é obrigatório"),
-  expressionInterpretation: z.array(expressionSchema).min(1, "Adicione pelo menos uma expressão"),
+  expressionInterpretation: z.array(expressionSchema),
   schedulingScript: z
     .array(schedulingStepSchema)
     .min(3, "Adicione pelo menos 3 passos no script de agendamento"),
-  rules: z.array(ruleSchema).min(1, "Adicione pelo menos uma regra"),
+  rules: z.array(ruleSchema),
   suportPhone: z.string().min(1, "O número é obrigatório"),
-});
-
-// Schema para o modelo de dados do atendente
-export const attendantSchema = z.object({
-  userId: z.string(),
-  type: z.string(),
-  content: z.string(),
-  isActive: z.boolean(),
-  presentation: z.string().min(1, "A apresentação é obrigatória"),
-  speechStyle: z.string().min(1, "O estilo de fala é obrigatório"),
-  expressionInterpretation: z.array(expressionSchema).nullable(),
-  schedulingScript: z
-    .array(schedulingStepSchema)
-    .min(3, "Adicione pelo menos 3 passos no script de agendamento"),
-  rules: z.array(ruleSchema).nullable(),
-  formattedContent: z.string(),
-  suportPhone: z.string(),
 });
 
 // Schema para o prompt (usado nas ações de servidor)
@@ -61,5 +44,4 @@ export const promptSchema = z.object({
 
 // Tipos exportados para uso em outros arquivos
 export type AttendantFormValues = z.infer<typeof attendantFormSchema>;
-export type AttendantSchemaValues = z.infer<typeof attendantSchema>;
 export type PromptSchemaValues = z.infer<typeof promptSchema>;
