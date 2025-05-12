@@ -26,7 +26,7 @@ type GetClientsProps = {
 
 export async function getClients({
   page = 1,
-  limit = 10,
+  limit = 1000,
   sort,
   where,
 }: GetClientsProps = {}): Promise<GetClientsResponse> {
