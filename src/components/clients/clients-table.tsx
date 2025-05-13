@@ -142,10 +142,13 @@ export default function ClientsTable({
 
   const handleDeleteClick = (id: string) => {
     setClientToDelete(id);
+    console.log(id);
+
     setIsDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
+    console.log(clientToDelete);
     if (!clientToDelete) return;
 
     setIsDeleting(true);

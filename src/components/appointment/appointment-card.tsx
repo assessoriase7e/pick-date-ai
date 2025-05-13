@@ -39,7 +39,7 @@ export function AppointmentCard({
             )}
           >
             <h4 className="font-medium truncate flex items-center gap-2">
-              <p>{client.fullName}</p> <span> | </span>
+              <p>{client?.fullName || "Cliente Deletado"}</p> <span> | </span>
               <p>{service.name}</p> <span> | </span>
               <div className="flex items-center">
                 <Clock className="h-3 w-3 mr-1" />

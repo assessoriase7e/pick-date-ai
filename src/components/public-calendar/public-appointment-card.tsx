@@ -20,7 +20,7 @@ export function PublicAppointmentCard({
       <div className="flex items-center gap-2 text-sm text-muted-foreground"></div>
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm flex gap-2 items-center">
-          {appointment.client.fullName || "Horário Reservado"}
+          {appointment?.client?.fullName || "Horário Reservado"}
           {appointment.service?.name && (
             <span className="ml-2 text-xs text-muted-foreground line-clamp-1">
               • {appointment.service.name}

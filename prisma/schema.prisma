@@ -351,8 +351,8 @@ model Appointment {
 
   userId         String
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId       String        @db.ObjectId
-  client         Client        @relation(fields: [clientId], references: [id])
+  clientId       String?       @db.ObjectId
+  client         Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
   serviceId      String        @db.ObjectId
   service        Service       @relation(fields: [serviceId], references: [id])
   calendarId     String        @db.ObjectId

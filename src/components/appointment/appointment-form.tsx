@@ -77,7 +77,7 @@ export function AppointmentForm({
     resolver: zodResolver(createAppointmentSchema),
     defaultValues: appointment
       ? {
-          clientId: appointment.clientId,
+          clientId: appointment?.clientId || "",
           serviceId: appointment.serviceId,
           startTime: moment(appointment.startTime).format("HH:mm"),
           endTime: moment(appointment.endTime).format("HH:mm"),
@@ -283,8 +283,8 @@ export function AppointmentForm({
               <FormItem>
                 <FormLabel></FormLabel>
                 <SelectWithScroll
-                  getOptionLabel={(option) => option?.fullName}
-                  getOptionValue={(option) => option?.id}
+                  getOptionLabel={(option) => option?.fullName || ""}
+                  getOptionValue={(option) => option?.id || ""}
                   label="Cliente"
                   placeholder="Selecione um cliente"
                   options={clients || []}

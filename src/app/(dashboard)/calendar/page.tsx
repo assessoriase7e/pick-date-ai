@@ -40,14 +40,6 @@ export default async function CalendarPage({
 
   if (res?.success && res?.data) {
     res.data.forEach((appointment: any) => {
-      if (!appointment.client || !appointment.service) {
-        console.warn(
-          "Appointment missing client or service data:",
-          appointment.id
-        );
-        return;
-      }
-
       if (appointment.status === "canceled") {
         return;
       }

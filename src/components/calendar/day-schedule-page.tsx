@@ -8,7 +8,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
-import { Calendar, Collaborator } from "@prisma/client";
+import { Calendar, Client, Collaborator, Service } from "@prisma/client";
 import { Separator } from "../ui/separator";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { MobileDaySchedule } from "./mobile-day-schedule";
@@ -18,8 +18,8 @@ interface DayScheduleContentProps {
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;
-  clients: any[];
-  services: any[];
+  clients: Client[];
+  services: Service[];
   calendar: Calendar;
 }
 
