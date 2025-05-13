@@ -22,6 +22,10 @@ export const defaultRules = [
     rule: "Verifique se o cliente está cadastrado na primeira interação.",
   },
   {
+    rule: "Assuntos e dúvidas fora do agendamento ou sobre o estabelecimento, chame o suporte.",
+  },
+
+  {
     rule: "Ao escolher o serviço, sempre busque nas tools os profissionais que executam ele.",
   },
   {
