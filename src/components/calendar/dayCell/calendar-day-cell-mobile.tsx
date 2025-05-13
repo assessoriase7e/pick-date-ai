@@ -2,8 +2,7 @@ import { cn } from "@/lib/utils";
 import { CalendarDay } from "../calendar-types";
 import { AppointmentFullData } from "@/types/calendar";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
-import { AppointmentDetailsDrawer } from "@/components/appointment/appointment-details-drawer";
+import { useEffect, useRef } from "react";
 
 interface CalendarDayCellMobileProps {
   dayObj: CalendarDay;
@@ -20,9 +19,7 @@ export function CalendarDayCellMobile({
   getAppointmentsForDay,
   onClick,
 }: CalendarDayCellMobileProps) {
-  const [showDetails, setShowDetails] = useState(false);
   const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [isTouching, setIsTouching] = useState(false);
 
   const activeAppointments = getAppointmentsForDay(dayObj.date).filter(
     (appointment) => appointment.status !== "canceled"
@@ -34,30 +31,6 @@ export function CalendarDayCellMobile({
     };
   }, []);
 
-  const handleTouchStart = () => {
-    if (activeAppointments.length > 0) {
-      setIsTouching(true);
-      if (!touchTimerRef.current) {
-        touchTimerRef.current = setTimeout(() => {
-          setShowDetails(true);
-          touchTimerRef.current = null;
-        }, 1000);
-      }
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsTouching(false);
-  };
-
-  const handleTouchMove = () => {
-    if (touchTimerRef.current) {
-      clearTimeout(touchTimerRef.current);
-      touchTimerRef.current = null;
-    }
-    setIsTouching(false);
-  };
-
   return (
     <>
       <div
@@ -67,14 +40,9 @@ export function CalendarDayCellMobile({
           isSelected(dayObj.date) && "ring-2 ring-ring",
           dayObj.isToday && "border-primary",
           activeAppointments?.length &&
-            "bg-primary/10 text-foreground dark:bg-primary/30 dark:text-foreground",
-          isTouching && "opacity-70"
+            "bg-primary/10 text-foreground dark:bg-primary/30 dark:text-foreground"
         )}
         onClick={onClick}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-        onTouchCancel={handleTouchEnd}
       >
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -105,13 +73,6 @@ export function CalendarDayCellMobile({
           )}
         </div>
       </div>
-
-      <AppointmentDetailsDrawer
-        isOpen={showDetails}
-        onClose={() => setShowDetails(false)}
-        appointments={activeAppointments}
-        date={dayObj.date}
-      />
     </>
   );
 }
