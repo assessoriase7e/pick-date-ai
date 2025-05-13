@@ -30,9 +30,6 @@ export const callProfileWebhook = async ({
 
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
-      include: {
-        services: true,
-      },
     });
 
     const optionsResponse = await fetch(webhookUrl, {
@@ -113,11 +110,6 @@ export const callProfileWebhook = async ({
                 Telefone: ${collaborator.phone || ""}
                 Descrição: ${collaborator.description || ""}
                 Horário de Trabalho: ${collaborator.workingHours || ""}
-                Serviços: ${
-                  collaborator.services
-                    .map((service) => service.name)
-                    .join(", ") || ""
-                }
                 `
           )
           .join("\n")}
