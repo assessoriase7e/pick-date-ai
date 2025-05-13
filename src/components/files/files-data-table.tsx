@@ -33,6 +33,7 @@ import {
   FileEdit,
   Trash2,
   FileIcon,
+  Download,
 } from "lucide-react";
 import { deleteFile } from "@/actions/files/delete";
 import { format } from "date-fns";
@@ -50,6 +51,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import Link from "next/link";
 
 interface FileRecord {
   id: string;
@@ -122,6 +124,16 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
     setSelectedFile(null);
   };
 
+  const handleDownload = (fileUrl: string, fileName: string) => {
+    // Criar um elemento de link temporário
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -173,6 +185,11 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
                     </div>
 
                     <div className="flex gap-2">
+                      <Link href={row.original.fileUrl} target="_blank">
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-1" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="outline"
                         size="sm"
@@ -232,30 +249,45 @@ export function FilesDataTable({ columns, data }: DataTableProps) {
                       </TableCell>
                     ))}
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(row.original)}
-                          >
-                            <FileEdit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(row.original.id)}
-                            disabled={isDeleting === row.original.id}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            {isDeleting === row.original.id
-                              ? "Excluindo..."
-                              : "Excluir"}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            handleDownload(
+                              row.original.fileUrl,
+                              row.original.fileName
+                            )
+                          }
+                          title="Baixar arquivo"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(row.original)}
+                            >
+                              <FileEdit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(row.original.id)}
+                              disabled={isDeleting === row.original.id}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              {isDeleting === row.original.id
+                                ? "Excluindo..."
+                                : "Excluir"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
