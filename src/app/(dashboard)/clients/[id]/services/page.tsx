@@ -8,12 +8,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface ClientServicesPageProps {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
-  searchParams: Promise<{
+  };
+  searchParams: {
     page?: string;
-  }>;
+  };
 }
 
 export default async function ClientServicesPage({

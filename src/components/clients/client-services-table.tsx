@@ -45,17 +45,24 @@ interface Service {
   name: string;
 }
 
-interface PaginationInfo {
-  total: number;
-  pages: number;
-  currentPage: number;
+interface ClientServiceWithRelations extends ClientService {
+  service: Service;
+  isAppointment?: boolean;
+  startTime?: Date;
+  endTime?: Date;
+  description?: string;
+  status?: string;
 }
 
 interface ClientServicesTableProps {
   clientId: string;
-  clientServices: ClientService[];
+  clientServices: ClientServiceWithRelations[];
   services: Service[];
-  pagination: PaginationInfo;
+  pagination: {
+    total: number;
+    pages: number;
+    currentPage: number;
+  };
 }
 
 export default function ClientServicesTable({

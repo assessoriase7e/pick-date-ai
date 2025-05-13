@@ -2,12 +2,37 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { Appointment, ClientService, Service } from "@prisma/client";
+
+type ExtendedClientService = ClientService & {
+  service: Service;
+  isAppointment?: boolean;
+  status?: string;
+  startTime?: Date;
+  endTime?: Date;
+  description?: string;
+};
+
+type GetClientServicesResponse = {
+  success: true;
+  data: {
+    clientServices: ExtendedClientService[];
+    pagination: {
+      total: number;
+      pages: number;
+      currentPage: number;
+    };
+  };
+} | {
+  success: false;
+  error: string;
+};
 
 export async function getClientServices(
   clientId: string,
   page = 1,
   limit = 10
-) {
+): Promise<GetClientServicesResponse> {
   try {
     const { userId } = await auth();
 
@@ -65,9 +90,9 @@ export async function getClientServices(
     });
 
     // Converter agendamentos para o formato de ClientService
-    const appointmentServices = appointments.map((appointment) => ({
+    const appointmentServices: ExtendedClientService[] = appointments.map((appointment) => ({
       id: appointment.id,
-      clientId: appointment.clientId,
+      clientId: appointment.clientId!, // Assert non-null
       serviceId: appointment.serviceId,
       date: appointment.startTime,
       createdAt: appointment.createdAt,
@@ -75,15 +100,13 @@ export async function getClientServices(
       service: appointment.service,
       isAppointment: true,
       status: appointment.status,
-      // Adicionando horário inicial e final
       startTime: appointment.startTime,
       endTime: appointment.endTime,
-      // Adicionando descrição (limitada a uma linha)
-      description: appointment.notes 
-        ? appointment.notes.length > 60 
-          ? appointment.notes.substring(0, 57) + '...' 
+      description: appointment.notes
+        ? appointment.notes.length > 60
+          ? appointment.notes.substring(0, 57) + "..."
           : appointment.notes
-        : '',
+        : "",
     }));
 
     // Combinar os resultados
