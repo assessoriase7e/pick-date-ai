@@ -145,6 +145,7 @@ export function CreateCalendarModal({
   setExternalOpen?: (open: boolean) => void;
   collaborators: CollaboratorFullData[];
 }) {
+  console.log(collaborators);
   const [internalOpen, setInternalOpen] = useState(false);
 
   const open = externalOpen !== undefined ? externalOpen : internalOpen;

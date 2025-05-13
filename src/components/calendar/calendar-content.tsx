@@ -93,8 +93,6 @@ export function CalendarContent({
   const handleEditCalendar = async (values: CalendarFormValues) => {
     if (!selectedCalendar) return;
 
-    console.log(values);
-
     try {
       await updateCalendar({
         id: selectedCalendar.id,
@@ -163,7 +161,7 @@ export function CalendarContent({
   };
 
   if (calendars.length === 0) {
-    return <EmptyCalendarState />;
+    return <EmptyCalendarState collaborators={collaborators} />;
   }
 
   return (

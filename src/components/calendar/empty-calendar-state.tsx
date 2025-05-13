@@ -1,8 +1,13 @@
 "use client";
 import { Calendar } from "lucide-react";
 import { CreateCalendarModal } from "./calendar-modals";
+import { CollaboratorFullData } from "@/types/collaborator";
 
-export function EmptyCalendarState() {
+type EmptyCalendarStateProps = {
+  collaborators: CollaboratorFullData[];
+};
+
+export function EmptyCalendarState({ collaborators }: EmptyCalendarStateProps) {
   return (
     <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg">
       <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
@@ -13,7 +18,7 @@ export function EmptyCalendarState() {
         Você ainda não criou nenhum calendário. Clique no botão abaixo para
         criar um novo.
       </p>
-      <CreateCalendarModal />
+      <CreateCalendarModal collaborators={collaborators} />
     </div>
   );
 }
