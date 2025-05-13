@@ -1,7 +1,5 @@
 "use client";
-
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import moment from "moment";
 import "moment/locale/pt-br";
 
@@ -30,8 +26,6 @@ export function MonthYearPicker({
   className,
 }: MonthYearPickerProps) {
   const [year, setYear] = React.useState<number>(currentDate.getFullYear());
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const currentYear = new Date().getFullYear();
   const years = React.useMemo(() => {
@@ -52,7 +46,6 @@ export function MonthYearPicker({
   const handleYearChange = (newYear: string) => {
     const y = parseInt(newYear, 10);
     setYear(y);
-    setDrawerOpen(false);
     const newDate = new Date(currentDate);
     newDate.setFullYear(y);
     onMonthChange(newDate);
@@ -66,7 +59,7 @@ export function MonthYearPicker({
 
   const DesktopYearSelect = () => (
     <Select value={year.toString()} onValueChange={handleYearChange}>
-      <SelectTrigger className="w-24 ml-1">
+      <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="max-h-[300px]">
@@ -80,45 +73,21 @@ export function MonthYearPicker({
   );
 
   return (
-    <div className={cn("p-4 space-y-4", className)}>
-      <div className="flex items-center justify-between">
+    <div className={cn("p-4 space-y-5", className)}>
+      <div className="flex flex-col items-center justify-between space-y-5">
         <h2 className="text-lg font-semibold">Selecione o mês e ano</h2>
-        {isMobile ? (
-          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerTrigger asChild>
-              <Button variant="outline" className="w-24">
-                {year}
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <div className="p-4">
-                <h3 className="text-lg font-medium mb-4">Selecione o ano</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {years.map((y) => (
-                    <Button
-                      key={y}
-                      variant={y === year ? "default" : "outline"}
-                      onClick={() => handleYearChange(y.toString())}
-                    >
-                      {y}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
-        ) : (
-          <DesktopYearSelect />
-        )}
+        <DesktopYearSelect />
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         {months.map((month) => (
           <Button
             key={month.value}
-            variant={currentDate.getMonth() === month.value ? "default" : "outline"}
+            variant={
+              currentDate.getMonth() === month.value ? "default" : "outline"
+            }
             onClick={() => handleMonthClick(month.value)}
-            className="capitalize"
+            className="capitalize border-dashed"
           >
             {month.label}
           </Button>
