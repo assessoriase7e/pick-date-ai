@@ -32,6 +32,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
@@ -58,6 +60,9 @@ export function AppointmentForm({
   const [selectedServiceDuration, setSelectedServiceDuration] = useState<
     number | null
   >(null);
+  const [activeTab, setActiveTab] = useState<string>(
+    appointment ? "resumo" : "editar"
+  );
 
   const isEditing = !!appointment;
 
@@ -161,7 +166,7 @@ export function AppointmentForm({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      if (!calendar.isActive) {
+      if (!calendar?.isActive) {
         toast.error(
           "Esta agenda está inativa e não permite novos agendamentos"
         );
@@ -233,7 +238,7 @@ export function AppointmentForm({
     }
   };
 
-  if (!calendar.isActive && !isEditing) {
+  if (!calendar?.isActive && !isEditing) {
     return (
       <Dialog open={true}>
         <DialogContent>
@@ -269,132 +274,118 @@ export function AppointmentForm({
     }
   };
 
+  // Busca os dados do cliente e serviço para exibir no resumo
+  const clientData = clients.find((c) => c.id === form.getValues("clientId"));
+  const serviceData = services.find(
+    (s) => s.id === form.getValues("serviceId")
+  );
+
+  // Formata o preço para exibição
+  const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return "R$ 0,00";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 flex flex-col justify-between h-full"
-      >
-        <div className="flex-1">
-          <FormField
-            control={form.control}
-            name="clientId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel></FormLabel>
-                <SelectWithScroll
-                  getOptionLabel={(option) => option?.fullName || ""}
-                  getOptionValue={(option) => option?.id || ""}
-                  label="Cliente"
-                  placeholder="Selecione um cliente"
-                  options={clients || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={form.formState.errors.clientId?.message}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Tabs
+      defaultValue={activeTab}
+      onValueChange={setActiveTab}
+      className="w-full"
+    >
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger
+          value="resumo"
+          disabled={!isEditing && !form.getValues("clientId")}
+        >
+          Resumo
+        </TabsTrigger>
+        <TabsTrigger value="editar">Editar</TabsTrigger>
+      </TabsList>
 
-          <FormField
-            control={form.control}
-            name="serviceId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel></FormLabel>
-                <SelectWithScroll
-                  getOptionLabel={(option) => option?.name}
-                  getOptionValue={(option) => option?.id}
-                  label="Serviço"
-                  placeholder="Selecione um serviço"
-                  options={services}
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={form.formState.errors.clientId?.message}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="finalPrice"
-            render={({ field: { onChange, value, ...field } }) => (
-              <FormItem>
-                <FormLabel>Preço</FormLabel>
-                <FormControl>
-                  <NumericFormat
-                    customInput={Input}
-                    prefix="R$"
-                    placeholder="R$ 0,00"
-                    thousandSeparator="."
-                    decimalSeparator=","
-                    decimalScale={2}
-                    allowNegative={false}
-                    value={value}
-                    onValueChange={(values) => {
-                      onChange(values.floatValue);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="startTime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Horário de Início</FormLabel>
-                  <FormControl>
-                    <Input type="time" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="endTime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Horário de Término</FormLabel>
-                  <FormControl>
-                    <Input type="time" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Observações</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Adicione observações sobre o agendamento"
-                    className="resize-none"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <TabsContent value="resumo" className="space-y-5">
+        <div>
+          <p className="text-2xl font-semibold">Detalhes do Agendamento</p>
+          <p className="text-muted-foreground">
+            Informações completas sobre o agendamento
+          </p>
         </div>
 
-        <div className="flex justify-end w-full gap-2">
+        <div className="flex-1 space-y-4">
+          {clientData && (
+            <div className="flex items-start gap-2">
+              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <p className="font-medium">Cliente</p>
+                <p className="text-muted-foreground">{clientData.fullName}</p>
+              </div>
+            </div>
+          )}
+
+          {serviceData && (
+            <div className="flex items-start gap-2">
+              <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <p className="font-medium">Serviço</p>
+                <p className="text-muted-foreground">{serviceData.name}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2">
+            <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Data</p>
+              <p className="text-muted-foreground">
+                {moment(date).format("DD/MM/YYYY")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2">
+            <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Horário</p>
+              <p className="text-muted-foreground">
+                {form.getValues("startTime")} às {form.getValues("endTime")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2">
+            <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Valor</p>
+              <p className="text-muted-foreground">
+                {formatCurrency(form.getValues("finalPrice"))}
+              </p>
+            </div>
+          </div>
+
+          {form.getValues("notes") && (
+            <div className="flex items-start gap-2">
+              <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <p className="font-medium">Observações</p>
+                <p className="text-muted-foreground whitespace-pre-wrap">
+                  {form.getValues("notes")}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-auto flex flex-col lg:flex-row justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setActiveTab("editar")}
+          >
+            Editar
+          </Button>
+
           {isEditing && (
             <Button
               type="button"
@@ -402,19 +393,166 @@ export function AppointmentForm({
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Cancelando..." : "Cancelar Agendamento"}
+              Cancelar
             </Button>
           )}
-
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>Salvando...</>
-            ) : (
-              <>{isEditing ? "Atualizar" : "Agendar"}</>
-            )}
-          </Button>
         </div>
-      </form>
-    </Form>
+      </TabsContent>
+
+      <TabsContent value="editar">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 flex flex-col justify-between h-full"
+          >
+            <div className="flex-1 space-y-4">
+              <div className="flex gap-5 w-full">
+                <FormField
+                  control={form.control}
+                  name="clientId"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel></FormLabel>
+                      <SelectWithScroll
+                        getOptionLabel={(option) => option?.fullName || ""}
+                        getOptionValue={(option) => option?.id || ""}
+                        label="Cliente"
+                        placeholder="Selecione um cliente"
+                        options={clients || []}
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          if (value && !isEditing) {
+                            setActiveTab("resumo");
+                          }
+                        }}
+                        error={form.formState.errors.clientId?.message}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="serviceId"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel></FormLabel>
+                      <SelectWithScroll
+                        getOptionLabel={(option) => option?.name}
+                        getOptionValue={(option) => option?.id}
+                        label="Serviço"
+                        placeholder="Selecione um serviço"
+                        options={services}
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={form.formState.errors.clientId?.message}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="finalPrice"
+                render={({ field: { onChange, value, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Preço</FormLabel>
+                    <FormControl>
+                      <NumericFormat
+                        customInput={Input}
+                        prefix="R$"
+                        placeholder="R$ 0,00"
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        decimalScale={2}
+                        allowNegative={false}
+                        value={value}
+                        onValueChange={(values) => {
+                          onChange(values.floatValue);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Horário de Início</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Horário de Término</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Adicione observações sobre o agendamento"
+                        className="resize-none"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex justify-end w-full gap-2">
+              {form.getValues("clientId") && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setActiveTab("resumo")}
+                >
+                  Ver Resumo
+                </Button>
+              )}
+
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>Salvando...</>
+                ) : (
+                  <>{isEditing ? "Atualizar" : "Agendar"}</>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </TabsContent>
+    </Tabs>
   );
 }

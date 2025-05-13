@@ -65,6 +65,7 @@ export function DayScheduleContent({
         appointments={appointments}
         clients={clients}
         services={services}
+        calendar={calendar}
       />
     );
   }
@@ -156,7 +157,7 @@ export function DayScheduleContent({
 
       <Separator />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100svh-300px)] w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4  w-full">
         <div className="border rounded-lg overflow-y-auto h-[calc(100svh-300px)]">
           <DayScheduleGrid
             appointments={appointments}

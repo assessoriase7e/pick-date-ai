@@ -8,7 +8,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
-import { Collaborator } from "@prisma/client";
+import { Calendar, Client, Collaborator, Service } from "@prisma/client";
 import { Separator } from "../ui/separator";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
@@ -17,8 +17,9 @@ interface MobileDayScheduleProps {
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;
-  clients: any[];
-  services: any[];
+  clients: Client[];
+  services: Service[];
+  calendar: Calendar;
 }
 
 export function MobileDaySchedule({
@@ -28,6 +29,7 @@ export function MobileDaySchedule({
   appointments,
   clients,
   services,
+  calendar,
 }: MobileDayScheduleProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -147,7 +149,7 @@ export function MobileDaySchedule({
 
       {/* Drawer para o formulário de agendamento */}
       <Drawer open={showForm} onOpenChange={setShowForm}>
-        <DrawerContent className="h-[80vh] overflow-y-auto">
+        <DrawerContent className="h-full">
           <DrawerHeader className="flex justify-between items-center mb-4">
             <DrawerTitle>
               {selectedAppointment ? "Editar Agendamento" : "Novo Agendamento"}
@@ -165,6 +167,7 @@ export function MobileDaySchedule({
               calendarId={calendarId}
               clients={clients}
               services={services}
+              calendar={calendar}
             />
           </div>
         </DrawerContent>
