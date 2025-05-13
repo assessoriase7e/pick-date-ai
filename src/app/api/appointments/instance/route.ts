@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let whereClause: any = {
-      userId: evolutionInstance.userId,
+    let whereClause: Prisma.AppointmentWhereInput = {
+      AND: [{ userId: evolutionInstance.userId }, { status: "scheduled" }],
     };
 
     if (clientPhone) {
