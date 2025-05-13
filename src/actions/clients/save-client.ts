@@ -25,16 +25,16 @@ export async function saveClient(data: any) {
         data: {
           fullName: validatedData.fullName,
           phone: validatedData.phone,
-          birthDate: validatedData.birthDate,
+          birthDate: validatedData.birthDate ?? null,
           notes: validatedData.observations,
         },
       });
     } else {
-      await prisma.client.create({
+      const client = await prisma.client.create({
         data: {
           fullName: validatedData.fullName,
           phone: validatedData.phone,
-          birthDate: validatedData.birthDate,
+          birthDate: validatedData.birthDate ?? null,
           notes: validatedData.observations,
           userId: userId,
         },

@@ -44,13 +44,7 @@ import { Pagination } from "@/components/ui/pagination";
 import IsTableLoading from "../isTableLoading";
 import { useDebounce } from "@/hooks/use-debounce";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-
-interface Client {
-  id: string;
-  fullName: string;
-  phone: string;
-  birthDate: Date;
-}
+import { Client } from "@prisma/client";
 
 type SortField = "fullName" | "phone" | "birthDate";
 type SortDirection = "asc" | "desc";
@@ -271,7 +265,9 @@ export default function ClientsTable({
                 <TableRow key={client.id}>
                   <TableCell>{client.fullName}</TableCell>
                   <TableCell>{client.phone}</TableCell>
-                  <TableCell>{formatDate(client.birthDate)}</TableCell>
+                  <TableCell>
+                    {client?.birthDate ? formatDate(client?.birthDate) : "-"}
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Link href={`/clients/${client.id}/services`}>
@@ -318,7 +314,7 @@ export default function ClientsTable({
                     {client.phone}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(client.birthDate)}
+                    {client?.birthDate ? formatDate(client.birthDate) : "-"}
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2">
