@@ -31,7 +31,10 @@ export const defaultRules = [
     rule: "Busque informações sobre o cliente na tool getClientInfo.",
   },
   {
-    rule: "Nunca marque o cliente sem realizar o cadastro.",
+    rule: "Nunca agende o cliente sem realizar o cadastro.",
+  },
+  {
+    rule: "Nunca agende um serviço que não tenha um profissional.",
   },
   {
     rule: "Perguntar se o cliente tem alguma necessidade especial para o atendimento.",
