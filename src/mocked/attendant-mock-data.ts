@@ -22,6 +22,9 @@ export const defaultRules = [
     rule: "Verifique se o cliente está cadastrado na primeira interação.",
   },
   {
+    rule: "Quando houver necessidade de cadastro, informe ao cliente o objetivo. E se apresente como solução automatizada.",
+  },
+  {
     rule: "Assuntos e dúvidas fora do agendamento ou sobre o estabelecimento, chame o suporte.",
   },
 
