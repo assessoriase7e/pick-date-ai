@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
     // Se o número de telefone for fornecido, busca apenas o cliente específico
     if (phone) {
       const client = await prisma.client.findFirst({
-        where: { 
+        where: {
           phone,
-          userId: evolutionInstance.userId 
+          userId: evolutionInstance.userId,
         },
       });
 
@@ -82,8 +82,6 @@ export async function POST(
         { status: 400 }
       );
     }
-    const body = await req.json();
-    const { fullName, phone, birthDate, notes } = body;
 
     const evolutionInstance = await prisma.evolutionInstance.findFirst({
       where: { name: instance },
@@ -96,6 +94,12 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    // Obtenha os dados do corpo da requisição
+    const body = await req.json();
+
+    // Extraia os outros dados do corpo
+    const { fullName, birthDate, phone, notes } = body;
 
     const existingClient = await prisma.client.findFirst({
       where: {
@@ -115,7 +119,7 @@ export async function POST(
       data: {
         fullName,
         phone,
-        birthDate: new Date(birthDate),
+        birthDate,
         notes,
         userId: evolutionInstance.userId,
       },
