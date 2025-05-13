@@ -37,6 +37,15 @@ export async function GET(req: NextRequest) {
       where: { userId: evolutionInstance.userId },
       include: {
         serviceCollaborators: {
+          where: {
+            collaborator: {
+              calendars: {
+                some: {
+                  isActive: true,
+                },
+              },
+            },
+          },
           include: {
             collaborator: true,
           },

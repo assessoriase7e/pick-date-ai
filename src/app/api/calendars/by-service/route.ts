@@ -55,6 +55,13 @@ export async function GET(req: NextRequest) {
       },
       include: {
         collaborator: {
+          where: {
+            calendars: {
+              some: {
+                isActive: true,
+              },
+            },
+          },
           select: {
             name: true,
           },

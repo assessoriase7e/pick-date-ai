@@ -66,7 +66,6 @@ export async function GET(req: NextRequest) {
                 availableDays: true,
                 notes: true,
                 durationMinutes: true,
-                commission: true,
                 isActive: true,
               },
             },
