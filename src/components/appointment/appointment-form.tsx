@@ -400,9 +400,13 @@ export function AppointmentForm({
             className="space-y-4 flex flex-col justify-between h-full"
           >
             <div>
-              <p className="text-2xl font-semibold">Edição do Agendamento</p>
+              <p className="text-2xl font-semibold">
+                {isEditing ? "Edição do Agendamento" : "Criação do Agendamento"}
+              </p>
               <p className="text-muted-foreground">
-                Edite o agendamento realizado
+                {isEditing
+                  ? "Atualize as informações do agendamento"
+                  : "Crie um novo agendamento"}
               </p>
             </div>
 
@@ -537,7 +541,7 @@ export function AppointmentForm({
                 {isLoading ? (
                   <>Salvando...</>
                 ) : (
-                  <>{isEditing ? "Atualizar" : "Agendar"}</>
+                  <>{isEditing ? "Atualizar" : "Salvar"}</>
                 )}
               </Button>
             </div>
