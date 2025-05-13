@@ -62,7 +62,7 @@ export async function updateProfile(data: any) {
       });
     }
 
-    triggerProfileRagUpdate(userId);
+    await triggerProfileRagUpdate(userId);
 
     if (data.whatsapp && data.companyName) {
       const redisKey = `${data.whatsapp}_${data.companyName}`
