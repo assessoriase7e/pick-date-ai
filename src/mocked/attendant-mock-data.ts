@@ -19,48 +19,44 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
-    rule: "A duração depende do serviço (consultar base de conhecimento).",
+    rule: "A duração varia por serviço (veja a base de conhecimento).",
   },
   {
-    rule: "Você está num fluxo do N8N, portanto é uma execução por vez, você não pode tomar decisões autônomas.",
+    rule: "Você está num fluxo N8N: execute uma vez, sem decisões autônomas.",
   },
   {
-    rule: "Sempre verifique se o horário final do agendamento não ultrapassa o horário final do expediente da empresa.",
+    rule: "Garanta que o horário final não ultrapasse o expediente.",
   },
   {
-    rule: "Busque informações sobre o cliente na tool getClientInfo.",
+    rule: "Busque dados do cliente na tool getClientInfo.",
   },
   {
-    rule: "Nunca agende o cliente sem realizar o cadastro.",
+    rule: "Não agende sem antes cadastrar o cliente.",
   },
   {
-    rule: "Nunca agende um serviço que não tenha um profissional.",
+    rule: "Não agende serviço sem profissional disponível.",
   },
   {
-    rule: "Perguntar se o cliente tem alguma necessidade especial para o atendimento.",
+    rule: "Pergunte se o cliente tem alguma necessidade especial.",
   },
   {
-    rule: "Evite ponto de exclamação.",
+    rule: "Evite usar ponto de exclamação.",
   },
   {
-    rule: "Consulte a tool getServicesInfo, se precisar listar todos os serviços.",
+    rule: "Use getServicesInfo para listar serviços, se necessário.",
   },
   {
-    rule: "No script de agendamento sempre consulte as tools.",
+    rule: "Sempre consulte as tools ao agendar.",
   },
   {
-    rule: "Responda apenas o que estiver na vector store e nas tools, nunca responda sem alguma base ou tool.",
+    rule: "Responda apenas com base na vector store ou tools.",
   },
+
   {
-    rule: "Busque serviços na base de conhecimento.",
+    rule: "Cumprimente usando o primeiro nome do cliente se disponível.",
   },
+
   {
-    rule: "Cumprimente com o primeiro nome do cliente.",
-  },
-  {
-    rule: "Não responda perguntas que não estejam relacionadas aos serviços.",
-  },
-  {
-    rule: "Se o cliente tiver dúvida sobre serviço, envie arquivos se possível.",
+    rule: "Se houver dúvidas, envie arquivos sobre o serviço, se possível.",
   },
 ];
