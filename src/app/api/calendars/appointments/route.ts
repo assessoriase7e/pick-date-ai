@@ -3,10 +3,7 @@ import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
 import moment from "moment";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest) {
   try {
     const apiKeyHeader = req.headers.get("Authorization");
     const validationResult = await validateApiKey(apiKeyHeader);
@@ -15,26 +12,23 @@ export async function GET(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const { id } = await params;
-
     const { searchParams } = new URL(req.url);
+    const calendarId = searchParams.get("calendarId");
     const date = searchParams.get("date");
 
-    if (!date) {
+    if (!date || !calendarId) {
       return NextResponse.json(
         { error: "O parâmetro 'date' é obrigatório na URL" },
         { status: 400 }
       );
     }
 
-    const calendar = await prisma.calendar.findFirst({
+    const calendar = await prisma.calendar.findUnique({
       where: {
-        id,
+        id: calendarId,
         isActive: true,
       },
     });
-
-    console.log("calendar", calendar);
 
     if (!calendar) {
       return NextResponse.json(
@@ -51,7 +45,7 @@ export async function GET(
 
     const appointments = await prisma.appointment.findMany({
       where: {
-        calendarId: id,
+        calendarId,
         startTime: {
           gte: startDate,
           lte: endDate,
