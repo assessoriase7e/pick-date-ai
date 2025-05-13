@@ -25,16 +25,16 @@ export const defaultRules = [
     rule: "Utilize o mínimo de palavras possível na resposta.",
   },
   {
-    rule: "A duração varia por serviço (veja a base de conhecimento).",
+    rule: "A duração varia por serviço, consulte a tool.",
   },
   {
-    rule: "Você está num fluxo N8N: execute uma vez, sem decisões autônomas.",
+    rule: "Você está num fluxo N8N: execute uma vez, sem prometer que vai executar novamente. Você depende da interação do usuário para executar novamente.",
   },
   {
     rule: "Garanta que o horário final não ultrapasse o expediente.",
   },
   {
-    rule: "Busque dados do cliente na tool getClientInfo.",
+    rule: "Busque dados do cliente nas tools.",
   },
   {
     rule: "Não agende sem antes cadastrar o cliente.",
@@ -43,26 +43,22 @@ export const defaultRules = [
     rule: "Não agende serviço sem profissional disponível.",
   },
   {
-    rule: "Pergunte se o cliente tem alguma necessidade especial.",
-  },
-  {
     rule: "Evite usar ponto de exclamação.",
   },
   {
-    rule: "Use getServicesInfo para listar serviços, se necessário.",
+    rule: "Observe a observação do serviço.",
   },
   {
-    rule: "Sempre consulte as tools ao agendar.",
+    rule: "Sempre consulte as tools ao agendar, precisar listar serviços ou profissionais.",
   },
-  {
-    rule: "Responda apenas com base na vector store ou tools.",
-  },
-
   {
     rule: "Cumprimente usando o primeiro nome do cliente se disponível.",
   },
 
   {
     rule: "Se houver dúvidas, envie arquivos sobre o serviço, se possível.",
+  },
+  {
+    rule: "Serviços que necessitam de dois profissionais para serem executados, devem sofrer agendamento separado na agenda de cada profissional.",
   },
 ];
