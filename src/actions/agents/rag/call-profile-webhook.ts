@@ -24,14 +24,6 @@ export const callProfileWebhook = async ({
       where: { userId },
     });
 
-    const links = await prisma.link.findMany({
-      where: { userId },
-    });
-
-    const collaborators = await prisma.collaborator.findMany({
-      where: { userId },
-    });
-
     const optionsResponse = await fetch(webhookUrl, {
       method: "OPTIONS",
     });
@@ -98,28 +90,6 @@ export const callProfileWebhook = async ({
                 Dias Disponíveis: ${service.availableDays?.join(", ") || ""}
                 Observações: ${service.notes || ""}
                 `
-          )
-          .join("\n")}
-
-        # Profissionais
-        ${collaborators
-          .map(
-            (collaborator) => `
-                ## ${collaborator.name}
-                Profissão: ${collaborator.profession || ""}
-                Telefone: ${collaborator.phone || ""}
-                Descrição: ${collaborator.description || ""}
-                Horário de Trabalho: ${collaborator.workingHours || ""}
-                `
-          )
-          .join("\n")}
-
-        # Links
-        ${links
-          .map(
-            (link) => `
-                ${link.title}: ${link.url}
-            `
           )
           .join("\n")}
         `;
