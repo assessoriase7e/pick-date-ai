@@ -10,7 +10,7 @@ import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
 import { Calendar, Client, Collaborator, Service } from "@prisma/client";
 import { Separator } from "../ui/separator";
-import { Drawer, DrawerContent } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
 interface MobileDayScheduleProps {
   calendarId: string;
@@ -149,6 +149,9 @@ export function MobileDaySchedule({
 
       {/* Drawer para o formulário de agendamento */}
       <Drawer open={showForm} onOpenChange={setShowForm}>
+        <DrawerHeader>
+          <DrawerTitle></DrawerTitle>
+        </DrawerHeader>
         <DrawerContent>
           <div className="p-5">
             <AppointmentForm
