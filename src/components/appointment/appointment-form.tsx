@@ -302,7 +302,9 @@ export function AppointmentForm({
         >
           Resumo
         </TabsTrigger>
-        <TabsTrigger value="editar">Editar</TabsTrigger>
+        <TabsTrigger value="editar">
+          {isEditing ? "Editar" : "Criar"}
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="resumo" className="space-y-5">
@@ -378,14 +380,6 @@ export function AppointmentForm({
         </div>
 
         <div className="mt-auto flex flex-col lg:flex-row justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setActiveTab("editar")}
-          >
-            Editar
-          </Button>
-
           {isEditing && (
             <Button
               type="button"
@@ -405,6 +399,13 @@ export function AppointmentForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 flex flex-col justify-between h-full"
           >
+            <div>
+              <p className="text-2xl font-semibold">Edição do Agendamento</p>
+              <p className="text-muted-foreground">
+                Edite o agendamento realizado
+              </p>
+            </div>
+
             <div className="flex-1 space-y-4">
               <div className="flex gap-5 w-full">
                 <FormField
@@ -531,17 +532,7 @@ export function AppointmentForm({
               />
             </div>
 
-            <div className="flex justify-end w-full gap-2">
-              {form.getValues("clientId") && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setActiveTab("resumo")}
-                >
-                  Ver Resumo
-                </Button>
-              )}
-
+            <div className="flex flex-col justify-end w-full gap-2">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>Salvando...</>

@@ -147,7 +147,7 @@ export function DayScheduleContent({
       </Button>
 
       <div className="flex items-center flex-col">
-        <h1 className="text-xl font-bold ml-auto text-center tablet:text-start">
+        <h1 className=" font-bold ml-auto text-center tablet:text-start">
           Agendamentos para {formattedDate}
         </h1>
         <h2 className="p-1 px-6 bg-primary rounded-full text-white">
