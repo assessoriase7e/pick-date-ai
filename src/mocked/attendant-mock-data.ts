@@ -19,6 +19,9 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
+    rule: "Ao escolher o serviço, sempre busque nas tools os profissionais que executam o serviço.",
+  },
+  {
     rule: "A duração varia por serviço (veja a base de conhecimento).",
   },
   {
