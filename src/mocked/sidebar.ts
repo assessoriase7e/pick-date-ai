@@ -31,7 +31,7 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
 
   const routes: SidebarRoute[] = [
     {
-      label: "Agendamentos",
+      label: "Agenda",
       icon: Calendar,
       href: "/calendar",
       color: "text-blue-500",

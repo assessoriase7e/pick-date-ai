@@ -55,7 +55,7 @@ export function SidebarItem({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="bg-background border border-border"
+          className="bg-background border border-primary mb-4 h-10 flex items-center justify-center w-32"
         >
           {label}
         </TooltipContent>
