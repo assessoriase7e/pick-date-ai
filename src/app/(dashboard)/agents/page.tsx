@@ -2,6 +2,7 @@
 import { getInstances } from "@/actions/agents/evolution/get-instances";
 import { getProfile } from "@/actions/profile/get";
 import { getAttendantPrompt } from "@/actions/agents/attendant/get-attendant-prompt";
+import { getBlackList } from "@/actions/agents/blacklist/get-blacklist";
 import { EvolutionSection } from "@/components/agents/evolution/evolution-section";
 import { PromptsSection } from "@/components/agents/prompts-section";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +15,7 @@ export default async function AgentesPage() {
   const { data: profile } = await getProfile();
   const { data: instances } = await getInstances();
   const { data: attendantData } = await getAttendantPrompt(userId as string);
+  const { data: blackListData } = await getBlackList(userId as string);
 
   const attendantPrompt = attendantData?.attendantPrompt
     ? {
@@ -29,6 +31,13 @@ export default async function AgentesPage() {
       }
     : undefined;
 
+  const blackList = blackListData?.blackList
+    ? {
+        id: blackListData.blackList.id,
+        phones: blackListData.blackList.phones,
+      }
+    : { phones: [] };
+
   const hasProfile = profile?.companyName;
 
   return (
@@ -36,7 +45,10 @@ export default async function AgentesPage() {
       <h1 className="text-3xl font-bold mb-8">Agentes</h1>
 
       <div className="space-y-8 w-full">
-        <PromptsSection attendantPrompt={attendantPrompt} />
+        <PromptsSection
+          attendantPrompt={attendantPrompt}
+          blackList={blackList}
+        />
 
         <Separator className="my-6" />
 

@@ -40,6 +40,7 @@ model User {
   evolutionInstances EvolutionInstance[]
   client             Client[]
   collaborator       Collaborator[]
+  backList           BlackList?
 
   @@map("user")
 }
@@ -305,15 +306,15 @@ model ClientService {
 }
 
 model Calendar {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
   name           String
-  collaboratorId String?      @db.ObjectId
+  collaboratorId String?       @db.ObjectId
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
   userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   appointments   Appointment[]
 
   @@map("calendar")
@@ -374,4 +375,15 @@ model FileRecord {
   updatedAt   DateTime @updatedAt
 
   @@map("filerecord")
+}
+
+model BlackList {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  phones    String[]
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("blacklist")
 }
