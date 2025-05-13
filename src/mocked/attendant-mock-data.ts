@@ -22,6 +22,9 @@ export const defaultRules = [
     rule: "Ao escolher o serviço, sempre busque nas tools os profissionais que executam ele.",
   },
   {
+    rule: "Utilize o mínimo de palavras possível na resposta.",
+  },
+  {
     rule: "A duração varia por serviço (veja a base de conhecimento).",
   },
   {
