@@ -1,8 +1,6 @@
 "use server";
-
 import { prisma } from "@/lib/db";
-import { callProfileWebhook } from "./call-profile-webhook";
-import { ragConfig } from "@/config/rag";
+import { updateRagContent } from "./update-rag-content";
 
 export const triggerProfileRagUpdate = async (userId: string) => {
   try {
@@ -45,11 +43,7 @@ export const triggerProfileRagUpdate = async (userId: string) => {
       .replace(/\s+/g, "_")
       .replace(/[^a-z0-9_]/g, "");
 
-    return await callProfileWebhook({
-      userId,
-      webhookUrl: ragConfig.webhookUrl,
-      metadataKey: `${profile.whatsapp}_${metadataKey}`,
-    });
+    return await updateRagContent(userId);
   } catch (error) {
     console.error("Erro ao acionar atualização RAG do perfil:", error);
     return { success: false, error: "Falha ao acionar atualização RAG" };
