@@ -19,10 +19,13 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
+    rule: "Verifique se o cliente está cadastrado na primeira interação.",
+  },
+  {
     rule: "Ao escolher o serviço, sempre busque nas tools os profissionais que executam ele.",
   },
   {
-    rule: "Utilize o mínimo de palavras possível na resposta.",
+    rule: "Independente da linguagem, sempre use poucas palavras para responder.",
   },
   {
     rule: "A duração varia por serviço, consulte a tool.",
