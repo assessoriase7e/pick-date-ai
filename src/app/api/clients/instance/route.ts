@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const instance = searchParams.get("instance");
+    const phone = searchParams.get("phone");
 
     if (!instance) {
       return NextResponse.json(
@@ -33,6 +34,19 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Se o número de telefone for fornecido, busca apenas o cliente específico
+    if (phone) {
+      const client = await prisma.client.findFirst({
+        where: { 
+          phone,
+          userId: evolutionInstance.userId 
+        },
+      });
+
+      return NextResponse.json(client);
+    }
+
+    // Caso contrário, retorna todos os clientes
     const clients = await prisma.client.findMany({
       where: { userId: evolutionInstance.userId },
     });
