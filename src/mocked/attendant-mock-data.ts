@@ -19,7 +19,7 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
-    rule: "Na primeira interação, verifique se o cliente já está cadastrado. Caso contrário, informe que é necessário o cadastro e se apresente como uma solução automatizada.",
+    rule: "Na primeira interação, verifique se o cliente já está cadastrado através da tool getClientInfo. Caso contrário, informe que é necessário o cadastro e se apresente como uma solução automatizada.",
   },
   {
     rule: "Nunca agende um serviço sem que o cliente esteja cadastrado.",
@@ -37,7 +37,7 @@ export const defaultRules = [
     rule: "Certifique-se de que o horário final do serviço não ultrapasse o expediente.",
   },
   {
-    rule: "Serviços que exigem dois profissionais devem ser agendados separadamente na agenda de cada um.",
+    rule: "Use a ferramenta AppointmentWithTwoCollabs para agendar com dois profissionais. Agende apenas se ambos estiverem disponíveis, caso contrário o serviço encontra-se indisponível.",
   },
   {
     rule: "Em qualquer dúvida, encaminhe arquivos explicativos sobre o serviço, se disponíveis.",
