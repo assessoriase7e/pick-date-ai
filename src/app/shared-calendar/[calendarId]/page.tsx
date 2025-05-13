@@ -32,8 +32,6 @@ export default async function SharedCalendarPage({
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   const res = await getAppointmentsByMonth(currentDate, calendarId, false);
 
-  console.log(appointmentsByDate);
-
   if (res?.success && res?.data) {
     res.data.forEach((appointment: any) => {
       if (!appointment.client || !appointment.service) {

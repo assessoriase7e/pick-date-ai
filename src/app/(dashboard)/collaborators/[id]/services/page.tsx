@@ -41,8 +41,6 @@ export default async function CollaboratorServicesPage({
     ? appointmentsResult.pagination
     : { totalPages: 0, currentPage: 1 };
 
-  console.log(appointments);
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

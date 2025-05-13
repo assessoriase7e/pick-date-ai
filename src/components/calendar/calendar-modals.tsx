@@ -145,7 +145,6 @@ export function CreateCalendarModal({
   setExternalOpen?: (open: boolean) => void;
   collaborators: CollaboratorFullData[];
 }) {
-  console.log(collaborators);
   const [internalOpen, setInternalOpen] = useState(false);
 
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -194,10 +193,7 @@ export function EditCalendarModal({
 }) {
   const [open, setOpen] = useState(false);
 
-  console.log(calendar);
-
   const handleSubmit = async (values: CalendarFormValues) => {
-    console.log(values);
     try {
       const response = await updateCalendar({
         id: calendar.id,
