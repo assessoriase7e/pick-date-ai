@@ -19,8 +19,8 @@ export const updateRagContent = async (userId: string) => {
       };
     }
 
-    const metadataKey = await prisma.redisKey.findUnique({
-      where: { id: userId },
+    const metadataKey = await prisma.redisKey.findFirst({
+      where: { userId },
     });
 
     const webhookUrl = process.env.RAG_WEBHOOK_URL;
