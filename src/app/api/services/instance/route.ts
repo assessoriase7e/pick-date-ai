@@ -41,13 +41,19 @@ export async function GET(req: NextRequest) {
             collaborator: {
               calendars: {
                 some: {
-                  isActive: true
-                }
-              }
-            }
+                  isActive: true,
+                },
+              },
+            },
           },
           include: {
-            collaborator: true,
+            collaborator: {
+              select: {
+                id: true,
+                name: true,
+                workingHours: true,
+              },
+            },
           },
         },
       },
