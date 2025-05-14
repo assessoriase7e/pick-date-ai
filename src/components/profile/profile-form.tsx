@@ -65,7 +65,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       firstName: initialData?.firstName || "",
       lastName: initialData?.lastName || "",
       whatsapp: initialData?.profile?.whatsapp || "",
-      imageUrl: initialData?.imageUrl || "",
       companyName: initialData?.profile?.companyName || "",
       businessHours: processInitialBusinessHours(),
       address: initialData?.profile?.address || "",

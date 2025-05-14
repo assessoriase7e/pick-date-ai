@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     try {
       const existingUser = await prisma.user.findFirst({
         where: {
-          OR: [{ id: id }, { email: primaryEmail }],
+          OR: [{ id }, { email: primaryEmail }],
         },
       });
 
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
       const newUser = await prisma.user.create({
         data: {
-          id: id,
+          id,
           email: primaryEmail,
           firstName: first_name || "",
           lastName: last_name || "",
