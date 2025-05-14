@@ -21,9 +21,7 @@ export const defaultRules = [
   {
     rule: "Consulte a base de conhecimento para verificar o período de funcionamento do estabelecimento.",
   },
-  {
-    rule: "Caso o cliente mencione dois serviços simultaneamente, verifique se existe algum serviço que permita agendar ambos no mesmo horário.",
-  },
+
   {
     rule: "Não fale sobre horários de outros clientes.",
   },
