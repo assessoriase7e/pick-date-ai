@@ -9,6 +9,7 @@ import {
   SquareUser,
   BarChart3,
   File,
+  Bolt,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -89,6 +90,12 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       icon: User,
       label: "Perfil",
       isActive: pathname === "/profile",
+    },
+    {
+      href: "/config",
+      icon: Bolt,
+      label: "Configurações",
+      isActive: pathname === "/config",
     },
     // {
     //   href: "/api-keys",
