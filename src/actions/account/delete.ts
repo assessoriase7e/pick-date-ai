@@ -3,6 +3,10 @@
 import { prisma } from "@/lib/db";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 
+const evolutionApiUrl =
+  process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
+const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
+
 export async function getUserData() {
   try {
     const user = await currentUser();
@@ -34,12 +38,38 @@ export async function deleteAccount() {
       return { success: false, error: "Usuário não autenticado" };
     }
 
+    // Buscar todas as instâncias do usuário
+    const instances = await prisma.evolutionInstance.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    await Promise.all(
+      instances.map(async (instance) => {
+        try {
+          await fetch(`${evolutionApiUrl}/instance/delete/${instance.name}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": evolutionApiKey,
+            },
+          });
+        } catch (error) {
+          console.error(`Erro ao deletar instância ${instance.name}:`, error);
+        }
+      })
+    );
+
+    // Deletar o usuário do banco de dados (isso irá deletar todas as instâncias em cascata)
     await prisma.user.delete({
       where: {
         id: user.id,
       },
     });
-    client.users.deleteUser(user.id);
+
+    // Deletar o usuário no Clerk
+    await client.users.deleteUser(user.id);
 
     return { success: true };
   } catch (error) {
