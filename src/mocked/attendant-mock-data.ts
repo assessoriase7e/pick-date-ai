@@ -22,6 +22,9 @@ export const defaultRules = [
     rule: "Consulte a base de conhecimento para verificar o período de funcionamento do estabelecimento.",
   },
   {
+    rule: "Não fale sobre horários de outros clientes.",
+  },
+  {
     rule: "Na primeira interação, verifique se o cliente já está cadastrado através da tool getClientInfo. Caso contrário, informe que é necessário o cadastro e se apresente como uma solução automatizada.",
   },
   {
