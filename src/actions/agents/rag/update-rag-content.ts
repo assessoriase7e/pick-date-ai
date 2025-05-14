@@ -19,11 +19,9 @@ export const updateRagContent = async (userId: string) => {
       };
     }
 
-    const metadataKey = profile.companyName
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
+    const metadataKey = await prisma.redisKey.findUnique({
+      where: { id: userId },
+    });
 
     const webhookUrl = process.env.RAG_WEBHOOK_URL;
 
@@ -150,7 +148,7 @@ export const updateRagContent = async (userId: string) => {
       },
       body: JSON.stringify({
         ragFiles: formattedContent,
-        metadataKey: metadataKey,
+        metadataKey,
       }),
     });
 
