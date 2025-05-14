@@ -34,18 +34,11 @@ export async function deleteAccount() {
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Deletar todos os dados do usuário no banco de dados
-    await prisma.link.deleteMany({
-      where: { userId: user.id },
+    await prisma.user.delete({
+      where: {
+        id: user.id,
+      },
     });
-
-    // Adicione aqui outras tabelas relacionadas ao usuário que precisam ser limpas
-    // Por exemplo:
-    // await prisma.appointment.deleteMany({ where: { userId: user.id } });
-    // await prisma.client.deleteMany({ where: { userId: user.id } });
-    // etc.
-
-    // Deletar a conta no Clerk
     client.users.deleteUser(user.id);
 
     return { success: true };
