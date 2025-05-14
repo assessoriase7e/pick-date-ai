@@ -291,18 +291,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <Separator />
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Horários de Atendimento</h3>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                append({ day: "", openTime: "09:00", closeTime: "18:00" })
-              }
-            >
-              Adicionar Horário
-            </Button>
-          </div>
+          <h3 className="text-lg font-medium">Horários de Atendimento</h3>
 
           <AnimatePresence>
             {fields.map((field, index) => (
@@ -396,6 +385,17 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               </motion.div>
             ))}
           </AnimatePresence>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              append({ day: "", openTime: "09:00", closeTime: "18:00" })
+            }
+          >
+            Adicionar Horário
+          </Button>
         </div>
 
         <Button type="submit" disabled={isLoading} className="w-full">
