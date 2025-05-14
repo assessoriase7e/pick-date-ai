@@ -28,6 +28,7 @@ export const profileSchema = z.object({
       const numbers = value.replace(/\D/g, "");
       return numbers.length === 11 || numbers.length === 14;
     }, "CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos"),
+  timezone: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;

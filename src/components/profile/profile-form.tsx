@@ -23,6 +23,15 @@ import { updateProfile } from "@/actions/profile/update";
 import { formatDocument } from "@/lib/format-utils";
 import { PatternFormat } from "react-number-format";
 import { daysOfWeek } from "@/mocked/daysOfWeek";
+import { brazilStatesWithTimezones } from "@/mocked/brazilStates";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Separator } from "../ui/separator";
 
 interface CombinedProfileData extends Partial<User> {
   profile?: Partial<Profile> | null;
@@ -70,6 +79,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       address: initialData?.profile?.address || "",
       locationUrl: initialData?.profile?.locationUrl || "",
       documentNumber: initialData?.profile?.documentNumber || "",
+      timezone: initialData?.profile?.timezone || "",
     },
   });
 
@@ -118,9 +128,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 max-w-xl mx-auto"
+        className="space-y-10 max-w-xl mx-auto"
       >
-        <div className="grid grid-cols-1 gap-6">
+        <div className="flex flex-col gap-5">
           <FormField
             control={form.control}
             name="firstName"
@@ -165,7 +175,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                     onValueChange={(values) => {
                       field.onChange(values.value);
                     }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -224,28 +233,62 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="documentNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CPF/CNPJ</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                    {...field}
-                    onChange={(e) => {
-                      handleDocumentChange(e);
-                    }}
-                    className="w-full"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-5 w-full">
+            <FormField
+              control={form.control}
+              name="timezone"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Estado (Fuso Horário)</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {brazilStatesWithTimezones.map((item, index) => (
+                        <SelectItem
+                          key={`state-${index * Math.random()}`}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="documentNumber"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>CPF/CNPJ</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                      {...field}
+                      onChange={(e) => {
+                        handleDocumentChange(e);
+                      }}
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
+
+        <Separator />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">

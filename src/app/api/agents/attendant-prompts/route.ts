@@ -26,13 +26,27 @@ export async function GET(req: NextRequest) {
       attendantPrompt = await prisma.attendantPrompt.findUnique({
         where: { userId, isActive: true },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       });
     } else if (phone) {
       const profile = await prisma.profile.findFirst({
         where: { whatsapp: phone },
-        include: { user: true },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
       });
 
       if (profile && profile.userId) {
@@ -40,7 +54,13 @@ export async function GET(req: NextRequest) {
         attendantPrompt = await prisma.attendantPrompt.findUnique({
           where: { userId: profile.userId },
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         });
       }

@@ -1,0 +1,15 @@
+export const brazilStatesWithTimezones = [
+  { label: "America/Rio_Branco", value: "America/Rio_Branco" },
+  { label: "America/Maceio", value: "America/Maceio" },
+  { label: "America/Belem", value: "America/Belem" },
+  { label: "America/Manaus", value: "America/Manaus" },
+  { label: "America/Bahia", value: "America/Bahia" },
+  { label: "America/Fortaleza", value: "America/Fortaleza" },
+  { label: "America/Sao_Paulo", value: "America/Sao_Paulo" },
+  { label: "America/Cuiaba", value: "America/Cuiaba" },
+  { label: "America/Campo_Grande", value: "America/Campo_Grande" },
+  { label: "America/Recife", value: "America/Recife" },
+  { label: "America/Porto_Velho", value: "America/Porto_Velho" },
+  { label: "America/Boa_Vista", value: "America/Boa_Vista" },
+  { label: "America/Araguaina", value: "America/Araguaina" },
+];

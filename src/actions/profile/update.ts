@@ -26,7 +26,7 @@ export async function updateProfile(data: any) {
   try {
     const { userId } = await auth();
 
-    console.log("userId", userId); // Adicione esta linha para verificar o valor de userId no consol
+    console.log("userId", userId);
 
     if (!userId) {
       return {
@@ -56,6 +56,7 @@ export async function updateProfile(data: any) {
       address: data.address,
       locationUrl: data.locationUrl,
       documentNumber: data.documentNumber,
+      timezone: data.timezone,
     };
 
     // Verifica se já existe perfil para o usuário

@@ -53,6 +53,7 @@ model Profile {
   address        String?
   locationUrl    String?
   documentNumber String?
+  timezone       String?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
