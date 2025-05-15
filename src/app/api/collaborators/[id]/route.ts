@@ -20,14 +20,11 @@ export async function GET(
       },
       include: {
         calendars: {
+          where: {
+            isActive: true,
+          },
           select: {
             id: true,
-            collaborator: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
           },
         },
         ServiceCollaborator: {
