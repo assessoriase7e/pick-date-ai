@@ -84,19 +84,13 @@ export async function POST(req: NextRequest) {
     if (!instance) {
       return NextResponse.json(
         { error: "Instância não fornecida" },
-        { status: 400 }
+        { status: 204 }
       );
     }
 
     const body = await req.json();
-    const {
-      startTime,
-      endTime,
-      clientId,
-      serviceId,
-      calendarId,
-      finalPrice,
-    } = body;
+    const { startTime, endTime, clientId, serviceId, calendarId, finalPrice } =
+      body;
 
     const evolutionInstance = await prisma.evolutionInstance.findFirst({
       where: { name: instance },
@@ -106,7 +100,7 @@ export async function POST(req: NextRequest) {
     if (!evolutionInstance) {
       return NextResponse.json(
         { error: "Instância não encontrada" },
-        { status: 404 }
+        { status: 204 }
       );
     }
 
@@ -118,7 +112,7 @@ export async function POST(req: NextRequest) {
     if (!calendar) {
       return NextResponse.json(
         { error: "Calendário não encontrado" },
-        { status: 404 }
+        { status: 204 }
       );
     }
 
