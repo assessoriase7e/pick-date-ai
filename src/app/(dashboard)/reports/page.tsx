@@ -189,11 +189,11 @@ export default async function ReportsPage({
     .map((client) => ({
       id: client.id,
       fullName: client.fullName,
-      birthDate: client.birthDate.toISOString(),
+      birthDate: client.birthDate?.toISOString() || "",
     }));
 
   return (
-    <div className="space-y-6 border border-border border-dashed p-5 rounded-lg">
+    <div className="space-y-6 border border-border border-dashed p-5 rounded-lg bg-card">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
         <p className="text-muted-foreground">

@@ -87,8 +87,6 @@ export async function updateAppointment(
       },
     });
 
-    console.log(appointment);
-
     revalidatePath("/calendar");
 
     return {
