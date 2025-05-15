@@ -95,7 +95,6 @@ export async function POST(req: NextRequest) {
       clientId,
       serviceId,
       calendarId,
-      collaboratorId,
       finalPrice,
     } = body;
 
@@ -111,6 +110,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Buscar o calendário para obter o collaboratorId
+    const calendar = await prisma.calendar.findUnique({
+      where: { id: calendarId },
+    });
+
+    if (!calendar) {
+      return NextResponse.json(
+        { error: "Calendário não encontrado" },
+        { status: 404 }
+      );
+    }
+
     const appointment = await prisma.appointment.create({
       data: {
         startTime: moment(startTime).toDate(),
@@ -118,7 +129,7 @@ export async function POST(req: NextRequest) {
         clientId,
         serviceId,
         calendarId,
-        collaboratorId,
+        collaboratorId: calendar.collaboratorId,
         finalPrice: Number(finalPrice),
         userId: evolutionInstance.userId,
       },
