@@ -14,40 +14,39 @@ export async function GET(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const businessPhone = searchParams.get("business-phone");
-
-    if (!businessPhone) {
-      return NextResponse.json(
-        { error: "O parâmetro 'business-phone' é obrigatório na URL" },
-        { status: 400 }
-      );
-    }
-
-    const userProfile = await prisma.profile.findFirst({
-      where: { whatsapp: businessPhone },
-      include: { user: true },
-    });
-
-    if (!userProfile) {
-      return NextResponse.json(
-        {
-          error: "Usuário não encontrado com este número de telefone comercial",
-        },
-        { status: 404 }
-      );
-    }
-
     const collaborator = await prisma.collaborator.findFirst({
       where: {
         id: params.id,
-        userId: userProfile.user.id,
       },
       include: {
-        calendars: true,
+        calendars: {
+          select: {
+            id: true,
+            collaborator: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         ServiceCollaborator: {
+          where: {
+            service: {
+              isActive: true,
+            },
+          },
           include: {
-            service: true,
+            service: {
+              select: {
+                id: true,
+                name: true,
+                notes: true,
+                durationMinutes: true,
+                availableDays: true,
+                price: true,
+              },
+            },
           },
         },
       },
