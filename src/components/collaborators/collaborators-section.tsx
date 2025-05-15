@@ -302,14 +302,6 @@ export function CollaboratorsSection({
                   <p className="text-sm text-muted-foreground">
                     {collaborator.profession}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShowServices(collaborator)}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Ver Serviços
-                  </Button>
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Button
@@ -327,6 +319,11 @@ export function CollaboratorsSection({
                     disabled={isDeleting}
                   >
                     <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" asChild>
+                    <Link href={`/collaborators/${collaborator.id}/services`}>
+                      <FileText className="h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </div>
