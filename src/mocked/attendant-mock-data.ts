@@ -19,7 +19,7 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
-    rule: "Consulte a base de conhecimento para verificar o período de funcionamento do estabelecimento.",
+    rule: "Consulte a base de conhecimento para verificar o expediente do estabelecimento antes de agendar.",
   },
 
   {
