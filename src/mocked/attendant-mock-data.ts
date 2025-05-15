@@ -21,6 +21,9 @@ export const defaultRules = [
   {
     rule: "Consulte a base de conhecimento para verificar o expediente do estabelecimento antes de agendar.",
   },
+  {
+    rule: "Se o cliente já estíver agendado em um calendário, não marque no mesmo horário em outro calendário.",
+  },
 
   {
     rule: "Não fale sobre horários de outros clientes.",
