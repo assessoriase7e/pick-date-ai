@@ -104,16 +104,10 @@ export function CollaboratorServicesTable({
                       <TooltipProvider>
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger>
-                            {truncateText(
-                              appointment.notes ||
-                                "asas asasasasas asas asasasasas asa s sas asasas"
-                            )}
+                            {truncateText(appointment.notes || "-")}
                           </TooltipTrigger>
                           <TooltipContent className="w-44">
-                            <p>
-                              {appointment.notes ||
-                                "asas asasasasas asas asasasasas asa s sas asasas"}
-                            </p>
+                            <p>{appointment.notes || "-"}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
