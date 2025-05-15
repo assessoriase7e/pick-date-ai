@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const instance = searchParams.get("instance");
     const date = searchParams.get("date");
+    const calendarId = searchParams.get("calendarId");
 
     if (!instance) {
       return NextResponse.json(
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
           gte: startDate,
           lte: endDate,
         },
+        ...(calendarId ? { calendarId } : {}),
       },
       include: {
         client: true,

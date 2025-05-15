@@ -26,6 +26,24 @@ export async function cancelAppointment(
       data: {
         status: "cancelled",
       },
+      include: {
+        client: {
+          select: {
+            fullName: true,
+            phone: true,
+            birthDate: true,
+          },
+        },
+        calendar: {
+          select: {
+            collaborator: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     revalidatePath(`/calendar/day?calendarId${appointment.calendarId}`);
