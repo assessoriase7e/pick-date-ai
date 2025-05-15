@@ -79,12 +79,15 @@ export async function updateAppointment(
         startTime: validatedData.startTime,
         endTime: validatedData.endTime,
         notes: validatedData.notes,
+        finalPrice: validatedData.finalPrice,
       },
       include: {
         client: true,
         service: true,
       },
     });
+
+    console.log(appointment);
 
     revalidatePath("/calendar");
 

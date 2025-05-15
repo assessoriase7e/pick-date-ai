@@ -88,8 +88,9 @@ export function CollaboratorServicesTable({
                       {appointment.service?.name || "Serviço não encontrado"}
                     </TableCell>
                     <TableCell>
-                      {formatCurrency(appointment.service?.price) ||
-                        "Serviço não encontrado"}
+                      {formatCurrency(
+                        appointment.finalPrice || appointment.service.price
+                      ) || "Serviço não encontrado"}
                     </TableCell>
                     <TableCell>{formatDate(appointment.startTime)}</TableCell>
                     <TableCell>{appointment.client?.fullName}</TableCell>
