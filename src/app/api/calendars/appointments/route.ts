@@ -53,9 +53,29 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        client: true,
-        service: true,
-        collaborator: true,
+        calendar: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        client: {
+          select: {
+            id: true,
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        collaborator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         startTime: "asc",
