@@ -9,7 +9,6 @@ import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
 import { Calendar, Client, Collaborator, Service } from "@prisma/client";
-import { Separator } from "../ui/separator";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { MobileDaySchedule } from "./mobile-day-schedule";
 
@@ -45,9 +44,7 @@ export function DayScheduleContent({
   const startTime = searchParams.get("startTime");
   const endTime = searchParams.get("endTime");
 
-  const formattedDate = moment(date)
-    .locale("pt-br")
-    .format("DD [de] MMMM [de] YYYY");
+  const formattedDate = moment(date).locale("pt-br").format("DD/MM/YYYY");
 
   useEffect(() => {
     if (selectedHour !== null || startTime || selectedAppointment) {
@@ -136,26 +133,22 @@ export function DayScheduleContent({
   };
 
   return (
-    <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
-      <Button
-        variant="ghost"
-        onClick={handleBackToCalendar}
-        className="mr-auto"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Voltar
-      </Button>
-
-      <div className="flex items-center flex-col">
-        <h1 className=" font-bold ml-auto text-center tablet:text-start">
-          Agendamentos para {formattedDate}
-        </h1>
-        <h2 className="p-1 px-6 bg-primary rounded-full text-white">
-          {collaborator.name}
-        </h2>
+    <div className="container mx-auto h-full flex flex-col items-end justify-center w-full gap-5">
+      <div className="flex w-full">
+        <Button
+          variant="ghost"
+          onClick={handleBackToCalendar}
+          className="mr-auto"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+        </Button>
+        <div className="grid grid-cols-1 gap-2 border border-primary rounded-xl p-4 px-5 bg-primary text-white">
+          <h2 className="p-1 px-6 bg-foreground/25 rounded-lg ">
+            {collaborator.name} | {collaborator.profession} | {formattedDate}
+          </h2>
+        </div>
       </div>
-
-      <Separator />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4  w-full">
         <div className="border rounded-lg overflow-y-auto h-[calc(100svh-300px)]">
