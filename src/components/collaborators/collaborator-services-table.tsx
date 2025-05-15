@@ -7,12 +7,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/components/ui/pagination";
 import { AppointmentFullData } from "@/types/calendar";
+import { formatCurrency } from "@/lib/format-utils";
+import { Calendar, ScissorsSquare, User } from "lucide-react";
 
 interface CollaboratorServicesTableProps {
-  data: any[];
+  appointments: AppointmentFullData[];
   pagination: {
     totalPages: number;
     currentPage: number;
@@ -20,7 +28,7 @@ interface CollaboratorServicesTableProps {
 }
 
 export function CollaboratorServicesTable({
-  data,
+  appointments,
   pagination,
 }: CollaboratorServicesTableProps) {
   const router = useRouter();
@@ -41,6 +49,12 @@ export function CollaboratorServicesTable({
     router.push(`?page=${page}`);
   };
 
+  const truncateText = (text: string, wordLimit: number = 5) => {
+    const words = text.split(" ");
+    if (words.length <= wordLimit) return text;
+    return words.slice(0, wordLimit).join(" ") + "...";
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -50,13 +64,15 @@ export function CollaboratorServicesTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Serviço</TableHead>
+                <TableHead>Preço</TableHead>
                 <TableHead>Data</TableHead>
+                <TableHead>Cliente</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Descrição</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.length === 0 ? (
+              {appointments.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
@@ -66,10 +82,17 @@ export function CollaboratorServicesTable({
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((appointment: AppointmentFullData) => (
+                appointments.map((appointment: AppointmentFullData) => (
                   <TableRow key={appointment.id}>
-                    <TableCell>{appointment.service?.name || 'Serviço não encontrado'}</TableCell>
+                    <TableCell>
+                      {appointment.service?.name || "Serviço não encontrado"}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(appointment.service?.price) ||
+                        "Serviço não encontrado"}
+                    </TableCell>
                     <TableCell>{formatDate(appointment.startTime)}</TableCell>
+                    <TableCell>{appointment.client?.fullName}</TableCell>
                     <TableCell>
                       {appointment.startTime && appointment.endTime
                         ? `${formatTime(appointment.startTime)} - ${formatTime(
@@ -77,7 +100,24 @@ export function CollaboratorServicesTable({
                           )}`
                         : "-"}
                     </TableCell>
-                    <TableCell>{appointment.notes || "-"}</TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger>
+                            {truncateText(
+                              appointment.notes ||
+                                "asas asasasasas asas asasasasas asa s sas asasas"
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent className="w-44">
+                            <p>
+                              {appointment.notes ||
+                                "asas asasasasas asas asasasasas asa s sas asasas"}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -87,21 +127,24 @@ export function CollaboratorServicesTable({
 
         {/* Visualização Mobile */}
         <div className="md:hidden space-y-4">
-          {data.length === 0 ? (
+          {appointments.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground rounded-md border">
               Nenhum serviço encontrado
             </div>
           ) : (
-            data.map((appointment) => (
+            appointments.map((appointment) => (
               <div
                 key={appointment.id}
                 className="rounded-md border p-4 space-y-3"
               >
-                <div className="flex justify-between items-start">
+                <div className="grid grid-cols-2">
                   <div className="space-y-1">
-                    <h3 className="font-medium">{appointment.service?.name || 'Serviço não encontrado'}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(appointment.date)}
+                    <h3 className="font-medium flex gap-2">
+                      <ScissorsSquare />
+                      {appointment.service?.name || "Serviço não encontrado"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground flex gap-2">
+                      <Calendar /> {formatDate(appointment.startTime)}
                     </p>
                     {appointment.notes && (
                       <p className="text-sm text-muted-foreground">
@@ -109,7 +152,19 @@ export function CollaboratorServicesTable({
                       </p>
                     )}
                   </div>
+                  <div className="space-y-1">
+                    <h3 className="font-medium flex gap-2">
+                      {formatCurrency(appointment.service?.price) ||
+                        "Serviço não encontrado"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground flex gap-2">
+                      <User /> {appointment.client?.fullName}
+                    </p>
+                  </div>
                 </div>
+                <p className="text-muted-foreground text-xs">
+                  {appointment.notes || "Nenhuma observação"}
+                </p>
               </div>
             ))
           )}

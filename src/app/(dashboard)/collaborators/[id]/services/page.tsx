@@ -56,7 +56,10 @@ export default async function CollaboratorServicesPage({
         </div>
       </div>
 
-      <CollaboratorServicesTable data={appointments} pagination={pagination} />
+      <CollaboratorServicesTable
+        appointments={appointments}
+        pagination={pagination}
+      />
     </div>
   );
 }

@@ -1,11 +1,12 @@
 "use server";
 import { prisma } from "@/lib/db";
+import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 
 type GetAppointmentsByCollaboratorResponse =
   | {
       success: true;
-      data: any[];
+      data: AppointmentFullData[];
       pagination: { totalPages: number; currentPage: number };
     }
   | { success: false; error: string };
