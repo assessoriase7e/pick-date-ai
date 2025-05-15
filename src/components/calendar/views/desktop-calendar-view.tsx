@@ -70,7 +70,7 @@ export function DesktopCalendarView({
       {isLoading && <IsTableLoading isPageChanging={isLoading} />}
 
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2 dark:shadow-[-0px_2px_5px_rgba(0,0,0,0.5)] dark:border-zinc-900/50 bg-gradient-to-tr dark:from-background dark:to-zinc-950">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <div>
@@ -116,7 +116,7 @@ export function DesktopCalendarView({
       </div>
 
       {/* Dias do Calendário */}
-      <div className="grid grid-cols-7 flex-1 auto-rows-fr lg:gap-2 p-2">
+      <div className="grid grid-cols-7 flex-1 auto-rows-fr lg:gap-2 p-2 dark:shadow-[-0px_2px_5px_rgba(0,0,0,0.5)] dark:border-zinc-900/50 bg-gradient-to-tr dark:from-background dark:to-zinc-950">
         {calendarDays.map((dayObj, index) => (
           <CalendarDayCell
             key={index}
