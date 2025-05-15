@@ -1,11 +1,11 @@
-import { Clock } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { AppointmentFullData } from "@/types/calendar";
 import React from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Clock } from "lucide-react";
+import moment from "moment";
+import { getShortName } from "@/utils/getShortName";
 
 interface AppointmentCardProps {
   appointment: AppointmentFullData;
@@ -31,26 +31,25 @@ export function AppointmentCard({
         onClick={onEdit}
         className="h-full w-full cursor-pointer"
       >
-        <Card className="appointment-card bg-primary z-20 text-sm h-full">
+        <Card className=" z-20 text-sm h-full border-none">
           <CardHeader
             className={cn(
-              "p-2 pl-4 items-center h-full",
+              "p-2 pl-4 items-center h-full bg-primary rounded-md ",
               duration < 60 && "flex-row"
             )}
           >
-            <h4 className="font-medium truncate flex items-center gap-2">
-              <p>{client?.fullName || "Cliente Deletado"}</p> <span> | </span>
+            <h4 className="font-medium truncate flex items-center gap-2 text-background dark:text-foreground">
+              <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
+              <span> | </span>
               <p>{service.name}</p> <span> | </span>
               <div className="flex items-center">
                 <Clock className="h-3 w-3 mr-1" />
                 <span>
-                  {format(startTime, "HH:mm", { locale: ptBR })} -{" "}
-                  {format(endTime, "HH:mm", { locale: ptBR })}
+                  {moment(startTime).format("HH:mm")} -{" "}
+                  {moment(endTime).format("HH:mm")}
                 </span>
               </div>
             </h4>
-
-            {notes && <p className="text-xs line-clamp-2">{notes}</p>}
           </CardHeader>
         </Card>
       </motion.div>
