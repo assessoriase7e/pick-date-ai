@@ -149,8 +149,9 @@ export function CollaboratorServicesTable({
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-medium flex gap-2">
-                      {formatCurrency(appointment.service?.price) ||
-                        "Serviço não encontrado"}
+                      {formatCurrency(
+                        appointment.finalPrice || appointment.service.price
+                      ) || "Serviço não encontrado"}
                     </h3>
                     <p className="text-sm text-muted-foreground flex gap-2">
                       <User /> {appointment.client?.fullName}
