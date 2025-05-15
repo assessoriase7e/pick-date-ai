@@ -46,6 +46,8 @@ export async function cancelAppointment(
       },
     });
 
+    
+
     revalidatePath(`/calendar/day?calendarId${appointment.calendarId}`);
     revalidatePath("/reports");
 

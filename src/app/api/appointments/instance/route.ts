@@ -49,10 +49,35 @@ export async function GET(req: NextRequest) {
     const appointments = await prisma.appointment.findMany({
       where: whereClause,
       include: {
-        client: true,
-        service: true,
-        calendar: true,
-        collaborator: true,
+        client: {
+          omit: {
+            birthDate: true,
+            createdAt: true,
+            updatedAt: true,
+            userId: true,
+          },
+        },
+        service: {
+          omit: {
+            createdAt: true,
+            updatedAt: true,
+            userId: true,
+          },
+        },
+        calendar: {
+          omit: {
+            createdAt: true,
+            updatedAt: true,
+            userId: true,
+          },
+        },
+        collaborator: {
+          omit: {
+            createdAt: true,
+            updatedAt: true,
+            userId: true,
+          },
+        },
       },
       orderBy: {
         startTime: "desc",
@@ -113,6 +138,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Calendário não encontrado" },
         { status: 204 }
+      );
+    }
+
+    // Verificar conflito de horário
+    const conflictingAppointment = await prisma.appointment.findFirst({
+      where: {
+        calendarId: calendarId,
+        status: "scheduled",
+        OR: [
+          {
+            startTime: {
+              lt: moment(endTime).toDate(),
+            },
+            endTime: {
+              gt: moment(startTime).toDate(),
+            },
+          },
+        ],
+      },
+    });
+
+    if (conflictingAppointment) {
+      return NextResponse.json(
+        { error: "Já existe um agendamento para este horário." },
+        { status: 202 }
       );
     }
 
