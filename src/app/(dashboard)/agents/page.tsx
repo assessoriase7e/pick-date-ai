@@ -34,7 +34,15 @@ export default async function AgentesPage() {
   const blackList = blackListData?.blackList
     ? {
         id: blackListData.blackList.id,
-        phones: blackListData.blackList.phones,
+        phones: blackListData.blackList.phones.map((phone: any) => {
+          if (typeof phone === "object" && phone.number) {
+            return phone;
+          }
+          return {
+            number: phone,
+            name: undefined,
+          };
+        }),
       }
     : { phones: [] };
 

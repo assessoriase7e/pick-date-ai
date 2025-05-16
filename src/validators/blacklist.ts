@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-export const phoneSchema = z.string().min(10).max(11);
+export const phoneSchema = z.object({
+  number: z.string().min(10).max(11),
+  name: z.string().optional(),
+});
 
 export const blackListSchema = z.object({
   id: z.string().optional(),

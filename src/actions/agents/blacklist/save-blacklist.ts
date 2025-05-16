@@ -16,7 +16,9 @@ export async function saveBlackList(data: BlackListFormValues) {
     }
 
     // Filtra números vazios
-    const filteredPhones = data.phones.filter((phone) => phone.trim() !== "");
+    const filteredPhones = data.phones.filter(
+      (phone) => phone.number.trim() !== ""
+    );
 
     // Verifica se já existe uma blacklist para o usuário
     const existingBlackList = await prisma.blackList.findUnique({

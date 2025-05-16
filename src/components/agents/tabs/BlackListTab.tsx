@@ -21,7 +21,7 @@ interface BlackListTabProps {
   setIsLoading: (isLoading: boolean) => void;
   initialData?: {
     id?: string;
-    phones: string[];
+    phones: Array<{ number: string; name?: string }>;
   };
 }
 
@@ -36,14 +36,15 @@ export function BlackListTab({
     resolver: zodResolver(blackListSchema),
     defaultValues: {
       id: initialData?.id,
-      phones: initialData?.phones?.length ? initialData.phones : [""],
+      phones: initialData?.phones?.length 
+        ? initialData.phones 
+        : [{ number: "", name: "" }],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    // @ts-ignore
-    name: "phones" as const,
+    name: "phones",
   });
 
   const onSubmit = async (data: BlackListFormValues) => {
@@ -52,7 +53,7 @@ export function BlackListTab({
       // Filtra números vazios antes de salvar
       const filteredData = {
         ...data,
-        phones: data.phones.filter((phone) => phone.trim() !== ""),
+        phones: data.phones.filter((phone) => phone.number.trim() !== ""),
       };
 
       const result = await saveBlackList(filteredData);
@@ -90,7 +91,7 @@ export function BlackListTab({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => append("")}
+              onClick={() => append({ number: "", name: "" })}
             >
               Adicionar Número
             </Button>
@@ -100,7 +101,7 @@ export function BlackListTab({
             <div key={field.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
-                name={`phones.${index}`}
+                name={`phones.${index}.number`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
@@ -113,6 +114,21 @@ export function BlackListTab({
                         onValueChange={(values) => {
                           field.onChange(values.value);
                         }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`phones.${index}.name`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        placeholder="Nome (opcional)"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

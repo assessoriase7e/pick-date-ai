@@ -19,7 +19,10 @@ interface PromptsProps {
   };
   blackList?: {
     id?: string;
-    phones: string[];
+    phones: Array<{
+      number: string;
+      name?: string;
+    }>;
   };
 }
 
