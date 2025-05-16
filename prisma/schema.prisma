@@ -327,7 +327,7 @@ model Collaborator {
   phone               String
   profession          String
   description         String?
-  workingHours        String
+  workingHours        Json                  // Alterado de String para Json
   userId              String
   user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendars           Calendar[]

@@ -3,11 +3,18 @@
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 interface UpdateCollaboratorParams {
   id: string;
   name: string;
-  workingHours: string;
+  workingHours: {
+    day: string;
+    startTime: string;
+    endTime: string;
+    breakStart?: string;
+    breakEnd?: string;
+  }[];
   phone: string;
   profession: string;
   description?: string;
@@ -46,7 +53,7 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
       },
       data: {
         name,
-        workingHours,
+        workingHours: workingHours as Prisma.InputJsonValue,
         phone,
         profession,
         description,

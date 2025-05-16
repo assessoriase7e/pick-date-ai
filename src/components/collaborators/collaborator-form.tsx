@@ -1,12 +1,11 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,11 +27,22 @@ import { useToast } from "@/components/ui/use-toast";
 import { collaboratorSchema } from "@/validators/collaborator";
 import { collabRoles } from "@/mocked/collabs";
 import { PatternFormat } from "react-number-format";
+import { Plus, X } from "lucide-react";
 
 interface CollaboratorFormProps {
   initialData?: any;
   onSuccess?: () => void;
 }
+
+const daysOfWeek = [
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+  "Domingo",
+];
 
 export function CollaboratorForm({
   initialData,
@@ -45,11 +55,24 @@ export function CollaboratorForm({
     resolver: zodResolver(collaboratorSchema),
     defaultValues: {
       name: initialData?.name || "",
-      workingHours: initialData?.workingHours || "",
+      workingHours: initialData?.workingHours || [
+        {
+          day: "Segunda-feira",
+          startTime: "09:00",
+          endTime: "18:00",
+          breakStart: "12:00",
+          breakEnd: "13:00",
+        },
+      ],
       phone: initialData?.phone || "",
       profession: initialData?.profession || "",
       description: initialData?.description || "",
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "workingHours",
   });
 
   async function onSubmit(values: z.infer<typeof collaboratorSchema>) {
@@ -102,6 +125,13 @@ export function CollaboratorForm({
     }
   }
 
+  // Função para verificar se o dia já está selecionado
+  const isDayAlreadySelected = (selectedDay: string, currentIndex: number) => {
+    return fields.some(
+      (field, index) => index !== currentIndex && field.day === selectedDay
+    );
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -119,25 +149,146 @@ export function CollaboratorForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="workingHours"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Horários de Atendimento</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ex: Segunda a Sexta, 9h às 18h"
-                  {...field}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <FormLabel>Horários de Atendimento</FormLabel>
+          </div>
+
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="flex flex-col gap-4 p-4 border rounded-lg"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-medium">Horário {index + 1}</h4>
+
+                <X
+                  className="w-8 h-8 hover:text-red-500 transition cursor-pointer"
+                  onClick={() => fields.length > 1 && remove(index)}
                 />
-              </FormControl>
-              <FormDescription>
-                Informe os dias e horários em que o profissional atende.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </div>
+              <FormField
+                control={form.control}
+                name={`workingHours.${index}.day`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dia da Semana</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        if (isDayAlreadySelected(value, index)) {
+                          toast({
+                            variant: "destructive",
+                            title: "Dia já selecionado",
+                            description:
+                              "Este dia da semana já está em uso em outro horário.",
+                          });
+                          return;
+                        }
+                        field.onChange(value);
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um dia" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {daysOfWeek.map((day) => (
+                          <SelectItem
+                            key={day}
+                            value={day}
+                            disabled={isDayAlreadySelected(day, index)}
+                          >
+                            {day}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`workingHours.${index}.startTime`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Início</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`workingHours.${index}.endTime`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Término</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`workingHours.${index}.breakStart`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Início do Intervalo</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`workingHours.${index}.breakEnd`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fim do Intervalo</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              append({
+                day: "Segunda-feira",
+                startTime: "09:00",
+                endTime: "18:00",
+                breakStart: "12:00",
+                breakEnd: "13:00",
+              })
+            }
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Horário
+          </Button>
+        </div>
 
         <FormField
           control={form.control}

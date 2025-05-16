@@ -4,9 +4,15 @@ import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 
-interface CreateCollaboratorParams {
+export interface CreateCollaboratorParams {
   name: string;
-  workingHours: string;
+  workingHours: {
+    day: string;
+    startTime: string;
+    endTime: string;
+    breakStart?: string;
+    breakEnd?: string;
+  }[];
   phone: string;
   profession: string;
   description?: string;
