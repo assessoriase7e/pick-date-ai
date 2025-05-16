@@ -16,34 +16,9 @@ export async function GET(
 
     const { id } = await params;
 
-    const { searchParams } = new URL(req.url);
-    const businessPhone = searchParams.get("business-phone");
-
-    if (!businessPhone) {
-      return NextResponse.json(
-        { error: "O parâmetro 'business-phone' é obrigatório na URL" },
-        { status: 400 }
-      );
-    }
-
-    const userProfile = await prisma.profile.findFirst({
-      where: { whatsapp: businessPhone },
-      include: { user: true },
-    });
-
-    if (!userProfile) {
-      return NextResponse.json(
-        {
-          error: "Usuário não encontrado com este número de telefone comercial",
-        },
-        { status: 404 }
-      );
-    }
-
     const calendar = await prisma.calendar.findFirst({
       where: {
         id,
-        userId: userProfile.user.id,
         isActive: true,
       },
       include: {
@@ -80,37 +55,12 @@ export async function PUT(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const businessPhone = searchParams.get("business-phone");
-
-    if (!businessPhone) {
-      return NextResponse.json(
-        { error: "O parâmetro 'business-phone' é obrigatório na URL" },
-        { status: 400 }
-      );
-    }
-
     const body = await req.json();
     const { name, collaboratorId } = body;
-
-    const userProfile = await prisma.profile.findFirst({
-      where: { whatsapp: businessPhone },
-      include: { user: true },
-    });
-
-    if (!userProfile) {
-      return NextResponse.json(
-        {
-          error: "Usuário não encontrado com este número de telefone comercial",
-        },
-        { status: 404 }
-      );
-    }
 
     const calendar = await prisma.calendar.findFirst({
       where: {
         id: params.id,
-        userId: userProfile.user.id,
       },
     });
 
