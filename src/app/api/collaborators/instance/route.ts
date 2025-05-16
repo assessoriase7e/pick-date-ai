@@ -61,11 +61,12 @@ export async function GET(req: NextRequest) {
             name: true,
           },
         },
+        workingHours: true,
         Appointment: {
           where: {
             AND: [
               { status: "scheduled" },
-              { startTime: { gte: moment().startOf('day').toISOString() } },
+              { startTime: { gte: moment().startOf("day").toISOString() } },
             ],
           },
         },
