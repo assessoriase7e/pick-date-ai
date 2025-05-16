@@ -42,12 +42,36 @@ export async function GET(
       where: {
         serviceId: params.id,
         service: {
-          userId: userProfile.user.id
-        }
+          userId: userProfile.user.id,
+        },
       },
       include: {
-        collaborator: true
-      }
+        collaborator: {
+          select: {
+            id: true,
+            name: true,
+            workingHours: true,
+            description: true,
+            phone: true,
+            profession: true,
+            ServiceCollaborator: {
+              select: {
+                service: {
+                  select: {
+                    id: true,
+                    name: true,
+                    price: true,
+                    durationMinutes: true,
+                    commission: true,
+                    availableDays: true,
+                    notes: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json(serviceCollaborators);
