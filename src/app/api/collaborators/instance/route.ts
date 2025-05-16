@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
           where: {
             AND: [
               { status: "scheduled" },
-              { startTime: { gte: moment().date().toString() } },
+              { startTime: { gte: moment().startOf('day').toISOString() } },
             ],
           },
         },
