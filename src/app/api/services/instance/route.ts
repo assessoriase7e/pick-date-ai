@@ -35,7 +35,14 @@ export async function GET(req: NextRequest) {
 
     const services = await prisma.service.findMany({
       where: { userId: evolutionInstance.userId },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        notes: true,
+        durationMinutes: true,
+        commission: true,
+        availableDays: true,
         serviceCollaborators: {
           where: {
             collaborator: {
