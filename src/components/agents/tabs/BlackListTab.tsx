@@ -36,8 +36,8 @@ export function BlackListTab({
     resolver: zodResolver(blackListSchema),
     defaultValues: {
       id: initialData?.id,
-      phones: initialData?.phones?.length 
-        ? initialData.phones 
+      phones: initialData?.phones?.length
+        ? initialData.phones
         : [{ number: "", name: "" }],
     },
   });
@@ -85,17 +85,7 @@ export function BlackListTab({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Números Bloqueados</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ number: "", name: "" })}
-            >
-              Adicionar Número
-            </Button>
-          </div>
+          <h3 className="text-lg font-medium">Números Bloqueados</h3>
 
           {fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
@@ -126,26 +116,27 @@ export function BlackListTab({
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
-                      <Input
-                        placeholder="Nome (opcional)"
-                        {...field}
-                      />
+                      <Input placeholder="Nome (opcional)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+
+              <X
+                className="h-8 w-8 hover:text-red-500 transition cursor-pointer"
                 onClick={() => remove(index)}
-                disabled={fields.length === 1}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              />
             </div>
           ))}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => append({ number: "", name: "" })}
+          >
+            Adicionar Número
+          </Button>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
