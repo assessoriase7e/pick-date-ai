@@ -26,7 +26,6 @@ export function CalendarGrid({
   selectedDate,
   appointments,
   calendarId,
-  loading = false,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
@@ -35,8 +34,6 @@ export function CalendarGrid({
     typeof window !== "undefined" ? window.location.pathname : "";
   const isSharedCalendar = pathname.includes("shared-calendar");
 
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [selectedYear, setSelectedYear] = useState(moment(currentDate).year());
   const [isLoading, setIsLoading] = useState(false);
   const [prevSearchParams, setPrevSearchParams] = useState("");
@@ -64,8 +61,6 @@ export function CalendarGrid({
       setIsLoading(false);
     };
   }, [searchParams, prevSearchParams, isInitialLoad]);
-
-  const minSwipeDistance = 50;
 
   const calendarDays = useMemo(() => {
     const startOfMonth = moment(currentDate).startOf("month");
@@ -123,36 +118,6 @@ export function CalendarGrid({
   const getAppointmentsForDay = (day: moment.Moment) => {
     const dateKey = day.format("YYYY-MM-DD");
     return appointments[dateKey] || [];
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.touches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.touches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      goToNextMonth();
-      setIsLoading(true);
-    }
-
-    if (isRightSwipe) {
-      goToPreviousMonth();
-      setIsLoading(true);
-    }
-
-    setTouchStart(null);
-    setTouchEnd(null);
   };
 
   const handleDayClick = (date: Date) => {
