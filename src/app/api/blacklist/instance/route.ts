@@ -37,8 +37,12 @@ export async function GET(req: NextRequest) {
       where: { userId: evolutionInstance.userId },
     });
 
+    const phoneNumbers = (blackList?.phones || []).map(
+      (phone: any) => phone.number
+    );
+
     return NextResponse.json({
-      phones: blackList?.phones || [],
+      phones: phoneNumbers,
     });
   } catch (error) {
     console.error("Erro ao buscar lista negra:", error);
