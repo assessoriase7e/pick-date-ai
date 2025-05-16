@@ -25,6 +25,25 @@ export async function GET(
           },
           select: {
             id: true,
+            appointments: {
+              omit: {
+                createdAt: true,
+                updatedAt: true,
+                collaboratorId: true,
+              },
+              include: {
+                service: {
+                  select: {
+                    id: true,
+                    name: true,
+                    notes: true,
+                    durationMinutes: true,
+                    availableDays: true,
+                    price: true,
+                  },
+                },
+              },
+            },
           },
         },
         ServiceCollaborator: {
