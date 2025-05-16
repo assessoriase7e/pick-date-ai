@@ -26,6 +26,7 @@ export function CalendarGrid({
   selectedDate,
   appointments,
   calendarId,
+  loading = false,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
@@ -142,10 +143,12 @@ export function CalendarGrid({
 
     if (isLeftSwipe) {
       goToNextMonth();
+      setIsLoading(true);
     }
 
     if (isRightSwipe) {
       goToPreviousMonth();
+      setIsLoading(true);
     }
 
     setTouchStart(null);
@@ -215,13 +218,7 @@ export function CalendarGrid({
       </span>
 
       <span className="hidden lg:block">
-        <DesktopCalendarView
-          {...commonProps}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-          isLoading={isLoading}
-        />
+        <DesktopCalendarView {...commonProps} isLoading={isLoading} />
       </span>
     </div>
   );

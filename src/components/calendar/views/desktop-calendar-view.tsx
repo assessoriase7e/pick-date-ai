@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import { CalendarViewProps } from "../calendar-types";
 import { CalendarDayCell } from "../dayCell/calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
@@ -15,9 +15,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { MonthYearPicker } from "../../ui/month-year-picker";
 
 interface DesktopCalendarViewProps extends CalendarViewProps {
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
   isLoading?: boolean;
 }
 
@@ -31,16 +28,16 @@ export function DesktopCalendarView({
   isSelected,
   getAppointmentsForDay,
   formatMonth,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  isLoading = false,
+  isLoading: IsDayLoading,
   calendarId,
 }: DesktopCalendarViewProps) {
   const calendarRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const params = new URLSearchParams(searchParams.toString());
+  const pDate = params.get("date");
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -59,15 +56,21 @@ export function DesktopCalendarView({
     }
   };
 
+  const handlePageChange = (fn: () => void) => {
+    setLoading(true);
+    fn();
+  };
+
+  useEffect(() => {
+    setLoading(false);
+  }, [pDate]);
+
   return (
     <div
       ref={calendarRef}
       className="flex flex-col h-full border rounded-lg relative"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
     >
-      {isLoading && <IsTableLoading isPageChanging={isLoading} />}
+      {IsDayLoading && <IsTableLoading isPageChanging={IsDayLoading} />}
 
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 border-b gap-2 dark:shadow-[-0px_2px_5px_rgba(0,0,0,0.5)] dark:border-zinc-900/50 bg-gradient-to-tr dark:from-background dark:to-zinc-950 rounded-t-lg">
@@ -91,13 +94,30 @@ export function DesktopCalendarView({
           </DialogContent>
         </Dialog>
         <div className="flex items-center space-x-1 sm:space-x-2">
-          <Button variant="outline" size="sm" onClick={goToPreviousMonth}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(goToPreviousMonth)}
+          >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <Button variant="outline" size="sm" onClick={goToToday}>
-            Hoje
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(goToToday)}
+            className="w-20"
+          >
+            {loading ? (
+              <LoaderCircle className="animate-spin text-primary" />
+            ) : (
+              "Hoje"
+            )}
           </Button>
-          <Button variant="outline" size="sm" onClick={goToNextMonth}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(goToNextMonth)}
+          >
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
