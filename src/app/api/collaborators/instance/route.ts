@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         name: true,
         phone: true,
         profession: true,
+        description: true,
         calendars: {
           where: {
             isActive: true,
@@ -79,6 +80,7 @@ export async function GET(req: NextRequest) {
                 durationMinutes: true,
                 availableDays: true,
                 price: true,
+                notes: true,
               },
             },
           },
