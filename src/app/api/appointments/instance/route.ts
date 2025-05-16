@@ -168,8 +168,8 @@ export async function POST(req: NextRequest) {
 
     const appointment = await prisma.appointment.create({
       data: {
-        startTime: moment(startTime).toDate(),
-        endTime: moment(endTime).toDate(),
+        startTime,
+        endTime,
         clientId,
         serviceId,
         calendarId,
