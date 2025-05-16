@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-key-utils";
+import moment from "moment";
 
 export async function GET(req: NextRequest) {
   try {
@@ -46,7 +47,11 @@ export async function GET(req: NextRequest) {
           },
         ],
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        profession: true,
         calendars: {
           where: {
             isActive: true,
@@ -56,17 +61,23 @@ export async function GET(req: NextRequest) {
             name: true,
           },
         },
+        Appointment: {
+          where: {
+            AND: [
+              { status: "scheduled" },
+              { startTime: { gte: moment().date().toString() } },
+            ],
+          },
+        },
         ServiceCollaborator: {
           include: {
             service: {
               select: {
                 id: true,
                 name: true,
-                price: true,
-                availableDays: true,
-                notes: true,
                 durationMinutes: true,
-                isActive: true,
+                availableDays: true,
+                price: true,
               },
             },
           },
