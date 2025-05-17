@@ -10,6 +10,7 @@ import {
   BarChart3,
   File,
   Bolt,
+  ListCollapse,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -37,6 +38,13 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       href: "/calendar",
       color: "text-blue-500",
       isActive: pathname === "/calendar",
+    },
+    {
+      label: "Agendamentos",
+      icon: ListCollapse,
+      href: "/appointments",
+      color: "text-blue-500",
+      isActive: pathname === "/appointments",
     },
     {
       label: "Clientes",

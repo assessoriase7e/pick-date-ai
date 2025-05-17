@@ -18,6 +18,7 @@ export type AppointmentData = Omit<
 export type AppointmentFullData = Appointment & {
   client: Client | null;
   service: Service;
+  collaborator: Collaborator;
 };
 
 export type CalendarFullData = Calendar & {
