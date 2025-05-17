@@ -14,6 +14,7 @@ interface AppointmentsPageProps {
     page?: string;
     search?: string;
     collaborator?: string;
+    timeFilter?: string;
   }>;
 }
 
@@ -24,6 +25,7 @@ export default async function AppointmentsPage({
   const page = Number(sParams.page || "1");
   const search = sParams.search || "";
   const collaborator = sParams.collaborator || "all";
+  const timeFilter = sParams.timeFilter || "past";
   const limit = 10;
 
   // Buscar dados
@@ -34,9 +36,10 @@ export default async function AppointmentsPage({
       collaborator !== "all" ? collaborator : undefined,
       search,
       {
-        endTime: {
-          lte: moment().startOf("day").add(1, "day").toISOString(),
-        },
+        endTime:
+          timeFilter === "past"
+            ? { lte: moment().startOf("day").add(1, "day").toISOString() }
+            : { gte: moment().startOf("day").toISOString() },
       }
     ),
     getCollaborators(),

@@ -33,7 +33,7 @@ export default async function SharedCalendarPage({
   const res = await getAppointmentsByMonth(currentDate, calendarId, false);
 
   if (res?.success && res?.data) {
-    res.data.forEach((appointment: any) => {
+    res.data.forEach((appointment: AppointmentFullData) => {
       if (!appointment.client || !appointment.service) {
         return;
       }

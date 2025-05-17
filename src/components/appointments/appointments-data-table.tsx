@@ -26,6 +26,8 @@ import { AppointmentFullData } from "@/types/calendar";
 import { Collaborator } from "@prisma/client";
 import { AppointmentsMobileView } from "./AppointmentsMobileView";
 import { AppointmentsDesktopView } from "./AppointmentsDesktopView";
+import { Toggle } from "@/components/ui/toggle";
+import { CalendarClock, History } from "lucide-react";
 
 interface AppointmentsDataTableProps {
   columns: ColumnDef<any>[];
@@ -56,11 +58,13 @@ export function AppointmentsDataTable({
   const initialSearch = searchParams.get("search") || "";
   const initialCollaborator = searchParams.get("collaborator") || "all";
   const initialPage = Number(searchParams.get("page") || "1");
+  const initialTimeFilter = searchParams.get("timeFilter") || "past"; // Novo parâmetro
 
   // Estados locais
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [collaboratorFilter, setCollaboratorFilter] =
     useState(initialCollaborator);
+  const [timeFilter, setTimeFilter] = useState(initialTimeFilter); // Novo estado
   const [sorting, setSorting] = useState<SortingState>([
     { id: "startTime", desc: true },
   ]);
@@ -80,7 +84,7 @@ export function AppointmentsDataTable({
     initialState: {
       pagination: {
         pageIndex: initialPage - 1,
-        pageSize: 10,
+        pageSize: 50,
       },
     },
   });
@@ -97,13 +101,22 @@ export function AppointmentsDataTable({
       params.set("collaborator", collaboratorFilter);
     }
 
+    if (timeFilter !== "past") {
+      params.set("timeFilter", timeFilter);
+    }
+
     if (table.getState().pagination.pageIndex + 1 > 1) {
       params.set("page", String(table.getState().pagination.pageIndex + 1));
     }
 
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.push(newUrl, { scroll: false });
-  }, [searchTerm, collaboratorFilter, table.getState().pagination.pageIndex]);
+  }, [
+    searchTerm,
+    collaboratorFilter,
+    timeFilter,
+    table.getState().pagination.pageIndex,
+  ]);
 
   // Manipuladores de eventos
   const handleSearch = (e: React.FormEvent) => {
@@ -165,7 +178,27 @@ export function AppointmentsDataTable({
           />
         </form>
 
-        <div className="w-full md:w-auto">
+        <div className="flex gap-2 w-full md:w-auto">
+          <Toggle
+            pressed={timeFilter === "future"}
+            onPressedChange={(pressed) =>
+              setTimeFilter(pressed ? "future" : "past")
+            }
+            className="gap-2"
+          >
+            {timeFilter === "future" ? (
+              <>
+                <CalendarClock className="h-4 w-4" />
+                Futuros
+              </>
+            ) : (
+              <>
+                <History className="h-4 w-4" />
+                Passados
+              </>
+            )}
+          </Toggle>
+
           <Select
             value={collaboratorFilter}
             onValueChange={handleCollaboratorChange}
@@ -186,15 +219,12 @@ export function AppointmentsDataTable({
       </div>
 
       {isMobile ? (
-        <AppointmentsMobileView 
-          appointments={appointments} 
-          onDetailsClick={handleDetailsClick} 
+        <AppointmentsMobileView
+          appointments={appointments}
+          onDetailsClick={handleDetailsClick}
         />
       ) : (
-        <AppointmentsDesktopView 
-          columns={columns} 
-          table={table} 
-        />
+        <AppointmentsDesktopView columns={columns} table={table} />
       )}
 
       <div className="flex items-center justify-between">
