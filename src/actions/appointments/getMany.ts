@@ -8,7 +8,8 @@ export async function getAppointments(
   page: number = 1,
   limit: number = 10,
   collaboratorId?: string,
-  searchTerm?: string
+  searchTerm?: string,
+  where?: Prisma.AppointmentWhereInput
 ) {
   try {
     const { userId } = await auth();
@@ -23,6 +24,7 @@ export async function getAppointments(
 
     // Construir a query base
     const baseQuery: Prisma.AppointmentWhereInput = {
+      ...where,
       userId,
       ...(collaboratorId && collaboratorId !== "all" ? { collaboratorId } : {}),
       ...(searchTerm

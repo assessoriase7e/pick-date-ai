@@ -7,6 +7,7 @@ import { AppointmentsDataTable } from "@/components/appointments/appointments-da
 import { columns } from "@/components/appointments/columns";
 import { LoaderCircle } from "lucide-react";
 import { AppointmentFullData } from "@/types/calendar";
+import moment from "moment";
 
 interface AppointmentsPageProps {
   searchParams: Promise<{
@@ -31,7 +32,12 @@ export default async function AppointmentsPage({
       page,
       limit,
       collaborator !== "all" ? collaborator : undefined,
-      search
+      search,
+      {
+        endTime: {
+          lte: moment().startOf("day").add(1, "day").toISOString(),
+        },
+      }
     ),
     getCollaborators(),
   ]);
