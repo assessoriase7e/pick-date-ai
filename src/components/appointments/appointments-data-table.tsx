@@ -168,23 +168,23 @@ export function AppointmentsDataTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-        <form onSubmit={handleSearch} className="relative flex-1">
+        <form onSubmit={handleSearch} className="relative flex-1 w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             name="search"
             placeholder="Buscar agendamentos..."
             defaultValue={searchTerm}
-            className="pl-8"
+            className="pl-8 max-w-md"
           />
         </form>
 
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
           <Toggle
             pressed={timeFilter === "future"}
             onPressedChange={(pressed) =>
               setTimeFilter(pressed ? "future" : "past")
             }
-            className="gap-2"
+            className="gap-2 border border-border w-full"
           >
             {timeFilter === "future" ? (
               <>
@@ -203,11 +203,11 @@ export function AppointmentsDataTable({
             value={collaboratorFilter}
             onValueChange={handleCollaboratorChange}
           >
-            <SelectTrigger className="w-full md:w-[200px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Filtrar por profissional" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os profissionais</SelectItem>
+              <SelectItem value="all">Profissional</SelectItem>
               {collaborators.map((collaborator) => (
                 <SelectItem key={collaborator.id} value={collaborator.id}>
                   {collaborator.name}
