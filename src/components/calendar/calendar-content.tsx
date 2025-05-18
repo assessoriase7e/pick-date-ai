@@ -63,6 +63,7 @@ export function CalendarContent({
       const response = await createCalendar({
         name: values.name,
         collaboratorId: values.collaboratorId,
+        accessCode: values.accessCode,
       });
 
       if (response.success) {
@@ -99,6 +100,7 @@ export function CalendarContent({
         name: values.name,
         collaboratorId: values.collaboratorId,
         isActive: values.isActive,
+        accessCode: values.accessCode,
       });
 
       setEditOpen(false);

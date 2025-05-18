@@ -7,9 +7,11 @@ import { revalidatePath } from "next/cache";
 export async function createCalendar({
   name,
   collaboratorId,
+  accessCode,
 }: {
   name: string;
   collaboratorId?: string;
+  accessCode?: string | null;
 }) {
   try {
     const { userId } = await auth();
@@ -26,6 +28,7 @@ export async function createCalendar({
         name,
         userId,
         collaboratorId,
+        accessCode,
       },
     });
 

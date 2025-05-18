@@ -14,11 +14,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy, RefreshCw } from "lucide-react";
 import { Calendar } from "@prisma/client";
 import { SelectWithScroll } from "./select-with-scroll";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { Switch } from "../ui/switch";
+import { toast } from "sonner";
 
 interface CalendarFormProps {
   onSubmit: (values: CalendarFormValues) => Promise<void>;
@@ -38,13 +39,15 @@ export function CalendarForm({
     defaultValues: calendar
       ? {
           name: calendar?.name || "",
-          collaboratorId: calendar.collaboratorId || undefined,
+          collaboratorId: calendar.collaboratorId!,
           isActive: calendar?.isActive ?? true,
+          accessCode: calendar?.accessCode || "",
         }
       : {
           name: "",
-          collaboratorId: undefined,
+          collaboratorId: "",
           isActive: true,
+          accessCode: "",
         },
   });
 
@@ -57,6 +60,19 @@ export function CalendarForm({
       console.error("Erro ao salvar calendário:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateAccessCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    form.setValue("accessCode", code);
+  };
+
+  const copyAccessCode = () => {
+    const code = form.getValues("accessCode");
+    if (code) {
+      navigator.clipboard.writeText(code);
+      toast.success("Código copiado para a área de transferência");
     }
   };
 
@@ -91,6 +107,50 @@ export function CalendarForm({
               getOptionValue={(option) => String(option.id)}
               error={form.formState.errors.collaboratorId?.message}
             />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="accessCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Acesso</FormLabel>
+              <div className="flex gap-2">
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Código de acesso de 6 dígitos"
+                    {...field}
+                    value={field.value || ""}
+                    readOnly
+                  />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={generateAccessCode}
+                  title="Gerar código"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={copyAccessCode}
+                  title="Copiar código"
+                  disabled={!form.getValues("accessCode")}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <FormDescription>
+                Código de 6 dígitos para acesso ao calendário público
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
