@@ -15,6 +15,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useEffect, useState } from "react";
+import { PublicAppointmentForm } from "./public-appointment-form";
+import { Service } from "@prisma/client";
 
 interface PublicDayDetailsModalProps {
   dayDetails: {
@@ -24,7 +26,9 @@ interface PublicDayDetailsModalProps {
   appointments: AppointmentFullData[];
   closeDayDetails: () => void;
   selectedHour: number | null;
-  onHourClick: (hour: number) => void;
+  onHourClick: (hour: number | null) => void;
+  calendarId: string;
+  services: Service[];
 }
 
 export function PublicDayDetailsModal({
@@ -33,10 +37,13 @@ export function PublicDayDetailsModal({
   closeDayDetails,
   selectedHour,
   onHourClick,
+  calendarId,
+  services,
 }: PublicDayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
 
   const [isMobile, setIsMobile] = useState(false);
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -45,9 +52,52 @@ export function PublicDayDetailsModal({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  useEffect(() => {
+    // Mostrar o formulário quando um horário for selecionado
+    setShowAppointmentForm(selectedHour !== null);
+  }, [selectedHour]);
+
   const formattedDate = moment(dayDetails.date).format(
     "DD [de] MMMM [de] YYYY"
   );
+
+  const handleAppointmentSuccess = () => {
+    // Fechar o formulário e atualizar a visualização
+    setShowAppointmentForm(false);
+    onHourClick(null);
+    closeDayDetails();
+    // Recarregar a página para atualizar os agendamentos
+    window.location.reload();
+  };
+
+  const handleCancelAppointment = () => {
+    setShowAppointmentForm(false);
+    onHourClick(null);
+  };
+
+  const renderContent = () => {
+    if (showAppointmentForm && selectedHour !== null) {
+      return (
+        <PublicAppointmentForm
+          date={dayDetails.date}
+          hour={selectedHour}
+          calendarId={calendarId}
+          services={services}
+          onSuccess={handleAppointmentSuccess}
+          onCancel={handleCancelAppointment}
+        />
+      );
+    }
+
+    return (
+      <PublicDayScheduleGrid
+        appointments={appointments}
+        onHourClick={onHourClick}
+        selectedHour={selectedHour}
+        selectedDate={String(dayDetails.date)}
+      />
+    );
+  };
 
   if (isMobile) {
     return (
@@ -55,17 +105,12 @@ export function PublicDayDetailsModal({
         <DrawerContent className="max-w-xl h-svh p-0 flex flex-col">
           <DrawerHeader className="p-2 flex items-center justify-center pt-10">
             <DrawerTitle className="text-xl">
-              Horários disponíveis para {formattedDate}
+              {showAppointmentForm
+                ? "Novo Agendamento"
+                : `Horários disponíveis para ${formattedDate}`}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="flex-1 overflow-y-auto">
-            <PublicDayScheduleGrid
-              appointments={appointments}
-              onHourClick={onHourClick}
-              selectedHour={selectedHour}
-              selectedDate={String(dayDetails.date)}
-            />
-          </div>
+          <div className="flex-1 overflow-y-auto p-4">{renderContent()}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -76,17 +121,12 @@ export function PublicDayDetailsModal({
       <DialogContent className="max-w-xl h-svh lg:h-[80svh] p-0 flex flex-col">
         <DialogHeader className="p-2 flex items-center justify-center pt-10">
           <DialogTitle className="text-xl">
-            Horários disponíveis para {formattedDate}
+            {showAppointmentForm
+              ? "Novo Agendamento"
+              : `Horários disponíveis para ${formattedDate}`}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto">
-          <PublicDayScheduleGrid
-            appointments={appointments}
-            onHourClick={onHourClick}
-            selectedHour={selectedHour}
-            selectedDate={String(dayDetails.date)}
-          />
-        </div>
+        <div className="flex-1 overflow-y-auto p-4">{renderContent()}</div>
       </DialogContent>
     </Dialog>
   );

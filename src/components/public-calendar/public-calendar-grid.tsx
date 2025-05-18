@@ -6,6 +6,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { CalendarDay } from "../calendar/calendar-types";
 import { DesktopCalendarView } from "../calendar/views/desktop-calendar-view";
 import { PublicDayDetailsModal } from "./public-day-details-modal";
+import { Service } from "@prisma/client";
 
 interface PublicCalendarGridProps {
   currentDate: Date;
@@ -15,6 +16,7 @@ interface PublicCalendarGridProps {
   selectedDate: Date | null;
   initialAppointments: Record<string, AppointmentFullData[]>;
   calendarId: string;
+  services: Service[];
 }
 
 export function PublicCalendarGrid({
@@ -25,6 +27,7 @@ export function PublicCalendarGrid({
   selectedDate,
   initialAppointments,
   calendarId,
+  services,
 }: PublicCalendarGridProps) {
   const today = moment();
   const [dayDetails, setDayDetails] = useState<{
@@ -96,7 +99,7 @@ export function PublicCalendarGrid({
     setDayDetails({ date, isOpen: true });
   };
 
-  const handleHourClick = (hour: number) => {
+  const handleHourClick = (hour: number | null) => {
     setSelectedHour(hour);
   };
 
@@ -118,12 +121,7 @@ export function PublicCalendarGrid({
   return (
     <>
       <div className="h-full">
-        <DesktopCalendarView
-          {...commonProps}
-          onTouchStart={() => {}}
-          onTouchMove={() => {}}
-          onTouchEnd={() => {}}
-        />
+        <DesktopCalendarView {...commonProps} />
       </div>
 
       <PublicDayDetailsModal
@@ -134,6 +132,8 @@ export function PublicCalendarGrid({
         closeDayDetails={() => setDayDetails(null)}
         selectedHour={selectedHour}
         onHourClick={handleHourClick}
+        calendarId={calendarId}
+        services={services}
       />
     </>
   );

@@ -2,64 +2,129 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { Appointment } from "@prisma/client";
 
-export async function createAppointment(
-  data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">
-) {
+// Adicione esta interface para os dados do cliente público
+interface PublicClientData {
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+export async function createAppointment({
+  clientId,
+  serviceId,
+  calendarId,
+  startTime,
+  endTime,
+  notes,
+  status,
+  servicePrice,
+  finalPrice,
+  collaboratorId,
+  publicClientData,
+}: {
+  clientId: string;
+  serviceId: string;
+  calendarId: string;
+  startTime: Date;
+  endTime: Date;
+  notes: string | null;
+  status: string;
+  servicePrice: number | null;
+  finalPrice: number | null;
+  collaboratorId: string | null;
+  publicClientData?: PublicClientData;
+}) {
   try {
-    const { userId } = await auth();
+    // Get the authenticated user ID or use the calendar's user ID for public appointments
+    let userId: string | null = null;
 
-    if (!userId) {
-      return {
-        success: false,
-        error: "Usuário não autenticado",
-      };
+    // For public appointments, get the userId from the calendar
+    if (publicClientData) {
+      const calendar = await prisma.calendar.findUnique({
+        where: { id: calendarId },
+        select: { userId: true },
+      });
+
+      if (!calendar) {
+        return {
+          success: false,
+          error: "Calendário não encontrado",
+        };
+      }
+
+      userId = calendar.userId;
+    } else {
+      // For authenticated appointments, get the userId from auth
+      const authResult = await auth();
+      userId = authResult.userId;
+
+      if (!userId) {
+        return {
+          success: false,
+          error: "Usuário não autenticado",
+        };
+      }
     }
 
-    // Buscar o calendário para obter o collaboratorId
-    const calendar = await prisma.calendar.findUnique({
-      where: { id: data.calendarId },
-      select: { collaboratorId: true }
-    });
+    // Se temos dados de cliente público, criar um cliente temporário
+    let actualClientId = clientId;
 
-    if (!calendar) {
-      return {
-        success: false,
-        error: "Calendário não encontrado",
-      };
+    if (publicClientData) {
+      // Verificar se já existe um cliente com este email
+      const existingClient = await prisma.client.findFirst({
+        where: {
+          phone: publicClientData.phone,
+        },
+      });
+
+      if (existingClient) {
+        actualClientId = existingClient.id;
+      } else {
+        // Criar um novo cliente
+        const newClient = await prisma.client.create({
+          data: {
+            fullName: publicClientData.fullName,
+            phone: publicClientData.phone,
+            userId: userId,
+          },
+        });
+
+        actualClientId = newClient.id;
+      }
     }
 
+    // Verificar conflitos de horário
     const conflictingAppointment = await prisma.appointment.findFirst({
       where: {
         OR: [
           {
             startTime: {
-              lte: data.startTime,
+              lte: startTime,
             },
             endTime: {
-              gt: data.startTime,
+              gt: startTime,
             },
           },
           {
             startTime: {
-              lt: data.endTime,
+              lt: endTime,
             },
             endTime: {
-              gte: data.endTime,
+              gte: endTime,
             },
           },
           {
             startTime: {
-              gte: data.startTime,
+              gte: startTime,
             },
             endTime: {
-              lte: data.endTime,
+              lte: endTime,
             },
           },
         ],
         status: "scheduled",
-        calendarId: data.calendarId,
+        calendarId: calendarId,
       },
     });
 
@@ -71,28 +136,38 @@ export async function createAppointment(
     }
 
     // Se não houver preço definido, busca o preço do serviço
-    if (!data.servicePrice || !data.finalPrice) {
+    let finalServicePrice = servicePrice;
+    let finalFinalPrice = finalPrice;
+
+    if (!finalServicePrice || !finalFinalPrice) {
       const service = await prisma.service.findUnique({
-        where: { id: data.serviceId },
+        where: { id: serviceId },
       });
-      
+
       if (service) {
-        data.servicePrice = data.servicePrice || service.price;
-        data.finalPrice = data.finalPrice || service.price;
+        finalServicePrice = finalServicePrice || service.price;
+        finalFinalPrice = finalFinalPrice || service.price;
       }
     }
 
+    // Criar o agendamento
     const appointment = await prisma.appointment.create({
       data: {
-        ...data,
-        status: data.status || "scheduled",
-        userId,
-        collaboratorId: calendar.collaboratorId, // Adiciona o collaboratorId do calendário
+        clientId: actualClientId,
+        serviceId,
+        calendarId,
+        startTime,
+        endTime,
+        notes,
+        status,
+        servicePrice: finalServicePrice,
+        finalPrice: finalFinalPrice,
+        collaboratorId,
+        userId: userId, // Adicionar o userId aqui
       },
       include: {
         client: true,
         service: true,
-        collaborator: true,
       },
     });
 
