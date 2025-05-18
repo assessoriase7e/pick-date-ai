@@ -40,6 +40,9 @@ export default async function AppointmentsPage({
           timeFilter === "past"
             ? { lte: moment().startOf("day").add(1, "day").toISOString() }
             : { gte: moment().startOf("day").toISOString() },
+      },
+      {
+        startTime: timeFilter === "past" ? "desc" : "asc",
       }
     ),
     getCollaborators(),

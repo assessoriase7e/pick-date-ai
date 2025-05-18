@@ -62,11 +62,10 @@ export function AppointmentsDataTable({
 
   // Estados locais
   const [searchTerm, setSearchTerm] = useState(initialSearch);
-  const [collaboratorFilter, setCollaboratorFilter] =
-    useState(initialCollaborator);
-  const [timeFilter, setTimeFilter] = useState(initialTimeFilter); // Novo estado
+  const [collaboratorFilter, setCollaboratorFilter] = useState(initialCollaborator);
+  const [timeFilter, setTimeFilter] = useState(initialTimeFilter);
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "startTime", desc: true },
+    { id: "startTime", desc: timeFilter === "past" },
   ]);
 
   // Configuração da tabela
@@ -164,6 +163,10 @@ export function AppointmentsDataTable({
       document.removeEventListener("click", handleButtonClick);
     };
   }, [appointments]);
+
+  useEffect(() => {
+    setSorting([{ id: "startTime", desc: timeFilter === "past" }]);
+  }, [timeFilter]);
 
   return (
     <div className="space-y-4">

@@ -9,7 +9,8 @@ export async function getAppointments(
   limit: number = 10,
   collaboratorId?: string,
   searchTerm?: string,
-  where?: Prisma.AppointmentWhereInput
+  where?: Prisma.AppointmentWhereInput,
+  orderBy?: Prisma.AppointmentOrderByWithRelationInput
 ) {
   try {
     const { userId } = await auth();
@@ -84,8 +85,8 @@ export async function getAppointments(
           },
         },
       },
-      orderBy: {
-        startTime: "desc",
+      orderBy: orderBy || {
+        startTime: "asc",
       },
     });
 

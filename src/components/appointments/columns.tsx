@@ -24,7 +24,11 @@ export const columns: ColumnDef<AppointmentFullData>[] = [
     },
     cell: ({ row }) => {
       const client = row.original.client;
-      return <div className="font-medium">{client?.fullName || "Cliente Deletado"}</div>;
+      return (
+        <div className="font-medium">
+          {client?.fullName || "Cliente Deletado"}
+        </div>
+      );
     },
   },
   {
