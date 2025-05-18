@@ -1,18 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ColumnDef,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  SortingState,
-} from "@tanstack/react-table";
+import { ColumnDef, SortingState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentDetails } from "./appointment-details";
 import {
@@ -25,7 +15,7 @@ import {
 import { AppointmentFullData } from "@/types/calendar";
 import { Collaborator } from "@prisma/client";
 import { AppointmentsMobileView } from "./AppointmentsMobileView";
-import { AppointmentsDesktopView } from "./AppointmentsDesktopView";
+import { DataTable } from "@/components/ui/data-table";
 import { Toggle } from "@/components/ui/toggle";
 import { CalendarClock, History } from "lucide-react";
 
@@ -57,36 +47,16 @@ export function AppointmentsDataTable({
   // Recuperar parâmetros da URL
   const initialSearch = searchParams.get("search") || "";
   const initialCollaborator = searchParams.get("collaborator") || "all";
-  const initialPage = Number(searchParams.get("page") || "1");
-  const initialTimeFilter = searchParams.get("timeFilter") || "past"; // Novo parâmetro
+  const initialTimeFilter = searchParams.get("timeFilter") || "past";
 
   // Estados locais
   const [searchTerm, setSearchTerm] = useState(initialSearch);
-  const [collaboratorFilter, setCollaboratorFilter] = useState(initialCollaborator);
+  const [collaboratorFilter, setCollaboratorFilter] =
+    useState(initialCollaborator);
   const [timeFilter, setTimeFilter] = useState(initialTimeFilter);
   const [sorting, setSorting] = useState<SortingState>([
     { id: "startTime", desc: timeFilter === "past" },
   ]);
-
-  // Configuração da tabela
-  const table = useReactTable({
-    data: appointments,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    state: {
-      sorting,
-    },
-    initialState: {
-      pagination: {
-        pageIndex: initialPage - 1,
-        pageSize: 50,
-      },
-    },
-  });
 
   // Atualizar a URL quando os filtros mudarem
   useEffect(() => {
@@ -104,18 +74,9 @@ export function AppointmentsDataTable({
       params.set("timeFilter", timeFilter);
     }
 
-    if (table.getState().pagination.pageIndex + 1 > 1) {
-      params.set("page", String(table.getState().pagination.pageIndex + 1));
-    }
-
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.push(newUrl, { scroll: false });
-  }, [
-    searchTerm,
-    collaboratorFilter,
-    timeFilter,
-    table.getState().pagination.pageIndex,
-  ]);
+  }, [searchTerm, collaboratorFilter, timeFilter]);
 
   // Manipuladores de eventos
   const handleSearch = (e: React.FormEvent) => {
@@ -168,66 +129,69 @@ export function AppointmentsDataTable({
     setSorting([{ id: "startTime", desc: timeFilter === "past" }]);
   }, [timeFilter]);
 
+  const headerContent = (
+    <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
+      <Toggle
+        pressed={timeFilter === "future"}
+        onPressedChange={(pressed) =>
+          setTimeFilter(pressed ? "future" : "past")
+        }
+        className="gap-2 border border-border w-full"
+      >
+        {timeFilter === "future" ? (
+          <>
+            <CalendarClock className="h-4 w-4" />
+            Futuros
+          </>
+        ) : (
+          <>
+            <History className="h-4 w-4" />
+            Passados
+          </>
+        )}
+      </Toggle>
+
+      <Select
+        value={collaboratorFilter}
+        onValueChange={handleCollaboratorChange}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Filtrar por profissional" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Profissional</SelectItem>
+          {collaborators.map((collaborator) => (
+            <SelectItem key={collaborator.id} value={collaborator.id}>
+              {collaborator.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-        <form onSubmit={handleSearch} className="relative flex-1 w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            name="search"
-            placeholder="Buscar agendamentos..."
-            defaultValue={searchTerm}
-            className="pl-8 max-w-md"
-          />
-        </form>
-
-        <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
-          <Toggle
-            pressed={timeFilter === "future"}
-            onPressedChange={(pressed) =>
-              setTimeFilter(pressed ? "future" : "past")
-            }
-            className="gap-2 border border-border w-full"
-          >
-            {timeFilter === "future" ? (
-              <>
-                <CalendarClock className="h-4 w-4" />
-                Futuros
-              </>
-            ) : (
-              <>
-                <History className="h-4 w-4" />
-                Passados
-              </>
-            )}
-          </Toggle>
-
-          <Select
-            value={collaboratorFilter}
-            onValueChange={handleCollaboratorChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Filtrar por profissional" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Profissional</SelectItem>
-              {collaborators.map((collaborator) => (
-                <SelectItem key={collaborator.id} value={collaborator.id}>
-                  {collaborator.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {isMobile ? (
         <AppointmentsMobileView
           appointments={appointments}
           onDetailsClick={handleDetailsClick}
         />
       ) : (
-        <AppointmentsDesktopView columns={columns} table={table} />
+        <DataTable
+          columns={columns}
+          data={appointments}
+          sortableColumns={[
+            "client.fullName",
+            "collaborator.name",
+            "startTime",
+          ]}
+          headerContent={headerContent}
+          enableSearch={true}
+          searchPlaceholder="Buscar agendamentos..."
+          pageSize={50}
+          enablePagination={false}
+        />
       )}
 
       <div className="flex items-center justify-between">
