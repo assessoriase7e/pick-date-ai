@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -7,16 +6,17 @@ import { CreateFileDialog } from "@/components/files/create-file-dialog";
 import { FilesDataTable } from "@/components/files/files-data-table";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
+import { FileRecord } from "@prisma/client";
 
 interface FilesContentProps {
-  columns: any[];
-  data: any[];
+  columns: any;
+  data: FileRecord[];
 }
 
 export function FilesContent({ columns, data }: FilesContentProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
-  
+
   const openDialog = () => {
     setIsDialogOpen(true);
   };
@@ -37,9 +37,9 @@ export function FilesContent({ columns, data }: FilesContentProps) {
       </div>
 
       <CreateFileDialog isOpen={isDialogOpen} onClose={closeDialog} />
-      
+
       <Suspense fallback={<div>Carregando arquivos...</div>}>
-        <FilesDataTable columns={columns} data={data} />
+        <FilesDataTable data={data} />
       </Suspense>
     </>
   );
