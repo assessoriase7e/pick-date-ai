@@ -57,15 +57,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
       </div>
 
       <div className="space-y-8">
-        <ClientsTable
-          clients={clients}
-          pagination={pagination}
-          initialFilters={{
-            searchTerm: search || "",
-            sortField: (sortField as any) || "fullName",
-            sortDirection: (sortDirection as any) || "asc",
-          }}
-        />
+        <ClientsTable clients={clients} />
       </div>
     </div>
   );
