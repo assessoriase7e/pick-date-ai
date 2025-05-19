@@ -380,12 +380,24 @@ model FileRecord {
 }
 
 model BlackList {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  phones    Json[]   // Alterado de String[] para Json[] para armazenar objetos
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String        @unique
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phones    BlackListPhone[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@map("blacklist")
+}
+
+model BlackListPhone {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  number      String
+  name        String?
+  blackListId String    @db.ObjectId
+  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("blacklistphone")
 }

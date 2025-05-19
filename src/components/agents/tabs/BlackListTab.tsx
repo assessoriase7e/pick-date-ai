@@ -21,7 +21,7 @@ interface BlackListTabProps {
   setIsLoading: (isLoading: boolean) => void;
   initialData?: {
     id?: string;
-    phones: Array<{ number: string; name?: string }>;
+    phones: Array<{ id?: string; number: string; name?: string }>;
   };
 }
 
