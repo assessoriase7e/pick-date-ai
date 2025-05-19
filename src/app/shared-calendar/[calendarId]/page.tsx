@@ -29,7 +29,11 @@ export default async function SharedCalendarPage({
   const calendar = calendarResponse.data;
 
   // Buscar serviços do usuário dono do calendário
-  const servicesResponse = await getServicesByUserId(calendar.userId, false);
+  const servicesResponse = await getServicesByUserId(calendar.userId, {
+    serviceCollaborators: {
+      some: { collaboratorId: calendar.collaboratorId! },
+    },
+  });
   const services = servicesResponse.success ? servicesResponse.data || [] : [];
 
   const currentDate = sParams.date ? new Date(sParams.date) : new Date();
