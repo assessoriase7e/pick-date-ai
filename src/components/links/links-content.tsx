@@ -21,6 +21,8 @@ import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 type LinksContentProps = {
   links: Link[];
@@ -116,6 +118,60 @@ export function LinksContent({
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  const columns: ColumnDef<Link>[] = [
+    {
+      header: "Título",
+      accessorKey: "title",
+    },
+    {
+      header: "URL",
+      accessorKey: "url",
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <span className="truncate max-w-[200px]">{row.original.url}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Descrição",
+      accessorKey: "description",
+      cell: ({ row }) => truncateText(row.original.description, 30),
+    },
+    {
+      header: "Ações",
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => openExternalLink(row.original.url)}
+            title="Abrir link"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setEditingLink(row.original)}
+            title="Editar link"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-destructive"
+            onClick={() => setDeletingLink(row.original)}
+            title="Excluir link"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -124,76 +180,15 @@ export function LinksContent({
         </Button>
       </div>
 
-      {/* Visualização Desktop */}
-      <div className="rounded-md border hidden md:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>URL</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead className="w-[150px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : links.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">
-                  Nenhum link encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              links.map((link: Link) => (
-                <TableRow key={link.id}>
-                  <TableCell>{link.title}</TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center">
-                      <span className="truncate max-w-[200px]">{link.url}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{truncateText(link.description, 30)}</TableCell>
-
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => openExternalLink(link.url)}
-                        title="Abrir link"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setEditingLink(link)}
-                        title="Editar link"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => setDeletingLink(link)}
-                        title="Excluir link"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      {/* Desktop View usando DataTable */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={links}
+          enableSearch={true}
+          searchPlaceholder="Buscar links..."
+          sortableColumns={["title", "url", "description"]}
+        />
       </div>
 
       {/* Visualização Mobile */}
