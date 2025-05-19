@@ -221,7 +221,9 @@ export function PublicAppointmentForm({
                   </DrawerTrigger>
                   <DrawerContent>
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">Selecionar Cliente</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Selecionar Cliente
+                      </h2>
                       <Input
                         placeholder="Buscar cliente..."
                         value={searchClient}
@@ -229,7 +231,7 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '60svh' }}>
                       {filteredClients.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum cliente encontrado.
@@ -281,7 +283,9 @@ export function PublicAppointmentForm({
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">Selecionar Cliente</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Selecionar Cliente
+                      </h2>
                       <Input
                         placeholder="Buscar cliente..."
                         value={searchClient}
@@ -289,7 +293,7 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '400px' }}>
                       {filteredClients.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum cliente encontrado.
@@ -352,7 +356,9 @@ export function PublicAppointmentForm({
                   </DrawerTrigger>
                   <DrawerContent>
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">Selecionar Serviço</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Selecionar Serviço
+                      </h2>
                       <Input
                         placeholder="Buscar serviço..."
                         value={searchService}
@@ -360,7 +366,7 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '60svh' }}>
                       {filteredServices.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum serviço encontrado.
@@ -412,7 +418,9 @@ export function PublicAppointmentForm({
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">Selecionar Serviço</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Selecionar Serviço
+                      </h2>
                       <Input
                         placeholder="Buscar serviço..."
                         value={searchService}
@@ -420,7 +428,7 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '400px' }}>
                       {filteredServices.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum serviço encontrado.
