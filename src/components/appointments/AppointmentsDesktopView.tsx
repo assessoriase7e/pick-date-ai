@@ -1,62 +1,30 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { flexRender } from "@tanstack/react-table";
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
+import { Appointment } from "@prisma/client";
 
 interface AppointmentsDesktopViewProps {
-  columns: ColumnDef<any>[];
-  table: any;
+  columns: ColumnDef<Appointment>[];
+  data: Appointment[];
+  headerContent?: React.ReactNode;
 }
 
 export function AppointmentsDesktopView({
   columns,
-  table,
+  data,
+  headerContent,
 }: AppointmentsDesktopViewProps) {
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup: any) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header: any) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row: any) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell: any) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Nenhum agendamento encontrado.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={data}
+      sortableColumns={["client.fullName", "collaborator.name", "startTime"]}
+      headerContent={headerContent}
+      enableSearch={true}
+      searchPlaceholder="Buscar agendamentos..."
+      pageSize={50}
+      enablePagination={false}
+    />
   );
 }
