@@ -1,15 +1,9 @@
 "use client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useState } from "react";
-import { deleteClientService } from "@/actions/clients/services/delete-client-service";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,8 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
-import { Pagination } from "@/components/ui/pagination";
+import { deleteClientService } from "@/actions/clients/services/delete-client-service";
 
 interface ClientService {
   id: string;
@@ -111,96 +104,43 @@ export default function ClientServicesTable({
     });
   };
 
-  const handlePageChange = (page: number) => {
-    router.push(`/clients/${clientId}/services?page=${page}`);
-  };
+  const columns: ColumnDef<ClientServiceWithRelations>[] = [
+    {
+      accessorKey: "service.name",
+      header: "Serviço",
+    },
+    {
+      accessorKey: "date",
+      header: "Data",
+      cell: ({ row }) => formatDate(row.original.date),
+    },
+    {
+      accessorKey: "time",
+      header: "Horário",
+      cell: ({ row }) => {
+        const service = row.original;
+        return service.isAppointment && service.startTime && service.endTime
+          ? `${formatTime(service.startTime)} - ${formatTime(service.endTime)}`
+          : "-";
+      },
+    },
+    {
+      accessorKey: "description",
+      header: "Descrição",
+      cell: ({ row }) => row.original.description || "-",
+    },
+  ];
 
   return (
     <>
-      <div className="space-y-4">
-        {/* Visualização Desktop */}
-        <div className="rounded-md border hidden md:block">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Serviço</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Horário</TableHead>
-                <TableHead>Descrição</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clientServices.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-6 text-muted-foreground"
-                  >
-                    Nenhum serviço encontrado
-                  </TableCell>
-                </TableRow>
-              ) : (
-                clientServices.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell>{service.service.name}</TableCell>
-                    <TableCell>{formatDate(service.date)}</TableCell>
-                    <TableCell>
-                      {service.isAppointment &&
-                      service.startTime &&
-                      service.endTime
-                        ? `${formatTime(service.startTime)} - ${formatTime(
-                            service.endTime
-                          )}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell>{service.description || "-"}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Visualização Mobile */}
-        <div className="md:hidden space-y-4">
-          {clientServices.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground rounded-md border">
-              Nenhum serviço encontrado
-            </div>
-          ) : (
-            clientServices.map((clientService) => (
-              <div
-                key={clientService.id}
-                className="rounded-md border p-4 space-y-3"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">
-                      {clientService.service.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(clientService.date)}
-                    </p>
-                    {clientService.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {clientService.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.pages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      <DataTable
+        columns={columns}
+        data={clientServices}
+        sortableColumns={["service.name", "date"]}
+        searchPlaceholder="Buscar serviços..."
+        pageSize={pagination.total}
+        enablePagination={false}
+      />
 
       <AlertDialog
         open={isDeleteDialogOpen}
