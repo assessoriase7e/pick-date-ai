@@ -80,6 +80,7 @@ export async function updateAppointment(
         endTime: validatedData.endTime,
         notes: validatedData.notes,
         finalPrice: validatedData.finalPrice,
+        collaboratorId: validatedData.collaboratorId,
       },
       include: {
         client: true,
