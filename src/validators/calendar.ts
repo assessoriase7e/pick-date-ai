@@ -25,6 +25,7 @@ export const updateAppointmentSchema = z.object({
   endTime: z.date(),
   notes: z.string().nullable(),
   finalPrice: z.number().nullable().optional(),
+  collaboratorId: z.string().optional(),
 });
 
 // Adicione ao schema de validação existente
