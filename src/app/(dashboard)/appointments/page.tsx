@@ -36,10 +36,21 @@ export default async function AppointmentsPage({
       collaborator !== "all" ? collaborator : undefined,
       search,
       {
-        endTime:
-          timeFilter === "past"
-            ? { lte: moment().startOf("day").add(1, "day").toISOString() }
-            : { gte: moment().startOf("day").toISOString() },
+        AND: [
+          {
+            endTime:
+              timeFilter === "past"
+                ? {
+                    lte: moment().startOf("day").add(1, "day").toISOString(),
+                  }
+                : {
+                    gte: moment().startOf("day").toISOString(),
+                  },
+          },
+          {
+            status: "scheduled",
+          },
+        ],
       },
       {
         startTime: timeFilter === "past" ? "desc" : "asc",
