@@ -67,25 +67,9 @@ export async function updateAppointment(
       };
     }
 
-    const validatedData = updateAppointmentSchema
-      .omit({ id: true })
-      .parse(data);
-
     const appointment = await prisma.appointment.update({
       where: { id },
-      data: {
-        clientId: validatedData.clientId,
-        serviceId: validatedData.serviceId,
-        startTime: validatedData.startTime,
-        endTime: validatedData.endTime,
-        notes: validatedData.notes,
-        finalPrice: validatedData.finalPrice,
-        collaboratorId: validatedData.collaboratorId,
-      },
-      include: {
-        client: true,
-        service: true,
-      },
+      data,
     });
 
     revalidatePath("/calendar");
