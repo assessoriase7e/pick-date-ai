@@ -45,14 +45,14 @@ export const columns: ColumnDef<AppointmentFullData>[] = [
       );
     },
     cell: ({ row }) => {
-      return <div>{row.original.collaborator.name}</div>;
+      return <div>{row.original.collaborator?.name || "Sem colaborador"}</div>;
     },
   },
   {
     accessorKey: "service.name",
     header: "Serviço",
     cell: ({ row }) => {
-      return <div>{row.original.service.name}</div>;
+      return <div>{row.original.service?.name}</div>;
     },
   },
   {
