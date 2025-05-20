@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { Service } from "@prisma/client";
+import { Prisma, Service } from "@prisma/client";
 
 type GetServicesByUserIdResponse = {
   success: boolean;
@@ -11,12 +11,13 @@ type GetServicesByUserIdResponse = {
 
 export async function getServicesByUserId(
   userId: string,
-  requireAuth: boolean = true
+  where?: Prisma.ServiceWhereInput
 ): Promise<GetServicesByUserIdResponse> {
   try {
     // Buscar serviços do usuário
     const services = await prisma.service.findMany({
       where: {
+        ...where,
         userId,
         isActive: true,
       },
