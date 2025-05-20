@@ -24,7 +24,7 @@ export const deleteManyAppointments = async ({
 
         revalidatePath("/calendar");
         revalidatePath("/reports");
-        revalidatePath("appointments");
+        revalidatePath("/appointments");
     } catch (error) {
         console.error("Erro ao deletar muitos agendamentos ", error);
         return false;

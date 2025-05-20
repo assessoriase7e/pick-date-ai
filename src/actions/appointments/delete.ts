@@ -38,7 +38,7 @@ export async function deleteAppointment(id: string) {
 
         revalidatePath("/calendar");
         revalidatePath("/reports");
-        revalidatePath("appointments");
+        revalidatePath("/appointments");
 
         return {
             success: true,

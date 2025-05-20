@@ -48,7 +48,7 @@ export async function cancelAppointment(
 
         revalidatePath(`/calendar/day?calendarId${appointment.calendarId}`);
         revalidatePath("/reports");
-        revalidatePath("appointments");
+        revalidatePath("/appointments");
 
         return {
             success: true,

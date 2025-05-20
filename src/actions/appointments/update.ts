@@ -73,7 +73,7 @@ export async function updateAppointment(
         });
 
         revalidatePath("/calendar");
-        revalidatePath("appointments");
+        revalidatePath("/appointments");
 
         return {
             success: true,
