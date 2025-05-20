@@ -211,7 +211,7 @@ export function AppointmentForm({
         status: "scheduled",
         servicePrice: values.servicePrice ?? null,
         finalPrice: values.finalPrice ?? null,
-        collaboratorId: appointment?.collaboratorId || null,
+        collaboratorId: calendar.collaboratorId || null,
       };
 
       let result;
