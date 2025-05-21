@@ -7,6 +7,8 @@ import { z } from "zod";
 import { Appointment } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
+
 export async function updateAppointment(
     id: string,
     data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">
@@ -30,6 +32,20 @@ export async function updateAppointment(
                 success: false,
                 error: "Agendamento não encontrado",
             };
+        }
+
+        // Verificar disponibilidade do colaborador
+        if (data.collaboratorId) {
+            const collaborator = await prisma.collaborator.findUnique({
+                where: { id: data.collaboratorId }
+            });
+            
+            if (collaborator && !isCollaboratorAvailable(collaborator, data.startTime, data.endTime)) {
+                return {
+                    success: false,
+                    error: "Horário do profissional indisponível",
+                };
+            }
         }
 
         const existingAppointment = await prisma.appointment.findFirst({

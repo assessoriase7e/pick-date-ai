@@ -23,7 +23,7 @@ import { createAppointment } from "@/actions/appointments/create";
 import { updateAppointment } from "@/actions/appointments/update";
 import { deleteAppointment } from "@/actions/appointments/delete";
 import { z } from "zod";
-import { Calendar, Client, Service } from "@prisma/client";
+import { Client, Service } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -37,10 +37,13 @@ import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
+import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
+import { CalendarWithCollaborator } from "@/types/calendar";
+
 interface ExtendedAppointmentFormProps extends AppointmentFormProps {
   clients: Client[];
   services: Service[];
-  calendar: Calendar;
+  calendar: CalendarWithCollaborator;
 }
 
 export function AppointmentForm({
@@ -186,6 +189,13 @@ export function AppointmentForm({
         toast.error(
           "O horário de término deve ser depois do horário de início"
         );
+        return;
+      }
+
+      // Verificar disponibilidade do colaborador
+      const collaborator = calendar.collaborator;
+      if (!isCollaboratorAvailable(collaborator, startTime, endTime)) {
+        toast.error("Horário do profissional indisponível");
         return;
       }
 

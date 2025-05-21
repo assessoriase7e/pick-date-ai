@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
+import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
 
 // Adicione esta interface para os dados do cliente público
 interface PublicClientData {
@@ -91,6 +92,20 @@ export async function createAppointment({
                 });
 
                 actualClientId = newClient.id;
+            }
+        }
+
+        // Verificar disponibilidade do colaborador
+        if (collaboratorId) {
+            const collaborator = await prisma.collaborator.findUnique({
+                where: { id: collaboratorId }
+            });
+            
+            if (collaborator && !isCollaboratorAvailable(collaborator, startTime, endTime)) {
+                return {
+                    success: false,
+                    error: "Horário do profissional indisponível",
+                };
             }
         }
 

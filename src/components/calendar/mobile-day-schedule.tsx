@@ -4,11 +4,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { AppointmentFullData } from "@/types/calendar";
+import {
+  AppointmentFullData,
+  CalendarWithCollaborator,
+} from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
-import { Calendar, Client, Collaborator, Service } from "@prisma/client";
+import { Client, Collaborator, Service } from "@prisma/client";
 import { Separator } from "../ui/separator";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
@@ -19,7 +22,7 @@ interface MobileDayScheduleProps {
   collaborator: Collaborator;
   clients: Client[];
   services: Service[];
-  calendar: Calendar;
+  calendar: CalendarWithCollaborator;
 }
 
 export function MobileDaySchedule({
