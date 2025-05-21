@@ -308,7 +308,7 @@ model ClientService {
 
 model Calendar {
   id             String        @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
+  name           String?
   collaboratorId String?       @db.ObjectId
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
   userId         String
