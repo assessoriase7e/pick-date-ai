@@ -10,104 +10,90 @@ import { revalidatePath } from "next/cache";
 import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
 
 export async function updateAppointment(
-    id: string,
-    data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">
+  id: string,
+  data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">
 ) {
-    try {
-        const { userId } = await auth();
+  try {
+    const { userId } = await auth();
 
-        if (!userId) {
-            return {
-                success: false,
-                error: "Não autorizado",
-            };
-        }
-
-        const currentAppointment = await prisma.appointment.findUnique({
-            where: { id },
-        });
-
-        if (!currentAppointment) {
-            return {
-                success: false,
-                error: "Agendamento não encontrado",
-            };
-        }
-
-        // Verificar disponibilidade do colaborador
-        if (data.collaboratorId) {
-            const collaborator = await prisma.collaborator.findUnique({
-                where: { id: data.collaboratorId }
-            });
-            
-            if (collaborator && !isCollaboratorAvailable(collaborator, data.startTime, data.endTime)) {
-                return {
-                    success: false,
-                    error: "Horário do profissional indisponível",
-                };
-            }
-        }
-
-        const existingAppointment = await prisma.appointment.findFirst({
-            where: {
-                calendarId: currentAppointment.calendarId,
-                id: { not: id },
-                OR: [
-                    {
-                        AND: [
-                            { startTime: { lte: data.startTime } },
-                            { endTime: { gt: data.startTime } },
-                        ],
-                    },
-                    {
-                        AND: [
-                            { startTime: { lt: data.endTime } },
-                            { endTime: { gte: data.endTime } },
-                        ],
-                    },
-                    {
-                        AND: [
-                            { startTime: { gte: data.startTime } },
-                            { endTime: { lte: data.endTime } },
-                        ],
-                    },
-                ],
-                status: "scheduled",
-            },
-        });
-
-        if (existingAppointment) {
-            return {
-                success: false,
-                error: "Já existe um agendamento neste horário",
-            };
-        }
-
-        const appointment = await prisma.appointment.update({
-            where: { id },
-            data,
-        });
-
-        revalidatePath("/calendar");
-        revalidatePath("/appointments");
-
-        return {
-            success: true,
-            data: appointment,
-        };
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return {
-                success: false,
-                error: "Dados inválidos",
-                fieldErrors: error.flatten().fieldErrors,
-            };
-        }
-
-        console.error("[APPOINTMENT_UPDATE]", error);
-        return {
-            success: false,
-            error: "Falha ao atualizar agendamento",
-        };
+    if (!userId) {
+      return {
+        success: false,
+        error: "Não autorizado",
+      };
     }
+
+    const currentAppointment = await prisma.appointment.findUnique({
+      where: { id },
+    });
+
+    if (!currentAppointment) {
+      return {
+        success: false,
+        error: "Agendamento não encontrado",
+      };
+    }
+
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        calendarId: currentAppointment.calendarId,
+        id: { not: id },
+        OR: [
+          {
+            AND: [
+              { startTime: { lte: data.startTime } },
+              { endTime: { gt: data.startTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { lt: data.endTime } },
+              { endTime: { gte: data.endTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { gte: data.startTime } },
+              { endTime: { lte: data.endTime } },
+            ],
+          },
+        ],
+        status: "scheduled",
+      },
+    });
+
+    if (existingAppointment) {
+      return {
+        success: false,
+        error: "Já existe um agendamento neste horário",
+      };
+    }
+
+    const appointment = await prisma.appointment.update({
+      where: { id },
+      data,
+    });
+
+    revalidatePath("/calendar");
+    revalidatePath("/appointments");
+
+    return {
+      success: true,
+      data: appointment,
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Dados inválidos",
+        fieldErrors: error.flatten().fieldErrors,
+      };
+    }
+
+    console.error("[APPOINTMENT_UPDATE]", error);
+    return {
+      success: false,
+      error: "Falha ao atualizar agendamento",
+    };
+  }
 }
