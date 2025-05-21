@@ -5,12 +5,16 @@ import { hoursOfDay } from "@/mocked/hoursOfDay";
 import { useState } from "react";
 import { PublicAppointmentDetailsModal } from "./public-appointment-details-modal";
 import { PublicAppointmentCard } from "./public-appointment-card";
+import { Client, Service } from "@prisma/client";
 
 interface PublicDayScheduleGridProps {
   appointments: AppointmentFullData[];
   onHourClick: (hour: number) => void;
   selectedHour: number | null;
   selectedDate: string;
+  calendarId: string;
+  services: Service[];
+  clients: Client[];
 }
 
 export function PublicDayScheduleGrid({
@@ -18,6 +22,9 @@ export function PublicDayScheduleGrid({
   onHourClick,
   selectedHour,
   selectedDate,
+  calendarId,
+  services,
+  clients,
 }: PublicDayScheduleGridProps) {
   const activeAppointments = appointments.filter(
     (appointment) => appointment.status !== "canceled"
@@ -147,6 +154,9 @@ export function PublicDayScheduleGrid({
       <PublicAppointmentDetailsModal
         appointment={selectedAppointment}
         onClose={handleCloseModal}
+        calendarId={calendarId}
+        services={services}
+        clients={clients}
       />
     </div>
   );

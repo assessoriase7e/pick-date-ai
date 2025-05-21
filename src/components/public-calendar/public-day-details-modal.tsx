@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/drawer";
 import { useEffect, useState } from "react";
 import { PublicAppointmentForm } from "./public-appointment-form";
-import { Service } from "@prisma/client";
+import { Client, Service } from "@prisma/client";
 
 interface PublicDayDetailsModalProps {
   dayDetails: {
@@ -29,6 +29,7 @@ interface PublicDayDetailsModalProps {
   onHourClick: (hour: number | null) => void;
   calendarId: string;
   services: Service[];
+  clients: Client[];
 }
 
 export function PublicDayDetailsModal({
@@ -39,6 +40,7 @@ export function PublicDayDetailsModal({
   onHourClick,
   calendarId,
   services,
+  clients,
 }: PublicDayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
 
@@ -85,6 +87,7 @@ export function PublicDayDetailsModal({
           services={services}
           onSuccess={handleAppointmentSuccess}
           onCancel={handleCancelAppointment}
+          clients={clients}
         />
       );
     }
@@ -95,6 +98,9 @@ export function PublicDayDetailsModal({
         onHourClick={onHourClick}
         selectedHour={selectedHour}
         selectedDate={String(dayDetails.date)}
+        calendarId={calendarId}
+        services={services}
+        clients={clients}
       />
     );
   };

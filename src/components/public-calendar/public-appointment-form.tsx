@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { AppointmentFullData } from "@/types/calendar";
+import { updateAppointment } from "@/actions/appointments/update";
 
 const publicAppointmentSchema = z.object({
   clientId: z.string().min(1, "Cliente é obrigatório"),
@@ -40,8 +42,10 @@ interface PublicAppointmentFormProps {
   hour: number;
   calendarId: string;
   services: Service[];
+  clients: Client[]; // Nova prop
   onSuccess: () => void;
   onCancel: () => void;
+  appointment?: AppointmentFullData; // Novo prop opcional
 }
 
 export function PublicAppointmentForm({
@@ -51,13 +55,13 @@ export function PublicAppointmentForm({
   services,
   onSuccess,
   onCancel,
+  appointment,
+  clients,
 }: PublicAppointmentFormProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedServiceDuration, setSelectedServiceDuration] =
     useState<number>(60);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
   const [openClientDrawer, setOpenClientDrawer] = useState(false);
   const [openServiceDrawer, setOpenServiceDrawer] = useState(false);
   const [searchClient, setSearchClient] = useState("");
@@ -71,38 +75,22 @@ export function PublicAppointmentForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(publicAppointmentSchema),
     defaultValues: {
-      clientId: "",
-      serviceId: "",
-      startTime: defaultStartTime,
-      endTime: defaultEndTime,
-      notes: "",
+      clientId: appointment?.clientId || "",
+      serviceId: appointment?.serviceId || "",
+      startTime: appointment
+        ? moment(appointment.startTime).format("HH:mm")
+        : defaultStartTime,
+      endTime: appointment
+        ? moment(appointment.endTime).format("HH:mm")
+        : defaultEndTime,
+      notes: appointment?.notes || "",
     },
   });
-
-  // Buscar clientes quando o componente for montado
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        setIsLoadingClients(true);
-        const response = await getClientsByCalendar(calendarId);
-        if (response.success) {
-          setClients(response.data);
-        } else {
-          console.error("Erro ao buscar clientes:", response.error);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
-      } finally {
-        setIsLoadingClients(false);
-      }
-    };
-
-    fetchClients();
-  }, [calendarId]);
 
   // Atualiza a duração do serviço quando o serviço é selecionado
   useEffect(() => {
     const serviceId = form.watch("serviceId");
+    if (!services) return; // Adicionando verificação de segurança
     const service = services.find((s) => s.id === serviceId);
     if (service) {
       setSelectedServiceDuration(service.durationMinutes || 60);
@@ -151,36 +139,50 @@ export function PublicAppointmentForm({
         notes: values.notes || null,
         status: "scheduled",
         servicePrice:
-          services.find((s) => s.id === values.serviceId)?.price ?? null,
+          services?.find((s) => s.id === values.serviceId)?.price ?? null,
         finalPrice:
-          services.find((s) => s.id === values.serviceId)?.price ?? null,
+          services?.find((s) => s.id === values.serviceId)?.price ?? null,
         collaboratorId: null,
         clientId: values.clientId,
       };
 
-      const result = await createAppointment(appointmentData);
+      let result;
+      if (appointment) {
+        result = await updateAppointment(appointment.id, appointmentData);
+      } else {
+        result = await createAppointment(appointmentData);
+      }
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      toast.success("Agendamento criado com sucesso!");
+      toast.success(
+        appointment
+          ? "Agendamento atualizado com sucesso!"
+          : "Agendamento criado com sucesso!"
+      );
       onSuccess();
     } catch (error) {
-      console.error("Erro ao criar agendamento:", error);
-      toast.error("Ocorreu um erro ao criar o agendamento");
+      console.error("Erro ao salvar agendamento:", error);
+      toast.error(
+        appointment
+          ? "Ocorreu um erro ao atualizar o agendamento"
+          : "Ocorreu um erro ao criar o agendamento"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.fullName.toLowerCase().includes(searchClient.toLowerCase()) ||
-      client.phone.includes(searchClient)
-  );
+  const filteredClients =
+    clients?.filter(
+      (client) =>
+        client.fullName.toLowerCase().includes(searchClient.toLowerCase()) ||
+        client.phone.includes(searchClient)
+    ) || [];
 
-  const filteredServices = services.filter((service) =>
+  const filteredServices = (services || []).filter((service) =>
     service.name.toLowerCase().includes(searchService.toLowerCase())
   );
 
@@ -210,10 +212,9 @@ export function PublicAppointmentForm({
                       variant="outline"
                       role="combobox"
                       className="w-full justify-between"
-                      disabled={isLoadingClients}
                     >
                       {field.value
-                        ? clients.find((client) => client.id === field.value)
+                        ? clients?.find((client) => client.id === field.value)
                             ?.fullName || "Selecione um cliente"
                         : "Selecione um cliente"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -231,7 +232,10 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '60svh' }}>
+                    <div
+                      className="p-4 pt-0 overflow-y-auto"
+                      style={{ maxHeight: "60svh" }}
+                    >
                       {filteredClients.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum cliente encontrado.
@@ -272,10 +276,9 @@ export function PublicAppointmentForm({
                       variant="outline"
                       role="combobox"
                       className="w-full justify-between"
-                      disabled={isLoadingClients}
                     >
                       {field.value
-                        ? clients.find((client) => client.id === field.value)
+                        ? clients?.find((client) => client.id === field.value)
                             ?.fullName || "Selecione um cliente"
                         : "Selecione um cliente"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -293,7 +296,10 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '400px' }}>
+                    <div
+                      className="p-4 pt-0 overflow-y-auto"
+                      style={{ maxHeight: "400px" }}
+                    >
                       {filteredClients.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum cliente encontrado.
@@ -348,8 +354,9 @@ export function PublicAppointmentForm({
                       className="w-full justify-between"
                     >
                       {field.value
-                        ? services.find((service) => service.id === field.value)
-                            ?.name || "Selecione um serviço"
+                        ? services?.find(
+                            (service) => service.id === field.value
+                          )?.name || "Selecione um serviço"
                         : "Selecione um serviço"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -366,7 +373,10 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '60svh' }}>
+                    <div
+                      className="p-4 pt-0 overflow-y-auto"
+                      style={{ maxHeight: "60svh" }}
+                    >
                       {filteredServices.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum serviço encontrado.
@@ -410,8 +420,9 @@ export function PublicAppointmentForm({
                       className="w-full justify-between"
                     >
                       {field.value
-                        ? services.find((service) => service.id === field.value)
-                            ?.name || "Selecione um serviço"
+                        ? services?.find(
+                            (service) => service.id === field.value
+                          )?.name || "Selecione um serviço"
                         : "Selecione um serviço"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -428,7 +439,10 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: '400px' }}>
+                    <div
+                      className="p-4 pt-0 overflow-y-auto"
+                      style={{ maxHeight: "400px" }}
+                    >
                       {filteredServices.length === 0 ? (
                         <p className="text-center text-muted-foreground">
                           Nenhum serviço encontrado.
@@ -520,7 +534,13 @@ export function PublicAppointmentForm({
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Agendando..." : "Confirmar Agendamento"}
+            {isLoading
+              ? appointment
+                ? "Atualizando..."
+                : "Agendando..."
+              : appointment
+              ? "Atualizar Agendamento"
+              : "Confirmar Agendamento"}
           </Button>
         </div>
       </form>

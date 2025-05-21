@@ -10,14 +10,14 @@ type GetClientsByCalendarResponse =
     }
   | { success: false; error: string };
 
-export async function getClientsByCalendar(
-  calendarId: string
-): Promise<GetClientsByCalendarResponse> {
+export async function getClientsByCalendar(calendarId: string) {
   try {
     // Primeiro, buscar o calendário para obter o userId
     const calendar = await prisma.calendar.findUnique({
-      where: { id: calendarId },
-      select: { userId: true },
+      where: { id: calendarId }, // Aqui estava o problema, id estava undefined
+      select: {
+        userId: true,
+      },
     });
 
     if (!calendar) {
@@ -38,10 +38,10 @@ export async function getClientsByCalendar(
       data: clients,
     };
   } catch (error) {
-    console.error("Erro ao buscar clientes pelo calendário:", error);
+    console.error("Erro ao buscar clientes:", error);
     return {
       success: false,
-      error: "Falha ao buscar clientes",
+      error: "Erro ao buscar clientes",
     };
   }
 }

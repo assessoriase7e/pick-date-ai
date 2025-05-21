@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Service } from "@prisma/client";
+import { Client, Service } from "@prisma/client";
 
 moment.locale("pt-br");
 
@@ -18,6 +18,7 @@ interface SharedCalendarViewProps {
   initialAppointments: Record<string, AppointmentFullData[]>;
   selectedDay: Date | null;
   services: Service[];
+  clients: Client[]; // Nova prop
 }
 
 export function SharedCalendarView({
@@ -26,6 +27,7 @@ export function SharedCalendarView({
   initialAppointments,
   selectedDay,
   services,
+  clients, // Nova prop
 }: SharedCalendarViewProps) {
   const router = useRouter();
   const [accessCode, setAccessCode] = useState("");
@@ -128,6 +130,7 @@ export function SharedCalendarView({
           initialAppointments={initialAppointments}
           calendarId={calendar.id}
           services={services}
+          clients={clients}
         />
       </div>
     </div>

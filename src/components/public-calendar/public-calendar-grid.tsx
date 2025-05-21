@@ -6,7 +6,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { CalendarDay } from "../calendar/calendar-types";
 import { DesktopCalendarView } from "../calendar/views/desktop-calendar-view";
 import { PublicDayDetailsModal } from "./public-day-details-modal";
-import { Service } from "@prisma/client";
+import { Client, Service } from "@prisma/client";
 
 interface PublicCalendarGridProps {
   currentDate: Date;
@@ -17,6 +17,7 @@ interface PublicCalendarGridProps {
   initialAppointments: Record<string, AppointmentFullData[]>;
   calendarId: string;
   services: Service[];
+  clients: Client[];
 }
 
 export function PublicCalendarGrid({
@@ -28,6 +29,7 @@ export function PublicCalendarGrid({
   initialAppointments,
   calendarId,
   services,
+  clients,
 }: PublicCalendarGridProps) {
   const today = moment();
   const [dayDetails, setDayDetails] = useState<{
@@ -134,6 +136,7 @@ export function PublicCalendarGrid({
         onHourClick={handleHourClick}
         calendarId={calendarId}
         services={services}
+        clients={clients}
       />
     </>
   );

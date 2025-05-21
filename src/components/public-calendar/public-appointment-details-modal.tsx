@@ -6,42 +6,53 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AppointmentFullData } from "@/types/calendar";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { PublicAppointmentForm } from "./public-appointment-form";
+import { Client, Service } from "@prisma/client";
 
 interface PublicAppointmentDetailsModalProps {
   appointment: AppointmentFullData | null;
   onClose: () => void;
+  calendarId: string;
+  services: Service[];
+  clients: Client[];
 }
 
 export function PublicAppointmentDetailsModal({
   appointment,
   onClose,
+  calendarId,
+  services,
+  clients,
 }: PublicAppointmentDetailsModalProps) {
   if (!appointment) return null;
+
+  const handleEditSuccess = () => {
+    onClose();
+  };
+
+  const handleCancelEdit = () => {
+    onClose();
+  };
 
   return (
     <Dialog open={!!appointment} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Detalhes do Agendamento</DialogTitle>
+          <DialogTitle>Editar Agendamento</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-2">
-          <span>
-            <b>Cliente:</b> {appointment.client?.fullName}
-          </span>
-          <span>
-            <b>Serviço:</b> {appointment.service?.name}
-          </span>
-          <span>
-            <b>Horário:</b>{" "}
-            {moment(appointment.startTime).format("HH:mm")} -{" "}
-            {moment(appointment.endTime).format("HH:mm")}
-          </span>
-          {appointment.notes && (
-            <span>
-              <b>Observações:</b> {appointment.notes}
-            </span>
-          )}
-        </div>
+
+        <PublicAppointmentForm
+          date={new Date(appointment.startTime)}
+          hour={moment(appointment.startTime).hour()}
+          calendarId={calendarId}
+          services={services}
+          onSuccess={handleEditSuccess}
+          onCancel={handleCancelEdit}
+          appointment={appointment}
+          clients={clients}
+        />
       </DialogContent>
     </Dialog>
   );

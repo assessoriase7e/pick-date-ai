@@ -6,6 +6,7 @@ import { SharedCalendarView } from "@/components/public-calendar/shared-calendar
 import { notFound } from "next/navigation";
 import { getCalendarById } from "@/actions/calendars/getById";
 import { getServicesByUserId } from "@/actions/services/get-by-user-id";
+import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
 
 export default async function SharedCalendarPage({
   params,
@@ -27,6 +28,10 @@ export default async function SharedCalendarPage({
   }
 
   const calendar = calendarResponse.data;
+
+  // Buscar clientes do calendário
+  const clientsResponse = await getClientsByCalendar(calendarId);
+  const clients = clientsResponse.success ? clientsResponse.data || [] : [];
 
   // Buscar serviços do usuário dono do calendário
   const servicesResponse = await getServicesByUserId(calendar.userId, {
@@ -72,6 +77,7 @@ export default async function SharedCalendarPage({
       initialAppointments={appointmentsByDate}
       selectedDay={selectedDayDate}
       services={services}
+      clients={clients}
     />
   );
 }
