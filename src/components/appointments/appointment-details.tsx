@@ -20,6 +20,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatCurrency } from "@/lib/format-utils";
 import { AppointmentFullData } from "@/types/calendar";
 
+type StatusKey = "scheduled" | "canceled";
+
 interface AppointmentDetailsProps {
   appointment: AppointmentFullData | null;
   isOpen: boolean;
@@ -46,6 +48,13 @@ export function AppointmentDetails({
     return format(date, "HH:mm", { locale: ptBR });
   };
 
+  const i18nStatus: Record<StatusKey, string> = {
+    scheduled: "Agendado",
+    canceled: "cancelado",
+  };
+
+  console.log(appointment.status);
+
   const content = (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -63,7 +72,8 @@ export function AppointmentDetails({
           </p>
           {appointment.status && (
             <p>
-              <span className="font-medium">Status:</span> {appointment.status}
+              <span className="font-medium">Status:</span>{" "}
+              {i18nStatus[appointment.status as StatusKey]}
             </p>
           )}
         </div>

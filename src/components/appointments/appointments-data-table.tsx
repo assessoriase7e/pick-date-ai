@@ -78,14 +78,6 @@ export function AppointmentsDataTable({
     router.push(newUrl, { scroll: false });
   }, [searchTerm, collaboratorFilter, timeFilter]);
 
-  // Manipuladores de eventos
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const search = formData.get("search") as string;
-    setSearchTerm(search);
-  };
-
   const handleCollaboratorChange = (value: string) => {
     setCollaboratorFilter(value);
   };
