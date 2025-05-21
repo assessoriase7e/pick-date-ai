@@ -20,7 +20,7 @@ export function AppointmentCard({
   style,
   duration,
 }: AppointmentCardProps) {
-  const { startTime, endTime, client, service, notes } = appointment;
+  const { startTime, endTime, client, service } = appointment;
 
   return (
     <div style={style} className="z-50">
@@ -34,15 +34,16 @@ export function AppointmentCard({
         <Card className=" z-20 text-sm h-full border-none">
           <CardHeader
             className={cn(
-              "p-2 pl-4 items-center h-full bg-primary rounded-md ",
-              duration < 60 && "flex-row"
+              "p-2 pl-4  h-full bg-primary rounded-md relative pb-3"
             )}
           >
+            <span className="w-[90%] h-1 bg-background/20 absolute bottom-0 mx-auto left-0 right-0 rounded-t-2xl" />
+
             <h4 className="font-medium truncate flex items-center gap-2 text-background dark:text-foreground text-xs lg:text-md">
               <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
               <span> | </span>
               <p>{service.name}</p> <span className="hidden lg:block"> | </span>
-              <div className="flex  items-center hidden lg:flex">
+              <div className="flex hidden lg:flex">
                 <Clock className="h-3 w-3 mr-1" />
                 <span>
                   {moment(startTime).format("HH:mm")} -{" "}
