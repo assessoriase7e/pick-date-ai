@@ -13,8 +13,6 @@ interface CalendarTabsProps {
   calendars: CalendarFullData[];
   calendarId: string;
   setCalendarId: (id: string) => void;
-  hoveredTab: string | null;
-  setHoveredTab: (tab: string | null) => void;
   openEditModal: (calendar: CalendarFullData) => void;
   openDeleteModal: (calendar: CalendarFullData) => void;
   currentDate: Date;
@@ -22,16 +20,16 @@ interface CalendarTabsProps {
   goToNextMonth: () => void;
   goToToday: () => void;
   selectedDate: Date | null;
-  openDayDetails: (date: Date) => void;
+  openDayDetails?: (date: Date) => void;
   appointments: Record<string, AppointmentFullData[]>;
+  setOpen: (open: boolean) => void;
+  setShareOpen: (open: boolean) => void;
 }
 
 export function CalendarTabs({
   calendars,
   calendarId,
   setCalendarId,
-  hoveredTab,
-  setHoveredTab,
   openEditModal,
   openDeleteModal,
   currentDate,
@@ -40,6 +38,8 @@ export function CalendarTabs({
   goToToday,
   selectedDate,
   appointments,
+  setOpen,
+  setShareOpen,
 }: CalendarTabsProps) {
   const [showActionsModal, setShowActionsModal] = useState<boolean>(false);
   const [selectedCalendar, setSelectedCalendar] =
@@ -69,6 +69,7 @@ export function CalendarTabs({
             setSelectedCalendar(calendar);
             setShowActionsModal(true);
           }}
+          openShareModal={() => setShareOpen(true)}
         />
       )}
 
@@ -81,11 +82,11 @@ export function CalendarTabs({
           <DesktopCalendarTabs
             calendars={calendars}
             calendarId={calendarId}
-            hoveredTab={hoveredTab}
-            setHoveredTab={setHoveredTab}
             setCalendarIdQueryParam={handleChangeCalendar}
             openEditModal={openEditModal}
             openDeleteModal={openDeleteModal}
+            openShareModal={() => setShareOpen(true)}
+            setCreateOpen={setOpen}
           />
         )}
 

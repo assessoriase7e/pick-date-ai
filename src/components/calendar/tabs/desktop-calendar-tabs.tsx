@@ -1,5 +1,5 @@
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Share2, Trash2 } from "lucide-react";
 import { CalendarFullData } from "@/types/calendar";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
@@ -9,124 +9,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface DesktopCalendarTabsProps {
   calendars: CalendarFullData[];
   calendarId: string;
-  hoveredTab: string | null;
-  setHoveredTab: (tab: string | null) => void;
   setCalendarIdQueryParam: (id: string) => void;
   openEditModal: (calendar: CalendarFullData) => void;
   openDeleteModal: (calendar: CalendarFullData) => void;
-  selectMode?: boolean;
+  openShareModal: () => void;
+  setCreateOpen: (open: boolean) => void;
 }
 
 export function DesktopCalendarTabs({
   calendars,
   calendarId,
-  hoveredTab,
-  setHoveredTab,
   setCalendarIdQueryParam,
   openEditModal,
   openDeleteModal,
-  selectMode = false,
+  openShareModal,
+  setCreateOpen,
 }: DesktopCalendarTabsProps) {
-  const isMobile = useIsMobile();
-  const shouldUseSelectMode = selectMode || isMobile;
+  const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
 
-  if (shouldUseSelectMode) {
-    return (
-      <div className="w-full mb-4">
+  // Sempre usar o modo select no desktop
+  return (
+    <div className="w-full mb-4 flex items-center gap-2">
+      <div className="flex-1 flex gap-2">
         <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione um calendário" />
+          <SelectTrigger className="w-full max-w-[300px]">
+            <SelectValue placeholder="Selecione um calendário">
+              {selectedCalendar
+                ? `${selectedCalendar.name} | ${selectedCalendar.collaborator?.name}`
+                : "Selecione um calendário"}
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-[300px] overflow-y-auto">
             {calendars.map((calendar) => (
-              <SelectItem
-                key={calendar.id}
-                value={calendar.id}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {calendar.name} | {calendar.collaborator?.name}
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <Edit
-                      className="h-4 w-4 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(calendar);
-                      }}
-                    />
-                    <Trash2
-                      className="h-4 w-4 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDeleteModal(calendar);
-                      }}
-                    />
-                  </div>
-                </div>
+              <SelectItem key={calendar.id} value={calendar.id}>
+                {calendar.name} | {calendar.collaborator?.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-    );
-  }
-
-  return (
-    <TabsList className="hidden lg:flex w-full justify-start overflow-x-auto overflow-y-hidden pr-20">
-      {calendars.map((calendar: CalendarFullData) => (
-        <TabsTrigger
-          key={calendar.id}
-          value={calendar.id}
-          className="relative group"
-          onMouseEnter={() => setHoveredTab(calendar.id)}
-          onMouseLeave={() => setHoveredTab(null)}
-          onClick={(e) => {
-            if ((e.target as HTMLElement).closest(".calendar-actions")) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-            setCalendarIdQueryParam(calendar.id);
-          }}
-        >
-          <span className="flex items-center">
-            {calendar.name} | {calendar.collaborator?.name}
-            <div
-              className={`calendar-actions  flex items-center justify-center space-x-1 transition-all duration-200 ${
-                hoveredTab === calendar.id
-                  ? "opacity-100 max-w-20"
-                  : "opacity-0 max-w-0 overflow-hidden"
-              }`}
+        {selectedCalendar && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={openShareModal}
+              title="Compartilhar calendário"
             >
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openEditModal(calendar);
-                }}
-                className="p-1 rounded-full cursor-pointer"
-                aria-label="Editar calendário"
-              >
-                <Edit className="h-4 w-4" />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDeleteModal(calendar);
-                }}
-                className="p-1 rounded-full cursor-pointer"
-                aria-label="Excluir calendário"
-              >
-                <Trash2 className="h-4 w-4" />
-              </span>
-            </div>
-          </span>
-        </TabsTrigger>
-      ))}
-    </TabsList>
+              <Share2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => openEditModal(selectedCalendar)}
+              title="Editar calendário"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => openDeleteModal(selectedCalendar)}
+              title="Excluir calendário"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <Button onClick={() => setCreateOpen(true)} className="ml-auto">
+        Novo Calendário
+      </Button>
+    </div>
   );
 }

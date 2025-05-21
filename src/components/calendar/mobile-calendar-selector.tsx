@@ -7,6 +7,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarFullData } from "@/types/calendar";
+import { Button } from "../ui/button";
+import { Share2 } from "lucide-react";
 
 interface MobileCalendarSelectorProps {
   calendars: CalendarFullData[];
@@ -14,6 +16,7 @@ interface MobileCalendarSelectorProps {
   setCalendarId: (id: string) => void;
   setCalendarIdQueryParam: (id: string) => void;
   onLongPress: (calendar: CalendarFullData) => void;
+  openShareModal: () => void;
 }
 
 export function MobileCalendarSelector({
@@ -21,6 +24,7 @@ export function MobileCalendarSelector({
   calendarId,
   setCalendarIdQueryParam,
   onLongPress,
+  openShareModal,
 }: MobileCalendarSelectorProps) {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -50,32 +54,37 @@ export function MobileCalendarSelector({
 
   return (
     <div className="lg:hidden w-full mb-4">
-      <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
-        <SelectTrigger className="w-full">
-          <SelectValue>
-            {calendars.find((c) => c.id === calendarId)?.name ||
-              "Selecione um calendário"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {calendars.map((calendar: CalendarFullData) => (
-            <SelectItem
-              key={calendar.id}
-              value={calendar.id}
-              onTouchStart={() => handleTouchStart(calendar)}
-              onTouchEnd={handleTouchEnd}
-              onTouchMove={handleTouchMove}
-              onClick={() => setCalendarIdQueryParam(calendar.id)}
-            >
-              <span className="flex items-center justify-between w-full">
-                <span>
-                  {calendar.name} | {calendar.collaborator?.name}
+      <div className="flex gap-2 mb-2">
+        <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {calendars.find((c) => c.id === calendarId)?.name ||
+                "Selecione um calendário"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {calendars.map((calendar: CalendarFullData) => (
+              <SelectItem
+                key={calendar.id}
+                value={calendar.id}
+                onTouchStart={() => handleTouchStart(calendar)}
+                onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchMove}
+                onClick={() => setCalendarIdQueryParam(calendar.id)}
+              >
+                <span className="flex items-center justify-between w-full">
+                  <span>
+                    {calendar.name} | {calendar.collaborator?.name}
+                  </span>
                 </span>
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="icon" onClick={openShareModal}>
+          <Share2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
