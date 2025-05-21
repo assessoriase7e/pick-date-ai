@@ -21,7 +21,10 @@ export type AppointmentFullData = Appointment & {
   collaborator: Collaborator;
 };
 
-export type CalendarFullData = Calendar & {
-  appointments: AppointmentFullData[];
+export type CalendarWithCollaborator = Calendar & {
   collaborator: Collaborator;
+};
+
+export type CalendarFullData = CalendarWithCollaborator & {
+  appointments: AppointmentFullData[];
 };
