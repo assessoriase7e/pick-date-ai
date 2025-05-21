@@ -38,11 +38,11 @@ export function AppointmentCard({
               duration < 60 && "flex-row"
             )}
           >
-            <h4 className="font-medium truncate flex items-center gap-2 text-background dark:text-foreground">
+            <h4 className="font-medium truncate flex items-center gap-2 text-background dark:text-foreground text-xs lg:text-md">
               <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
               <span> | </span>
-              <p>{service.name}</p> <span> | </span>
-              <div className="flex items-center">
+              <p>{service.name}</p> <span className="hidden lg:block"> | </span>
+              <div className="flex  items-center hidden lg:flex">
                 <Clock className="h-3 w-3 mr-1" />
                 <span>
                   {moment(startTime).format("HH:mm")} -{" "}
