@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createCalendarSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
+  name: z.string().optional(),
   description: z.string().optional(),
   color: z.string().optional(),
 });
@@ -59,7 +59,7 @@ export const changeAppointmentStatusSchema = z.object({
 });
 
 export const calendarSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
+  name: z.string().optional(),
   collaboratorId: z.string(),
   isActive: z.boolean(),
   accessCode: z.string().nullable().optional(),

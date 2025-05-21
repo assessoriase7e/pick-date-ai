@@ -40,7 +40,11 @@ export function DesktopCalendarTabs({
           <SelectTrigger className="w-full max-w-[300px]">
             <SelectValue placeholder="Selecione um calendário">
               {selectedCalendar
-                ? `${selectedCalendar.name} | ${selectedCalendar.collaborator?.name}`
+                ? `${
+                    selectedCalendar?.name
+                      ? `${selectedCalendar.name} | ${selectedCalendar.collaborator.name}`
+                      : `${selectedCalendar.collaborator.name}`
+                  } `
                 : "Selecione um calendário"}
             </SelectValue>
           </SelectTrigger>
