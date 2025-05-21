@@ -41,8 +41,7 @@ export function CalendarContent({
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false); // Adicionar estes estados
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
   const { toast } = useToast();
 
@@ -169,9 +168,9 @@ export function CalendarContent({
 
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader 
-        setOpen={setOpen} 
-        calendarId={activeCalendarId} 
+      <CalendarHeader
+        setOpen={setOpen}
+        calendarId={activeCalendarId}
         shareOpen={shareOpen}
         setShareOpen={setShareOpen}
       />
