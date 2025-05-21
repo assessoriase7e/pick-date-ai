@@ -61,7 +61,7 @@ export function CalendarContent({
   const handleCreateCalendar = async (values: CalendarFormValues) => {
     try {
       const response = await createCalendar({
-        name: values.name,
+        name: values?.name || "",
         collaboratorId: values.collaboratorId,
         accessCode: values.accessCode,
       });
@@ -97,7 +97,7 @@ export function CalendarContent({
     try {
       await updateCalendar({
         id: selectedCalendar.id,
-        name: values.name,
+        name: values?.name || "",
         collaboratorId: values.collaboratorId,
         isActive: values.isActive,
         accessCode: values.accessCode,
@@ -173,6 +173,9 @@ export function CalendarContent({
         calendarId={activeCalendarId}
         shareOpen={shareOpen}
         setShareOpen={setShareOpen}
+        openEditModal={openEditModal}
+        selectedCalendar={selectedCalendar}
+        openDeleteModal={openDeleteModal}
       />
 
       <CalendarTabs

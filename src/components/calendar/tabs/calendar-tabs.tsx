@@ -69,7 +69,6 @@ export function CalendarTabs({
             setSelectedCalendar(calendar);
             setShowActionsModal(true);
           }}
-          openShareModal={() => setShareOpen(true)}
         />
       )}
 

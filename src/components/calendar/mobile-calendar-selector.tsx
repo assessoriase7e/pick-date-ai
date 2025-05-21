@@ -16,7 +16,6 @@ interface MobileCalendarSelectorProps {
   setCalendarId: (id: string) => void;
   setCalendarIdQueryParam: (id: string) => void;
   onLongPress: (calendar: CalendarFullData) => void;
-  openShareModal: () => void;
 }
 
 export function MobileCalendarSelector({
@@ -24,7 +23,6 @@ export function MobileCalendarSelector({
   calendarId,
   setCalendarIdQueryParam,
   onLongPress,
-  openShareModal,
 }: MobileCalendarSelectorProps) {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -83,9 +81,6 @@ export function MobileCalendarSelector({
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" onClick={openShareModal}>
-          <Share2 className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
