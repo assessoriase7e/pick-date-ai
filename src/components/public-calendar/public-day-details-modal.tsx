@@ -18,6 +18,8 @@ import { useEffect, useState } from "react";
 import { PublicAppointmentForm } from "./public-appointment-form";
 import { Client, Service } from "@prisma/client";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { cancelAppointment } from "@/actions/appointments/cancel";
+import { toast } from "sonner";
 
 interface PublicDayDetailsModalProps {
   dayDetails: {
@@ -65,16 +67,29 @@ export function PublicDayDetailsModal({
   );
 
   const handleAppointmentSuccess = () => {
-    // Fechar apenas o formulário, mas manter o modal de detalhes aberto
     setShowAppointmentForm(false);
     onHourClick(null);
-
     revalidatePathAction("/shared-calendar/calendarId");
   };
 
-  const handleCancelAppointment = () => {
-    setShowAppointmentForm(false);
-    onHourClick(null);
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      const result = await cancelAppointment({
+        id: appointmentId,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Agendamento cancelado com sucesso!");
+      setShowAppointmentForm(false);
+      onHourClick(null);
+      revalidatePathAction("/shared-calendar/calendarId");
+    } catch (error) {
+      console.error("Erro ao cancelar agendamento:", error);
+      toast.error("Ocorreu um erro ao cancelar o agendamento");
+    }
   };
 
   const renderContent = () => {

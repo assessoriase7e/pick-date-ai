@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Service, Client } from "@prisma/client";
-import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import {
@@ -50,7 +49,7 @@ interface PublicAppointmentFormProps {
   services: Service[];
   clients: Client[]; // Nova prop
   onSuccess: () => void;
-  onCancel: () => void;
+  onCancel: (appointmentId: string) => Promise<void>;
   appointment?: AppointmentFullData; // Novo prop opcional
 }
 
@@ -539,11 +538,8 @@ export function PublicAppointmentForm({
           )}
         />
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isLoading}>
+        <div className="pt-4">
+          <Button type="submit" disabled={isLoading} className="w-full mb-2">
             {isLoading
               ? appointment
                 ? "Atualizando..."
@@ -551,6 +547,14 @@ export function PublicAppointmentForm({
               : appointment
               ? "Atualizar Agendamento"
               : "Confirmar Agendamento"}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => onCancel(appointment?.id!)}
+            className="w-full"
+          >
+            Cancelar
           </Button>
         </div>
       </form>

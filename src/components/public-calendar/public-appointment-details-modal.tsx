@@ -6,10 +6,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AppointmentFullData } from "@/types/calendar";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { PublicAppointmentForm } from "./public-appointment-form";
 import { Client, Service } from "@prisma/client";
+import { cancelAppointment } from "@/actions/appointments/cancel";
+import { toast } from "sonner";
 
 interface PublicAppointmentDetailsModalProps {
   appointment: AppointmentFullData | null;
@@ -32,8 +32,22 @@ export function PublicAppointmentDetailsModal({
     onClose();
   };
 
-  const handleCancelEdit = () => {
-    onClose();
+  const handleCancelEdit = async (appointmentId: string): Promise<void> => {
+    try {
+      const result = await cancelAppointment({
+        id: appointmentId,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Agendamento cancelado com sucesso!");
+      onClose();
+    } catch (error) {
+      console.error("Erro ao cancelar agendamento:", error);
+      toast.error("Ocorreu um erro ao cancelar o agendamento");
+    }
   };
 
   return (
@@ -43,16 +57,18 @@ export function PublicAppointmentDetailsModal({
           <DialogTitle>Editar Agendamento</DialogTitle>
         </DialogHeader>
 
-        <PublicAppointmentForm
-          date={new Date(appointment.startTime)}
-          hour={moment(appointment.startTime).hour()}
-          calendarId={calendarId}
-          services={services}
-          onSuccess={handleEditSuccess}
-          onCancel={handleCancelEdit}
-          appointment={appointment}
-          clients={clients}
-        />
+        <div className="flex flex-col gap-4">
+          <PublicAppointmentForm
+            date={new Date(appointment.startTime)}
+            hour={moment(appointment.startTime).hour()}
+            calendarId={calendarId}
+            services={services}
+            onSuccess={handleEditSuccess}
+            onCancel={handleCancelEdit}
+            appointment={appointment}
+            clients={clients}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

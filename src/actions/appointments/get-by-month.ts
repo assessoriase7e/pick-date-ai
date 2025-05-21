@@ -4,6 +4,7 @@ import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 type GetAppointmentsByMonthReturn = {
   success: boolean;
@@ -15,7 +16,8 @@ export async function getAppointmentsByMonth(
   date: Date,
   calendarId: string,
   requireAuth: boolean = true,
-  includeCanceled: boolean = false
+  includeCanceled: boolean = false,
+  where: Prisma.AppointmentWhereInput = { status: "scheduled" }
 ): Promise<GetAppointmentsByMonthReturn> {
   let userId: string | undefined = undefined;
   if (requireAuth) {
@@ -35,7 +37,7 @@ export async function getAppointmentsByMonth(
       const start = startOfMonth(new Date(dateIso));
       const end = endOfMonth(new Date(dateIso));
 
-      const whereClause: any = {
+      const whereClause: Prisma.AppointmentWhereInput = {
         startTime: { gte: start, lte: end },
       };
 
@@ -57,12 +59,29 @@ export async function getAppointmentsByMonth(
       }
 
       const appointments = await prisma.appointment.findMany({
-        where: whereClause,
-        include: { client: true, service: true },
+        where: {
+          ...whereClause,
+          ...where,
+        },
+        include: {
+          client: true,
+          service: true,
+          calendar: {
+            select: {
+              collaborator: true,
+            },
+          },
+        },
         orderBy: { startTime: "asc" },
       });
 
-      return { success: true, data: appointments };
+      // Mapeia para garantir o campo collaborator no formato esperado
+      const formattedAppointments = appointments.map((appointment) => ({
+        ...appointment,
+        collaborator: appointment.calendar?.collaborator || null,
+      }));
+
+      return { success: true, data: formattedAppointments };
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
       return {
