@@ -13,9 +13,12 @@ export function PublicAppointmentCard({
 }: PublicAppointmentCardProps) {
   return (
     <div
-      className="bg-primary/10 p-2 flex flex-col justify-between cursor-pointer"
+      className="bg-primary p-2 flex flex-col justify-between cursor-pointer z-50"
       style={{ height: `${height}px`, minHeight: "20px" }}
-      onClick={() => onClick(appointment)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(appointment);
+      }}
     >
       <div className="flex items-center gap-2 text-sm text-muted-foreground"></div>
       <div className="flex flex-col gap-1">

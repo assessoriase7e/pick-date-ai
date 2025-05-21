@@ -22,7 +22,13 @@ import { Service, Client } from "@prisma/client";
 import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentFullData } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
@@ -427,7 +433,11 @@ export function PublicAppointmentForm({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </DialogTrigger>
+
                   <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle></DialogTitle>
+                    </DialogHeader>
                     <div className="p-4 pb-0">
                       <h2 className="text-lg font-semibold mb-4">
                         Selecionar Serviço

@@ -64,9 +64,8 @@ export function PublicDayScheduleGrid({
   };
 
   const handleHourClick = (hour: number) => {
-    if (!isHourOccupied(hour)) {
-      onHourClick(hour);
-    }
+    // Remover a condição para permitir cliques em todos os slots
+    onHourClick(hour);
   };
 
   const [selectedAppointment, setSelectedAppointment] =
@@ -110,16 +109,17 @@ export function PublicDayScheduleGrid({
                 <div
                   key={hour}
                   className={cn(
-                    "h-20 border-b transition-colors",
+                    "h-20 border-b transition-colors cursor-pointer",
                     isNightHour(hour) &&
                       "bg-background brightness-90 dark:brightness-50",
-                    !isOccupied && "hover:bg-muted/20 cursor-pointer",
-                    isOccupied && "bg-muted/10",
+                    !isOccupied && "hover:bg-muted/20",
+                    isOccupied && "bg-muted/10 hover:bg-muted/20",
                     selectedHour === hour && "ring-2 ring-primary"
                   )}
-                  onClick={() =>
-                    !isOccupied ? handleHourClick(hour) : undefined
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleHourClick(hour);
+                  }}
                 >
                   {isOccupied ? (
                     <div className="h-full">

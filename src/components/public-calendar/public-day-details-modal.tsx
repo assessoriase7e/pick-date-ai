@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { PublicAppointmentForm } from "./public-appointment-form";
 import { Client, Service } from "@prisma/client";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 interface PublicDayDetailsModalProps {
   dayDetails: {
@@ -64,12 +65,11 @@ export function PublicDayDetailsModal({
   );
 
   const handleAppointmentSuccess = () => {
-    // Fechar o formulário e atualizar a visualização
+    // Fechar apenas o formulário, mas manter o modal de detalhes aberto
     setShowAppointmentForm(false);
     onHourClick(null);
-    closeDayDetails();
-    // Recarregar a página para atualizar os agendamentos
-    window.location.reload();
+
+    revalidatePathAction("/shared-calendar/calendarId");
   };
 
   const handleCancelAppointment = () => {
