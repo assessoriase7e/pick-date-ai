@@ -1,7 +1,5 @@
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Share2, Trash2 } from "lucide-react";
 import { CalendarFullData } from "@/types/calendar";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
   Select,
   SelectContent,
@@ -51,7 +49,9 @@ export function DesktopCalendarTabs({
           <SelectContent className="max-h-[300px] overflow-y-auto">
             {calendars.map((calendar) => (
               <SelectItem key={calendar.id} value={calendar.id}>
-                {calendar.name} | {calendar.collaborator?.name}
+                {calendar.name
+                  ? `${calendar.name} | ${calendar.collaborator?.name}`
+                  : calendar.collaborator?.name}
               </SelectItem>
             ))}
           </SelectContent>
