@@ -20,7 +20,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Service, Client } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTrigger,
+} from "../ui/drawer";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +36,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentFullData } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
+import { AlertDialogHeader } from "../ui/alert-dialog";
 
 const publicAppointmentSchema = z.object({
   clientId: z.string().min(1, "Cliente é obrigatório"),
@@ -226,6 +232,7 @@ export function PublicAppointmentForm({
                     </Button>
                   </DrawerTrigger>
                   <DrawerContent>
+                    <DrawerHeader></DrawerHeader>
                     <div className="p-4 pb-0">
                       <h2 className="text-lg font-semibold mb-4">
                         Selecionar Cliente
