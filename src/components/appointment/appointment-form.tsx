@@ -39,6 +39,7 @@ type FormValues = z.infer<typeof createAppointmentSchema>;
 
 import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
 import { CalendarWithCollaborator } from "@/types/calendar";
+import { cn } from "@/lib/utils";
 
 interface ExtendedAppointmentFormProps extends AppointmentFormProps {
   clients: Client[];
@@ -134,7 +135,8 @@ export function AppointmentForm({
   // Atualiza o horário de término baseado na duração do serviço
   useEffect(() => {
     const startTime = form.watch("startTime");
-    if (selectedServiceDuration && startTime) {
+    // Só atualiza automaticamente se NÃO estiver editando (ou seja, criando novo)
+    if (!isEditing && selectedServiceDuration && startTime) {
       const newEndTime = moment(startTime, "HH:mm")
         .add(selectedServiceDuration, "minutes")
         .format("HH:mm");
@@ -305,10 +307,11 @@ export function AppointmentForm({
       onValueChange={setActiveTab}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="block grid w-full grid-cols-2">
         <TabsTrigger
           value="resumo"
           disabled={!isEditing && !form.getValues("clientId")}
+          className={cn("hidden", isEditing && "block")}
         >
           Resumo
         </TabsTrigger>
