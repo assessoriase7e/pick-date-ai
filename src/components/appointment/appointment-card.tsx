@@ -29,21 +29,23 @@ export function AppointmentCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
         onClick={onEdit}
-        className="h-full w-full cursor-pointer"
+        className="cursor-pointer h-full"
       >
-        <Card className=" z-20 text-sm h-full border-none">
+        <Card className="z-20 text-sm h-full border-none">
           <CardHeader
             className={cn(
-              "p-2 pl-4  h-full bg-primary rounded-md relative pb-3"
+              "h-full bg-primary rounded-md p-1 pl-4 border-b border-background",
+              duration <= 20 && "p-0 pl-4"
             )}
           >
             <span className="w-[90%] h-1 bg-background/20 absolute bottom-0 mx-auto left-0 right-0 rounded-t-2xl" />
 
-            <h4 className="font-medium truncate flex items-center gap-2 text-background dark:text-foreground text-xs lg:text-md">
+            <h4 className="font-medium truncate flex gap-2 text-background dark:text-foreground text-xs lg:text-md h-full z-50">
               <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
               <span> | </span>
-              <p>{service.name}</p> <span className="hidden lg:block"> | </span>
-              <div className="flex hidden lg:flex">
+              <p>{service?.name}</p>{" "}
+              <span className="hidden lg:block"> | </span>
+              <div className="hidden lg:flex">
                 <Clock className="h-3 w-3 mr-1" />
                 <span>
                   {moment(startTime).format("HH:mm")} -{" "}
