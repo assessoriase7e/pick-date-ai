@@ -21,7 +21,7 @@ export async function messageBuffer({
   const lastMessage = oldMessages[oldMessages.length - 1] ?? "";
 
   // Skip if the new message is the same as the last one
-  if (newMessage === lastMessage) return;
+  if (newMessage === lastMessage) return null;
 
   // Store the new message
   await redis.rpush(redisKey, newMessage);

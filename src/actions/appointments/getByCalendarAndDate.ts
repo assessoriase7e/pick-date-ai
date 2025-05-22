@@ -54,6 +54,7 @@ export async function getAppointmentsByCalendarAndDate(
       include: {
         client: true,
         service: true,
+        collaborator: true,
       },
       orderBy: {
         startTime: "asc",
