@@ -19,6 +19,9 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
+    rule: "Realize apenas uma ação por vez e aguarde a resposta do cliente antes de continuar, você não pode dizer que vai fazer algo sem que o usuário interaja como pedir para que ele aguarde por exemplo. Se precisar de uma nova ação, force o usuário a responder.",
+  },
+  {
     rule: "Antes de qualquer agendamento, utilize as ferramentas disponíveis para: verificar se o cliente está cadastrado (sem perguntar), consultar o expediente da empresa e do colaborador, e confirmar a disponibilidade do serviço e do profissional.",
   },
   {
@@ -38,8 +41,5 @@ export const defaultRules = [
   },
   {
     rule: "Sempre cumprimente o cliente pelo primeiro nome, quando disponível, e mantenha a comunicação curta, clara e objetiva, sem uso de pontos de exclamação.",
-  },
-  {
-    rule: "Realize apenas uma ação por vez e aguarde a resposta do cliente antes de continuar.",
   },
 ];

@@ -17,5 +17,4 @@ export const createClientTool = {
     required: ["fullName", "birthDate"],
     additionalProperties: false,
   },
-  strict: true,
 };

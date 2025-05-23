@@ -32,6 +32,7 @@ export const runAgent = async ({
     messages,
     tool_choice: "auto",
     tools,
+    temperature: 0.7,
   });
 
   const response = res.choices[0].message;

@@ -7,5 +7,4 @@ export const getBusinessProfileTool = {
     properties: {},
     additionalProperties: false,
   },
-  strict: true,
 };

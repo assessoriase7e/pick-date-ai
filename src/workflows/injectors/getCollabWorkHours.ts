@@ -2,39 +2,36 @@ import { prisma } from "@/lib/db";
 import { devConsoleLog } from "@/utils/devConsoleLog";
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
 
-export const getCollabsInjector = async ({
+export const getCollabWorkHoursInjector = async ({
   toolCall,
-  instance,
 }: {
   toolCall: ChatCompletionMessageToolCall;
-  instance: string;
 }) => {
-  devConsoleLog("Get collabs");
+  devConsoleLog("Get collab Work Hours");
 
-  const collabs = await prisma.collaborator.findMany({
-    where: {
-      user: {
-        evolutionInstances: {
-          some: {
-            name: instance,
-          },
-        },
-      },
-    },
-    omit: {
-      updatedAt: true,
-      createdAt: true,
-      userId: true,
+  const args = JSON.parse(toolCall.function.arguments);
+
+  console.log(args);
+
+  const collab = await prisma.collaborator.findFirst({
+    where: { id: args.collaboratorId },
+    select: {
       workingHours: true,
+      id: true,
+      name: true,
+      description: true,
+      profession: true,
     },
   });
+
+  console.log(collab);
 
   return {
     role: "tool" as const,
     tool_call_id: toolCall.id,
     content: JSON.stringify({
       success: true,
-      collabs,
+      collab,
     }),
   };
 };
