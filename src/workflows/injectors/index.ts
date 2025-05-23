@@ -6,6 +6,7 @@ import { getBusinessProfileInjector } from "./businessProfile";
 import { getClientInjector } from "./getClient";
 import { createClientInjector } from "./createClient";
 import { getServicesInjector } from "./getServices";
+import { getCollabsInjector } from "./getCollabs";
 
 type CreateClientArgs = {
   toolCall: ChatCompletionMessageToolCall;
@@ -29,6 +30,11 @@ type GetServicesArgs = {
   toolCall: ChatCompletionMessageToolCall;
 };
 
+type GetCollabsArgs = {
+  instance: string;
+  toolCall: ChatCompletionMessageToolCall;
+};
+
 type ToolInjectors = {
   createClient: (args: CreateClientArgs) => Promise<ChatCompletionMessageParam>;
   getClient: (args: GetClientArgs) => Promise<ChatCompletionMessageParam>;
@@ -36,6 +42,7 @@ type ToolInjectors = {
     args: GetBusinessArgs
   ) => Promise<ChatCompletionMessageParam>;
   getServices: (args: GetServicesArgs) => Promise<ChatCompletionMessageParam>;
+  getCollabs: (args: GetCollabsArgs) => Promise<ChatCompletionMessageParam>;
 };
 
 export const toolInjectors: ToolInjectors = {
@@ -43,4 +50,5 @@ export const toolInjectors: ToolInjectors = {
   getClient: getClientInjector,
   getBusinessProfile: getBusinessProfileInjector,
   getServices: getServicesInjector,
+  getCollabs: getCollabsInjector,
 };

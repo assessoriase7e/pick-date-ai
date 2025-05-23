@@ -1,6 +1,7 @@
 import { createClientTool } from "./createClient";
 import { getBusinessProfileTool } from "./getBusiness";
 import { getClientTool } from "./getClient";
+import { getCollabsTool } from "./getCollabs";
 import { getServicesTool } from "./getServices";
 
 export const agentTools = [
@@ -8,4 +9,5 @@ export const agentTools = [
   getClientTool,
   getBusinessProfileTool,
   getServicesTool,
+  getCollabsTool,
 ];
