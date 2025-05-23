@@ -1,10 +1,8 @@
 import { EvolutionData } from "@/types/evolutionData";
 import { messageBuffer } from "../utils/messageBuffer";
 import { getFormattedAttendantPrompt } from "@/utils/attendantPrompt";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { sendAgentMessage } from "../utils/sendMessage";
-import { llmWithTools } from "@/lib/langchain";
-import { RunnableSequence } from "@langchain/core/runnables";
+import { createChatRes } from "@/lib/openai";
 
 export const attedantAgent = async ({
   body,
@@ -24,23 +22,17 @@ export const attedantAgent = async ({
 
     if (!fullMessage) return;
 
-    //Get Prompt
-    const prompt = await getFormattedAttendantPrompt({
+    const systemPrompt = await getFormattedAttendantPrompt({
       instanceName: body.instance,
     });
 
-    // Set agent
-    const promptTemplate = ChatPromptTemplate.fromMessages([
-      ["system", prompt!],
-      ["user", "{topic}"],
-    ]);
+    const { llmRes } = await createChatRes({
+      system: systemPrompt,
+      user: fullMessage,
+    });
 
-    const chain = RunnableSequence.from([promptTemplate, llmWithTools]);
-
-    const result = await chain.invoke({ topic: fullMessage });
-
-    sendAgentMessage({
-      text: result.content as string,
+    await sendAgentMessage({
+      text: llmRes,
       instance: body.instance,
       number,
     });

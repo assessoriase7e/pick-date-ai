@@ -307,7 +307,7 @@ export function AppointmentForm({
       onValueChange={setActiveTab}
       className="w-full"
     >
-      <TabsList className="block grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger
           value="resumo"
           disabled={!isEditing && !form.getValues("clientId")}
