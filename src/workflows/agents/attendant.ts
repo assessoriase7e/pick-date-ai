@@ -5,7 +5,7 @@ import { sendAgentMessage } from "../utils/sendMessage";
 import { openai, runAgent } from "@/lib/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { agentTools } from "../tools";
-import { toolHandlers } from "../tools/toolHandlers";
+import { toolInjectors } from "../injectors";
 
 export const attedantAgent = async ({
   body,
@@ -47,9 +47,9 @@ export const attedantAgent = async ({
 
     const validToolsResults: ChatCompletionMessageParam[] = await Promise.all(
       tool_calls
-        .filter((toolCall) => toolHandlers[toolCall.function.name])
+        .filter((toolCall) => toolInjectors[toolCall.function.name])
         .map((toolCall) =>
-          toolHandlers[toolCall.function.name]({
+          toolInjectors[toolCall.function.name]({
             toolCall,
             phone: clientPhone,
             instance: body.instance,

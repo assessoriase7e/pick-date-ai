@@ -2,9 +2,9 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
 } from "openai/resources/index.mjs";
-import { getBusinessProfileInjector } from "../injectors/businessProfile";
-import { getClientInjector } from "../injectors/getClient";
-import { createClientInjector } from "../injectors/createClient";
+import { getBusinessProfileInjector } from "./businessProfile";
+import { getClientInjector } from "./getClient";
+import { createClientInjector } from "./createClient";
 
 type CreateClientArgs = {
   toolCall: ChatCompletionMessageToolCall;
@@ -23,7 +23,7 @@ type GetBusinessArgs = {
   toolCall: ChatCompletionMessageToolCall;
 };
 
-type ToolHandlers = {
+type ToolInjectors = {
   createClient: (args: CreateClientArgs) => Promise<ChatCompletionMessageParam>;
   getClient: (args: GetClientArgs) => Promise<ChatCompletionMessageParam>;
   getBusinessProfile: (
@@ -31,7 +31,7 @@ type ToolHandlers = {
   ) => Promise<ChatCompletionMessageParam>;
 };
 
-export const toolHandlers: ToolHandlers = {
+export const toolInjectors: ToolInjectors = {
   createClient: ({ toolCall, phone, instance }) => {
     return createClientInjector({ toolCall, phone, instance });
   },
