@@ -7,7 +7,7 @@ export const getCollabWorkHoursTool = {
     properties: {
       collaboratorId: {
         type: "string",
-        description: "string",
+        description: "Chave primária do colaborador no banco de dados (id).",
       },
     },
     required: ["collaboratorId"],

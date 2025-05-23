@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { devConsoleLog } from "@/utils/devConsoleLog";
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
 
-export const getCollabWorkHoursInjector = async ({
+export const getCollabCalendarTimesInjector = async ({
   toolCall,
 }: {
   toolCall: ChatCompletionMessageToolCall;
@@ -14,11 +14,15 @@ export const getCollabWorkHoursInjector = async ({
   const collab = await prisma.collaborator.findFirst({
     where: { id: args.collaboratorId },
     select: {
-      workingHours: true,
       id: true,
       name: true,
-      description: true,
-      profession: true,
+      calendars: {
+        omit: {
+          createdAt: true,
+          collaboratorId: true,
+          accessCode: true,
+        },
+      },
     },
   });
 

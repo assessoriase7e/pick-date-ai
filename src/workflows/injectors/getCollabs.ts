@@ -25,7 +25,6 @@ export const getCollabsInjector = async ({
       updatedAt: true,
       createdAt: true,
       userId: true,
-      workingHours: true,
     },
   });
 
