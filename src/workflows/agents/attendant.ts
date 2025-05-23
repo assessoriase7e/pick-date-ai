@@ -6,6 +6,8 @@ import { openai, runAgent } from "@/lib/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { agentTools } from "../tools";
 import { toolInjectors } from "../injectors";
+import moment from "moment";
+import { saveMessageToHistory } from "@/utils/redis";
 
 export const attedantAgent = async ({
   body,
@@ -31,7 +33,10 @@ export const attedantAgent = async ({
 
     const { llmRes, tool_calls } = await runAgent({
       sessionId: body.data.key.remoteJid + "_temp",
-      system: systemPrompt,
+      system: `Data de hoje: ${moment().date()}
+      \n
+      ${systemPrompt}
+      `,
       user: fullMessage,
       tools: agentTools.map((t) => ({ type: "function", function: t })),
     });
@@ -48,13 +53,20 @@ export const attedantAgent = async ({
     const validToolsResults: ChatCompletionMessageParam[] = await Promise.all(
       tool_calls
         .filter((toolCall) => toolInjectors[toolCall.function.name])
-        .map((toolCall) =>
-          toolInjectors[toolCall.function.name]({
+        .map(async (toolCall) => {
+          const result = await toolInjectors[toolCall.function.name]({
             toolCall,
             phone: clientPhone,
             instance: body.instance,
-          })
-        )
+          });
+          if (result)
+            await saveMessageToHistory(
+              body.data.key.remoteJid + "_temp",
+              "assistant",
+              JSON.stringify(result)
+            );
+          return result;
+        })
     );
 
     const messagesForFollowUp: ChatCompletionMessageParam[] = [

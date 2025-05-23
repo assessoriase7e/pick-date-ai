@@ -6,6 +6,8 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENAI_KEY,
 });
 
+const MAX_HISTORY_LENGTH = 20;
+
 export const runAgent = async ({
   sessionId,
   system,
@@ -20,10 +22,12 @@ export const runAgent = async ({
   // Recupera histórico anterior
   const history = await getChatHistory(sessionId);
 
+  const limitedHistory = history.slice(-MAX_HISTORY_LENGTH);
+
   // Mensagens para a nova chamada
   const messages = [
     { role: "system", content: system },
-    ...history,
+    ...limitedHistory,
     { role: "user", content: user },
   ];
 
