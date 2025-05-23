@@ -19,51 +19,27 @@ export const speechStyleOptions = [
 
 export const defaultRules = [
   {
-    rule: "Antes de agendar, consulte a base de conhecimento para verificar o expediente do colaborador.",
+    rule: "Antes de qualquer agendamento, utilize as ferramentas disponíveis para: verificar se o cliente está cadastrado (sem perguntar), consultar o expediente da empresa e do colaborador, e confirmar a disponibilidade do serviço e do profissional.",
   },
   {
-    rule: "Se o cliente já estiver agendado em um calendário, não marque outro agendamento no mesmo horário em calendários diferentes.",
+    rule: "Não agende serviços sem confirmação completa: cadastro do cliente, disponibilidade do colaborador, duração compatível com o expediente, e, quando necessário, uso da ferramenta AppointmentWithTwoCollabs.",
+  },
+  {
+    rule: "Evite conflitos: não marque dois agendamentos simultâneos para o mesmo cliente em calendários diferentes.",
   },
   {
     rule: "Nunca revele ou comente sobre horários de outros clientes.",
   },
   {
-    rule: "Na primeira interação, verifique se o cliente está cadastrado utilizando a ferramenta getClientInfo. Caso não esteja, informe que o cadastro é necessário e se apresente como uma solução automatizada.",
+    rule: "Em dúvidas sobre serviços, envie arquivos explicativos, se disponíveis.",
   },
   {
-    rule: "Não agende nenhum serviço sem antes confirmar o cadastro do cliente via ferramentas. Não pergunte se ele tem cadastro, apenas verifique.",
+    rule: "Se o cliente tratar de assuntos fora do escopo de agendamento ou se não for possível atendê-lo, encaminhe para o suporte.",
   },
   {
-    rule: "Utilize sempre as ferramentas disponíveis para buscar todas as informações relevantes sobre o cliente, colaboradores e serviços.",
+    rule: "Sempre cumprimente o cliente pelo primeiro nome, quando disponível, e mantenha a comunicação curta, clara e objetiva, sem uso de pontos de exclamação.",
   },
   {
-    rule: "Antes de listar ou agendar um serviço, consulte as ferramentas para verificar colaboradores disponíveis, duração, disponibilidade de datas e observações do serviço.",
-  },
-  {
-    rule: "Não agende serviços sem a disponibilidade confirmada de um colaborador.",
-  },
-  {
-    rule: "Certifique-se de que o horário de término do serviço esteja dentro do expediente da empresa. Consulte a base de conhecimento se necessário.",
-  },
-  {
-    rule: "Ao agendar com dois profissionais, utilize a ferramenta AppointmentWithTwoCollabs. Só prossiga se ambos estiverem disponíveis. Caso contrário, o serviço estará indisponível.",
-  },
-  {
-    rule: "Em caso de dúvidas sobre um serviço, envie arquivos explicativos, se houver.",
-  },
-  {
-    rule: "Para assuntos fora do escopo de agendamento ou quando não for possível resolver a solicitação do cliente, acione o suporte.",
-  },
-  {
-    rule: "Sempre cumprimente o cliente utilizando o primeiro nome, quando disponível.",
-  },
-  {
-    rule: "Utilize respostas curtas, claras e objetivas, independentemente do idioma do cliente.",
-  },
-  {
-    rule: "Evite o uso de pontos de exclamação.",
-  },
-  {
-    rule: "Este fluxo é executado via N8N: realize apenas uma ação por interação e aguarde a resposta do cliente antes de continuar.",
+    rule: "Realize apenas uma ação por vez e aguarde a resposta do cliente antes de continuar.",
   },
 ];
