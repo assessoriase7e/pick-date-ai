@@ -1,6 +1,3 @@
-import { prisma } from "@/lib/db";
-import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
-
 export const createClientTool = {
   name: "createClient",
   description:
@@ -21,44 +18,4 @@ export const createClientTool = {
     additionalProperties: false,
   },
   strict: true,
-};
-
-export const createClientDataInjection = async ({
-  toolCall,
-  phone,
-  instance,
-}: {
-  toolCall: ChatCompletionMessageToolCall;
-  phone: string;
-  instance: string;
-}) => {
-  console.log("Create Client");
-  const args = JSON.parse(toolCall.function.arguments);
-
-  const user = await prisma.user.findFirst({
-    where: {
-      evolutionInstances: {
-        some: {
-          name: instance,
-        },
-      },
-    },
-  });
-
-  const data = {
-    ...args,
-    phone: phone || args.phone,
-    userId: user.id,
-  };
-
-  const client = await prisma.client.create({ data });
-
-  return {
-    role: "tool" as const,
-    tool_call_id: toolCall.id,
-    content: JSON.stringify({
-      success: true,
-      name: client.fullName,
-    }),
-  };
 };
