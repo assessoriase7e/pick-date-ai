@@ -5,6 +5,7 @@ import {
 import { getBusinessProfileInjector } from "./businessProfile";
 import { getClientInjector } from "./getClient";
 import { createClientInjector } from "./createClient";
+import { getServicesInjector } from "./getServices";
 
 type CreateClientArgs = {
   toolCall: ChatCompletionMessageToolCall;
@@ -23,24 +24,23 @@ type GetBusinessArgs = {
   toolCall: ChatCompletionMessageToolCall;
 };
 
+type GetServicesArgs = {
+  instance: string;
+  toolCall: ChatCompletionMessageToolCall;
+};
+
 type ToolInjectors = {
   createClient: (args: CreateClientArgs) => Promise<ChatCompletionMessageParam>;
   getClient: (args: GetClientArgs) => Promise<ChatCompletionMessageParam>;
   getBusinessProfile: (
     args: GetBusinessArgs
   ) => Promise<ChatCompletionMessageParam>;
+  getServices: (args: GetServicesArgs) => Promise<ChatCompletionMessageParam>;
 };
 
 export const toolInjectors: ToolInjectors = {
-  createClient: ({ toolCall, phone, instance }) => {
-    return createClientInjector({ toolCall, phone, instance });
-  },
-
-  getClient: ({ phone, instance, toolCall }) => {
-    return getClientInjector({ phone, instance, toolCall });
-  },
-
-  getBusinessProfile: ({ instance, toolCall }) => {
-    return getBusinessProfileInjector({ instance, toolCall });
-  },
+  createClient: createClientInjector,
+  getClient: getClientInjector,
+  getBusinessProfile: getBusinessProfileInjector,
+  getServices: getServicesInjector,
 };
