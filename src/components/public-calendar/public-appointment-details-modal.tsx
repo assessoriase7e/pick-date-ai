@@ -32,11 +32,17 @@ export function PublicAppointmentDetailsModal({
     onClose();
   };
 
-  const handleCancelEdit = async (appointmentId: string): Promise<void> => {
+  const handleCancelEdit = async (
+    appointmentId: string,
+    isPublic: boolean = false
+  ): Promise<void> => {
     try {
-      const result = await cancelAppointment({
-        id: appointmentId,
-      });
+      const result = await cancelAppointment(
+        {
+          id: appointmentId,
+        },
+        isPublic
+      );
 
       if (!result.success) {
         throw new Error(result.error);

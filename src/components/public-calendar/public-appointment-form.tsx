@@ -36,7 +36,6 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentFullData } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
-import { AlertDialogHeader } from "../ui/alert-dialog";
 
 const publicAppointmentSchema = z.object({
   clientId: z.string().min(1, "Cliente é obrigatório"),
@@ -55,7 +54,7 @@ interface PublicAppointmentFormProps {
   services: Service[];
   clients: Client[]; // Nova prop
   onSuccess: () => void;
-  onCancel: (appointmentId: string) => Promise<void>;
+  onCancel: (appointmentId: string, isPublic?: boolean) => Promise<void>;
   appointment?: AppointmentFullData; // Novo prop opcional
 }
 
@@ -159,9 +158,12 @@ export function PublicAppointmentForm({
 
       let result;
       if (appointment) {
-        result = await updateAppointment(appointment.id, appointmentData);
+        result = await updateAppointment(appointment.id, appointmentData, true);
       } else {
-        result = await createAppointment(appointmentData);
+        result = await createAppointment({
+          ...appointmentData,
+          isPublic: true,
+        });
       }
 
       if (!result.success) {
@@ -558,7 +560,7 @@ export function PublicAppointmentForm({
           <Button
             type="button"
             variant="destructive"
-            onClick={() => onCancel(appointment?.id!)}
+            onClick={() => onCancel(appointment?.id!, true)}
             className="w-full"
           >
             Cancelar

@@ -1,30 +1,21 @@
 "use server";
-
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { updateAppointmentSchema } from "@/validators/calendar";
 import { z } from "zod";
 import { Appointment } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
-
 export async function updateAppointment(
   id: string,
-  data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">
+  data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">,
+  isPublic?: boolean
 ) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return {
-        success: false,
-        error: "Não autorizado",
-      };
-    }
+    let userId: string | null = null;
 
     const currentAppointment = await prisma.appointment.findUnique({
       where: { id },
+      select: { calendarId: true, userId: true },
     });
 
     if (!currentAppointment) {
@@ -34,9 +25,46 @@ export async function updateAppointment(
       };
     }
 
+    const calendarId = currentAppointment.calendarId;
+
+    if (isPublic) {
+      const calendar = await prisma.calendar.findUnique({
+        where: { id: calendarId },
+        select: { userId: true },
+      });
+
+      if (!calendar) {
+        return {
+          success: false,
+          error: "Calendário não encontrado",
+        };
+      }
+
+      userId = calendar.userId;
+    } else {
+      const authResult = await auth();
+
+      if (!authResult || !authResult.userId) {
+        return {
+          success: false,
+          error: "Não autorizado",
+        };
+      }
+
+      userId = authResult.userId;
+
+      // Segurança extra: garantir que o agendamento pertence ao usuário autenticado
+      if (currentAppointment.userId !== userId) {
+        return {
+          success: false,
+          error: "Você não tem permissão para editar este agendamento",
+        };
+      }
+    }
+
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
-        calendarId: currentAppointment.calendarId,
+        calendarId,
         id: { not: id },
         OR: [
           {

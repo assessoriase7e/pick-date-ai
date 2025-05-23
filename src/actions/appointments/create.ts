@@ -1,11 +1,11 @@
 "use server";
+
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
 
 // Adicione esta interface para os dados do cliente público
-interface PublicClientData {
+interface isPublic {
   fullName: string;
   email: string;
   phone: string;
@@ -22,9 +22,9 @@ export async function createAppointment({
   servicePrice,
   finalPrice,
   collaboratorId,
-  publicClientData,
+  isPublic,
 }: {
-  clientId: string;
+  clientId?: string;
   serviceId: string;
   calendarId: string;
   startTime: Date;
@@ -34,14 +34,13 @@ export async function createAppointment({
   servicePrice: number | null;
   finalPrice: number | null;
   collaboratorId: string | null;
-  publicClientData?: PublicClientData;
+  isPublic?: Boolean;
 }) {
   try {
-    // Get the authenticated user ID or use the calendar's user ID for public appointments
     let userId: string | null = null;
 
-    // For public appointments, get the userId from the calendar
-    if (publicClientData) {
+    // Se for cliente público, buscar o userId pelo calendário
+    if (isPublic) {
       const calendar = await prisma.calendar.findUnique({
         where: { id: calendarId },
         select: { userId: true },
@@ -56,44 +55,21 @@ export async function createAppointment({
 
       userId = calendar.userId;
     } else {
-      // For authenticated appointments, get the userId from auth
+      // Caso contrário, autenticação é obrigatória
       const authResult = await auth();
-      userId = authResult.userId;
 
-      if (!userId) {
+      if (!authResult || !authResult.userId) {
         return {
           success: false,
           error: "Usuário não autenticado",
         };
       }
+
+      userId = authResult.userId;
     }
 
-    // Se temos dados de cliente público, criar um cliente temporário
-    let actualClientId = clientId;
-
-    if (publicClientData) {
-      // Verificar se já existe um cliente com este email
-      const existingClient = await prisma.client.findFirst({
-        where: {
-          phone: publicClientData.phone,
-        },
-      });
-
-      if (existingClient) {
-        actualClientId = existingClient.id;
-      } else {
-        // Criar um novo cliente
-        const newClient = await prisma.client.create({
-          data: {
-            fullName: publicClientData.fullName,
-            phone: publicClientData.phone,
-            userId: userId,
-          },
-        });
-
-        actualClientId = newClient.id;
-      }
-    }
+    // Criar ou reutilizar cliente público
+    let actualClientId = clientId ?? "";
 
     // Verificar conflitos de horário
     const conflictingAppointment = await prisma.appointment.findFirst({
@@ -118,8 +94,10 @@ export async function createAppointment({
           {
             startTime: {
               gte: startTime,
+              lte: endTime,
             },
             endTime: {
+              gte: startTime,
               lte: endTime,
             },
           },
@@ -136,7 +114,7 @@ export async function createAppointment({
       };
     }
 
-    // Se não houver preço definido, busca o preço do serviço
+    // Preencher preços caso estejam ausentes
     let finalServicePrice = servicePrice;
     let finalFinalPrice = finalPrice;
 
@@ -164,7 +142,7 @@ export async function createAppointment({
         servicePrice: finalServicePrice,
         finalPrice: finalFinalPrice,
         collaboratorId,
-        userId: userId, // Adicionar o userId aqui
+        userId,
       },
       include: {
         client: true,
