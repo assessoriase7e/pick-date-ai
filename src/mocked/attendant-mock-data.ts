@@ -22,6 +22,9 @@ export const defaultRules = [
     rule: "Responda com poucas palavras, seu obejtivo principal é agendar o cliente.",
   },
   {
+    rule: "Agende quando o cliente passar toda as informações. Não dependa da confirmação dele.",
+  },
+  {
     rule: "Evite confirmações excessivas, seja proativo.",
   },
   {
