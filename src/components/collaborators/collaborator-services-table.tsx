@@ -12,6 +12,7 @@ import { Calendar, ScissorsSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
 
 interface CollaboratorServicesTableProps {
   appointments: AppointmentFullData[];
@@ -99,6 +100,33 @@ export function CollaboratorServicesTable({
     },
   ];
 
+  // Componente de paginação personalizado para usar a paginação do servidor
+  const CustomPagination = () => {
+    return (
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(pagination.currentPage - 1)}
+          disabled={pagination.currentPage <= 1}
+        >
+          Anterior
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Página {pagination.currentPage} de {pagination.totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(pagination.currentPage + 1)}
+          disabled={pagination.currentPage >= pagination.totalPages}
+        >
+          Próxima
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <DataTable
@@ -106,9 +134,12 @@ export function CollaboratorServicesTable({
         data={appointments}
         sortableColumns={["service.name", "startTime", "client.fullName"]}
         pageSize={10}
-        enablePagination={true}
+        enablePagination={false} // Desativamos a paginação interna
         searchPlaceholder="Buscar serviços..."
       />
+      
+      {/* Paginação customizada usando os dados do servidor */}
+      {pagination.totalPages > 1 && <CustomPagination />}
 
       {/* Visualização Mobile */}
       <div className="md:hidden space-y-4">
@@ -155,6 +186,13 @@ export function CollaboratorServicesTable({
           ))
         )}
       </div>
+      
+      {/* Paginação mobile */}
+      {pagination.totalPages > 1 && (
+        <div className="md:hidden">
+          <CustomPagination />
+        </div>
+      )}
     </div>
   );
 }
