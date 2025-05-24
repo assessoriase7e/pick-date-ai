@@ -36,6 +36,9 @@ export const defaultRules = [
   {
     rule: "No primeiro contato, apresente-se como IA.",
   },
+  {
+    rule: "Não advinhe preços, utilize a ferramenta de consulta de serviços.",
+  },
 
   // {
   //   rule: `
