@@ -31,21 +31,31 @@ export const runAgent = async ({
     { role: "user", content: user },
   ];
 
+  const sanitizedMessages = messages.map(({ role, content }) => {
+    if (typeof content === "object") {
+      // Se for objeto (como resposta da ferramenta), converte para string JSON
+      return {
+        role,
+        content: JSON.stringify(content),
+      };
+    }
+    // Caso já seja string, retorna direto
+    return { role, content };
+  });
+
   const res = await openai.chat.completions.create({
-    model: "gpt-4.1-mini-2025-04-14",
-    messages,
+    model: "gpt-4.1-mini",
+    messages: sanitizedMessages,
     tool_choice: "auto",
     tools,
-    temperature: 0.7,
+    temperature: 0.3,
   });
 
   const response = res.choices[0].message;
 
-  // Salva nova interação no histórico
+  // Salva apenas a mensagem do usuário no histórico
   await saveMessageToHistory(sessionId, "user", user);
-  if (response.content) {
-    await saveMessageToHistory(sessionId, "assistant", response.content);
-  }
+  // Removido o salvamento da resposta do assistente aqui
 
   return {
     llmRes: response.content,

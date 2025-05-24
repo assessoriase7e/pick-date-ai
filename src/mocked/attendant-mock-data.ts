@@ -22,6 +22,38 @@ export const defaultRules = [
     rule: "Realize apenas uma ação por vez e aguarde a resposta do cliente antes de continuar, você não pode dizer que vai fazer algo sem que o usuário interaja como pedir para que ele aguarde por exemplo. Se precisar de uma nova ação, force o usuário a responder.",
   },
   {
+    rule: `
+    Antes de prometer qualquer ação:
+    - Verifique se você tem todas as ferramentas necessárias
+    - Confirme a disponibilidade do recurso (horário, profissional, etc.)
+    `,
+  },
+  {
+    rule: `
+    Ao prometer uma ação:
+    - Execute-a imediatamente
+    - Informe o resultado ao usuário
+    - Em caso de erro, explique o que aconteceu
+    `,
+  },
+  {
+    rule: `
+    Nunca deixe uma conversa sem conclusão:
+    - Sempre confirme se a ação foi realizada
+    - Forneça uma resposta clara sobre o resultado
+    - Pergunte se o usuário precisa de mais alguma coisa
+    `,
+  },
+  {
+    rule: "Não pergunte novamente sobre dados que já foram fornecidos.",
+  },
+  {
+    rule: "Mantenha a coerência e considere as escolhas já feitas pelo cliente.",
+  },
+  {
+    rule: "Use as informações anteriores para prosseguir.",
+  },
+  {
     rule: "Antes de qualquer agendamento, utilize as ferramentas disponíveis para: verificar se o cliente está cadastrado (sem perguntar), consultar o expediente da empresa e do colaborador, e confirmar a disponibilidade do serviço e do profissional.",
   },
   {

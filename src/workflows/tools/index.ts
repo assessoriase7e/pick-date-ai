@@ -1,3 +1,4 @@
+import { createAppointmentTool } from "./createAppointment";
 import { createClientTool } from "./createClient";
 import { getBusinessProfileTool } from "./getBusiness";
 import { getClientTool } from "./getClient";
@@ -14,4 +15,5 @@ export const agentTools = [
   getCollabsTool,
   getCollabWorkHoursTool,
   getCollabCalendarTimesTool,
+  createAppointmentTool,
 ];

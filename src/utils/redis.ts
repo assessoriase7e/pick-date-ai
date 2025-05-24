@@ -5,10 +5,22 @@ const getHistoryKey = (sessionId: string) => `chat:history:${sessionId}`;
 export const saveMessageToHistory = async (
   sessionId: string,
   role: "user" | "system" | "assistant",
-  content: string
+  content: string | object
 ) => {
   const key = getHistoryKey(sessionId);
-  const message = JSON.stringify({ role, content });
+
+  // Se content for string e for JSON válido, converte para objeto:
+  let contentToSave = content;
+  if (typeof content === "string") {
+    try {
+      contentToSave = JSON.parse(content);
+    } catch {
+      // não é JSON, salva como string mesmo
+      contentToSave = content;
+    }
+  }
+
+  const message = JSON.stringify({ role, content: contentToSave });
   await redis.rpush(key, message);
   await redis.expire(key, 43200);
 };
