@@ -30,6 +30,7 @@ export const defaultRules = [
   {
     rule: "No primeiro contato, apresente-se como IA.",
   },
+
   // {
   //   rule: `
   //   Antes de prometer qualquer ação:
