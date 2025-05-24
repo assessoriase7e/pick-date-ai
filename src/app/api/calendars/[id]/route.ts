@@ -29,7 +29,7 @@ export async function GET(
     if (!calendar) {
       return NextResponse.json(
         { error: "Calendário não encontrado" },
-        { status: 404 }
+        { status: 204 }
       );
     }
 
