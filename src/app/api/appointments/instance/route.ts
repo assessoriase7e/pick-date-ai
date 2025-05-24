@@ -166,6 +166,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const service = await prisma.service.findUnique({
+      where: { id: serviceId },
+    });
+
+    if (!service) {
+      return NextResponse.json(
+        { error: "Serviço não encontrado. Verifique o id." },
+        { status: 204 }
+      );
+    }
+
     const appointment = await prisma.appointment.create({
       data: {
         startTime,
