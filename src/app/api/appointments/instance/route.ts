@@ -171,10 +171,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!service) {
-      return NextResponse.json(
-        { error: "Serviço não encontrado. Verifique o id." },
-        { status: 204 }
-      );
+      return new Response(undefined, { status: 204 });
     }
 
     const appointment = await prisma.appointment.create({
