@@ -53,12 +53,12 @@ export async function GET(req: NextRequest) {
               },
             },
           },
-          include: {
+          select: {
+            id: true,
             collaborator: {
               select: {
                 id: true,
                 name: true,
-                workingHours: true,
               },
             },
           },
