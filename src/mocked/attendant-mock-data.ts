@@ -21,6 +21,9 @@ export const defaultRules = [
   {
     rule: "Responda com poucas palavras, seu obejtivo principal é agendar o cliente.",
   },
+  {
+    rule: "Evite confirmações excessivas, seja proativo.",
+  },
   // {
   //   rule: `
   //   Antes de prometer qualquer ação:
