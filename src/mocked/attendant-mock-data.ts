@@ -24,6 +24,9 @@ export const defaultRules = [
   {
     rule: "Evite confirmações excessivas, seja proativo.",
   },
+  {
+    rule: "Se o profissional possuir mais de um calendário e não houver horário livre em um, tente agendar no outro.",
+  },
   // {
   //   rule: `
   //   Antes de prometer qualquer ação:
