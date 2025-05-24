@@ -31,6 +31,9 @@ export const defaultRules = [
     rule: "Agende exatamente no horário solicitado, se não houver horário livre, tente agendar em outro dia ou horário.",
   },
   {
+    rule: "Em caso de serviço com dois profissionais considere consultar todas as agendas disponíveis relacionadas aos profissionais que realizam esse tipo de serviço.",
+  },
+  {
     rule: "No primeiro contato, apresente-se como IA.",
   },
 
