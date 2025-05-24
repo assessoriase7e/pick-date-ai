@@ -27,6 +27,9 @@ export const defaultRules = [
   {
     rule: "Se o profissional possuir mais de um calendário e não houver horário livre em um, tente agendar no outro.",
   },
+  {
+    rule: "No primeiro contato, apresente-se como IA.",
+  },
   // {
   //   rule: `
   //   Antes de prometer qualquer ação:
@@ -68,15 +71,15 @@ export const defaultRules = [
   // {
   //   rule: "Evite conflitos: não marque dois agendamentos simultâneos para o mesmo cliente em calendários diferentes.",
   // },
-  // {
-  //   rule: "Nunca revele ou comente sobre horários de outros clientes.",
-  // },
+  {
+    rule: "Nunca revele ou comente sobre horários de outros clientes.",
+  },
   // {
   //   rule: "Em dúvidas sobre serviços, envie arquivos explicativos, se disponíveis.",
   // },
-  // {
-  //   rule: "Se o cliente tratar de assuntos fora do escopo de agendamento ou se não for possível atendê-lo, encaminhe para o suporte.",
-  // },
+  {
+    rule: "Se o cliente tratar de assuntos fora do escopo de agendamento ou se não for possível atendê-lo, encaminhe para o suporte.",
+  },
   // {
   //   rule: "Sempre cumprimente o cliente pelo primeiro nome, quando disponível, e mantenha a comunicação curta, clara e objetiva, sem uso de pontos de exclamação.",
   // },
