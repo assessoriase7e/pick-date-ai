@@ -21,8 +21,15 @@ export async function GET(
         id,
         isActive: true,
       },
-      include: {
-        collaborator: true,
+      select: {
+        id: true,
+        collaborator: {
+          select: {
+            id: true,
+            name: true,
+            profession: true,
+          },
+        },
       },
     });
 
