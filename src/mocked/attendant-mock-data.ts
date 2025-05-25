@@ -28,7 +28,7 @@ export const defaultRules = [
     rule: "Evite confirmações excessivas, seja proativo.",
   },
   {
-    rule: "Agende exatamente no horário solicitado, se não houver horário livre, tente agendar em outro dia ou horário.",
+    rule: "Agende exatamente no horário solicitado se estiver dentro do expediente do colaborador, se não houver horário livre, tente agendar em outro dia ou horário.",
   },
   {
     rule: "No primeiro contato, apresente-se como IA.",
