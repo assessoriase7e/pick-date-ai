@@ -95,6 +95,8 @@ export const updateRagContent = async () => {
           .map(
             (service) => `
                 ## ${service.name}
+                Preço: ${service.price || ""}
+                Duração: ${service.durationMinutes || ""}
                 `
           )
           .join("\n")}
