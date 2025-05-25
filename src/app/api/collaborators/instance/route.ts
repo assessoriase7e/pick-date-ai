@@ -49,29 +49,12 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         name: true,
-        phone: true,
-        profession: true,
-        description: true,
-        calendars: {
-          where: {
-            isActive: true,
-          },
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        workingHours: true,
         ServiceCollaborator: {
           include: {
             service: {
               select: {
                 id: true,
                 name: true,
-                durationMinutes: true,
-                availableDays: true,
-                price: true,
-                notes: true,
               },
             },
           },
