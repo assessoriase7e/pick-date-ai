@@ -38,10 +38,16 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         name: true,
-        price: true,
-        notes: true,
-        durationMinutes: true,
-        commission: true,
+        serviceCollaborators: {
+          select: {
+            collaborator: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
