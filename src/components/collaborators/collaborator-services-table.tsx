@@ -137,12 +137,12 @@ export function CollaboratorServicesTable({
         enablePagination={false} // Desativamos a paginação interna
         searchPlaceholder="Buscar serviços..."
       />
-      
+
       {/* Paginação customizada usando os dados do servidor */}
       {pagination.totalPages > 1 && <CustomPagination />}
 
       {/* Visualização Mobile */}
-      <div className="md:hidden space-y-4">
+      <div className="lg:hidden space-y-4">
         {appointments.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground rounded-md border">
             Nenhum serviço encontrado
@@ -186,7 +186,7 @@ export function CollaboratorServicesTable({
           ))
         )}
       </div>
-      
+
       {/* Paginação mobile */}
       {pagination.totalPages > 1 && (
         <div className="md:hidden">
