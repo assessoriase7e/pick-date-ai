@@ -43,6 +43,7 @@ export const updateRagContent = async () => {
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
       include: {
+        calendars: true,
         ServiceCollaborator: {
           include: {
             service: true,
@@ -123,7 +124,9 @@ export const updateRagContent = async () => {
         # Calendários
         ${calendars
           .map(
-            (calendar) => `
+            (calendar) =>
+              calendar.isActive &&
+              `
                 ## ${calendar.name || "Sem nome"} (ID: ${calendar.id})
                 Colaborador ID: ${calendar.collaboratorId || "Não associado"}
                 Ativo: ${calendar.isActive ? "Sim" : "Não"}
@@ -141,6 +144,7 @@ export const updateRagContent = async () => {
                 Telefone: ${collaborator.phone || ""}
                 Descrição: ${collaborator.description || ""}
                 Horário de Trabalho: ${collaborator.workingHours || ""}
+                calendários: ${collaborator.calendars.map((c) => `ID: ${c.id}`)}
                 Serviços: ${
                   collaborator.ServiceCollaborator.map(
                     (sc) => `${sc.service.name} (ID: ${sc.serviceId})`
