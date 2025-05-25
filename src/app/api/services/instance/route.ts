@@ -42,27 +42,6 @@ export async function GET(req: NextRequest) {
         notes: true,
         durationMinutes: true,
         commission: true,
-        availableDays: true,
-        serviceCollaborators: {
-          where: {
-            collaborator: {
-              calendars: {
-                some: {
-                  isActive: true,
-                },
-              },
-            },
-          },
-          select: {
-            id: true,
-            collaborator: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
       },
     });
 
