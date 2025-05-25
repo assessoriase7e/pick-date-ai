@@ -46,7 +46,7 @@ export async function createService(data: ServiceFormValues) {
     revalidatePath("/services");
     revalidatePath("/collaborators");
 
-    await updateRagContent(user.id);
+    await updateRagContent();
 
     return {
       success: true,

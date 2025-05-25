@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function deleteCollaborator(id: string) {
   try {
@@ -36,6 +37,8 @@ export async function deleteCollaborator(id: string) {
     });
 
     revalidatePath("/collaborators");
+
+    await updateRagContent();
 
     return {
       success: true,

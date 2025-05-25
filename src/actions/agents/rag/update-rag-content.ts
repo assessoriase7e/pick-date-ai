@@ -1,8 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
 
-export const updateRagContent = async (userId: string) => {
+export const updateRagContent = async () => {
+  const { userId } = await auth();
+
   try {
     if (!process.env.RAG_WEBHOOK_URL) {
       return { success: true, message: "Webhook não configurado" };
@@ -30,6 +33,10 @@ export const updateRagContent = async (userId: string) => {
     });
 
     const links = await prisma.link.findMany({
+      where: { userId },
+    });
+
+    const calendars = await prisma.calendar.findMany({
       where: { userId },
     });
 
@@ -104,7 +111,7 @@ export const updateRagContent = async (userId: string) => {
         ${services
           .map(
             (service) => `
-                ## ${service.name}
+                ## ${service.name} (ID: ${service.id})
                 Preço: R$${service.price || ""}
                 Duração: ${service.durationMinutes || ""} minutos
                 Dias Disponíveis: ${service.availableDays?.join(", ") || ""}
@@ -113,18 +120,30 @@ export const updateRagContent = async (userId: string) => {
           )
           .join("\n")}
 
+        # Calendários
+        ${calendars
+          .map(
+            (calendar) => `
+                ## ${calendar.name || "Sem nome"} (ID: ${calendar.id})
+                Colaborador ID: ${calendar.collaboratorId || "Não associado"}
+                Ativo: ${calendar.isActive ? "Sim" : "Não"}
+                Código de Acesso: ${calendar.accessCode || "Não definido"}
+                `
+          )
+          .join("\n")}
+
         # Profissionais
         ${collaborators
           .map(
             (collaborator) => `
-                ## ${collaborator.name}
+                ## ${collaborator.name} (ID: ${collaborator.id})
                 Profissão: ${collaborator.profession || ""}
                 Telefone: ${collaborator.phone || ""}
                 Descrição: ${collaborator.description || ""}
                 Horário de Trabalho: ${collaborator.workingHours || ""}
                 Serviços: ${
                   collaborator.ServiceCollaborator.map(
-                    (sc) => sc.service.name
+                    (sc) => `${sc.service.name} (ID: ${sc.serviceId})`
                   ).join(", ") || ""
                 }
                 `
@@ -135,7 +154,7 @@ export const updateRagContent = async (userId: string) => {
         ${links
           .map(
             (link) => `
-                ${link.title}: ${link.url}
+                ${link.title} (ID: ${link.id}): ${link.url}
             `
           )
           .join("\n")}

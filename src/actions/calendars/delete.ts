@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function deleteCalendar({ id }: { id: string }) {
   try {
@@ -33,6 +34,8 @@ export async function deleteCalendar({ id }: { id: string }) {
         id,
       },
     });
+
+    await updateRagContent();
 
     return {
       success: true,

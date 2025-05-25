@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export interface CreateCollaboratorParams {
   name: string;
@@ -43,6 +44,8 @@ export async function createCollaborator(params: CreateCollaboratorParams) {
     });
 
     revalidatePath("/collaborators");
+
+    await updateRagContent();
 
     return {
       success: true,

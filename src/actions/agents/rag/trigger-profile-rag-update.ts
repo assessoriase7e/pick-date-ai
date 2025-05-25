@@ -36,14 +36,9 @@ export const triggerProfileRagUpdate = async (userId: string) => {
         error: "Perfil ou nome da empresa não encontrado",
       };
     }
+    await updateRagContent();
 
-    const metadataKey = profile.companyName
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
-
-    return await updateRagContent(userId);
+    return;
   } catch (error) {
     console.error("Erro ao acionar atualização RAG do perfil:", error);
     return { success: false, error: "Falha ao acionar atualização RAG" };

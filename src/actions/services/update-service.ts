@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 import { Service } from "@prisma/client";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function updateService(
   id: string,
@@ -105,6 +106,8 @@ export async function updateService(
 
     revalidatePath("/services");
     revalidatePath("/collaborators");
+
+    await updateRagContent();
 
     return {
       success: true,

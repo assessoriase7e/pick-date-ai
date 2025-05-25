@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import { updateRagContent } from "../agents/rag/update-rag-content";
 
 interface UpdateCollaboratorParams {
   id: string;
@@ -61,6 +62,8 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
     });
 
     revalidatePath("/collaborators");
+
+    await updateRagContent();
 
     return {
       success: true,
