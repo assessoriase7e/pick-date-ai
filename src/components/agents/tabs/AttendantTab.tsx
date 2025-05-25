@@ -23,7 +23,6 @@ import {
   parseSchedulingScript,
   parseRules,
 } from "@/utils/form-parsers";
-import { defaultRules } from "@/mocked/attendant-mock-data";
 import { PatternFormat } from "react-number-format";
 import {
   attendantFormSchema,
@@ -93,14 +92,9 @@ export function AttendantTab({
 
       // Formatar regras: concatenar as personalizadas com as mockadas apenas na hora de salvar
       const userRules = values.rules.map((item) => item.rule);
-      const mockedRules = defaultRules.map((item) => item.rule);
 
       // Usar um delimitador claro para separar regras personalizadas das mockadas
-      const rulesText =
-        userRules.join("\n") +
-        "\n\n### REGRAS PADRÃO ###\n\n" +
-        mockedRules.join("\n");
-
+      const rulesText = userRules.join("\n");
       // Enviar o valor do estilo diretamente, sem buscar no speechStyleOptions
       const speechStyleText = values.speechStyle;
 
