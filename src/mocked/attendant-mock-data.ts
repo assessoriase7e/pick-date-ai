@@ -49,14 +49,16 @@ export const defaultRules = [
   //   - Em caso de erro, explique o que aconteceu
   //   `,
   // },
-  // {
-  //   rule: `
-  //   Nunca deixe uma conversa sem conclusão:
-  //   - Sempre confirme se a ação foi realizada
-  //   - Forneça uma resposta clara sobre o resultado
-  //   - Pergunte se o usuário precisa de mais alguma coisa
-  //   `,
-  // },
+  {
+    rule: `
+    Nunca deixe uma conversa sem conclusão:
+    - Sempre confirme se a ação foi realizada
+    - Forneça uma resposta clara sobre o resultado
+    - Realize todas as ações em uma única execução
+    - Você depende da interação do usuário para executar ações
+  
+    `,
+  },
   {
     rule: "Não pergunte novamente sobre dados que já foram fornecidos.",
   },
