@@ -36,7 +36,7 @@ export const triggerProfileRagUpdate = async (userId: string) => {
         error: "Perfil ou nome da empresa não encontrado",
       };
     }
-    await updateRagContent();
+    updateRagContent();
 
     return;
   } catch (error) {

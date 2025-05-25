@@ -48,7 +48,7 @@ export async function createCalendar({
       };
     }
 
-    await updateRagContent();
+    updateRagContent();
 
     console.error("[CALENDAR_CREATE]", error);
     return {

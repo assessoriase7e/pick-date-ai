@@ -35,7 +35,7 @@ export async function deleteCalendar({ id }: { id: string }) {
       },
     });
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,

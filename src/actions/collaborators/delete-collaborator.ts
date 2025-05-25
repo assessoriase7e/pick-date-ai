@@ -38,7 +38,7 @@ export async function deleteCollaborator(id: string) {
 
     revalidatePath("/collaborators");
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,

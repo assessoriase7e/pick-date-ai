@@ -45,7 +45,7 @@ export async function createCollaborator(params: CreateCollaboratorParams) {
 
     revalidatePath("/collaborators");
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,

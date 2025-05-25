@@ -63,7 +63,7 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
 
     revalidatePath("/collaborators");
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,

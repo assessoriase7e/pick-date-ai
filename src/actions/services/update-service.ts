@@ -107,7 +107,7 @@ export async function updateService(
     revalidatePath("/services");
     revalidatePath("/collaborators");
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,

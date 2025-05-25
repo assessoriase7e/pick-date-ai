@@ -36,7 +36,7 @@ export async function deleteService(id: string) {
 
     revalidatePath("/services");
 
-    await updateRagContent();
+    updateRagContent();
 
     return {
       success: true,
