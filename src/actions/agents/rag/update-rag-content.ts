@@ -30,6 +30,13 @@ export const updateRagContent = async () => {
 
     const services = await prisma.service.findMany({
       where: { userId },
+      include: {
+        serviceCollaborators: {
+          include: {
+            collaborator: true,
+          },
+        },
+      },
     });
 
     const links = await prisma.link.findMany({
@@ -117,6 +124,10 @@ export const updateRagContent = async () => {
                 Duração: ${service.durationMinutes || ""} minutos
                 Dias Disponíveis: ${service.availableDays?.join(", ") || ""}
                 Observações: ${service.notes || ""}
+                Colaboradors: ${service.serviceCollaborators?.map(
+                  (sc) =>
+                    `Nome: ${sc.collaborator.name} (ID: ${sc.collaborator.id}) `
+                )}
                 `
           )
           .join("\n")}
@@ -143,7 +154,17 @@ export const updateRagContent = async () => {
                 Profissão: ${collaborator.profession || ""}
                 Telefone: ${collaborator.phone || ""}
                 Descrição: ${collaborator.description || ""}
-                Horário de Trabalho: ${collaborator.workingHours || ""}
+                Horário de Trabalho: ${
+                  Array.isArray(collaborator.workingHours)
+                    ? collaborator.workingHours
+                        .map((wh) =>
+                          typeof wh === "object" ? JSON.stringify(wh) : wh
+                        )
+                        .join(", ")
+                    : typeof collaborator.workingHours === "object"
+                    ? JSON.stringify(collaborator.workingHours)
+                    : collaborator.workingHours || ""
+                }
                 calendários: ${collaborator.calendars.map((c) => `ID: ${c.id}`)}
                 Serviços: ${
                   collaborator.ServiceCollaborator.map(
