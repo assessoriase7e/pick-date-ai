@@ -30,33 +30,10 @@ export const updateRagContent = async () => {
 
     const services = await prisma.service.findMany({
       where: { userId },
-      include: {
-        serviceCollaborators: {
-          include: {
-            collaborator: true,
-          },
-        },
-      },
-    });
-
-    const links = await prisma.link.findMany({
-      where: { userId },
-    });
-
-    const calendars = await prisma.calendar.findMany({
-      where: { userId },
     });
 
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
-      include: {
-        calendars: true,
-        ServiceCollaborator: {
-          include: {
-            service: true,
-          },
-        },
-      },
     });
 
     const optionsResponse = await fetch(webhookUrl, {
@@ -112,36 +89,12 @@ export const updateRagContent = async () => {
               })()
             : ""
         }
-        Documento: ${profile?.documentNumber || ""}
-        Localização: ${profile?.locationUrl || ""}
 
         # Serviços Oferecidos
         ${services
           .map(
             (service) => `
-                ## ${service.name} (ID: ${service.id})
-                Preço: R$${service.price || ""}
-                Duração: ${service.durationMinutes || ""} minutos
-                Dias Disponíveis: ${service.availableDays?.join(", ") || ""}
-                Observações: ${service.notes || ""}
-                Colaboradors: ${service.serviceCollaborators?.map(
-                  (sc) =>
-                    `Nome: ${sc.collaborator.name} (ID: ${sc.collaborator.id}) `
-                )}
-                `
-          )
-          .join("\n")}
-
-        # Calendários
-        ${calendars
-          .map(
-            (calendar) =>
-              calendar.isActive &&
-              `
-                ## ${calendar.name || "Sem nome"} (ID: ${calendar.id})
-                Colaborador ID: ${calendar.collaboratorId || "Não associado"}
-                Ativo: ${calendar.isActive ? "Sim" : "Não"}
-                Código de Acesso: ${calendar.accessCode || "Não definido"}
+                ## ${service.name}
                 `
           )
           .join("\n")}
@@ -150,10 +103,8 @@ export const updateRagContent = async () => {
         ${collaborators
           .map(
             (collaborator) => `
-                ## ${collaborator.name} (ID: ${collaborator.id})
+                ## ${collaborator.name}
                 Profissão: ${collaborator.profession || ""}
-                Telefone: ${collaborator.phone || ""}
-                Descrição: ${collaborator.description || ""}
                 Horário de Trabalho: ${
                   Array.isArray(collaborator.workingHours)
                     ? collaborator.workingHours
@@ -165,22 +116,7 @@ export const updateRagContent = async () => {
                     ? JSON.stringify(collaborator.workingHours)
                     : collaborator.workingHours || ""
                 }
-                calendários: ${collaborator.calendars.map((c) => `ID: ${c.id}`)}
-                Serviços: ${
-                  collaborator.ServiceCollaborator.map(
-                    (sc) => `${sc.service.name} (ID: ${sc.serviceId})`
-                  ).join(", ") || ""
-                }
                 `
-          )
-          .join("\n")}
-
-        # Links
-        ${links
-          .map(
-            (link) => `
-                ${link.title} (ID: ${link.id}): ${link.url}
-            `
           )
           .join("\n")}
         `;
