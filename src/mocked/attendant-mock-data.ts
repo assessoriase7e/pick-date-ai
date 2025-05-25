@@ -28,19 +28,10 @@ export const defaultRules = [
     rule: "Evite confirmações excessivas, seja proativo.",
   },
   {
-    rule: "Se o profissional possuir mais de um calendário e não houver horário livre em um, tente agendar no outro.",
-  },
-  {
     rule: "Agende exatamente no horário solicitado, se não houver horário livre, tente agendar em outro dia ou horário.",
   },
   {
-    rule: "Em caso de serviço com dois profissionais considere consultar todas as agendas disponíveis relacionadas aos profissionais que realizam esse tipo de serviço.",
-  },
-  {
     rule: "No primeiro contato, apresente-se como IA.",
-  },
-  {
-    rule: "Não advinhe preços, utilize a ferramenta de consulta de serviços.",
   },
 
   // {
