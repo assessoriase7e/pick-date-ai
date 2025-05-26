@@ -135,7 +135,11 @@ export const updateRagContent = async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Erro ao chamar webhook: ${response.statusText}`);
+      console.error(`Erro ao chamar webhook: ${response.statusText}`);
+      return {
+        success: false,
+        error: "Falha ao atualizar conteúdo RAG",
+      };
     }
 
     return { success: true };

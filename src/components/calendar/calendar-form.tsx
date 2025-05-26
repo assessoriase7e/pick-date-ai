@@ -101,10 +101,10 @@ export function CalendarForm({
               label="Profissional"
               placeholder="Selecione um profissional"
               options={collaborators}
-              value={String(field.value)}
+              value={field.value}
               onChange={field.onChange}
               getOptionLabel={(option) => option?.name}
-              getOptionValue={(option) => String(option.id)}
+              getOptionValue={(option) => option.id}
               error={form.formState.errors.collaboratorId?.message}
             />
           )}

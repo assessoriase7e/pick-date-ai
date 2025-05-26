@@ -19,10 +19,10 @@ interface SelectFieldProps<T> {
   label: string;
   placeholder: string;
   options: T[];
-  value: string | undefined;
-  onChange: (value: string) => void;
-  getOptionLabel: (option: T) => string;
-  getOptionValue: (option: T) => string;
+  value: string | number | undefined;
+  onChange: (value: number | string) => void;
+  getOptionLabel: (option: T) => number | string;
+  getOptionValue: (option: T) => number | string;
   error?: string;
 }
 
@@ -39,16 +39,13 @@ export function SelectWithScroll<T>({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Add a null check when filtering options
-  // In the useMemo for filteredOptions, ensure options is an array before filtering
-  
   const filteredOptions = useMemo(() => {
     if (!options || !Array.isArray(options)) return [];
-    
+
     return options.filter((option) => {
       if (!searchTerm) return true;
-      const label = getOptionLabel(option).toLowerCase();
-      return label.includes(searchTerm.toLowerCase());
+      const label = getOptionLabel(option);
+      return String(label).toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [options, searchTerm, getOptionLabel]);
 
@@ -58,7 +55,12 @@ export function SelectWithScroll<T>({
 
       {/* Desktop Select */}
       <div className="hidden md:block">
-        <Select value={value} onValueChange={onChange}>
+        <Select
+          value={value !== undefined ? String(value) : undefined}
+          onValueChange={(val) =>
+            onChange(isNaN(Number(val)) ? val : Number(val))
+          }
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
@@ -73,14 +75,17 @@ export function SelectWithScroll<T>({
               />
             </div>
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <SelectItem
-                  key={getOptionValue(option)}
-                  value={getOptionValue(option)}
-                >
-                  {getOptionLabel(option)}
-                </SelectItem>
-              ))
+              filteredOptions.map((option) => {
+                const optionValue = getOptionValue(option);
+                return (
+                  <SelectItem
+                    key={String(optionValue)}
+                    value={String(optionValue)}
+                  >
+                    {getOptionLabel(option)}
+                  </SelectItem>
+                );
+              })
             ) : (
               <div className="p-2 text-sm text-muted-foreground">
                 Nenhum resultado encontrado.
@@ -95,9 +100,11 @@ export function SelectWithScroll<T>({
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
-              {value
+              {value !== undefined
                 ? getOptionLabel(
-                    options.find((opt) => getOptionValue(opt) === value)!
+                    options.find(
+                      (opt) => String(getOptionValue(opt)) === String(value)
+                    )!
                   )
                 : placeholder}
             </Button>
@@ -117,21 +124,26 @@ export function SelectWithScroll<T>({
 
               <div className="max-h-[50vh] overflow-y-auto space-y-2">
                 {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option) => (
-                    <Button
-                      key={getOptionValue(option)}
-                      variant={
-                        getOptionValue(option) === value ? "default" : "ghost"
-                      }
-                      className="w-full justify-start"
-                      onClick={() => {
-                        onChange(getOptionValue(option));
-                        setOpen(false);
-                      }}
-                    >
-                      {getOptionLabel(option)}
-                    </Button>
-                  ))
+                  filteredOptions.map((option) => {
+                    const optionValue = getOptionValue(option);
+                    return (
+                      <Button
+                        key={String(optionValue)}
+                        variant={
+                          String(optionValue) === String(value)
+                            ? "default"
+                            : "ghost"
+                        }
+                        className="w-full justify-start"
+                        onClick={() => {
+                          onChange(optionValue);
+                          setOpen(false);
+                        }}
+                      >
+                        {getOptionLabel(option)}
+                      </Button>
+                    );
+                  })
                 ) : (
                   <div className="text-sm text-muted-foreground text-center">
                     Nenhum resultado encontrado.
