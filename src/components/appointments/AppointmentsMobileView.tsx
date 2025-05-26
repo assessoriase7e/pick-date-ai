@@ -56,11 +56,11 @@ export function AppointmentsMobileView({
                 <div>
                   <p className="text-sm">
                     <span className="font-medium">Profissional:</span>{" "}
-                    {appointment.collaborator.name}
+                    {appointment.collaborator?.name || "Profissional não disponível"}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Serviço:</span>{" "}
-                    {appointment.service.name}
+                    {appointment.service?.name || "Serviço não disponível"}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Data:</span>{" "}
