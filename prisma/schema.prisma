@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @map("_id")
+  id        String   @id // Mantendo o ID do Clerk como primário
   email     String   @unique
   firstName String?
   lastName  String?
@@ -40,13 +40,13 @@ model User {
   evolutionInstances EvolutionInstance[]
   client             Client[]
   collaborator       Collaborator[]
-  backList           BlackList?
+  blackList          BlackList?
 
   @@map("user")
 }
 
 model Profile {
-  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  id             Int     @id @default(autoincrement())
   whatsapp       String?
   companyName    String?
   businessHours  Json?
@@ -62,7 +62,7 @@ model Profile {
 }
 
 model Link {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   url         String
   title       String
   description String
@@ -75,7 +75,7 @@ model Link {
 }
 
 model ApiKey {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   key         String   @unique
   description String?
   userId      String
@@ -87,7 +87,7 @@ model ApiKey {
 }
 
 model Prompt {
-  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                       Int      @id @default(autoincrement())
   type                     String
   content                  String
   isActive                 Boolean  @default(false)
@@ -104,7 +104,7 @@ model Prompt {
 }
 
 model AttendantPrompt {
-  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                       Int      @id @default(autoincrement())
   content                  String
   isActive                 Boolean  @default(false)
   createdAt                DateTime @default(now())
@@ -123,7 +123,7 @@ model AttendantPrompt {
 }
 
 model SdrPrompt {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   content   String
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -135,7 +135,7 @@ model SdrPrompt {
 }
 
 model FollowUpPrompt {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   content   String
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -147,7 +147,7 @@ model FollowUpPrompt {
 }
 
 model RagFile {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   name      String
   content   String
   userId    String
@@ -158,7 +158,7 @@ model RagFile {
 }
 
 model RagConfig {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   userId      String   @unique
   webhookUrl  String?
   metadataKey String?
@@ -167,7 +167,7 @@ model RagConfig {
 }
 
 model RedisKey {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   key       String
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -178,7 +178,7 @@ model RedisKey {
 }
 
 model Whatsapp {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   phoneNumber String
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -190,7 +190,7 @@ model Whatsapp {
 
 // Agent-related models
 model AgentPrompt {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   userId    String
   attendant Boolean  @default(false)
   content   String
@@ -200,7 +200,7 @@ model AgentPrompt {
 }
 
 model AgentRagFile {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   userId    String
   name      String
   content   String
@@ -210,7 +210,7 @@ model AgentRagFile {
 }
 
 model AgentRedisKey {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   userId    String
   key       String
   createdAt DateTime @default(now())
@@ -219,7 +219,7 @@ model AgentRedisKey {
 }
 
 model AgentWhatsapp {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int      @id @default(autoincrement())
   userId    String
   phone     String
   createdAt DateTime @default(now())
@@ -228,7 +228,7 @@ model AgentWhatsapp {
 }
 
 model EvolutionInstance {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         Int      @id @default(autoincrement())
   name       String
   number     String
   qrCode     String?
@@ -245,7 +245,7 @@ model EvolutionInstance {
 }
 
 model Service {
-  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  id                   Int                   @id @default(autoincrement())
   name                 String
   price                Float
   availableDays        String[]
@@ -259,15 +259,15 @@ model Service {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   clientServices       ClientService[]
-  Appointment          Appointment[]
+  appointments         Appointment[]
 
   @@map("service")
 }
 
 model ServiceCollaborator {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
-  serviceId      String       @db.ObjectId
-  collaboratorId String       @db.ObjectId
+  id             Int          @id @default(autoincrement())
+  serviceId      Int
+  collaboratorId Int
   service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
@@ -277,7 +277,7 @@ model ServiceCollaborator {
 }
 
 model Client {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  id        Int       @id @default(autoincrement())
   fullName  String
   phone     String
   birthDate DateTime?
@@ -287,17 +287,17 @@ model Client {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  clientService ClientService[]
-  Appointment   Appointment[]
+  clientServices ClientService[]
+  appointments   Appointment[]
 
   @@map("client")
 }
 
 model ClientService {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  clientId  String   @db.ObjectId
+  id        Int      @id @default(autoincrement())
+  clientId  Int
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceId String   @db.ObjectId
+  serviceId Int
   service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   date      DateTime
   createdAt DateTime @default(now())
@@ -307,9 +307,9 @@ model ClientService {
 }
 
 model Calendar {
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  id             Int           @id @default(autoincrement())
   name           String?
-  collaboratorId String?       @db.ObjectId
+  collaboratorId Int?
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
   userId         String
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -323,50 +323,50 @@ model Calendar {
 }
 
 model Collaborator {
-  id                  String                @id @default(auto()) @map("_id") @db.ObjectId
+  id                  Int                   @id @default(autoincrement())
   name                String
   phone               String
   profession          String
   description         String?
-  workingHours        Json                  // Alterado de String para Json
+  workingHours        Json
   userId              String
   user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendars           Calendar[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  ServiceCollaborator ServiceCollaborator[]
-  Appointment         Appointment[]
+  serviceCollaborators ServiceCollaborator[]
+  appointments         Appointment[]
 
   @@map("collaborator")
 }
 
 model Appointment {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  startTime    DateTime
-  endTime      DateTime
-  status       String   @default("scheduled")
-  notes        String?
-  servicePrice Float?
-  finalPrice   Float?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             Int          @id @default(autoincrement())
+  startTime      DateTime
+  endTime        DateTime
+  status         String      @default("scheduled")
+  notes          String?
+  servicePrice   Float?
+  finalPrice     Float?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId       String?       @db.ObjectId
-  client         Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  serviceId      String        @db.ObjectId
-  service        Service       @relation(fields: [serviceId], references: [id])
-  calendarId     String        @db.ObjectId
-  calendar       Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  collaboratorId String?       @db.ObjectId
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId       Int?
+  client         Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  serviceId      Int
+  service        Service      @relation(fields: [serviceId], references: [id])
+  calendarId     Int
+  calendar       Calendar     @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  collaboratorId Int?
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
 
   @@map("appointment")
 }
 
 model FileRecord {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   fileUrl     String
   fileName    String
   fileType    String
@@ -380,21 +380,21 @@ model FileRecord {
 }
 
 model BlackList {
-  id        String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String        @unique
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int              @id @default(autoincrement())
+  userId    String           @unique
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   phones    BlackListPhone[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   @@map("blacklist")
 }
 
 model BlackListPhone {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int       @id @default(autoincrement())
   number      String
   name        String?
-  blackListId String    @db.ObjectId
+  blackListId Int
   blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
