@@ -71,8 +71,6 @@ export function PublicAppointmentForm({
   clients,
   collaboratorId,
 }: PublicAppointmentFormProps) {
-  console.log(collaboratorId);
-
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedServiceDuration, setSelectedServiceDuration] =

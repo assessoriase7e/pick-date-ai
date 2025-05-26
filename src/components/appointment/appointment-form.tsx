@@ -54,7 +54,6 @@ export function AppointmentForm({
   checkTimeConflict,
   initialStartTime,
   initialEndTime,
-  calendarId,
   clients,
   services,
   calendar,
@@ -86,12 +85,12 @@ export function AppointmentForm({
     resolver: zodResolver(createAppointmentSchema),
     defaultValues: appointment
       ? {
-          clientId: appointment?.clientId || "",
+          clientId: appointment?.clientId || null,
           serviceId: appointment.serviceId,
           startTime: moment(appointment.startTime).format("HH:mm"),
           endTime: moment(appointment.endTime).format("HH:mm"),
           notes: appointment.notes || "",
-          calendarId,
+          calendarId: calendar.id,
           servicePrice: appointment.servicePrice || null,
           finalPrice:
             appointment.finalPrice || appointment.servicePrice || null,
@@ -100,7 +99,7 @@ export function AppointmentForm({
           startTime: defaultStartTime,
           endTime: defaultEndTime,
           notes: "",
-          calendarId,
+          calendarId: calendar.id,
           servicePrice: null,
           finalPrice: null,
         },
@@ -156,7 +155,7 @@ export function AppointmentForm({
         ? moment(appointment.endTime).format("HH:mm")
         : initialEndTime || "10:00",
       notes: appointment?.notes || "",
-      calendarId: null,
+      calendarId: calendar.id || null,
       servicePrice: appointment?.servicePrice || null,
       finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
     });
@@ -166,7 +165,7 @@ export function AppointmentForm({
     appointment?.endTime,
     initialStartTime,
     initialEndTime,
-    calendarId,
+    calendar.id,
   ]);
 
   const onSubmit = async (values: FormValues) => {
@@ -216,7 +215,7 @@ export function AppointmentForm({
       const appointmentData = {
         clientId: values.clientId,
         serviceId: values.serviceId,
-        calendarId,
+        calendarId: calendar.id,
         startTime,
         endTime,
         notes: values.notes || null,

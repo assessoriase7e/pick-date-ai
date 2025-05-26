@@ -11,7 +11,7 @@ type GetServicesByCalendarResponse = {
 };
 
 export async function getServicesByCalendar(
-  calendarId: string,
+  calendarId: number,
   requireAuth: boolean = true
 ): Promise<GetServicesByCalendarResponse> {
   try {

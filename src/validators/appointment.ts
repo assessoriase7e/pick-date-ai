@@ -11,5 +11,5 @@ export interface AppointmentFormProps {
   ) => boolean;
   initialStartTime?: string;
   initialEndTime?: string;
-  calendarId: string;
+  calendarId: number;
 }

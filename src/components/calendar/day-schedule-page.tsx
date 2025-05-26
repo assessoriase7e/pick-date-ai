@@ -16,7 +16,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { MobileDaySchedule } from "./mobile-day-schedule";
 
 interface DayScheduleContentProps {
-  calendarId: string;
+  calendarId: number;
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;

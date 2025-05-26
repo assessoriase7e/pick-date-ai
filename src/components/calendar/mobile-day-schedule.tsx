@@ -16,7 +16,7 @@ import { Separator } from "../ui/separator";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
 interface MobileDayScheduleProps {
-  calendarId: string;
+  calendarId: number;
   date: Date;
   appointments: AppointmentFullData[];
   collaborator: Collaborator;
@@ -100,7 +100,7 @@ export function MobileDaySchedule({
   const checkTimeConflict = (
     startTime: Date,
     endTime: Date,
-    excludeId?: string
+    excludeId?: number
   ): boolean => {
     return appointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;

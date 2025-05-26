@@ -27,7 +27,7 @@ export default async function DaySchedulePage({
     );
   }
 
-  const calendarId = sParams.calendarId;
+  const calendarId = Number(sParams.calendarId);
   const date = moment(sParams.date).toDate();
 
   // Buscar dados em paralelo para melhor performance
