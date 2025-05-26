@@ -51,7 +51,10 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(services);
+    // Formatar os serviços para leitura por IA
+    const formattedResponse = formatServicesForAI(services);
+    
+    return NextResponse.json({ data: services, formatted: formattedResponse });
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);
     return NextResponse.json(
@@ -59,6 +62,34 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Função para formatar serviços para leitura por IA
+function formatServicesForAI(services: any[]) {
+  if (!services || services.length === 0) {
+    return "Não há serviços disponíveis.";
+  }
+
+  let formattedText = `Encontrei ${services.length} serviços disponíveis:\n\n`;
+
+  services.forEach((service, index) => {
+    formattedText += `${index + 1}. Serviço: ${service.name} (ID: ${service.id})\n`;
+    
+    if (service.serviceCollaborators && service.serviceCollaborators.length > 0) {
+      formattedText += "   Profissionais que realizam este serviço:\n";
+      service.serviceCollaborators.forEach((sc: any) => {
+        if (sc.collaborator) {
+          formattedText += `   - ${sc.collaborator.name}\n`;
+        }
+      });
+    } else {
+      formattedText += "   Não há profissionais específicos para este serviço.\n";
+    }
+    
+    formattedText += "\n";
+  });
+
+  return formattedText;
 }
 
 export async function POST(req: NextRequest) {

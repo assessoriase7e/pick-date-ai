@@ -84,7 +84,10 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(appointments);
+    // Formatar os agendamentos para leitura por IA
+    const formattedResponse = formatAppointmentsForAI(appointments);
+    
+    return NextResponse.json({ data: appointments, formatted: formattedResponse });
   } catch (error) {
     console.error("Erro ao buscar agendamentos:", error);
     return NextResponse.json(
@@ -92,6 +95,46 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Função para formatar agendamentos para leitura por IA
+function formatAppointmentsForAI(appointments: any[]) {
+  if (!appointments || appointments.length === 0) {
+    return "Não há agendamentos marcados.";
+  }
+
+  let formattedText = `Encontrei ${appointments.length} agendamentos marcados:\n\n`;
+
+  appointments.forEach((appointment, index) => {
+    const startTime = new Date(appointment.startTime);
+    const endTime = new Date(appointment.endTime);
+    
+    formattedText += `${index + 1}. Data: ${startTime.toLocaleDateString('pt-BR')}\n`;
+    formattedText += `   Horário: ${startTime.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})} até ${endTime.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}\n`;
+    
+    if (appointment.client) {
+      formattedText += `   Cliente: ${appointment.client.fullName}\n`;
+      formattedText += `   Telefone: ${appointment.client.phone}\n`;
+    } else {
+      formattedText += "   Cliente: Não informado\n";
+    }
+    
+    if (appointment.service) {
+      formattedText += `   Serviço: ${appointment.service.name}\n`;
+    }
+    
+    if (appointment.collaborator) {
+      formattedText += `   Profissional: ${appointment.collaborator.name}\n`;
+    }
+    
+    if (appointment.notes) {
+      formattedText += `   Observações: ${appointment.notes}\n`;
+    }
+    
+    formattedText += "\n";
+  });
+
+  return formattedText;
 }
 
 export async function POST(req: NextRequest) {

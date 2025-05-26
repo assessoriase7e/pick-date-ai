@@ -66,7 +66,11 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(appointments);
+    // Formatar os agendamentos para leitura por IA
+    const formattedDate = moment(date).format('DD/MM/YYYY');
+    const formattedResponse = formatCalendarAppointmentsForAI(appointments, formattedDate, calendarId);
+    
+    return NextResponse.json({ data: appointments, formatted: formattedResponse });
   } catch (error) {
     console.error("Erro ao buscar agendamentos:", error);
     return NextResponse.json(
@@ -74,4 +78,51 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Função para formatar agendamentos de calendário para leitura por IA
+function formatCalendarAppointmentsForAI(appointments: any[], date: string, calendarId?: string) {
+  if (!appointments || appointments.length === 0) {
+    return `Não há agendamentos para o dia ${date}${calendarId ? ' neste calendário específico' : ''}.`;
+  }
+
+  let calendarName = '';
+  if (appointments.length > 0 && appointments[0].calendar) {
+    calendarName = appointments[0].calendar.name || 'Sem nome';
+  }
+
+  let formattedText = `Encontrei ${appointments.length} agendamentos para o dia ${date}`;
+  if (calendarId && calendarName) {
+    formattedText += ` no calendário ${calendarName}`;
+  }
+  formattedText += ":\n\n";
+
+  appointments.forEach((appointment, index) => {
+    const startTime = new Date(appointment.startTime);
+    
+    formattedText += `${index + 1}. Horário: ${startTime.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}\n`;
+    
+    if (appointment.client) {
+      formattedText += `   Cliente: ${appointment.client.fullName}\n`;
+      formattedText += `   Telefone: ${appointment.client.phone}\n`;
+    } else {
+      formattedText += "   Cliente: Não informado\n";
+    }
+    
+    if (appointment.service) {
+      formattedText += `   Serviço: ${appointment.service.name}\n`;
+    }
+    
+    if (appointment.collaborator) {
+      formattedText += `   Profissional: ${appointment.collaborator.name}\n`;
+    }
+    
+    if (appointment.notes) {
+      formattedText += `   Observações: ${appointment.notes}\n`;
+    }
+    
+    formattedText += "\n";
+  });
+
+  return formattedText;
 }

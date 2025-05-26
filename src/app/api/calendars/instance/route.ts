@@ -45,7 +45,10 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(calendars);
+    // Formatar os calendários para leitura por IA
+    const formattedResponse = formatCalendarsForAI(calendars);
+    
+    return NextResponse.json({ data: calendars, formatted: formattedResponse });
   } catch (error) {
     console.error("Erro ao buscar calendários:", error);
     return NextResponse.json(
@@ -53,4 +56,27 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Função para formatar calendários para leitura por IA
+function formatCalendarsForAI(calendars: any[]) {
+  if (!calendars || calendars.length === 0) {
+    return "Não há calendários disponíveis.";
+  }
+
+  let formattedText = `Encontrei ${calendars.length} calendários disponíveis:\n\n`;
+
+  calendars.forEach((calendar, index) => {
+    formattedText += `${index + 1}. Calendário: ${calendar.name || 'Sem nome'} (ID: ${calendar.id})\n`;
+    
+    if (calendar.collaborator) {
+      formattedText += `   Profissional: ${calendar.collaborator.name}\n`;
+    } else {
+      formattedText += "   Sem profissional associado\n";
+    }
+    
+    formattedText += "\n";
+  });
+
+  return formattedText;
 }

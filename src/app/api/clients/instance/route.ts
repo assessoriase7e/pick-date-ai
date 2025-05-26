@@ -43,7 +43,11 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      return NextResponse.json(client);
+      const formattedResponse = client 
+        ? `Cliente encontrado: ${client.fullName}, telefone: ${client.phone}${client.notes ? `, observações: ${client.notes}` : ''}`
+        : "Nenhum cliente encontrado com este número de telefone.";
+
+      return NextResponse.json({ data: client, formatted: formattedResponse });
     }
 
     // Caso contrário, retorna todos os clientes
@@ -51,7 +55,10 @@ export async function GET(req: NextRequest) {
       where: { userId: evolutionInstance.userId },
     });
 
-    return NextResponse.json(clients);
+    // Formatar os clientes para leitura por IA
+    const formattedResponse = formatClientsForAI(clients);
+    
+    return NextResponse.json({ data: clients, formatted: formattedResponse });
   } catch (error) {
     console.error("Erro ao buscar clientes:", error);
     return NextResponse.json(
@@ -59,6 +66,33 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Função para formatar clientes para leitura por IA
+function formatClientsForAI(clients: any[]) {
+  if (!clients || clients.length === 0) {
+    return "Não há clientes cadastrados.";
+  }
+
+  let formattedText = `Encontrei ${clients.length} clientes cadastrados:\n\n`;
+
+  clients.forEach((client, index) => {
+    formattedText += `${index + 1}. Nome: ${client.fullName}\n`;
+    formattedText += `   Telefone: ${client.phone}\n`;
+    
+    if (client.birthDate) {
+      const birthDate = new Date(client.birthDate);
+      formattedText += `   Data de Nascimento: ${birthDate.toLocaleDateString('pt-BR')}\n`;
+    }
+    
+    if (client.notes) {
+      formattedText += `   Observações: ${client.notes}\n`;
+    }
+    
+    formattedText += "\n";
+  });
+
+  return formattedText;
 }
 
 export async function POST(
