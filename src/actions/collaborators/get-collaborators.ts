@@ -15,7 +15,7 @@ type GetCollaboratorsProps = {
   limit?: number;
   where?: Prisma.CollaboratorWhereInput;
   sort?: SortOptions;
-  serviceId?: string;
+  serviceId?: number;
 };
 
 export async function getCollaborators({
@@ -36,7 +36,9 @@ export async function getCollaborators({
   try {
     const skip = (page - 1) * limit;
 
-    let orderBy: any = { createdAt: "desc" };
+    let orderBy: Prisma.CollaboratorOrderByWithAggregationInput = {
+      createdAt: "desc",
+    };
 
     if (sort?.field) {
       orderBy = {
@@ -57,11 +59,11 @@ export async function getCollaborators({
 
     let whereCondition: Prisma.CollaboratorWhereInput = finalWhere;
 
-    // Se tiver um serviceId, buscar em ServiceCollaborator
+    // Se tiver um serviceId, buscar em serviceCollaborators
     if (serviceId) {
       whereCondition = {
         ...finalWhere,
-        ServiceCollaborator: {
+        serviceCollaborators: {
           some: {
             serviceId,
           },
@@ -74,11 +76,7 @@ export async function getCollaborators({
         where: whereCondition,
         include: serviceId
           ? {
-              ServiceCollaborator: {
-                include: {
-                  service: true,
-                },
-              },
+              serviceCollaborators: true,
             }
           : undefined,
         skip,

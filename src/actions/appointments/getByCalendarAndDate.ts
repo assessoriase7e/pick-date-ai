@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { startOfDay, endOfDay } from "date-fns";
 
 export async function getAppointmentsByCalendarAndDate(
-  calendarId: string,
+  calendarId: number,
   date: Date,
   requireAuth: boolean = true
 ) {

@@ -4,13 +4,6 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 
-// Adicione esta interface para os dados do cliente público
-interface isPublic {
-  fullName: string;
-  email: string;
-  phone: string;
-}
-
 export async function createAppointment({
   clientId,
   serviceId,
@@ -24,16 +17,16 @@ export async function createAppointment({
   collaboratorId,
   isPublic,
 }: {
-  clientId?: string;
-  serviceId: string;
-  calendarId: string;
+  clientId?: number;
+  serviceId: number;
+  calendarId: number;
   startTime: Date;
   endTime: Date;
   notes: string | null;
   status: string;
   servicePrice: number | null;
   finalPrice: number | null;
-  collaboratorId: string | null;
+  collaboratorId: number | null;
   isPublic?: Boolean;
 }) {
   try {
@@ -69,7 +62,7 @@ export async function createAppointment({
     }
 
     // Criar ou reutilizar cliente público
-    let actualClientId = clientId ?? "";
+    let actualClientId = clientId ?? null;
 
     // Verificar conflitos de horário
     const conflictingAppointment = await prisma.appointment.findFirst({

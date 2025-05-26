@@ -22,7 +22,7 @@ moment.locale("pt-br");
 
 interface CalendarContentProps {
   calendars: CalendarFullData[];
-  calendarId: string;
+  calendarId: number;
   appointments: Record<string, AppointmentFullData[]>;
   currentDate: Date;
   selectedDay: Date | null;

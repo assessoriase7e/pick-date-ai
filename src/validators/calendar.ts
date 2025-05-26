@@ -7,35 +7,35 @@ export const createCalendarSchema = z.object({
 });
 
 export const updateCalendarSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
   color: z.string().optional(),
 });
 
 export const cancelAppointmentSchema = z.object({
-  id: z.string(),
+  id: z.number(),
 });
 
 export const updateAppointmentSchema = z.object({
   id: z.string(),
-  clientId: z.string(),
-  serviceId: z.string(),
+  clientId: z.number(),
+  serviceId: z.number(),
   startTime: z.date(),
   endTime: z.date(),
   notes: z.string().nullable(),
   finalPrice: z.number().nullable().optional(),
-  collaboratorId: z.string().optional(),
+  collaboratorId: z.number().optional(),
 });
 
 // Adicione ao schema de validação existente
 export const createAppointmentSchema = z.object({
-  clientId: z.string().min(1, "Cliente é obrigatório"),
-  serviceId: z.string().min(1, "Serviço é obrigatório"),
+  clientId: z.number().min(1, "Cliente é obrigatório"),
+  serviceId: z.number().min(1, "Serviço é obrigatório"),
   startTime: z.string().min(1, "Horário de início é obrigatório"),
   endTime: z.string().min(1, "Horário de término é obrigatório"),
   notes: z.string().optional().nullable(),
-  calendarId: z.string().min(1, "Calendário é obrigatório"),
+  calendarId: z.number().min(1, "Calendário é obrigatório"),
   servicePrice: z.number().nullable().optional(),
   finalPrice: z.number().nullable().optional(),
 });
@@ -45,22 +45,22 @@ export const getAppointmentsByDateSchema = z.object({
 });
 
 export const getAppointmentsByCalendarSchema = z.object({
-  calendarId: z.string(),
+  calendarId: z.number(),
 });
 
 export const getAppointmentsByCalendarAndDateSchema = z.object({
-  calendarId: z.string(),
+  calendarId: z.number(),
   date: z.date(),
 });
 
 export const changeAppointmentStatusSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   status: z.enum(["scheduled", "completed", "cancelled"]),
 });
 
 export const calendarSchema = z.object({
   name: z.string().optional(),
-  collaboratorId: z.string(),
+  collaboratorId: z.number(),
   isActive: z.boolean(),
   accessCode: z.string().nullable().optional(),
 });

@@ -7,14 +7,14 @@ import { Collaborator } from "@prisma/client";
 type GetCalendarCollaboratorResponse = {
   success: boolean;
   data?: {
-    collaboratorId: string | null;
+    collaboratorId: number | null;
     collaborator: Collaborator | null;
   } | null;
   error?: string;
 };
 
 export async function getCalendarCollaborator(
-  calendarId: string,
+  calendarId: number,
   requireAuth: boolean = true
 ): Promise<GetCalendarCollaboratorResponse> {
   try {

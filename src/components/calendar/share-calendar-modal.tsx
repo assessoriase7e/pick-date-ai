@@ -13,7 +13,7 @@ import { toast } from "sonner";
 interface ShareCalendarModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  calendarId: string;
+  calendarId: number;
 }
 
 export function ShareCalendarModal({

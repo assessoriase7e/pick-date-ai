@@ -7,7 +7,7 @@ export interface AppointmentFormProps {
   checkTimeConflict: (
     startTime: Date,
     endTime: Date,
-    excludeId?: string
+    excludeId?: number
   ) => boolean;
   initialStartTime?: string;
   initialEndTime?: string;

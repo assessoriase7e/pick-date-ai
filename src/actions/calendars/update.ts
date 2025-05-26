@@ -1,9 +1,7 @@
 "use server";
-
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { calendarSchema } from "@/validators/calendar";
 
 export async function updateCalendar({
   id,
@@ -12,9 +10,9 @@ export async function updateCalendar({
   isActive,
   accessCode,
 }: {
-  id: string;
+  id: number;
   name: string;
-  collaboratorId?: string;
+  collaboratorId?: number;
   isActive?: boolean;
   accessCode?: string | null;
 }) {
@@ -42,23 +40,15 @@ export async function updateCalendar({
       };
     }
 
-    const validatedData = calendarSchema.parse({
-      name,
-      userId,
-      collaboratorId,
-      isActive,
-      accessCode,
-    });
-
     const calendar = await prisma.calendar.update({
       where: {
         id,
       },
       data: {
-        name: validatedData.name,
-        collaboratorId: validatedData.collaboratorId,
-        isActive: validatedData.isActive,
-        accessCode: validatedData.accessCode,
+        name,
+        collaboratorId,
+        isActive,
+        accessCode,
       },
     });
 

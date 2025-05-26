@@ -45,7 +45,7 @@ export function CalendarForm({
         }
       : {
           name: "",
-          collaboratorId: "",
+          collaboratorId: null,
           isActive: true,
           accessCode: "",
         },
@@ -101,7 +101,7 @@ export function CalendarForm({
               label="Profissional"
               placeholder="Selecione um profissional"
               options={collaborators}
-              value={field.value}
+              value={String(field.value)}
               onChange={field.onChange}
               getOptionLabel={(option) => option?.name}
               getOptionValue={(option) => String(option.id)}

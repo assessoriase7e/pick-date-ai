@@ -6,7 +6,7 @@ import { Appointment } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function updateAppointment(
-  id: string,
+  id: number,
   data: Omit<Appointment, "id" | "createdAt" | "updatedAt" | "userId">,
   isPublic?: boolean
 ) {

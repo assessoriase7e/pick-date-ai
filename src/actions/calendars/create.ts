@@ -11,7 +11,7 @@ export async function createCalendar({
   accessCode,
 }: {
   name: string;
-  collaboratorId?: string;
+  collaboratorId?: number;
   accessCode?: string | null;
 }) {
   try {

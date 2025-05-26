@@ -106,7 +106,7 @@ export function AppointmentForm({
         },
   });
 
-  const updatePriceFromService = (serviceId: string) => {
+  const updatePriceFromService = (serviceId: number) => {
     const service = services.find((s) => s.id === serviceId);
     if (service) {
       form.setValue("servicePrice", service.price);
@@ -147,8 +147,8 @@ export function AppointmentForm({
   // Reseta o formulário quando o appointment ou os tempos iniciais mudam
   useEffect(() => {
     form.reset({
-      clientId: appointment?.clientId || "",
-      serviceId: appointment?.serviceId || "",
+      clientId: appointment?.clientId || null,
+      serviceId: appointment?.serviceId || null,
       startTime: appointment?.startTime
         ? moment(appointment.startTime).format("HH:mm")
         : initialStartTime || "09:00",
@@ -156,7 +156,7 @@ export function AppointmentForm({
         ? moment(appointment.endTime).format("HH:mm")
         : initialEndTime || "10:00",
       notes: appointment?.notes || "",
-      calendarId,
+      calendarId: null,
       servicePrice: appointment?.servicePrice || null,
       finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
     });
@@ -433,11 +433,11 @@ export function AppointmentForm({
                       <FormLabel></FormLabel>
                       <SelectWithScroll
                         getOptionLabel={(option) => option?.fullName || ""}
-                        getOptionValue={(option) => option?.id || ""}
+                        getOptionValue={(option) => String(option?.id) || null}
                         label="Cliente"
                         placeholder="Selecione um cliente"
                         options={clients || []}
-                        value={field.value}
+                        value={String(field.value)}
                         onChange={(value) => {
                           field.onChange(value);
                           if (value && !isEditing) {
@@ -459,11 +459,11 @@ export function AppointmentForm({
                       <FormLabel></FormLabel>
                       <SelectWithScroll
                         getOptionLabel={(option) => option?.name}
-                        getOptionValue={(option) => option?.id}
+                        getOptionValue={(option) => String(option?.id)}
                         label="Serviço"
                         placeholder="Selecione um serviço"
                         options={services}
-                        value={field.value}
+                        value={String(field.value)}
                         onChange={field.onChange}
                         error={form.formState.errors.clientId?.message}
                       />

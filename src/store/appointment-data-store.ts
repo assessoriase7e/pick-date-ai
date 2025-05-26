@@ -11,7 +11,7 @@ interface AppointmentDataState {
   isLoadingServices: boolean;
   error: string | null;
   fetchClients: () => Promise<void>;
-  fetchServices: (calendarId?: string) => Promise<void>;
+  fetchServices: (calendarId?: number) => Promise<void>;
   reset: () => void;
 }
 

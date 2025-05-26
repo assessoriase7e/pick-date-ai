@@ -1,22 +1,9 @@
 import { Button } from "@/components/ui/button";
-import {
-  CalendarIcon,
-  Edit,
-  List,
-  OptionIcon,
-  Share2,
-  Trash2,
-} from "lucide-react";
-import { useState } from "react";
+import { CalendarIcon, Edit, List, Share2, Trash2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ShareCalendarModal } from "./share-calendar-modal";
 import { ShareCalendarDrawer } from "./share-calendar-drawer";
 import { Calendar } from "@prisma/client";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
 import {
   Drawer,
   DrawerContent,
@@ -28,7 +15,7 @@ import {
 interface CalendarHeaderProps {
   shareOpen: boolean;
   setShareOpen: (open: boolean) => void;
-  calendarId: string;
+  calendarId: number;
   setOpen: (open: boolean) => void;
   openEditModal: (calendar: Calendar) => void;
   openDeleteModal: (calendar: Calendar) => void;

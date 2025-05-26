@@ -12,7 +12,7 @@ type GetServicesByCollaboratorResponse =
   | { success: false; error: string };
 
 export async function getServicesByCollaborator(
-  collaboratorId: string
+  collaboratorId: number
 ): Promise<GetServicesByCollaboratorResponse> {
   const { userId } = await auth();
   if (!userId) {

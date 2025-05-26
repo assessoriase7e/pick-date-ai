@@ -14,7 +14,7 @@ interface CalendarGridProps {
   goToToday: () => void;
   selectedDate: Date | null;
   appointments: Record<string, AppointmentFullData[]>;
-  calendarId: string;
+  calendarId: number;
   loading?: boolean;
 }
 
@@ -127,7 +127,7 @@ export function CalendarGrid({
       ? `/shared-calendar/${calendarId}`
       : "/calendar/day";
     const params = new URLSearchParams();
-    params.set("calendarId", calendarId);
+    params.set("calendarId", String(calendarId));
     params.set("date", date.toISOString());
 
     router.push(`${baseUrl}?${params.toString()}`);
@@ -159,7 +159,7 @@ export function CalendarGrid({
     currentDate,
     selectedDate,
     calendarDays,
-    calendarId,
+    calendarId: String(calendarId), // Convert to string here
     initialAppointments: appointments,
     goToPreviousMonth,
     goToNextMonth,

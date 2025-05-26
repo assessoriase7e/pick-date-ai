@@ -1,7 +1,5 @@
 "use server";
-
 import { prisma } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import { CalendarFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 
@@ -12,7 +10,7 @@ type GetCalendarByIdResponse = {
 };
 
 export async function getCalendarById(
-  calendarId: string,
+  calendarId: number,
   requireAuth: boolean = true
 ): Promise<GetCalendarByIdResponse> {
   try {

@@ -7,12 +7,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarFullData } from "@/types/calendar";
-import { Button } from "../ui/button";
-import { Share2 } from "lucide-react";
 
 interface MobileCalendarSelectorProps {
   calendars: CalendarFullData[];
-  calendarId: string;
+  calendarId: number;
   setCalendarId: (id: string) => void;
   setCalendarIdQueryParam: (id: string) => void;
   onLongPress: (calendar: CalendarFullData) => void;
@@ -53,7 +51,10 @@ export function MobileCalendarSelector({
   return (
     <div className="lg:hidden w-full mb-4">
       <div className="flex gap-2 mb-2">
-        <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
+        <Select
+          value={String(calendarId)}
+          onValueChange={setCalendarIdQueryParam}
+        >
           <SelectTrigger className="w-full">
             <SelectValue>
               {calendars.find((c) => c.id === calendarId)?.name ||
@@ -64,11 +65,11 @@ export function MobileCalendarSelector({
             {calendars.map((calendar: CalendarFullData) => (
               <SelectItem
                 key={calendar.id}
-                value={calendar.id}
+                value={String(calendar.id)}
                 onTouchStart={() => handleTouchStart(calendar)}
                 onTouchEnd={handleTouchEnd}
                 onTouchMove={handleTouchMove}
-                onClick={() => setCalendarIdQueryParam(calendar.id)}
+                onClick={() => setCalendarIdQueryParam(String(calendar.id))}
               >
                 <span className="flex items-center justify-between w-full">
                   <span>

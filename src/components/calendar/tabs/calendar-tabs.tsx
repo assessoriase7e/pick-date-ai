@@ -11,7 +11,7 @@ import IsTableLoading from "../../isTableLoading";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
-  calendarId: string;
+  calendarId: number;
   setCalendarId: (id: string) => void;
   openEditModal: (calendar: CalendarFullData) => void;
   openDeleteModal: (calendar: CalendarFullData) => void;
@@ -73,7 +73,7 @@ export function CalendarTabs({
       )}
 
       <Tabs
-        value={calendarId}
+        value={String(calendarId)}
         onValueChange={handleChangeCalendar}
         className="h-full flex flex-col gap-2 relative"
       >
@@ -94,7 +94,7 @@ export function CalendarTabs({
         {calendars.map((calendar) => (
           <TabsContent
             key={calendar.id}
-            value={calendar.id}
+            value={String(calendar.id)}
             className="flex-1 mt-0 h-full"
           >
             <CalendarGrid

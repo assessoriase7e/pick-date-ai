@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 interface DesktopCalendarTabsProps {
   calendars: CalendarFullData[];
-  calendarId: string;
+  calendarId: number;
   setCalendarIdQueryParam: (id: string) => void;
   openEditModal: (calendar: CalendarFullData) => void;
   openDeleteModal: (calendar: CalendarFullData) => void;
@@ -34,7 +34,10 @@ export function DesktopCalendarTabs({
   return (
     <div className="w-full mb-4 flex items-center gap-2">
       <div className="flex-1 flex gap-2">
-        <Select value={calendarId} onValueChange={setCalendarIdQueryParam}>
+        <Select
+          value={String(calendarId)}
+          onValueChange={setCalendarIdQueryParam}
+        >
           <SelectTrigger className="w-full max-w-[300px]">
             <SelectValue placeholder="Selecione um calendário">
               {selectedCalendar
@@ -48,7 +51,7 @@ export function DesktopCalendarTabs({
           </SelectTrigger>
           <SelectContent className="max-h-[300px] overflow-y-auto">
             {calendars.map((calendar) => (
-              <SelectItem key={calendar.id} value={calendar.id}>
+              <SelectItem key={calendar.id} value={String(calendar.id)}>
                 {calendar.name
                   ? `${calendar.name} | ${calendar.collaborator?.name}`
                   : calendar.collaborator?.name}

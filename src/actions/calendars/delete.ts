@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { updateRagContent } from "../agents/rag/update-rag-content";
 
-export async function deleteCalendar({ id }: { id: string }) {
+export async function deleteCalendar({ id }: { id: number }) {
   try {
     const { userId } = await auth();
 

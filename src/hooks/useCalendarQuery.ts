@@ -3,9 +3,9 @@ import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface UseCalendarQueryProps {
-  initialCalendarId: string;
+  initialCalendarId: number;
   initialDate: Date;
-  availableCalendarIds: string[];
+  availableCalendarIds: number[];
 }
 
 export function useCalendarQuery({
@@ -15,7 +15,8 @@ export function useCalendarQuery({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const activeCalendarId = searchParams.get("calendarId") || initialCalendarId;
+  const activeCalendarId =
+    Number(searchParams.get("calendarId")) || initialCalendarId;
   const activeDate = searchParams.get("date")
     ? new Date(searchParams.get("date")!)
     : initialDate;
@@ -32,7 +33,7 @@ export function useCalendarQuery({
   const setDate = useCallback(
     (date: Date) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("calendarId", activeCalendarId);
+      params.set("calendarId", String(activeCalendarId));
       params.set("date", date.toISOString());
       router.push(`/calendar?${params.toString()}`);
     },
@@ -43,7 +44,7 @@ export function useCalendarQuery({
     const prevMonth = new Date(activeDate);
     prevMonth.setMonth(prevMonth.getMonth() - 1);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("calendarId", activeCalendarId);
+    params.set("calendarId", String(activeCalendarId));
     params.set("date", prevMonth.toISOString());
     router.push(`/calendar?${params.toString()}`);
   }, [activeDate, activeCalendarId, router, searchParams]);
@@ -52,14 +53,14 @@ export function useCalendarQuery({
     const nextMonth = new Date(activeDate);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("calendarId", activeCalendarId);
+    params.set("calendarId", String(activeCalendarId));
     params.set("date", nextMonth.toISOString());
     router.push(`/calendar?${params.toString()}`);
   }, [activeDate, activeCalendarId, router, searchParams]);
 
   const goToToday = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("calendarId", activeCalendarId);
+    params.set("calendarId", String(activeCalendarId));
     params.set("date", new Date().toISOString());
     router.push(`/calendar?${params.toString()}`);
   }, [activeCalendarId, router, searchParams]);

@@ -14,7 +14,7 @@ import { toast } from "sonner";
 interface ShareCalendarDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  calendarId: string;
+  calendarId: number;
 }
 
 export function ShareCalendarDrawer({
@@ -23,9 +23,9 @@ export function ShareCalendarDrawer({
   calendarId,
 }: ShareCalendarDrawerProps) {
   const [copied, setCopied] = useState(false);
-  
+
   const shareUrl = `${window.location.origin}/shared-calendar/${calendarId}`;
-  
+
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -36,7 +36,7 @@ export function ShareCalendarDrawer({
       toast.error("Erro ao copiar o link");
     }
   };
-  
+
   const shareOnWhatsApp = () => {
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
       `Confira meu calendário de agendamentos: ${shareUrl}`
@@ -52,14 +52,10 @@ export function ShareCalendarDrawer({
         </DrawerHeader>
         <div className="p-4 space-y-4">
           <div className="flex items-center space-x-2">
-            <Input
-              readOnly
-              value={shareUrl}
-              className="flex-1"
-            />
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Input readOnly value={shareUrl} className="flex-1" />
+            <Button
+              variant="outline"
+              size="icon"
               onClick={copyToClipboard}
               className={copied ? "bg-green-100" : ""}
             >
@@ -67,17 +63,17 @@ export function ShareCalendarDrawer({
             </Button>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            <Button 
-              variant="outline" 
-              className="w-full" 
+            <Button
+              variant="outline"
+              className="w-full"
               onClick={copyToClipboard}
             >
               <Copy className="mr-2 h-4 w-4" />
               Copiar Link
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full" 
+            <Button
+              variant="outline"
+              className="w-full"
               onClick={shareOnWhatsApp}
             >
               <MessageCircle className="mr-2 h-4 w-4" />

@@ -28,15 +28,15 @@ export default async function CalendarPage({
     ? collaboratorsResponse.data
     : [];
 
-  const initialCalendarId = calendars.length > 0 ? calendars[0].id : "";
-  const calendarId = sParams.calendarId || initialCalendarId;
+  const initialCalendarId = calendars.length > 0 ? calendars[0].id : 0;
+  const calendarId = Number(sParams.calendarId) || initialCalendarId;
 
   const currentDate = sParams.date
     ? moment(sParams.date).toDate()
     : moment().startOf("day").toDate();
 
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
-  const res = await getAppointmentsByMonth(currentDate, calendarId);
+  const res = await getAppointmentsByMonth(currentDate, Number(calendarId));
 
   if (res?.success && res?.data) {
     res.data.forEach((appointment: any) => {

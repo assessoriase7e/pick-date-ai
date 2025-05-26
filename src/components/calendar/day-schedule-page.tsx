@@ -118,7 +118,7 @@ export function DayScheduleContent({
   const checkTimeConflict = (
     startTime: Date,
     endTime: Date,
-    excludeId?: string
+    excludeId?: number
   ): boolean => {
     return appointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
