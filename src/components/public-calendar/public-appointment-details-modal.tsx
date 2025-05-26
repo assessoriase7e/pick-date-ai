@@ -14,10 +14,10 @@ import { toast } from "sonner";
 interface PublicAppointmentDetailsModalProps {
   appointment: AppointmentFullData | null;
   onClose: () => void;
-  calendarId: string;
+  calendarId: number;
   services: Service[];
   clients: Client[];
-  collaboratorId: string;
+  collaboratorId: number;
 }
 
 export function PublicAppointmentDetailsModal({
@@ -35,7 +35,7 @@ export function PublicAppointmentDetailsModal({
   };
 
   const handleCancelEdit = async (
-    appointmentId: string,
+    appointmentId: number,
     isPublic: boolean = false
   ): Promise<void> => {
     try {

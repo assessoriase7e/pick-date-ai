@@ -15,10 +15,10 @@ interface PublicCalendarGridProps {
   goToToday: () => void;
   selectedDate: Date | null;
   initialAppointments: Record<string, AppointmentFullData[]>;
-  calendarId: string;
+  calendarId: number;
   services: Service[];
   clients: Client[];
-  collaboratorId: string; // Adicionar esta linha
+  collaboratorId: number;
 }
 
 export function PublicCalendarGrid({
@@ -111,7 +111,7 @@ export function PublicCalendarGrid({
     currentDate,
     selectedDate,
     calendarDays,
-    calendarId,
+    calendarId: String(calendarId),
     initialAppointments,
     goToPreviousMonth,
     goToNextMonth,

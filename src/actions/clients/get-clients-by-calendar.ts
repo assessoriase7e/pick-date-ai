@@ -1,16 +1,7 @@
 "use server";
-
 import { prisma } from "@/lib/db";
-import { Client } from "@prisma/client";
 
-type GetClientsByCalendarResponse =
-  | {
-      success: true;
-      data: Client[];
-    }
-  | { success: false; error: string };
-
-export async function getClientsByCalendar(calendarId: string) {
+export async function getClientsByCalendar(calendarId: number) {
   try {
     // Primeiro, buscar o calendário para obter o userId
     const calendar = await prisma.calendar.findUnique({

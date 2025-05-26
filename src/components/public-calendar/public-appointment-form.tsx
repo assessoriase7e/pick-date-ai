@@ -38,11 +38,11 @@ import { AppointmentFullData } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
 
 const publicAppointmentSchema = z.object({
-  clientId: z.string().min(1, "Cliente é obrigatório"),
-  serviceId: z.string().min(1, "Serviço é obrigatório"),
+  clientId: z.number().min(1, "Cliente é obrigatório"),
+  serviceId: z.number().min(1, "Serviço é obrigatório"),
   startTime: z.string().min(1, "Horário de início é obrigatório"),
   endTime: z.string().min(1, "Horário de término é obrigatório"),
-  collaboratorId: z.string().optional().nullable(),
+  collaboratorId: z.number().optional().nullable(),
   notes: z.string().optional(),
 });
 
@@ -51,13 +51,13 @@ type FormValues = z.infer<typeof publicAppointmentSchema>;
 interface PublicAppointmentFormProps {
   date: Date;
   hour: number;
-  calendarId: string;
+  calendarId: number;
   services: Service[];
   clients: Client[];
   onSuccess: () => void;
-  onCancel: (appointmentId: string, isPublic?: boolean) => Promise<void>;
+  onCancel: (appointmentId: number, isPublic?: boolean) => Promise<void>;
   appointment?: AppointmentFullData;
-  collaboratorId: string;
+  collaboratorId: number;
 }
 
 export function PublicAppointmentForm({
@@ -90,8 +90,8 @@ export function PublicAppointmentForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(publicAppointmentSchema),
     defaultValues: {
-      clientId: appointment?.clientId || "",
-      serviceId: appointment?.serviceId || "",
+      clientId: appointment?.clientId || null,
+      serviceId: appointment?.serviceId || null,
       startTime: appointment
         ? moment(appointment.startTime).format("HH:mm")
         : defaultStartTime,

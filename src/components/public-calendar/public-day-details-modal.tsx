@@ -30,10 +30,10 @@ interface PublicDayDetailsModalProps {
   closeDayDetails: () => void;
   selectedHour: number | null;
   onHourClick: (hour: number | null) => void;
-  calendarId: string;
+  calendarId: number;
   services: Service[];
   clients: Client[];
-  collaboratorId: string; // Adicionar esta linha
+  collaboratorId: number; // Adicionar esta linha
 }
 
 export function PublicDayDetailsModal({
@@ -74,7 +74,7 @@ export function PublicDayDetailsModal({
     revalidatePathAction("/shared-calendar/calendarId");
   };
 
-  const handleCancelAppointment = async (appointmentId: string) => {
+  const handleCancelAppointment = async (appointmentId: number) => {
     try {
       const result = await cancelAppointment({
         id: appointmentId,

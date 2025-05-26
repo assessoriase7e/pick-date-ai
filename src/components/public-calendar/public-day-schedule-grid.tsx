@@ -12,10 +12,10 @@ interface PublicDayScheduleGridProps {
   onHourClick: (hour: number) => void;
   selectedHour: number | null;
   selectedDate: string;
-  calendarId: string;
+  calendarId: number;
   services: Service[];
   clients: Client[];
-  collaboratorId: string;
+  collaboratorId: number;
 }
 
 export function PublicDayScheduleGrid({
