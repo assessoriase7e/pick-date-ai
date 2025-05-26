@@ -101,7 +101,7 @@ export function AppointmentsDataTable({
       if (button) {
         const appointmentId = button.getAttribute("data-appointment-id");
         const appointment = appointments.find(
-          (item) => item.id === appointmentId
+          (item) => item.id === Number(appointmentId)
         );
 
         if (appointment) {
@@ -153,7 +153,7 @@ export function AppointmentsDataTable({
         <SelectContent>
           <SelectItem value="all">Profissional</SelectItem>
           {collaborators.map((collaborator) => (
-            <SelectItem key={collaborator.id} value={collaborator.id}>
+            <SelectItem key={collaborator.id} value={String(collaborator.id)}>
               {collaborator.name}
             </SelectItem>
           ))}
