@@ -62,7 +62,7 @@ export const calendarSchema = z.object({
   name: z.string().optional(),
   collaboratorId: z.number(),
   isActive: z.boolean(),
-  accessCode: z.string().nullable().optional(),
+  accessCode: z.string(),
 });
 
 export type CalendarFormValues = z.infer<typeof calendarSchema>;
