@@ -18,6 +18,7 @@ interface PublicCalendarGridProps {
   calendarId: string;
   services: Service[];
   clients: Client[];
+  collaboratorId: string; // Adicionar esta linha
 }
 
 export function PublicCalendarGrid({
@@ -30,6 +31,7 @@ export function PublicCalendarGrid({
   calendarId,
   services,
   clients,
+  collaboratorId,
 }: PublicCalendarGridProps) {
   const today = moment();
   const [dayDetails, setDayDetails] = useState<{
@@ -137,6 +139,7 @@ export function PublicCalendarGrid({
         calendarId={calendarId}
         services={services}
         clients={clients}
+        collaboratorId={collaboratorId} // Adicionar esta linha
       />
     </>
   );

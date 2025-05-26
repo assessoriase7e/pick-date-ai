@@ -17,6 +17,7 @@ interface PublicAppointmentDetailsModalProps {
   calendarId: string;
   services: Service[];
   clients: Client[];
+  collaboratorId: string;
 }
 
 export function PublicAppointmentDetailsModal({
@@ -25,6 +26,7 @@ export function PublicAppointmentDetailsModal({
   calendarId,
   services,
   clients,
+  collaboratorId,
 }: PublicAppointmentDetailsModalProps) {
   if (!appointment) return null;
 
@@ -73,6 +75,7 @@ export function PublicAppointmentDetailsModal({
             onCancel={handleCancelEdit}
             appointment={appointment}
             clients={clients}
+            collaboratorId={collaboratorId}
           />
         </div>
       </DialogContent>

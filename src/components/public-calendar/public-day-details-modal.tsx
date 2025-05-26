@@ -33,6 +33,7 @@ interface PublicDayDetailsModalProps {
   calendarId: string;
   services: Service[];
   clients: Client[];
+  collaboratorId: string; // Adicionar esta linha
 }
 
 export function PublicDayDetailsModal({
@@ -44,6 +45,7 @@ export function PublicDayDetailsModal({
   calendarId,
   services,
   clients,
+  collaboratorId,
 }: PublicDayDetailsModalProps) {
   if (!dayDetails || !dayDetails.isOpen) return null;
 
@@ -94,6 +96,8 @@ export function PublicDayDetailsModal({
 
   const renderContent = () => {
     if (showAppointmentForm && selectedHour !== null) {
+      console.log("collaboratorId", collaboratorId);
+
       return (
         <PublicAppointmentForm
           date={dayDetails.date}
@@ -103,6 +107,7 @@ export function PublicDayDetailsModal({
           onSuccess={handleAppointmentSuccess}
           onCancel={handleCancelAppointment}
           clients={clients}
+          collaboratorId={collaboratorId}
         />
       );
     }
@@ -116,6 +121,7 @@ export function PublicDayDetailsModal({
         calendarId={calendarId}
         services={services}
         clients={clients}
+        collaboratorId={collaboratorId}
       />
     );
   };

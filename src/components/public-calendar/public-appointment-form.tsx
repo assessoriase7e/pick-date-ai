@@ -42,6 +42,7 @@ const publicAppointmentSchema = z.object({
   serviceId: z.string().min(1, "Serviço é obrigatório"),
   startTime: z.string().min(1, "Horário de início é obrigatório"),
   endTime: z.string().min(1, "Horário de término é obrigatório"),
+  collaboratorId: z.string().optional().nullable(),
   notes: z.string().optional(),
 });
 
@@ -52,10 +53,11 @@ interface PublicAppointmentFormProps {
   hour: number;
   calendarId: string;
   services: Service[];
-  clients: Client[]; // Nova prop
+  clients: Client[];
   onSuccess: () => void;
   onCancel: (appointmentId: string, isPublic?: boolean) => Promise<void>;
-  appointment?: AppointmentFullData; // Novo prop opcional
+  appointment?: AppointmentFullData;
+  collaboratorId: string;
 }
 
 export function PublicAppointmentForm({
@@ -67,7 +69,10 @@ export function PublicAppointmentForm({
   onCancel,
   appointment,
   clients,
+  collaboratorId,
 }: PublicAppointmentFormProps) {
+  console.log(collaboratorId);
+
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedServiceDuration, setSelectedServiceDuration] =
@@ -94,6 +99,7 @@ export function PublicAppointmentForm({
         ? moment(appointment.endTime).format("HH:mm")
         : defaultEndTime,
       notes: appointment?.notes || "",
+      collaboratorId,
     },
   });
 
@@ -152,7 +158,7 @@ export function PublicAppointmentForm({
           services?.find((s) => s.id === values.serviceId)?.price ?? null,
         finalPrice:
           services?.find((s) => s.id === values.serviceId)?.price ?? null,
-        collaboratorId: null,
+        collaboratorId,
         clientId: values.clientId,
       };
 

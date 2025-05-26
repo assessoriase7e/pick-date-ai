@@ -15,6 +15,7 @@ interface PublicDayScheduleGridProps {
   calendarId: string;
   services: Service[];
   clients: Client[];
+  collaboratorId: string;
 }
 
 export function PublicDayScheduleGrid({
@@ -25,6 +26,7 @@ export function PublicDayScheduleGrid({
   calendarId,
   services,
   clients,
+  collaboratorId,
 }: PublicDayScheduleGridProps) {
   const activeAppointments = appointments.filter(
     (appointment) => appointment.status !== "canceled"
@@ -157,6 +159,7 @@ export function PublicDayScheduleGrid({
         calendarId={calendarId}
         services={services}
         clients={clients}
+        collaboratorId={collaboratorId}
       />
     </div>
   );

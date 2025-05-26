@@ -131,6 +131,7 @@ export function SharedCalendarView({
           calendarId={calendar.id}
           services={services}
           clients={clients}
+          collaboratorId={calendar.collaboratorId}
         />
       </div>
     </div>
