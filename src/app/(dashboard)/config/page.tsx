@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
 import { LoaderCircle } from "lucide-react";
 import { getProfile } from "@/actions/profile/get";
+export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const { data } = await getProfile();
