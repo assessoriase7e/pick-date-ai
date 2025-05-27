@@ -6,34 +6,28 @@ import { LinkModal } from "./link-modal";
 import { DeleteLinkModal } from "./delete-link-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Pencil, Trash2, ExternalLink, LinkIcon } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
 import { deleteLink } from "@/actions/links/delete";
 import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
-import { useUser } from "@clerk/nextjs";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 type LinksContentProps = {
   links: Link[];
   totalPages: number;
   currentPage: number;
+  userId: string;
 };
 
 export function LinksContent({
   links,
   totalPages,
   currentPage,
+  userId,
 }: LinksContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,12 +35,10 @@ export function LinksContent({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingLink, setEditingLink] = useState<any | null>(null);
-  const [deletingLink, setDeletingLink] = useState<any | null>(null);
+  const [editingLink, setEditingLink] = useState<Link | null>(null);
+  const [deletingLink, setDeletingLink] = useState<Link | null>(null);
 
-  const { user } = useUser();
-
-  async function handleCreateLink(data: any) {
+  async function handleCreateLink(data: Link) {
     try {
       setIsLoading(true);
       const result = await createLink(data);
@@ -55,7 +47,7 @@ export function LinksContent({
         throw new Error(result.error);
       }
 
-      router.refresh();
+      revalidatePathAction("/links");
       setIsCreateModalOpen(false);
       toast("Link criado com sucesso!");
     } catch (error) {
@@ -71,13 +63,13 @@ export function LinksContent({
       setIsLoading(true);
       if (!editingLink) return;
 
-      const result = await updateLink(editingLink.id, user?.id!, data);
+      const result = await updateLink(editingLink.id, userId!, data);
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      router.refresh();
+      revalidatePathAction("/links");
       setEditingLink(null);
       toast("Link atualizado com sucesso!");
     } catch (error) {
@@ -99,7 +91,7 @@ export function LinksContent({
         throw new Error(result.error);
       }
 
-      router.refresh();
+      revalidatePathAction("/links");
       setDeletingLink(null);
       toast("Link excluído com sucesso!");
     } catch (error) {

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 
-export async function deleteLink(id: string) {
+export async function deleteLink(id: number) {
   try {
     await prisma.link.delete({
       where: { id },

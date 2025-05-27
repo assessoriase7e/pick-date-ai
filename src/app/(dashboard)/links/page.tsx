@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { LinksContent } from "@/components/links/links-content";
 import { LoaderCircle } from "lucide-react";
 import { listLinks } from "@/actions/links/getMany";
+import { currentUser } from "@clerk/nextjs/server";
 
 interface LinksPageProps {
   searchParams: Promise<{
@@ -17,6 +18,7 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
   const result = await listLinks(page, limit);
   const links = result.success ? result.data!.links : [];
   const totalPages = result.success ? result.data!.totalPages : 1;
+  const { id: userId } = await currentUser();
 
   return (
     <div className="space-y-6">
@@ -31,6 +33,7 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
           links={links}
           totalPages={totalPages}
           currentPage={page}
+          userId={userId!}
         />
       </Suspense>
     </div>

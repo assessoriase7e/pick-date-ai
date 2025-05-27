@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { triggerProfileRagUpdate } from "../agents/rag/trigger-profile-rag-update";
 
-export async function updateLink(linkId: string, userId: string, data: any) {
+export async function updateLink(linkId: number, userId: string, data: any) {
   try {
     const updatedLink = await prisma.link.update({
       where: { id: linkId },
