@@ -12,12 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { saveClient } from "@/actions/clients/save-client";
 import { clientSchema, ClientFormValues } from "@/validators/client";
 import { PatternFormat } from "react-number-format";
 import { YearInputCalendar } from "@/components/ui/year-input-calendar";
+import { revalidatePathAction } from "@/actions/revalidate-path";
 
 interface ClientFormProps {
   initialData?: any;
@@ -28,7 +28,6 @@ export default function ClientForm({
   initialData,
   onSuccess,
 }: ClientFormProps) {
-  const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm<ClientFormValues>({
@@ -56,10 +55,10 @@ export default function ClientForm({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/clients");
+        revalidatePathAction("/clients");
       }
 
-      router.refresh();
+      revalidatePathAction("/clients");
     } else {
       toast({
         title: "Erro",
@@ -153,7 +152,7 @@ export default function ClientForm({
               if (onSuccess) {
                 onSuccess();
               } else {
-                router.push("/clients");
+                revalidatePathAction("/clients");
               }
             }}
           >

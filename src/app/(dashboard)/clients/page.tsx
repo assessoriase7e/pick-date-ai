@@ -40,11 +40,6 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
     sort,
   });
 
-  const pagination =
-    clientsResult.success && clientsResult.pagination
-      ? clientsResult.pagination
-      : { totalPages: 1, currentPage: 1 };
-
   const clients = clientsResult.success ? clientsResult.data : [];
 
   return (

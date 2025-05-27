@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function deleteClientService(id: string, clientId: string) {
+export async function deleteClientService(id: number, clientId: number) {
   try {
     const clientService = await prisma.clientService.findUnique({
       where: { id },

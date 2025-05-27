@@ -8,12 +8,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface ClientServicesPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 export default async function ClientServicesPage({
@@ -26,8 +26,8 @@ export default async function ClientServicesPage({
 
   const [clientResult, clientServicesResult, servicesResult] =
     await Promise.all([
-      getClient(id),
-      getClientServices(id, page),
+      getClient(Number(id)),
+      getClientServices(Number(id), page),
       getServices({}),
     ]);
 
@@ -51,11 +51,10 @@ export default async function ClientServicesPage({
 
       {!clientServicesResult.success ? (
         <div className="p-4 bg-red-50 text-red-500 rounded-md">
-          Erro ao carregar serviços: {clientServicesResult.error}
+          Erro ao carregar serviços
         </div>
       ) : (
         <ClientServicesTable
-          clientId={id}
           clientServices={clientServicesResult.data?.clientServices || []}
           pagination={
             clientServicesResult.data?.pagination || {

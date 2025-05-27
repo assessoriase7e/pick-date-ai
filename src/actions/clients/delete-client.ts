@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export async function deleteClient(id: string) {
+export async function deleteClient(id: number) {
   try {
     await prisma.clientService.deleteMany({
       where: { clientId: id },

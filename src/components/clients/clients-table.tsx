@@ -36,13 +36,20 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
 
-  const handleDeleteClick = (id: string) => {
+  const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleEditClick = (client: Client) => {
+    setClientToEdit(client);
+    setIsEditClientDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -74,6 +81,7 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
 
   const handleClientFormSuccess = () => {
     setIsNewClientDialogOpen(false);
+    setIsEditClientDialogOpen(false);
     router.refresh();
   };
 
@@ -106,11 +114,13 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
               </Button>
             </Link>
 
-            <Link href={`/clients/${client.id}/edit`}>
-              <Button variant="outline" size="icon">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleEditClick(client)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
 
             <Button
               variant="outline"
@@ -153,6 +163,21 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
             <DialogTitle>Novo Cliente</DialogTitle>
           </DialogHeader>
           <ClientForm onSuccess={handleClientFormSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isEditClientDialogOpen}
+        onOpenChange={setIsEditClientDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+          </DialogHeader>
+          <ClientForm
+            initialData={clientToEdit}
+            onSuccess={handleClientFormSuccess}
+          />
         </DialogContent>
       </Dialog>
 
