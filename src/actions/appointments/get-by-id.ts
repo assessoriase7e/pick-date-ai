@@ -1,9 +1,7 @@
 "use server";
-
 import { prisma } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 
-export async function getAppointmentById(id: string) {
+export async function getAppointmentById(id: number) {
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { id },

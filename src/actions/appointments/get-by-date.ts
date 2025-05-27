@@ -1,10 +1,8 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 import { startOfDay, endOfDay } from "date-fns";
-import { unstable_cache } from "next/cache";
 
 type GetAppointmentsByDateReturn = {
   success: boolean;
@@ -43,6 +41,7 @@ export async function getAppointmentsByDate(
       include: {
         client: true,
         service: true,
+        collaborator: true,
       },
       orderBy: {
         startTime: "asc",

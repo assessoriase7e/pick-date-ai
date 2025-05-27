@@ -1,13 +1,18 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { unstable_cache } from "next/cache";
 
-type TopClientsBySpendingSuccess = {
+export type TopClientProps = {
+  id: number;
+  name: string;
+  totalSpent: number;
+  serviceCount: number;
+};
+
+export type TopClientsBySpendingSuccess = {
   success: true;
   data: {
-    id: string;
+    id: number;
     name: string;
     totalSpent: number;
     serviceCount: number;
@@ -19,10 +24,14 @@ type TopClientsBySpendingError = {
   error: string;
 };
 
-async function fetchTopClientsBySpending(
-  userId: string,
+export const getTopClientsBySpending = async (
   limit: number = 10
-): Promise<TopClientsBySpendingSuccess | TopClientsBySpendingError> {
+): Promise<TopClientsBySpendingSuccess | TopClientsBySpendingError> => {
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
@@ -46,7 +55,7 @@ async function fetchTopClientsBySpending(
     const clientData: Record<
       string,
       {
-        id: string;
+        id: number;
         name: string;
         serviceCount: number;
         totalSpent: number;
@@ -87,19 +96,4 @@ async function fetchTopClientsBySpending(
     console.error("Erro ao buscar top clientes por gasto:", error);
     return { success: false, error: "Falha ao buscar top clientes por gasto" };
   }
-}
-
-export const getTopClientsBySpending = async (
-  limit: number = 10
-): Promise<TopClientsBySpendingSuccess | TopClientsBySpendingError> => {
-  const { userId } = await auth();
-  if (!userId) {
-    return { success: false, error: "Usuário não autenticado" };
-  }
-
-  return unstable_cache(
-    () => fetchTopClientsBySpending(userId, limit),
-    [`top-clients-spending-${userId}-${limit}`],
-    { revalidate: 60 * 60, tags: ["clients", "appointments"] }
-  )();
 };

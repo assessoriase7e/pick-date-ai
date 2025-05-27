@@ -21,23 +21,18 @@ import { DatePickerWithRange } from "../ui/date-picker-range";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CommissionMobileCard } from "./commission-mobile-card";
 
-interface CommissionMobileCardProps {
+type CommissionData = {
+  collaboratorId: number;
   name: string;
   totalServices: number;
   totalRevenue: number;
   commission: number;
-}
+};
 
 interface CollaboratorCommissionProps {
   collaborators: Collaborator[];
-  commissionData: {
-    collaboratorId: string;
-    name: string;
-    totalServices: number;
-    totalRevenue: number;
-    commission: number;
-  }[];
-  selectedCollaborator?: string;
+  commissionData: CommissionData[];
+  selectedCollaborator?: number;
   dateRange: DateRange;
 }
 
@@ -57,10 +52,10 @@ export function CollaboratorCommission({
     }).format(value);
   };
 
-  const handleCollaboratorChange = (value: string | undefined) => {
+  const handleCollaboratorChange = (value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value !== "all") {
-      params.set("collaboratorId", value as string);
+    if (value !== null) {
+      params.set("collaboratorId", value);
     } else {
       params.delete("collaboratorId");
     }
@@ -76,7 +71,9 @@ export function CollaboratorCommission({
 
   // Filtrar os dados de comissão com base no colaborador selecionado
   const filteredCommissionData = selectedCollaborator
-    ? commissionData.filter(item => item.collaboratorId === selectedCollaborator)
+    ? commissionData.filter(
+        (item) => item.collaboratorId === selectedCollaborator
+      )
     : commissionData;
 
   return (
@@ -92,17 +89,17 @@ export function CollaboratorCommission({
               label="Profissional"
               placeholder="Todos os profissionais"
               options={[
-                { id: "all", name: "Todos os profissionais" }, // Opção para limpar o filtro
+                { id: null, name: "Todos os profissionais" }, // Opção para limpar o filtro
                 ...collaborators,
               ]}
               value={selectedCollaborator ?? ""}
               onChange={(value) =>
                 handleCollaboratorChange(
-                  value && value !== "" ? value : undefined
+                  String(value) ? String(value) : undefined
                 )
               }
-              getOptionLabel={(option) => option.name}
-              getOptionValue={(option) => option.id}
+              getOptionLabel={(option) => option?.name ?? "Sem nome"}
+              getOptionValue={(option) => String(option.id)}
             />
           </div>
           <div className="w-full">

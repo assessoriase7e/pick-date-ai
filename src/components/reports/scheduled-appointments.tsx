@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Card,
   CardContent,
@@ -39,28 +38,16 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { AppointmentMobileCard } from "./appointment-mobile-card";
+import { Appointment } from "@prisma/client";
+import { AppointmentFullData } from "@/types/calendar";
 
 interface ScheduledAppointmentsProps {
-  initialAppointments: {
-    id: string;
-    clientName: string;
-    serviceName: string;
-    date: string;
-    time: string;
-    collaboratorName: string;
-  }[];
+  initialAppointments: AppointmentFullData[];
   initialFromDate?: Date;
   initialToDate?: Date;
 }
 
-const columns: ColumnDef<{
-  id: string;
-  clientName: string;
-  serviceName: string;
-  date: string;
-  time: string;
-  collaboratorName: string;
-}>[] = [
+const columns: ColumnDef<any>[] = [
   {
     accessorKey: "clientName",
     header: "Cliente",
@@ -90,7 +77,8 @@ export function ScheduledAppointments({
 }: ScheduledAppointmentsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [appointments, setAppointments] = useState(initialAppointments);
+  const [appointments, setAppointments] =
+    useState<Appointment[]>(initialAppointments);
   const [loading, setLoading] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({

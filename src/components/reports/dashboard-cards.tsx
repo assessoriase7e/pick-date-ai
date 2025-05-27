@@ -100,7 +100,7 @@ interface DashboardCardsProps {
   periodRevenue?: number;
   canceledAppointmentsCount: number;
   birthdayClients: Array<{
-    id: string;
+    id: number;
     fullName: string;
     birthDate: string;
   }>;

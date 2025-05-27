@@ -38,7 +38,7 @@ export const getCollaborators = async (
     const collaborators = await prisma.collaborator.findMany({
       where: whereCondition,
       include: {
-        ServiceCollaborator: {
+        serviceCollaborators: {
           include: {
             service: true,
           },

@@ -1,10 +1,8 @@
 "use server";
-
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 
-export async function getAppointmentsByCalendar(calendarId: string) {
+export async function getAppointmentsByCalendar(calendarId: number) {
   try {
     const { userId } = await auth();
 

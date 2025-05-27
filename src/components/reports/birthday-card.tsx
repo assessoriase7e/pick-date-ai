@@ -20,7 +20,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BirthdayClient {
-  id: string;
+  id: number;
   fullName: string;
   birthDate: string;
 }

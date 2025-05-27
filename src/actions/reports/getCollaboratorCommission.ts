@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
 
 type CollaboratorCommissionData = {
-  collaboratorId: string;
+  collaboratorId: number;
   name: string;
   totalServices: number;
   totalRevenue: number;
@@ -28,7 +28,7 @@ function calculateCommission(amount: number, percentage: number): number {
 
 async function getCollaboratorCommissionData(
   userId: string,
-  collaboratorId?: string,
+  collaboratorId?: number,
   from?: Date,
   to?: Date
 ): Promise<RevenueResult | CollaboratorCommissionError> {
@@ -39,7 +39,7 @@ async function getCollaboratorCommissionData(
     };
 
     // Se colaboradorId foi informado, buscar os serviços relacionados a ele via ServiceCollaborator
-    let serviceIds: string[] | undefined = undefined;
+    let serviceIds: number[] | undefined = undefined;
     if (collaboratorId) {
       const serviceCollaborators = await prisma.serviceCollaborator.findMany({
         where: { collaboratorId },
@@ -130,7 +130,7 @@ async function getCollaboratorCommissionData(
 }
 
 export async function getCollaboratorCommission(
-  collaboratorId?: string,
+  collaboratorId?: number,
   from?: Date,
   to?: Date
 ): Promise<RevenueResult | CollaboratorCommissionError> {

@@ -21,10 +21,25 @@ import { getScheduledAppointments } from "@/actions/reports/getScheduledAppointm
 import { prisma } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 
+type ReportsSearchParamsProps = {
+  fromRevenue?: string;
+  toRevenue?: string;
+  fromMonthlyRevenue?: string;
+  toMonthlyRevenue?: string;
+  fromCollab?: string;
+  toCollab?: string;
+  collaboratorId?: string;
+  fromCanceled?: string;
+  toCanceled?: string;
+  fromScheduled?: string;
+  toScheduled?: string;
+  [key: string]: string | string[] | undefined;
+};
+
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<ReportsSearchParamsProps>;
 }) {
   const user = await currentUser();
   const dashboardResult = await getDashboardData();
@@ -112,7 +127,7 @@ export default async function ReportsPage({
     : [];
 
   const commissionResult = await getCollaboratorCommission(
-    collaboratorId as string | undefined,
+    Number(collaboratorId),
     formatedFromCollab,
     formatedToCollab
   );
@@ -246,7 +261,7 @@ export default async function ReportsPage({
           <CollaboratorCommission
             collaborators={collaborators}
             commissionData={commissionData}
-            selectedCollaborator={collaboratorId as string | undefined}
+            selectedCollaborator={Number(collaboratorId)}
             dateRange={{
               from: formatedFromCollab,
               to: formatedToCollab,

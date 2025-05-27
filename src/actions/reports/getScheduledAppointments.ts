@@ -1,20 +1,10 @@
 "use server";
-
 import { prisma } from "@/lib/db";
+import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
-import moment from "moment";
-
-type AppointmentData = {
-  id: string;
-  clientName: string;
-  serviceName: string;
-  date: string;
-  time: string;
-  collaboratorName: string;
-};
 
 type ScheduledAppointmentsResult =
-  | { success: true; data: AppointmentData[] }
+  | { success: true; data: AppointmentFullData[] }
   | { success: false; error: string };
 
 export const getScheduledAppointments = async (
@@ -37,23 +27,12 @@ export const getScheduledAppointments = async (
         status: "scheduled",
       },
       include: {
-        client: {
-          select: {
-            fullName: true,
-          },
-        },
-        service: {
-          select: {
-            name: true,
-          },
-        },
+        client: true,
+        service: true,
+        collaborator: true,
         calendar: {
           include: {
-            collaborator: {
-              select: {
-                name: true,
-              },
-            },
+            collaborator: true,
           },
         },
       },
@@ -62,19 +41,7 @@ export const getScheduledAppointments = async (
       },
     });
 
-    const formattedAppointments = appointments.map((appointment) => ({
-      id: appointment.id,
-      clientName: appointment.client?.fullName || "Cliente não encontrado",
-      serviceName: appointment.service?.name || "Serviço não encontrado",
-      date: moment(appointment.startTime).format("DD/MM/YYYY"),
-      time: moment(appointment.startTime).format("HH:mm"),
-      collaboratorName:
-        appointment.calendar && appointment.calendar.collaborator
-          ? appointment.calendar.collaborator.name
-          : "Profissional não encontrado",
-    }));
-
-    return { success: true, data: formattedAppointments };
+    return { success: true, data: appointments };
   } catch (error) {
     console.error("Erro ao buscar agendamentos agendados:", error);
     return {

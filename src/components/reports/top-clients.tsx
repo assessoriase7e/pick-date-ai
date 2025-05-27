@@ -24,20 +24,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { TopClientProps } from "@/actions/reports/getTopClientsBySpending";
 
 interface TopClientsProps {
   topClientsByServices: {
-    id: string;
+    id: number;
     name: string;
     serviceCount: number;
     totalSpent: number;
   }[];
-  topClientsBySpending: {
-    id: string;
-    name: string;
-    serviceCount: number;
-    totalSpent: number;
-  }[];
+  topClientsBySpending: TopClientProps[];
 }
 
 export function TopClients({
