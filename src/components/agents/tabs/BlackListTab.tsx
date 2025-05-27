@@ -15,14 +15,12 @@ import { blackListSchema, BlackListFormValues } from "@/validators/blacklist";
 import { saveBlackList } from "@/actions/agents/blacklist/save-blacklist";
 import { PatternFormat } from "react-number-format";
 import { X } from "lucide-react";
+import { BlackListFullProps } from "@/types/blacklist";
 
 interface BlackListTabProps {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
-  initialData?: {
-    id?: string;
-    phones: Array<{ id?: string; number: string; name?: string }>;
-  };
+  initialData?: BlackListFullProps;
 }
 
 export function BlackListTab({
@@ -50,10 +48,11 @@ export function BlackListTab({
   const onSubmit = async (data: BlackListFormValues) => {
     setIsLoading(true);
     try {
-      // Filtra números vazios antes de salvar
       const filteredData = {
         ...data,
-        phones: data.phones.filter((phone) => phone.number.trim() !== ""),
+        phones: data.phones.filter(
+          (phone) => phone.number.trim() !== "" && phone.name.trim() !== ""
+        ),
       };
 
       const result = await saveBlackList(filteredData);

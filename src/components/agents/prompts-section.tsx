@@ -5,6 +5,7 @@ import { AttendantTab } from "./tabs/AttendantTab";
 import { SdrTab } from "./tabs/SdrTab";
 import { FollowUpTab } from "./tabs/FollowUpTab";
 import { BlackListTab } from "./tabs/BlackListTab";
+import { BlackListFullProps } from "@/types/blacklist";
 
 interface PromptsProps {
   attendantPrompt?: {
@@ -17,13 +18,7 @@ interface PromptsProps {
     rules: string;
     suportPhone: string | null;
   };
-  blackList?: {
-    id?: string;
-    phones: Array<{
-      number: string;
-      name?: string;
-    }>;
-  };
+  blackList?: BlackListFullProps;
 }
 
 export function PromptsSection({ attendantPrompt, blackList }: PromptsProps) {

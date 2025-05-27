@@ -31,21 +31,6 @@ export default async function AgentesPage() {
       }
     : undefined;
 
-  const blackList = blackListData?.blackList
-    ? {
-        id: blackListData.blackList.id,
-        phones: blackListData.blackList.phones.map((phone: any) => {
-          if (typeof phone === "object" && phone.number) {
-            return phone;
-          }
-          return {
-            number: phone,
-            name: undefined,
-          };
-        }),
-      }
-    : { phones: [] };
-
   const hasProfile = profile?.companyName;
 
   return (
@@ -55,7 +40,7 @@ export default async function AgentesPage() {
       <div className="space-y-8 w-full">
         <PromptsSection
           attendantPrompt={attendantPrompt}
-          blackList={blackList}
+          blackList={blackListData.blackList}
         />
 
         <Separator className="my-6" />
