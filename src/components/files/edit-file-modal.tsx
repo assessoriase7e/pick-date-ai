@@ -36,7 +36,7 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fileData.id) {
+    if (!fileData || !fileData.id) {
       alert("ID do arquivo não encontrado");
       return;
     }
@@ -65,6 +65,22 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
   const handleClose = () => {
     onClose();
   };
+
+  // Se não houver dados do arquivo, não renderize o conteúdo do formulário
+  if (!fileData) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Arquivo</DialogTitle>
+            <DialogDescription>
+              Carregando informações do arquivo...
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
