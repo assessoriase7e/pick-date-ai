@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
 import { LoaderCircle } from "lucide-react";
-import { currentUser } from "@clerk/nextjs/server";
+import { getProfile } from "@/actions/profile/get";
 
 export default async function SettingsPage() {
-  const user = await currentUser();
+  const { data } = await getProfile();
 
   return (
     <div className="space-y-6">
@@ -15,7 +15,7 @@ export default async function SettingsPage() {
         </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <SettingsContent user={JSON.parse(JSON.stringify(user))} />
+        <SettingsContent combinedProfile={data} />
       </Suspense>
     </div>
   );

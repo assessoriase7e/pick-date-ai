@@ -2,8 +2,17 @@
 
 import { prisma } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
+import { Profile, User } from "@prisma/client";
 
-export async function getProfile() {
+export type CombinedProfileData = Partial<User> & {
+  profile?: Partial<Profile> | null;
+};
+
+export async function getProfile(): Promise<{
+  success: boolean;
+  error?: string;
+  data?: CombinedProfileData;
+}> {
   try {
     const user = await currentUser();
 
@@ -36,17 +45,20 @@ export async function getProfile() {
         where: { id: user.id },
         include: { profile: true },
       });
-      
+
       // Verificar se o usuário foi encontrado após a criação do perfil
       if (!userWithProfile) {
-        return { success: false, error: "Falha ao recuperar usuário após criar perfil" };
+        return {
+          success: false,
+          error: "Falha ao recuperar usuário após criar perfil",
+        };
       }
     }
 
     // Combinar os dados do usuário e do perfil para o formulário
     const profileData = {
       ...userWithProfile,
-      ...userWithProfile.profile,
+      profile: userWithProfile.profile,
     };
 
     return { success: true, data: profileData };

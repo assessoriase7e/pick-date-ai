@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Profile, User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,10 +31,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
-
-interface CombinedProfileData extends Partial<User> {
-  profile?: Partial<Profile> | null;
-}
+import { CombinedProfileData } from "@/actions/profile/get";
 
 interface ProfileFormProps {
   initialData?: CombinedProfileData;

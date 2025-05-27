@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,13 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DeleteAccountDialog } from "./delete-account-dialog";
-import { User } from "@clerk/nextjs/server";
+import { CombinedProfileData } from "@/actions/profile/get";
 
 interface SettingsContentProps {
-  user: User | null;
+  combinedProfile: CombinedProfileData | null;
 }
 
-export function SettingsContent({ user }: SettingsContentProps) {
+export function SettingsContent({ combinedProfile }: SettingsContentProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   return (
@@ -34,18 +33,20 @@ export function SettingsContent({ user }: SettingsContentProps) {
             <div>
               <p className="text-sm font-medium">Nome</p>
               <p className="text-sm text-muted-foreground">
-                {user?.fullName || "Não disponível"}
+                {combinedProfile.profile.companyName || "Não disponível"}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium">Email</p>
               <p className="text-sm text-muted-foreground">
-                {user?.emailAddresses[0]?.emailAddress || "Não disponível"}
+                {combinedProfile.email || "Não disponível"}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium">ID</p>
-              <p className="text-sm text-muted-foreground">{user?.id}</p>
+              <p className="text-sm text-muted-foreground">
+                {combinedProfile?.id}
+              </p>
             </div>
           </div>
         </CardContent>
