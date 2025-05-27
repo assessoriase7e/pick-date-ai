@@ -1,27 +1,14 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
 import { updateRagContent } from "../agents/rag/update-rag-content";
+import { FullCollaborator } from "@/types/calendar";
 
-interface UpdateCollaboratorParams {
-  id: string;
-  name: string;
-  workingHours: {
-    day: string;
-    startTime: string;
-    endTime: string;
-    breakStart?: string;
-    breakEnd?: string;
-  }[];
-  phone: string;
-  profession: string;
-  description?: string;
-}
-
-export async function updateCollaborator(params: UpdateCollaboratorParams) {
+export async function updateCollaborator(
+  id: number,
+  data: Omit<FullCollaborator, "id" | "createdAt" | "updatedAt">
+) {
   try {
     const user = await getClerkUser();
 
@@ -31,8 +18,6 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
         error: "Usuário não autenticado",
       };
     }
-
-    const { id, name, workingHours, phone, profession, description } = params;
 
     const existingCollaborator = await prisma.collaborator.findUnique({
       where: {
@@ -48,18 +33,40 @@ export async function updateCollaborator(params: UpdateCollaboratorParams) {
       };
     }
 
+    // Atualizar os dados básicos do colaborador
     const collaborator = await prisma.collaborator.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
-        name,
-        workingHours: workingHours as Prisma.InputJsonValue,
-        phone,
-        profession,
-        description,
+        description: data.description,
+        name: data.name,
+        phone: data.phone,
+        profession: data.profession,
+      },
+      include: {
+        workHours: true,
       },
     });
+
+    // Excluir os horários de trabalho existentes
+    await prisma.workHour.deleteMany({
+      where: {
+        collaboratorId: id,
+      },
+    });
+
+    // Criar os novos horários de trabalho
+    if (data.workHours && data.workHours.length > 0) {
+      await prisma.workHour.createMany({
+        data: data.workHours.map((wh) => ({
+          day: wh.day,
+          startTime: wh.startTime,
+          endTime: wh.endTime,
+          breakStart: wh.breakStart,
+          breakEnd: wh.breakEnd,
+          collaboratorId: id,
+        })),
+      });
+    }
 
     revalidatePath("/collaborators");
 

@@ -6,6 +6,7 @@ import {
   Client,
   Collaborator,
   Service,
+  WorkHour,
 } from "@prisma/client";
 
 export type AppointmentData = Omit<
@@ -21,8 +22,12 @@ export type AppointmentFullData = Appointment & {
   collaborator: Collaborator | null;
 };
 
-export type CalendarWithCollaborator = Calendar & {
-  collaborator: Collaborator;
+export type FullCollaborator = Collaborator & {
+  workHours: WorkHour[];
+};
+
+export type CalendarWithFullCollaborator = Calendar & {
+  collaborator: FUllCollaborator | null;
 };
 
 export type CalendarFullData = CalendarWithCollaborator & {

@@ -1,25 +1,11 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 import { updateRagContent } from "../agents/rag/update-rag-content";
+import { FullCollaborator } from "@/types/calendar";
 
-export interface CreateCollaboratorParams {
-  name: string;
-  workingHours: {
-    day: string;
-    startTime: string;
-    endTime: string;
-    breakStart?: string;
-    breakEnd?: string;
-  }[];
-  phone: string;
-  profession: string;
-  description?: string;
-}
-
-export async function createCollaborator(params: CreateCollaboratorParams) {
+export async function createCollaborator(data: FullCollaborator) {
   try {
     const user = await getClerkUser();
 
@@ -30,18 +16,30 @@ export async function createCollaborator(params: CreateCollaboratorParams) {
       };
     }
 
-    const { name, workingHours, phone, profession, description } = params;
-
+    // Criar o colaborador sem os horários de trabalho
     const collaborator = await prisma.collaborator.create({
       data: {
-        name,
-        workingHours,
-        phone,
-        profession,
-        description,
+        name: data.name,
+        description: data.description,
+        phone: data.phone,
+        profession: data.profession,
         userId: user.id,
       },
     });
+
+    // Criar os horários de trabalho relacionados
+    if (data.workHours && data.workHours.length > 0) {
+      await prisma.workHour.createMany({
+        data: data.workHours.map((wh) => ({
+          day: wh.day,
+          startTime: wh.startTime,
+          endTime: wh.endTime,
+          breakStart: wh.breakStart,
+          breakEnd: wh.breakEnd,
+          collaboratorId: collaborator.id,
+        })),
+      });
+    }
 
     revalidatePath("/collaborators");
 

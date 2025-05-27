@@ -38,13 +38,13 @@ import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
 import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
-import { CalendarWithCollaborator } from "@/types/calendar";
 import { cn } from "@/lib/utils";
+import { CalendarWithFullCollaborator } from "@/types/calendar";
 
 interface ExtendedAppointmentFormProps extends AppointmentFormProps {
   clients: Client[];
   services: Service[];
-  calendar: CalendarWithCollaborator;
+  calendar: CalendarWithFullCollaborator;
 }
 
 export function AppointmentForm({

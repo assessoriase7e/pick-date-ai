@@ -1,22 +1,12 @@
-import { Collaborator } from "@prisma/client";
+import { FullCollaborator } from "@/types/calendar";
 import moment from "moment";
 
-type WorkingHourEntry = {
-  day: string;
-  startTime: string;
-  endTime: string;
-  breakStart?: string;
-  breakEnd?: string;
-};
-
 export const isCollaboratorAvailable = (
-  collaborator: Collaborator | null | undefined,
+  collaborator: FullCollaborator | null | undefined,
   startTime: Date,
   endTime: Date
 ): boolean => {
-  if (!collaborator) return true;
-
-  const workingHours = collaborator.workingHours as WorkingHourEntry[];
+  if (!collaborator || !collaborator.workHours) return true;
 
   const dayOfWeek = startTime.getDay();
 
@@ -33,7 +23,7 @@ export const isCollaboratorAvailable = (
   const dayName = dayNames[dayOfWeek];
 
   // Busca o horário de trabalho correspondente ao dia da semana
-  const daySchedule = workingHours.find(
+  const daySchedule = collaborator.workHours.find(
     (entry) => entry.day.toLowerCase() === dayName.toLowerCase()
   );
 

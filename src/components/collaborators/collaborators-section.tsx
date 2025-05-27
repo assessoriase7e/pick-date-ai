@@ -137,7 +137,7 @@ export function CollaboratorsSection({
 
       if (result.success) {
         toast.success("Profissional excluído com sucesso");
-        router.refresh();
+        revalidatePathAction("/collaborators");
       } else {
         toast.error(result.error || "Erro ao excluir profissional");
       }
@@ -343,7 +343,7 @@ export function CollaboratorsSection({
         onClose={() => {
           setIsModalOpen(false);
           setSelectedCollaborator(null);
-          router.refresh();
+          revalidatePathAction("/collaborators");
         }}
         initialData={selectedCollaborator}
       />

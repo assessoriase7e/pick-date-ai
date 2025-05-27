@@ -96,8 +96,6 @@ export function PublicDayDetailsModal({
 
   const renderContent = () => {
     if (showAppointmentForm && selectedHour !== null) {
-      console.log("collaboratorId", collaboratorId);
-
       return (
         <PublicAppointmentForm
           date={dayDetails.date}

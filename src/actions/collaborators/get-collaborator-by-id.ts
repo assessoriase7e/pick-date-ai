@@ -33,6 +33,7 @@ export async function getCollaboratorById(
             service: true,
           },
         },
+        workHours: true, // Incluir os horários de trabalho
       },
     });
 

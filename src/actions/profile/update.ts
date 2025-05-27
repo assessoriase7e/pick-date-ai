@@ -26,8 +26,6 @@ export async function updateProfile(data: any) {
   try {
     const { userId } = await auth();
 
-    console.log("userId", userId);
-
     if (!userId) {
       return {
         success: false,
@@ -75,8 +73,6 @@ export async function updateProfile(data: any) {
       const existingUser = await prisma.user.findUnique({
         where: { id: userId },
       });
-
-      console.log("existingUser", existingUser);
 
       if (existingUser) {
         await prisma.user.update({

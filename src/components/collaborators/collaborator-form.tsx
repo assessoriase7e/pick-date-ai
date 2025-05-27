@@ -28,9 +28,10 @@ import { collaboratorSchema } from "@/validators/collaborator";
 import { collabRoles } from "@/mocked/collabs";
 import { PatternFormat } from "react-number-format";
 import { Plus, X } from "lucide-react";
+import { FullCollaborator } from "@/types/calendar";
 
 interface CollaboratorFormProps {
-  initialData?: any;
+  initialData?: FullCollaborator;
   onSuccess?: () => void;
 }
 
@@ -55,7 +56,7 @@ export function CollaboratorForm({
     resolver: zodResolver(collaboratorSchema),
     defaultValues: {
       name: initialData?.name || "",
-      workingHours: initialData?.workingHours || [
+      workHours: initialData?.workHours || [
         {
           day: "Segunda-feira",
           startTime: "09:00",
@@ -72,18 +73,18 @@ export function CollaboratorForm({
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "workingHours",
+    name: "workHours",
   });
 
-  async function onSubmit(values: z.infer<typeof collaboratorSchema>) {
+  async function onSubmit(values: any) {
     setIsLoading(true);
     try {
       let result;
 
       if (initialData) {
-        result = await updateCollaborator({
-          id: initialData.id,
+        result = await updateCollaborator(initialData.id, {
           ...values,
+          userId: initialData.userId,
         });
       } else {
         result = await createCollaborator(values);
@@ -169,7 +170,7 @@ export function CollaboratorForm({
               </div>
               <FormField
                 control={form.control}
-                name={`workingHours.${index}.day`}
+                name={`workHours.${index}.day`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Dia da Semana</FormLabel>
@@ -213,7 +214,7 @@ export function CollaboratorForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name={`workingHours.${index}.startTime`}
+                  name={`workHours.${index}.startTime`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Início</FormLabel>
@@ -227,7 +228,7 @@ export function CollaboratorForm({
 
                 <FormField
                   control={form.control}
-                  name={`workingHours.${index}.endTime`}
+                  name={`workHours.${index}.endTime`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Término</FormLabel>
@@ -241,7 +242,7 @@ export function CollaboratorForm({
 
                 <FormField
                   control={form.control}
-                  name={`workingHours.${index}.breakStart`}
+                  name={`workHours.${index}.breakStart`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Início do Intervalo</FormLabel>
@@ -255,7 +256,7 @@ export function CollaboratorForm({
 
                 <FormField
                   control={form.control}
-                  name={`workingHours.${index}.breakEnd`}
+                  name={`workHours.${index}.breakEnd`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Fim do Intervalo</FormLabel>

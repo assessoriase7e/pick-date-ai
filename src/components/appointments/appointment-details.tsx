@@ -53,8 +53,6 @@ export function AppointmentDetails({
     canceled: "cancelado",
   };
 
-  console.log(appointment.status);
-
   const content = (
     <div className="space-y-6">
       <div className="space-y-2">

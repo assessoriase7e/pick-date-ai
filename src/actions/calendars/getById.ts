@@ -1,11 +1,11 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { CalendarFullData } from "@/types/calendar";
+import { CalendarWithFullCollaborator } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 
 type GetCalendarByIdResponse = {
   success: boolean;
-  data?: CalendarFullData;
+  data?: CalendarWithFullCollaborator;
   error?: string;
 };
 
@@ -31,7 +31,11 @@ export async function getCalendarById(
     const calendar = await prisma.calendar.findFirst({
       where: requireAuth ? { id: calendarId, userId } : { id: calendarId },
       include: {
-        collaborator: true,
+        collaborator: {
+          include: {
+            workHours: true,
+          },
+        },
       },
     });
 
@@ -44,7 +48,7 @@ export async function getCalendarById(
 
     return {
       success: true,
-      data: calendar as unknown as CalendarFullData,
+      data: calendar,
     };
   } catch (error) {
     console.error("[GET_CALENDAR_BY_ID]", error);

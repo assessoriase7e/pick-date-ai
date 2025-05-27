@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import {
   AppointmentFullData,
-  CalendarWithCollaborator,
+  CalendarWithFullCollaborator,
 } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
@@ -22,7 +22,7 @@ interface MobileDayScheduleProps {
   collaborator: Collaborator;
   clients: Client[];
   services: Service[];
-  calendar: CalendarWithCollaborator;
+  calendar: CalendarWithFullCollaborator;
 }
 
 export function MobileDaySchedule({

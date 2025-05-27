@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const collaboratorSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  workingHours: z.array(
+  workHours: z.array(
     z.object({
       day: z.string().min(1, "Dia da semana é obrigatório"),
       startTime: z.string().min(1, "Horário de início é obrigatório"),
