@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { FileRecord } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-export async function updateFile(id: string, data: Partial<FileRecord>) {
+export async function updateFile(id: number, data: Partial<FileRecord>) {
   try {
     const file = await prisma.fileRecord.update({
       where: { id },

@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function deleteFile(id: string) {
+export async function deleteFile(id: number) {
   try {
     await prisma.fileRecord.delete({
       where: { id },

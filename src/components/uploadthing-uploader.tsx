@@ -1,10 +1,8 @@
 "use client";
-
 import { generateUploadDropzone } from "@uploadthing/react";
 import { OurFileRouter } from "@/app/api/uploadthing/core";
 import { toast } from "sonner";
 import "@uploadthing/react/styles.css";
-import { Button } from "./ui/button";
 
 const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 
@@ -48,7 +46,7 @@ export function UploadthingUploader({
         }
       }}
       content={{
-        button: <Button className="w-full">Selecionar</Button>,
+        button: <span className="w-full">Selecionar</span>,
         label: "Arraste e solte o arquivo aqui ou clique para selecionar",
         allowedContent: "Audio, imagem, texto ou PDF",
       }}

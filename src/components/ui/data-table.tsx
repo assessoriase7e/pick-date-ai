@@ -68,7 +68,7 @@ export function DataTable<TData>({
   });
 
   return (
-    <div className="space-y-4 hidden lg:block">
+    <div className="space-y-4 lg:block">
       <div className="flex items-center justify-between gap-2">
         {enableSearch && (
           <div className="relative flex-1">

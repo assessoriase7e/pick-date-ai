@@ -7,7 +7,7 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FileRecord {
-  id: string;
+  id: number;
   fileName: string;
   description: string;
   fileType: string;

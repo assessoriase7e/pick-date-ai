@@ -14,45 +14,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FileRecord } from "@prisma/client";
 
 interface EditFileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  file: {
-    id: string;
-    fileName: string;
-    fileType: string;
-    fileUrl: string;
-    description: string;
-  } | null;
+  file: FileRecord | null;
 }
 
 export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fileData, setFileData] = useState<{
-    id: string;
-    fileName: string;
-    fileType: string;
-    fileUrl: string;
-    description: string;
-  }>({
-    id: "",
-    fileName: "",
-    fileType: "",
-    fileUrl: "",
-    description: "",
-  });
+  const [fileData, setFileData] = useState<FileRecord | null>(null);
 
   useEffect(() => {
     if (file) {
-      setFileData({
-        id: file.id,
-        fileName: file.fileName,
-        fileType: file.fileType,
-        fileUrl: file.fileUrl,
-        description: file.description,
-      });
+      setFileData(file);
     }
   }, [file]);
 
