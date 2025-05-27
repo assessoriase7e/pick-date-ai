@@ -36,7 +36,7 @@ import { Collaborator } from "@prisma/client";
 interface ServiceFormProps {
   initialData?: any;
   onSuccess: () => void;
-  collaborators: any[];
+  collaborators: Collaborator[];
 }
 
 const daysOfWeek = [
@@ -58,8 +58,9 @@ export function ServiceForm({
   const [selectedCollaborators, setSelectedCollaborators] = useState<
     Collaborator[]
   >(initialData?.serviceCollaborators?.map((sc: any) => sc.collaborator) || []);
-  const [selectedCollaboratorId, setSelectedCollaboratorId] =
-    useState<string>("none");
+  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<
+    number | null
+  >(null);
   const isEditing = !!initialData;
 
   const form = useForm<ServiceFormValues>({
@@ -81,7 +82,7 @@ export function ServiceForm({
   });
 
   const handleAddCollaborator = () => {
-    if (selectedCollaboratorId === "none") return;
+    if (selectedCollaboratorId === null) return;
 
     const collaborator = collaborators.find(
       (c) => c.id === selectedCollaboratorId
@@ -98,16 +99,16 @@ export function ServiceForm({
     const currentIds = form.getValues("collaboratorIds") || [];
     form.setValue("collaboratorIds", [...currentIds, collaborator.id]);
 
-    setSelectedCollaboratorId("none");
+    setSelectedCollaboratorId(null);
   };
 
-  const handleRemoveCollaborator = (id: string) => {
+  const handleRemoveCollaborator = (id: number) => {
     setSelectedCollaborators((prev) => prev.filter((c) => c.id !== id));
 
     const currentIds = form.getValues("collaboratorIds") || [];
     form.setValue(
       "collaboratorIds",
-      currentIds.filter((cId: string) => cId !== id)
+      currentIds.filter((cId: number) => cId !== id)
     );
   };
 
@@ -115,10 +116,14 @@ export function ServiceForm({
     setIsLoading(true);
 
     const submissionValues = {
-      ...values,
-      notes: values.notes || null,
+      name: values.name,
+      price: values.price || 0,
+      availableDays: values.availableDays || [],
+      notes: values.notes || "",
       collaboratorIds: values.collaboratorIds || [],
-      commission: values.commission || null,
+      durationMinutes: values.durationMinutes || 30,
+      commission: values.commission || 0,
+      isActive: values.isActive !== undefined ? values.isActive : true,
     };
 
     try {
@@ -267,8 +272,10 @@ export function ServiceForm({
           <div className="space-y-4">
             <div className="flex gap-2">
               <Select
-                value={selectedCollaboratorId}
-                onValueChange={setSelectedCollaboratorId}
+                value={String(selectedCollaboratorId)}
+                onValueChange={(value) =>
+                  setSelectedCollaboratorId(Number(value))
+                }
               >
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Selecione um profissional" />
@@ -284,7 +291,7 @@ export function ServiceForm({
                       .map((collaborator) => (
                         <SelectItem
                           key={collaborator.id}
-                          value={collaborator.id}
+                          value={String(collaborator.id)}
                         >
                           {collaborator.name}
                         </SelectItem>
@@ -299,7 +306,7 @@ export function ServiceForm({
               <Button
                 type="button"
                 onClick={handleAddCollaborator}
-                disabled={selectedCollaboratorId === "none"}
+                disabled={selectedCollaboratorId === null}
               >
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>

@@ -5,7 +5,7 @@ export const serviceSchema = z.object({
   price: z.number().min(0, "Preço deve ser maior ou igual a zero"),
   availableDays: z.array(z.string()),
   notes: z.string().nullable(),
-  collaboratorIds: z.array(z.string()),
+  collaboratorIds: z.array(z.number()),
   durationMinutes: z.number().min(1, "Duração deve ser maior que zero"),
   commission: z.number().nullable().optional(),
   isActive: z.boolean(),

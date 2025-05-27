@@ -166,7 +166,7 @@ export function ServicesSection({
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       setIsLoading(true);
       const result = await deleteService(id);
@@ -212,7 +212,10 @@ export function ServicesSection({
   const formatCollaborators = (service: ServiceFullData) => {
     const allCollaborators = [] as Collaborator[];
 
-    if (service.serviceCollaborators && Array.isArray(service.serviceCollaborators)) {
+    if (
+      service.serviceCollaborators &&
+      Array.isArray(service.serviceCollaborators)
+    ) {
       service.serviceCollaborators.forEach((sc) => {
         if (!allCollaborators.some((c) => c.id === sc.collaborator.id)) {
           allCollaborators.push(sc.collaborator);
@@ -308,7 +311,10 @@ export function ServicesSection({
             <SelectContent>
               <SelectItem value="all">Todos os profissionais</SelectItem>
               {collaborators.map((collaborator) => (
-                <SelectItem key={collaborator.id} value={collaborator.id}>
+                <SelectItem
+                  key={collaborator.id}
+                  value={String(collaborator.id)}
+                >
                   {collaborator.name}
                 </SelectItem>
               ))}
@@ -399,9 +405,9 @@ export function ServicesSection({
                     {getStatusBadge(service)}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {typeof formatCollaborators(service) === 'string' 
-                      ? formatCollaborators(service) 
-                      : 'Múltiplos profissionais'}
+                    {typeof formatCollaborators(service) === "string"
+                      ? formatCollaborators(service)
+                      : "Múltiplos profissionais"}
                   </p>
                 </div>
                 <div className="flex space-x-2">

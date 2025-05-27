@@ -7,12 +7,12 @@ import { Service } from "@prisma/client";
 import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function updateService(
-  id: string,
+  id: number,
   data: Omit<
     Service,
     "id" | "createdAt" | "updatedAt" | "userId" | "collaboratorId"
   > & {
-    collaboratorIds?: string[];
+    collaboratorIds?: number[];
   }
 ) {
   try {

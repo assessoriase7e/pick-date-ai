@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { updateRagContent } from "../agents/rag/update-rag-content";
 
-export async function deleteService(id: string) {
+export async function deleteService(id: number) {
   try {
     const { userId } = await auth();
 
