@@ -33,7 +33,7 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
             <div>
               <p className="text-sm font-medium">Nome</p>
               <p className="text-sm text-muted-foreground">
-                {combinedProfile.profile.companyName || "Não disponível"}
+                {combinedProfile.profile?.companyName || "Não disponível"}
               </p>
             </div>
             <div>
