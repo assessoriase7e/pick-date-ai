@@ -8,39 +8,35 @@ datasource db {
 }
 
 model User {
-  id        String   @id // Mantendo o ID do Clerk como primário
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile Profile?
-  apiKey  ApiKey[]
-
-  files        FileRecord[]
-  links        Link[]
-  prompts      Prompt[]
-  ragFiles     RagFile[]
-  redisKeys    RedisKey[]
-  whatsapp     Whatsapp?
-  services     Service[]
-  calendars    Calendar[]
-  appointments Appointment[]
-
-  agentPrompts   AgentPrompt[]
-  agentRagFiles  AgentRagFile[]
-  agentRedisKeys AgentRedisKey[]
-  agentWhatsapp  AgentWhatsapp[]
-
-  attendantPrompts   AttendantPrompt[]
-  sdrPrompts         SdrPrompt[]
-  followUpPrompts    FollowUpPrompt[]
-  evolutionInstances EvolutionInstance[]
+  id                 String              @id
+  email              String              @unique
+  firstName          String?
+  lastName           String?
+  imageUrl           String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  agentPrompts       AgentPrompt[]
+  agentRagFiles      AgentRagFile[]
+  agentRedisKeys     AgentRedisKey[]
+  agentWhatsapp      AgentWhatsapp[]
+  prompts            Prompt[]
+  ragFiles           RagFile[]
+  apiKey             ApiKey[]
+  appointments       Appointment[]
+  attendantPrompts   AttendantPrompt?
+  blackList          BlackList?
+  calendars          Calendar[]
   client             Client[]
   collaborator       Collaborator[]
-  blackList          BlackList?
+  evolutionInstances EvolutionInstance[]
+  files              FileRecord[]
+  followUpPrompts    FollowUpPrompt?
+  links              Link[]
+  profile            Profile?
+  redisKeys          RedisKey[]
+  sdrPrompts         SdrPrompt?
+  services           Service[]
+  whatsapp           Whatsapp?
 
   @@map("user")
 }
@@ -54,9 +50,8 @@ model Profile {
   locationUrl    String?
   documentNumber String?
   timezone       String?
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profile")
 }
@@ -67,9 +62,9 @@ model Link {
   title       String
   description String
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("link")
 }
@@ -79,9 +74,9 @@ model ApiKey {
   key         String   @unique
   description String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("apikey")
 }
@@ -153,8 +148,7 @@ model RagFile {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model RagConfig {
@@ -170,9 +164,9 @@ model RedisKey {
   id        Int      @id @default(autoincrement())
   key       String
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("rediskey")
 }
@@ -181,14 +175,13 @@ model Whatsapp {
   id          Int      @id @default(autoincrement())
   phoneNumber String
   userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("whatsapp")
 }
 
-// Agent-related models
 model AgentPrompt {
   id        Int      @id @default(autoincrement())
   userId    String
@@ -237,9 +230,9 @@ model EvolutionInstance {
   status     String   @default("close")
   type       String   @default("attendant")
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("evolutioninstance")
 }
@@ -250,16 +243,16 @@ model Service {
   price                Float
   availableDays        String[]
   notes                String?
-  serviceCollaborators ServiceCollaborator[]
   userId               String
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   durationMinutes      Int                   @default(30)
   commission           Float?                @default(0)
   isActive             Boolean               @default(true)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
-  clientServices       ClientService[]
   appointments         Appointment[]
+  clientServices       ClientService[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceCollaborators ServiceCollaborator[]
 
   @@map("service")
 }
@@ -268,27 +261,26 @@ model ServiceCollaborator {
   id             Int          @id @default(autoincrement())
   serviceId      Int
   collaboratorId Int
-  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@unique([serviceId, collaboratorId])
   @@map("serviceCollaborator")
 }
 
 model Client {
-  id        Int       @id @default(autoincrement())
-  fullName  String
-  phone     String
-  birthDate DateTime?
-  notes     String?
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  clientServices ClientService[]
+  id             Int             @id @default(autoincrement())
+  fullName       String
+  phone          String
+  birthDate      DateTime?
+  notes          String?
+  userId         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   appointments   Appointment[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientServices ClientService[]
 
   @@map("client")
 }
@@ -296,12 +288,12 @@ model Client {
 model ClientService {
   id        Int      @id @default(autoincrement())
   clientId  Int
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   serviceId Int
-  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   date      DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@map("clientservice")
 }
@@ -310,57 +302,71 @@ model Calendar {
   id             Int           @id @default(autoincrement())
   name           String?
   collaboratorId Int?
-  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
   userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   isActive       Boolean       @default(true)
   accessCode     String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   appointments   Appointment[]
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("calendar")
 }
 
 model Collaborator {
-  id                  Int                   @id @default(autoincrement())
-  name                String
-  phone               String
-  profession          String
-  description         String?
-  workingHours        Json
-  userId              String
-  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  calendars           Calendar[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  serviceCollaborators ServiceCollaborator[]
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  phone                String
+  profession           String
+  description          String?
+  userId               String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
   appointments         Appointment[]
+  calendars            Calendar[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceCollaborators ServiceCollaborator[]
+  workHours            WorkHour[]
 
   @@map("collaborator")
 }
 
-model Appointment {
+model WorkHour {
   id             Int          @id @default(autoincrement())
+  day            String
+  startTime      String
+  endTime        String
+  breakStart     String?
+  breakEnd       String?
+  collaboratorId Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+
+  @@map("workhour")
+}
+
+model Appointment {
+  id             Int           @id @default(autoincrement())
   startTime      DateTime
   endTime        DateTime
-  status         String      @default("scheduled")
+  status         String        @default("scheduled")
   notes          String?
   servicePrice   Float?
   finalPrice     Float?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientId       Int?
-  client         Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
   serviceId      Int
-  service        Service      @relation(fields: [serviceId], references: [id])
   calendarId     Int
-  calendar       Calendar     @relation(fields: [calendarId], references: [id], onDelete: Cascade)
   collaboratorId Int?
+  calendar       Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  client         Client?       @relation(fields: [clientId], references: [id])
   collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  service        Service       @relation(fields: [serviceId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("appointment")
 }
@@ -372,9 +378,9 @@ model FileRecord {
   fileType    String
   description String
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("filerecord")
 }
@@ -382,10 +388,10 @@ model FileRecord {
 model BlackList {
   id        Int              @id @default(autoincrement())
   userId    String           @unique
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phones    BlackListPhone[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phones    BlackListPhone[]
 
   @@map("blacklist")
 }
@@ -395,9 +401,9 @@ model BlackListPhone {
   number      String
   name        String?
   blackListId Int
-  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
 
   @@map("blacklistphone")
 }
