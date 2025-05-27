@@ -41,7 +41,10 @@ export default async function CollaboratorsPage({
       limit: 10,
       where,
       sort,
-      serviceId: service && service !== "all" ? service : undefined,
+      serviceId:
+        Number(service) && Number(service) !== null
+          ? Number(service)
+          : undefined,
     }),
     getServices({
       limit: 100,

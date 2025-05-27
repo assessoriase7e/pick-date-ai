@@ -12,7 +12,7 @@ type GetAppointmentsByCollaboratorResponse =
   | { success: false; error: string };
 
 export async function getAppointmentsByCollaborator(
-  collaboratorId: string,
+  collaboratorId: number,
   page: number = 1,
   limit: number = 10
 ): Promise<GetAppointmentsByCollaboratorResponse> {
@@ -65,6 +65,7 @@ export async function getAppointmentsByCollaborator(
         include: {
           client: true,
           service: true,
+          collaborator: true,
         },
         orderBy: {
           startTime: "desc",

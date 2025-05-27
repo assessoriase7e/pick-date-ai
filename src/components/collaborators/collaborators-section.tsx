@@ -130,7 +130,7 @@ export function CollaboratorsSection({
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       setIsDeleting(true);
       const result = await deleteCollaborator(id);

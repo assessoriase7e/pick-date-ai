@@ -11,7 +11,7 @@ interface GetCollaboratorByIdResponse {
 }
 
 export async function getCollaboratorById(
-  collaboratorId: string
+  collaboratorId: number
 ): Promise<GetCollaboratorByIdResponse> {
   const { userId } = await auth();
   if (!userId) {
@@ -28,7 +28,7 @@ export async function getCollaboratorById(
         userId,
       },
       include: {
-        ServiceCollaborator: {
+        serviceCollaborators: {
           include: {
             service: true,
           },

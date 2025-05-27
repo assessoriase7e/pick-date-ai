@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { updateRagContent } from "../agents/rag/update-rag-content";
 
-export async function deleteCollaborator(id: string) {
+export async function deleteCollaborator(id: number) {
   try {
     const { userId } = await auth();
 

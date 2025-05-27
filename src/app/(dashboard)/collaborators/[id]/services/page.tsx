@@ -25,8 +25,8 @@ export default async function CollaboratorServicesPage({
   const page = Number(sPage) || 1;
 
   const [collaboratorResult, appointmentsResult] = await Promise.all([
-    getCollaboratorById(id),
-    getAppointmentsByCollaborator(id, page, 10),
+    getCollaboratorById(Number(id)),
+    getAppointmentsByCollaborator(Number(id), page, 10),
   ]);
 
   if (!collaboratorResult.success || !collaboratorResult.data) {
