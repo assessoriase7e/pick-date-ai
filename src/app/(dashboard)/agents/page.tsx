@@ -31,7 +31,7 @@ export default async function AgentesPage() {
       }
     : undefined;
 
-  const hasProfile = profile?.companyName;
+  const hasProfile = profile.email;
 
   return (
     <div className="container relative mx-auto max-w-2xl">
@@ -47,8 +47,8 @@ export default async function AgentesPage() {
 
         <EvolutionSection
           instances={instances || []}
-          profilePhone={profile?.whatsapp || ""}
-          companyName={profile?.companyName || ""}
+          profilePhone={profile?.profile.whatsapp || ""}
+          companyName={profile?.profile.companyName || ""}
         />
       </div>
 

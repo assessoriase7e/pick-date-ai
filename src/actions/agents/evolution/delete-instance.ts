@@ -8,7 +8,7 @@ const evolutionApiUrl =
   process.env.EVOLUTION_API_URL || "https://api.evolution-api.com";
 const evolutionApiKey = process.env.EVOLUTION_API_KEY || "";
 
-export async function deleteInstance(id: string) {
+export async function deleteInstance(id: number) {
   try {
     const { userId } = await auth();
 
@@ -34,7 +34,7 @@ export async function deleteInstance(id: string) {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "apikey": evolutionApiKey,
+        apikey: evolutionApiKey,
       },
     });
 

@@ -38,9 +38,10 @@ export function EvolutionSection({
 }: EvolutionSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const [selectedInstance, setSelectedInstance] = useState<any>(null);
+  const [selectedInstance, setSelectedInstance] =
+    useState<EvolutionInstance>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [instanceToDelete, setInstanceToDelete] = useState<string | null>(null);
+  const [instanceToDelete, setInstanceToDelete] = useState<number | null>(null);
 
   const handleDelete = async () => {
     if (!instanceToDelete) return;
