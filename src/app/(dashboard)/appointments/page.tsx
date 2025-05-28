@@ -24,7 +24,7 @@ export default async function AppointmentsPage({
   const sParams = await searchParams;
   const page = Number(sParams.page || "1");
   const search = sParams.search || "";
-  const collaborator = sParams.collaborator || "all";
+  const collaborator = Number(sParams.collaborator) || null;
   const timeFilter = sParams.timeFilter || "past";
   const limit = 10;
 
@@ -33,7 +33,7 @@ export default async function AppointmentsPage({
     getAppointments(
       page,
       limit,
-      collaborator !== "all" ? collaborator : undefined,
+      collaborator !== null ? collaborator : undefined,
       search,
       {
         AND: [
