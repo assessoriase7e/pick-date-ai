@@ -133,7 +133,7 @@ export async function getCollaborators() {
         phone: true,
         profession: true,
         description: true,
-        workingHours: true,
+        workHours: true,
       },
       orderBy: {
         name: "asc",
