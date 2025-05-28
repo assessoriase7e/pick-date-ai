@@ -7,7 +7,7 @@ import { Prisma } from "@prisma/client";
 export async function getAppointments(
   page: number = 1,
   limit: number = 10,
-  collaboratorId?: string,
+  collaboratorId?: number,
   searchTerm?: string,
   where?: Prisma.AppointmentWhereInput,
   orderBy?: Prisma.AppointmentOrderByWithRelationInput
@@ -27,7 +27,7 @@ export async function getAppointments(
     const baseQuery: Prisma.AppointmentWhereInput = {
       ...where,
       userId,
-      ...(collaboratorId && collaboratorId !== "all" ? { collaboratorId } : {}),
+      ...(collaboratorId && collaboratorId !== null ? { collaboratorId } : {}),
       ...(searchTerm
         ? {
             OR: [
