@@ -136,7 +136,7 @@ export function SelectWithScroll<T>({
                         }
                         className="w-full justify-start"
                         onClick={() => {
-                          onChange(optionValue);
+                          onChange(isNaN(Number(optionValue)) ? optionValue : Number(optionValue));
                           setOpen(false);
                         }}
                       >
