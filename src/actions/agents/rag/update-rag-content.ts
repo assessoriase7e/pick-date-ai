@@ -34,6 +34,9 @@ export const updateRagContent = async () => {
 
     const collaborators = await prisma.collaborator.findMany({
       where: { userId },
+      include: {
+        workHours: true,
+      },
     });
 
     const optionsResponse = await fetch(webhookUrl, {
@@ -108,15 +111,15 @@ export const updateRagContent = async () => {
                 ## ${collaborator.name}
                 Profissão: ${collaborator.profession || ""}
                 Horário de Trabalho: ${
-                  Array.isArray(collaborator.workingHours)
-                    ? collaborator.workingHours
+                  Array.isArray(collaborator.workHours)
+                    ? collaborator.workHours
                         .map((wh) =>
                           typeof wh === "object" ? JSON.stringify(wh) : wh
                         )
                         .join(", ")
-                    : typeof collaborator.workingHours === "object"
-                    ? JSON.stringify(collaborator.workingHours)
-                    : collaborator.workingHours || ""
+                    : typeof collaborator.workHours === "object"
+                    ? JSON.stringify(collaborator.workHours)
+                    : collaborator.workHours || ""
                 }
                 `
           )
