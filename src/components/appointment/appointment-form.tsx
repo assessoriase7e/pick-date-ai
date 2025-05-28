@@ -463,7 +463,12 @@ export function AppointmentForm({
                         placeholder="Selecione um serviço"
                         options={services}
                         value={String(field.value)}
-                        onChange={field.onChange}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          if (value) {
+                            updatePriceFromService(Number(value));
+                          }
+                        }}
                         error={form.formState.errors.clientId?.message}
                       />
                       <FormMessage />
