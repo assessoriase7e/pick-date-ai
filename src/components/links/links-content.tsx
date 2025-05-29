@@ -1,10 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
 import { DeleteLinkModal } from "./delete-link-modal";
-import { Pagination } from "@/components/ui/pagination";
 import { Pencil, Trash2, ExternalLink, LinkIcon } from "lucide-react";
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
@@ -15,6 +14,7 @@ import { Link } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { listLinks } from "@/actions/links/getMany";
 
 type LinksContentProps = {
   links: Link[];
@@ -24,15 +24,17 @@ type LinksContentProps = {
 };
 
 export function LinksContent({
-  links,
-  totalPages,
+  links: initialLinks,
+  totalPages: initialTotalPages,
   currentPage,
   userId,
 }: LinksContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const page = currentPage || Number(searchParams.get("page") || "1");
+  const page = currentPage || Number(searchParams.get("page")) || 1;
 
+  const [links, setLinks] = useState(initialLinks);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
@@ -110,6 +112,26 @@ export function LinksContent({
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  // Função para lidar com a busca
+  const handleSearch = useCallback(async (searchTerm: string) => {
+    try {
+      setIsLoading(true);
+      const result = await listLinks(page, 20, searchTerm);
+      
+      if (result.success) {
+        setLinks(result.data.links);
+        setTotalPages(result.data.totalPages);
+      } else {
+        toast.error("Erro ao buscar links");
+      }
+    } catch (error) {
+      console.error("Error searching links:", error);
+      toast.error("Erro ao buscar links");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page]);
+
   const columns: ColumnDef<Link>[] = [
     {
       header: "Título",
@@ -180,6 +202,11 @@ export function LinksContent({
           enableSearch={true}
           searchPlaceholder="Buscar links..."
           sortableColumns={["title", "url", "description"]}
+          onSearch={handleSearch}
+          pagination={{
+            totalPages,
+            currentPage: page
+          }}
         />
       </div>
 
@@ -238,13 +265,6 @@ export function LinksContent({
           ))
         )}
       </div>
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        isLoading={isLoading}
-      />
 
       <LinkModal
         isOpen={isCreateModalOpen}

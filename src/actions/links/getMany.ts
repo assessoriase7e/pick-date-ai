@@ -2,21 +2,13 @@
 
 import { prisma } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
+import { Prisma } from "@prisma/client";
 
-type ListLinksSuccess = {
-  success: true;
-  data: {
-    links: any[];
-    totalPages: number;
-  };
-};
-
-type ListLinksError = {
-  success: false;
-  error: string;
-};
-
-export async function listLinks(page: number = 1, limit: number = 10) {
+export async function listLinks(
+  page: number = 1,
+  limit: number = 10,
+  search?: string
+) {
   try {
     const user = await currentUser();
 
@@ -26,15 +18,36 @@ export async function listLinks(page: number = 1, limit: number = 10) {
 
     const skip = (page - 1) * limit;
 
+    // Condição de busca
+    const whereCondition = {
+      userId: user.id,
+      ...(search
+        ? {
+            OR: [
+              {
+                title: { contains: search, mode: Prisma.QueryMode.insensitive },
+              },
+              { url: { contains: search, mode: Prisma.QueryMode.insensitive } },
+              {
+                description: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
     const [links, total] = await Promise.all([
       prisma.link.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        where: { userId: user.id },
+        where: whereCondition,
       }),
       prisma.link.count({
-        where: { userId: user.id },
+        where: whereCondition,
       }),
     ]);
 

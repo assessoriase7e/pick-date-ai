@@ -7,15 +7,15 @@ import { currentUser } from "@clerk/nextjs/server";
 interface LinksPageProps {
   searchParams: Promise<{
     page?: string;
+    search?: string;
   }>;
 }
 
 export default async function LinksPage({ searchParams }: LinksPageProps) {
-  const { page: sPage } = await searchParams;
-  const page = Number(sPage || "1");
-  const limit = 10;
+  const { page: sPage, search } = await searchParams;
+  const page = Number(sPage) || 1;
 
-  const result = await listLinks(page, limit);
+  const result = await listLinks(page, 20, search);
   const links = result.success ? result.data!.links : [];
   const totalPages = result.success ? result.data!.totalPages : 1;
   const { id: userId } = await currentUser();
