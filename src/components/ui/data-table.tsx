@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import {
   ColumnDef,
@@ -24,6 +23,7 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import IsTableLoading from "@/components/isTableLoading";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -56,6 +56,7 @@ export function DataTable<TData>({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const isMobile = useIsMobile();
 
   // Desativa o loading quando o componente é remontado (dados atualizados)
   useEffect(() => {
@@ -95,19 +96,62 @@ export function DataTable<TData>({
     const value = e.target.value;
     setGlobalFilter(value);
     setIsSearching(true);
-    
+
     // Desativa o loading após 500ms
     setTimeout(() => {
       setIsSearching(false);
     }, 500);
-    
+
     if (onSearch) {
       onSearch(value);
     }
   };
 
+  // Renderiza os cards para visualização mobile
+  const renderMobileCards = () => {
+    if (table.getRowModel().rows?.length) {
+      return (
+        <div className="space-y-4">
+          {table.getRowModel().rows.map((row) => (
+            <div
+              key={row.id}
+              className="p-4 rounded-md border bg-card shadow-sm"
+            >
+              {row.getVisibleCells().map((cell) => {
+                // Obtém o cabeçalho da coluna para exibir junto com o valor
+                const header = columns.find(
+                  (col) => (col as any).id === cell.column.id
+                )?.header as string;
+
+                return (
+                  <div key={cell.id} className="py-2 border-b last:border-0">
+                    <div className="font-medium text-sm text-muted-foreground">
+                      {header}
+                    </div>
+                    <div>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center p-4 border rounded-md">
+          Nenhum resultado encontrado.
+        </div>
+      );
+    }
+  };
+
   return (
-    <div className="space-y-4 lg:block relative">
+    <div className="space-y-4 relative">
       <div className="flex items-center justify-between gap-2">
         {enableSearch && (
           <div className="relative flex-1">
@@ -127,71 +171,78 @@ export function DataTable<TData>({
         {/* Componente de loading */}
         <IsTableLoading isPageChanging={isPageChanging || isSearching} />
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={
-                            sortableColumns.includes(header.column.id)
-                              ? "cursor-pointer select-none"
-                              : ""
-                          }
-                          onClick={
-                            sortableColumns.includes(header.column.id)
-                              ? header.column.getToggleSortingHandler()
-                              : undefined
-                          }
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </div>
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+        {isMobile ? (
+          // Visualização mobile (cards)
+          renderMobileCards()
+        ) : (
+          // Visualização desktop (tabela)
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder ? null : (
+                          <div
+                            className={
+                              sortableColumns.includes(header.column.id)
+                                ? "cursor-pointer select-none"
+                                : ""
+                            }
+                            onClick={
+                              sortableColumns.includes(header.column.id)
+                                ? header.column.getToggleSortingHandler()
+                                : undefined
+                            }
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </div>
                         )}
-                      </TableCell>
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    Nenhum resultado encontrado.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Nenhum resultado encontrado.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
 
       {pagination && (
-        <div className="flex items-center justify-end space-x-2">
+        <div className="flex items-center justify-end space-x-2 mx-auto">
           <Button
             variant="outline"
             size="sm"
+            className="w-full lg:w-auto"
             onClick={() => navigateToPage(pagination.currentPage - 1)}
             disabled={pagination.currentPage <= 1 || isPageChanging}
           >
@@ -203,6 +254,7 @@ export function DataTable<TData>({
           <Button
             variant="outline"
             size="sm"
+            className="w-full lg:w-auto"
             onClick={() => navigateToPage(pagination.currentPage + 1)}
             disabled={
               pagination.currentPage >= pagination.totalPages || isPageChanging
