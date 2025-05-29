@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Edit,
-  Trash2,
-  FileText,
-  Users,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-} from "lucide-react";
+import { Edit, Trash2, FileText, Users, Search } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
@@ -226,29 +218,6 @@ export default function ClientsTable({
       />
 
       {/* Remova os controles de paginação do servidor, pois agora estão no DataTable */}
-      
-      {/* Controles de paginação do servidor */}
-      <div className="flex items-center justify-end space-x-2 mt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigateToPage(pagination.currentPage - 1)}
-          disabled={pagination.currentPage <= 1}
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
-        </Button>
-        <span className="text-sm">
-          Página {pagination.currentPage} de {pagination.totalPages}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigateToPage(pagination.currentPage + 1)}
-          disabled={pagination.currentPage >= pagination.totalPages}
-        >
-          Próxima <ChevronRight className="h-4 w-4 ml-1" />
-        </Button>
-      </div>
 
       <Dialog
         open={isNewClientDialogOpen}

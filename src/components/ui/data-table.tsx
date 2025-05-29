@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import IsTableLoading from "@/components/isTableLoading";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -50,9 +51,17 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isPageChanging, setIsPageChanging] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  // Desativa o loading quando o componente é remontado (dados atualizados)
+  useEffect(() => {
+    if (isPageChanging) {
+      setIsPageChanging(false);
+    }
+  }, [data]);
 
   const table = useReactTable({
     data,
@@ -72,6 +81,9 @@ export function DataTable<TData>({
   const navigateToPage = (pageNumber: number) => {
     if (!pagination) return;
     
+    // Ativa o loading antes de mudar de página
+    setIsPageChanging(true);
+    
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", pageNumber.toString());
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -88,7 +100,10 @@ export function DataTable<TData>({
   };
 
   return (
-    <div className="space-y-4 lg:block">
+    <div className="space-y-4 lg:block relative">
+      {/* Componente de loading */}
+      <IsTableLoading isPageChanging={isPageChanging} />
+      
       <div className="flex items-center justify-between gap-2">
         {enableSearch && (
           <div className="relative flex-1">
@@ -169,7 +184,7 @@ export function DataTable<TData>({
             variant="outline"
             size="sm"
             onClick={() => navigateToPage(pagination.currentPage - 1)}
-            disabled={pagination.currentPage <= 1}
+            disabled={pagination.currentPage <= 1 || isPageChanging}
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
           </Button>
@@ -180,7 +195,7 @@ export function DataTable<TData>({
             variant="outline"
             size="sm"
             onClick={() => navigateToPage(pagination.currentPage + 1)}
-            disabled={pagination.currentPage >= pagination.totalPages}
+            disabled={pagination.currentPage >= pagination.totalPages || isPageChanging}
           >
             Próxima <ChevronRight className="h-4 w-4 ml-1" />
           </Button>

@@ -35,7 +35,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
 
   const clientsResult = await getClients({
     page: pageParam,
-    limit: 20,
+    limit: 1,
     where,
     sort,
   });
