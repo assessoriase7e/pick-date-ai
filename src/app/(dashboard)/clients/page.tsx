@@ -34,13 +34,16 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
     : undefined;
 
   const clientsResult = await getClients({
-    page: 1, // Sempre carrega a primeira página
-    limit: 2000, // Aumenta o limite para carregar todos os clientes
+    page: pageParam,
+    limit: 20,
     where,
     sort,
   });
 
   const clients = clientsResult.success ? clientsResult.data : [];
+  const pagination = clientsResult.success
+    ? clientsResult.pagination
+    : { totalPages: 1, currentPage: 1 };
 
   return (
     <div className="container">
@@ -52,7 +55,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
       </div>
 
       <div className="space-y-8">
-        <ClientsTable clients={clients} />
+        <ClientsTable clients={clients} pagination={pagination} />
       </div>
     </div>
   );

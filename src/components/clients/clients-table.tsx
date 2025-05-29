@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, Users } from "lucide-react";
+import { Edit, Trash2, FileText, Users, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -23,24 +23,60 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ClientForm from "./client-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Client } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface ClientsTableProps {
   clients: Client[];
+  pagination?: {
+    totalPages: number;
+    currentPage: number;
+  };
 }
 
-export default function ClientsTable({ clients }: ClientsTableProps) {
+export default function ClientsTable({ clients, pagination = { totalPages: 1, currentPage: 1 } }: ClientsTableProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Inicializar o termo de busca a partir das query params
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [searchParams]);
+
+  // Atualizar as query params quando o termo de busca mudar
+  useEffect(() => {
+    if (debouncedSearchTerm !== undefined) {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (debouncedSearchTerm) {
+        params.set("search", debouncedSearchTerm);
+      } else {
+        params.delete("search");
+      }
+      
+      // Resetar para a primeira página quando a busca mudar
+      params.set("page", "1");
+      
+      router.push(`${pathname}?${params.toString()}`);
+    }
+  }, [debouncedSearchTerm, pathname, router, searchParams]);
 
   const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
@@ -83,6 +119,13 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
     setIsNewClientDialogOpen(false);
     setIsEditClientDialogOpen(false);
     router.refresh();
+  };
+
+  // Função para navegar entre páginas
+  const navigateToPage = (pageNumber: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", pageNumber.toString());
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const columns: ColumnDef<Client>[] = [
@@ -144,17 +187,53 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
 
   return (
     <>
+      {/* Campo de busca personalizado */}
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar clientes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {headerContent}
+      </div>
+
       <DataTable
         columns={columns}
         data={clients}
         sortableColumns={["fullName", "phone", "birthDate"]}
-        headerContent={headerContent}
-        searchPlaceholder="Buscar clientes..."
+        headerContent={null} // Removido pois agora está acima da tabela
+        enableSearch={false} // Desativa a busca no cliente
+        pageSize={20} // Ajustado para corresponder ao limite do servidor
         enablePagination={false} // Desativa a paginação no cliente
       />
-      
-      {/* Adicione aqui controles de paginação que atualizem a URL com o parâmetro page */}
-      
+
+      {/* Controles de paginação do servidor */}
+      <div className="flex items-center justify-end space-x-2 mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigateToPage(pagination.currentPage - 1)}
+          disabled={pagination.currentPage <= 1}
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+        </Button>
+        <span className="text-sm">
+          Página {pagination.currentPage} de {pagination.totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigateToPage(pagination.currentPage + 1)}
+          disabled={pagination.currentPage >= pagination.totalPages}
+        >
+          Próxima <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+
       <Dialog
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
