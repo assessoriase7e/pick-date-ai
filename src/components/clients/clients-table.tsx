@@ -1,7 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, Users, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  FileText,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
@@ -38,7 +46,10 @@ interface ClientsTableProps {
   };
 }
 
-export default function ClientsTable({ clients, pagination = { totalPages: 1, currentPage: 1 } }: ClientsTableProps) {
+export default function ClientsTable({
+  clients,
+  pagination = { totalPages: 1, currentPage: 1 },
+}: ClientsTableProps) {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -61,22 +72,20 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   }, [searchParams]);
 
   // Atualizar as query params quando o termo de busca mudar
+  // Atualizar as query params quando o termo de busca mudar
   useEffect(() => {
     if (debouncedSearchTerm !== undefined) {
       const params = new URLSearchParams(searchParams.toString());
-      
       if (debouncedSearchTerm) {
         params.set("search", debouncedSearchTerm);
+        params.set("page", "1");
       } else {
         params.delete("search");
+        params.set("page", "1");
       }
-      
-      // Resetar para a primeira página quando a busca mudar
-      params.set("page", "1");
-      
       router.push(`${pathname}?${params.toString()}`);
     }
-  }, [debouncedSearchTerm, pathname, router, searchParams]);
+  }, [debouncedSearchTerm]);
 
   const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
@@ -125,7 +134,10 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   const navigateToPage = (pageNumber: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", pageNumber.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    const newUrl = `${pathname}?${params.toString()}`;
+
+    // Usar replace em vez de push para evitar problemas de navegação
+    router.push(newUrl, { scroll: false });
   };
 
   const columns: ColumnDef<Client>[] = [
