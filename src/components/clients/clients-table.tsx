@@ -205,8 +205,6 @@ export default function ClientsTable({
         }}
       />
 
-      {/* Remova os controles de paginação do servidor, pois agora estão no DataTable */}
-
       <Dialog
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}

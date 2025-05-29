@@ -18,16 +18,14 @@ interface ClientService {
 
 type ClientServiceWithRelations = ClientService;
 
-interface Pagination {
-  total: number;
-  pages: number;
-  currentPage: number;
-}
-
 interface ClientServicesTableProps {
   clientServices: ClientServiceWithRelations[];
   services: Service[];
-  pagination: Pagination;
+  pagination: {
+    total: number;
+    pages: number;
+    currentPage: number;
+  };
 }
 
 export default function ClientServicesTable({
@@ -80,8 +78,11 @@ export default function ClientServicesTable({
         data={clientServices}
         sortableColumns={["service.name", "date"]}
         searchPlaceholder="Buscar serviços..."
-        pageSize={pagination.total}
-        enablePagination={false}
+        enableSearch={true}
+        pagination={{
+          totalPages: pagination.pages,
+          currentPage: pagination.currentPage
+        }}
       />
     </>
   );
