@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
   getFilteredRowModel,
   getSortedRowModel,
   SortingState,
@@ -22,6 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -30,8 +31,11 @@ interface DataTableProps<TData> {
   headerContent?: React.ReactNode;
   enableSearch?: boolean;
   searchPlaceholder?: string;
-  pageSize?: number;
-  enablePagination?: boolean;
+  pagination?: {
+    totalPages: number;
+    currentPage: number;
+  };
+  onSearch?: (value: string) => void;
 }
 
 export function DataTable<TData>({
@@ -41,17 +45,19 @@ export function DataTable<TData>({
   headerContent,
   enableSearch = true,
   searchPlaceholder = "Buscar...",
-  pageSize = 10,
-  enablePagination = true,
+  pagination,
+  onSearch,
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
@@ -60,12 +66,26 @@ export function DataTable<TData>({
       sorting,
     },
     onGlobalFilterChange: setGlobalFilter,
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-    },
   });
+
+  // Função para navegar entre páginas usando query params
+  const navigateToPage = (pageNumber: number) => {
+    if (!pagination) return;
+    
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", pageNumber.toString());
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // Função para lidar com a mudança no campo de busca
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setGlobalFilter(value);
+    
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
 
   return (
     <div className="space-y-4 lg:block">
@@ -76,7 +96,7 @@ export function DataTable<TData>({
             <Input
               placeholder={searchPlaceholder}
               value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              onChange={handleSearchChange}
               className="pl-8"
             />
           </div>
@@ -143,23 +163,26 @@ export function DataTable<TData>({
         </Table>
       </div>
 
-      {enablePagination && (
+      {pagination && (
         <div className="flex items-center justify-end space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => navigateToPage(pagination.currentPage - 1)}
+            disabled={pagination.currentPage <= 1}
           >
-            Anterior
+            <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
           </Button>
+          <span className="text-sm">
+            Página {pagination.currentPage} de {pagination.totalPages}
+          </span>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => navigateToPage(pagination.currentPage + 1)}
+            disabled={pagination.currentPage >= pagination.totalPages}
           >
-            Próxima
+            Próxima <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       )}

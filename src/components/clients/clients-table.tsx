@@ -217,12 +217,16 @@ export default function ClientsTable({
         columns={columns}
         data={clients}
         sortableColumns={["fullName", "phone", "birthDate"]}
-        headerContent={null} // Removido pois agora está acima da tabela
-        enableSearch={false} // Desativa a busca no cliente
-        pageSize={20} // Ajustado para corresponder ao limite do servidor
-        enablePagination={false} // Desativa a paginação no cliente
+        headerContent={null}
+        enableSearch={false}
+        pagination={pagination}
+        onSearch={(value) => {
+          setSearchTerm(value);
+        }}
       />
 
+      {/* Remova os controles de paginação do servidor, pois agora estão no DataTable */}
+      
       {/* Controles de paginação do servidor */}
       <div className="flex items-center justify-end space-x-2 mt-4">
         <Button
