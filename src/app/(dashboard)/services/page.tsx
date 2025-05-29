@@ -41,11 +41,13 @@ export default async function ServicesPage({
   const [servicesResult, collaboratorsResult] = await Promise.all([
     getServices({
       page: pageParam,
-      limit: 10,
+      limit: 20,
       where,
       sort,
       collaboratorId:
-        collaborator && collaborator !== "all" ? collaborator : undefined,
+        collaborator && collaborator !== null
+          ? Number(collaborator)
+          : undefined,
     }),
     getCollaborators({
       page: 1,

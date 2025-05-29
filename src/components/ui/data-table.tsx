@@ -97,15 +97,14 @@ export function DataTable<TData>({
     setGlobalFilter(value);
     setIsSearching(true);
 
-    // Desativa o loading após 500ms
-    setTimeout(() => {
-      setIsSearching(false);
-    }, 500);
-
     if (onSearch) {
       onSearch(value);
     }
   };
+
+  useEffect(() => {
+    setIsSearching(false);
+  }, [data]);
 
   // Renderiza os cards para visualização mobile
   const renderMobileCards = () => {

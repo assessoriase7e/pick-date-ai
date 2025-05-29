@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { Collaborator, Prisma, Service } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
 
 type GetServicesResponse =
@@ -12,13 +12,6 @@ type GetServicesResponse =
       pagination: { totalPages: number; currentPage: number };
     }
   | { success: false; error: string };
-
-type ServiceWithCollaborators = Service & {
-  collaborator: Collaborator | null;
-  serviceCollaborators: {
-    collaborator: Collaborator;
-  }[];
-};
 
 type SortOptions = {
   field?: string;
@@ -30,12 +23,12 @@ type GetServicesProps = {
   page?: number;
   limit?: number;
   sort?: SortOptions;
-  collaboratorId?: string;
+  collaboratorId?: number;
 };
 
 export async function getServices({
   page = 1,
-  limit = 10,
+  limit = 20,
   sort,
   where,
   collaboratorId,
