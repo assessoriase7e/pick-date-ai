@@ -37,6 +37,8 @@ interface DataTableProps<TData> {
     currentPage: number;
   };
   onSearch?: (value: string) => void;
+  setIsLoading?: (loading: boolean) => void;
+  isloading?: boolean;
 }
 
 export function DataTable<TData>({
@@ -48,6 +50,8 @@ export function DataTable<TData>({
   searchPlaceholder = "Buscar...",
   pagination,
   onSearch,
+  isloading,
+  setIsLoading,
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -168,7 +172,9 @@ export function DataTable<TData>({
 
       <div className="relative">
         {/* Componente de loading */}
-        <IsTableLoading isPageChanging={isPageChanging || isSearching} />
+        <IsTableLoading
+          isPageChanging={isPageChanging || isSearching || isloading}
+        />
 
         {isMobile ? (
           // Visualização mobile (cards)
@@ -248,7 +254,7 @@ export function DataTable<TData>({
             <ChevronLeft className="h-4 w-4 mr-1" />
           </Button>
           <span className="text-sm w-full lg:w-auto text-center">
-            {pagination.currentPage} de {pagination.totalPages + 1}
+            {pagination.currentPage} de {pagination.totalPages}
           </span>
           <Button
             variant="outline"

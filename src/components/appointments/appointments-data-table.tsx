@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import { AppointmentDetails } from "./appointment-details";
 import {
   Select,
@@ -16,7 +15,6 @@ import { Collaborator } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { Toggle } from "@/components/ui/toggle";
 import { CalendarClock, History } from "lucide-react";
-import { getAppointments } from "@/actions/appointments/getMany";
 
 interface AppointmentsDataTableProps {
   columns: ColumnDef<any>[];
@@ -57,6 +55,18 @@ export function AppointmentsDataTable({
     { id: "startTime", desc: timeFilter === "past" },
   ]);
 
+  // Efeito para desativar o loading quando o componente for recarregado
+  useEffect(() => {
+    setIsLoading(false);
+  }, [appointments]);
+
+  // Efeito para ativar o loading quando houver sorting
+  useEffect(() => {
+    if (sorting.length > 0) {
+      setIsLoading(true);
+    }
+  }, [sorting]);
+
   const handleCollaboratorChange = (value: string) => {
     setCollaboratorFilter(value);
     updateUrlParams(searchTerm, value, timeFilter);
@@ -73,7 +83,11 @@ export function AppointmentsDataTable({
   };
 
   // Função para atualizar os parâmetros da URL
-  const updateUrlParams = (search: string, collaborator: string, timeFilter: string) => {
+  const updateUrlParams = (
+    search: string,
+    collaborator: string,
+    timeFilter: string
+  ) => {
     const params = new URLSearchParams();
 
     if (search) {
@@ -180,16 +194,14 @@ export function AppointmentsDataTable({
       <DataTable
         columns={columns}
         data={appointments}
-        sortableColumns={[
-          "client.fullName",
-          "collaborator.name",
-          "startTime",
-        ]}
+        sortableColumns={["client.fullName", "collaborator.name", "startTime"]}
         headerContent={headerContent}
         enableSearch={true}
         searchPlaceholder="Buscar agendamentos..."
         pagination={pagination}
         onSearch={handleSearch}
+        isloading={isLoading}
+        setIsLoading={setIsLoading}
       />
 
       <AppointmentDetails
