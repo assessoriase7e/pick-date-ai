@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, Users, Search } from "lucide-react";
+import { Edit, Trash2, FileText, Users } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
@@ -27,7 +27,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Client } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 
 interface ClientsTableProps {
@@ -55,7 +54,6 @@ export default function ClientsTable({
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Inicializar o termo de busca a partir das query params
   useEffect(() => {
     const search = searchParams.get("search");
     if (search) {
@@ -63,8 +61,6 @@ export default function ClientsTable({
     }
   }, [searchParams]);
 
-  // Atualizar as query params quando o termo de busca mudar
-  // Atualizar as query params quando o termo de busca mudar
   useEffect(() => {
     if (debouncedSearchTerm !== undefined) {
       const params = new URLSearchParams(searchParams.toString());
@@ -193,15 +189,6 @@ export default function ClientsTable({
     <>
       {/* Campo de busca personalizado */}
       <div className="flex items-center justify-between gap-2 mb-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar clientes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
         {headerContent}
       </div>
 
@@ -210,7 +197,8 @@ export default function ClientsTable({
         data={clients}
         sortableColumns={["fullName", "phone", "birthDate"]}
         headerContent={null}
-        enableSearch={false}
+        enableSearch={true}
+        searchPlaceholder="Buscar clientes..."
         pagination={pagination}
         onSearch={(value) => {
           setSearchTerm(value);

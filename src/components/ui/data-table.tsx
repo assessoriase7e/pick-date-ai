@@ -52,6 +52,7 @@ export function DataTable<TData>({
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isPageChanging, setIsPageChanging] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -80,10 +81,10 @@ export function DataTable<TData>({
   // Função para navegar entre páginas usando query params
   const navigateToPage = (pageNumber: number) => {
     if (!pagination) return;
-    
+
     // Ativa o loading antes de mudar de página
     setIsPageChanging(true);
-    
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", pageNumber.toString());
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -93,6 +94,12 @@ export function DataTable<TData>({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setGlobalFilter(value);
+    setIsSearching(true);
+    
+    // Desativa o loading após 500ms
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 500);
     
     if (onSearch) {
       onSearch(value);
@@ -101,9 +108,6 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-4 lg:block relative">
-      {/* Componente de loading */}
-      <IsTableLoading isPageChanging={isPageChanging} />
-      
       <div className="flex items-center justify-between gap-2">
         {enableSearch && (
           <div className="relative flex-1">
@@ -119,63 +123,68 @@ export function DataTable<TData>({
         {headerContent}
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={
-                          sortableColumns.includes(header.column.id)
-                            ? "cursor-pointer select-none"
-                            : ""
-                        }
-                        onClick={
-                          sortableColumns.includes(header.column.id)
-                            ? header.column.getToggleSortingHandler()
-                            : undefined
-                        }
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </div>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+      <div className="relative">
+        {/* Componente de loading */}
+        <IsTableLoading isPageChanging={isPageChanging || isSearching} />
+
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={
+                            sortableColumns.includes(header.column.id)
+                              ? "cursor-pointer select-none"
+                              : ""
+                          }
+                          onClick={
+                            sortableColumns.includes(header.column.id)
+                              ? header.column.getToggleSortingHandler()
+                              : undefined
+                          }
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </div>
                       )}
-                    </TableCell>
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Nenhum resultado encontrado.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Nenhum resultado encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {pagination && (
@@ -195,7 +204,9 @@ export function DataTable<TData>({
             variant="outline"
             size="sm"
             onClick={() => navigateToPage(pagination.currentPage + 1)}
-            disabled={pagination.currentPage >= pagination.totalPages || isPageChanging}
+            disabled={
+              pagination.currentPage >= pagination.totalPages || isPageChanging
+            }
           >
             Próxima <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
