@@ -34,8 +34,8 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
     : undefined;
 
   const clientsResult = await getClients({
-    page: pageParam,
-    limit: 20,
+    page: 1, // Sempre carrega a primeira página
+    limit: 2000, // Aumenta o limite para carregar todos os clientes
     where,
     sort,
   });

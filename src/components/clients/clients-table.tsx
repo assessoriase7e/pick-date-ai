@@ -150,10 +150,11 @@ export default function ClientsTable({ clients }: ClientsTableProps) {
         sortableColumns={["fullName", "phone", "birthDate"]}
         headerContent={headerContent}
         searchPlaceholder="Buscar clientes..."
-        pageSize={10}
-        enablePagination
+        enablePagination={false} // Desativa a paginação no cliente
       />
-
+      
+      {/* Adicione aqui controles de paginação que atualizem a URL com o parâmetro page */}
+      
       <Dialog
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
