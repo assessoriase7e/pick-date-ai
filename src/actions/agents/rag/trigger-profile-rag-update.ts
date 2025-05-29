@@ -1,6 +1,5 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { updateRagContent } from "./update-rag-content";
 
 export const triggerProfileRagUpdate = async (userId: string) => {
   try {
@@ -36,7 +35,6 @@ export const triggerProfileRagUpdate = async (userId: string) => {
         error: "Perfil ou nome da empresa não encontrado",
       };
     }
-    updateRagContent();
 
     return;
   } catch (error) {

@@ -2,7 +2,6 @@
 import { prisma } from "@/lib/db";
 import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
-import { updateRagContent } from "../agents/rag/update-rag-content";
 import { FullCollaborator } from "@/types/calendar";
 
 export async function updateCollaborator(
@@ -69,8 +68,6 @@ export async function updateCollaborator(
     }
 
     revalidatePath("/collaborators");
-
-    updateRagContent();
 
     return {
       success: true,

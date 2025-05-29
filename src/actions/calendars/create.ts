@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function createCalendar({
   name,
@@ -47,8 +46,6 @@ export async function createCalendar({
         fieldErrors: error.flatten().fieldErrors,
       };
     }
-
-    updateRagContent();
 
     console.error("[CALENDAR_CREATE]", error);
     return {

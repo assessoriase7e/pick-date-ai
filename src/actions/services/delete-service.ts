@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { updateRagContent } from "../agents/rag/update-rag-content";
 
 export async function deleteService(id: number) {
   try {
@@ -35,8 +34,6 @@ export async function deleteService(id: number) {
     });
 
     revalidatePath("/services");
-
-    updateRagContent();
 
     return {
       success: true,
