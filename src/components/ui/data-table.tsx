@@ -245,10 +245,10 @@ export function DataTable<TData>({
             onClick={() => navigateToPage(pagination.currentPage - 1)}
             disabled={pagination.currentPage <= 1 || isPageChanging}
           >
-            <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+            <ChevronLeft className="h-4 w-4 mr-1" />
           </Button>
-          <span className="text-sm">
-            Página {pagination.currentPage} de {pagination.totalPages}
+          <span className="text-sm w-full text-center">
+            {pagination.currentPage} de {pagination.totalPages + 1}
           </span>
           <Button
             variant="outline"
@@ -259,7 +259,7 @@ export function DataTable<TData>({
               pagination.currentPage >= pagination.totalPages || isPageChanging
             }
           >
-            Próxima <ChevronRight className="h-4 w-4 ml-1" />
+            <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       )}

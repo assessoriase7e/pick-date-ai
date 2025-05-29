@@ -113,24 +113,27 @@ export function LinksContent({
   }
 
   // Função para lidar com a busca
-  const handleSearch = useCallback(async (searchTerm: string) => {
-    try {
-      setIsLoading(true);
-      const result = await listLinks(page, 20, searchTerm);
-      
-      if (result.success) {
-        setLinks(result.data.links);
-        setTotalPages(result.data.totalPages);
-      } else {
+  const handleSearch = useCallback(
+    async (searchTerm: string) => {
+      try {
+        setIsLoading(true);
+        const result = await listLinks(page, 20, searchTerm);
+
+        if (result.success) {
+          setLinks(result.data.links);
+          setTotalPages(result.data.totalPages);
+        } else {
+          toast.error("Erro ao buscar links");
+        }
+      } catch (error) {
+        console.error("Error searching links:", error);
         toast.error("Erro ao buscar links");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error searching links:", error);
-      toast.error("Erro ao buscar links");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page]);
+    },
+    [page]
+  );
 
   const columns: ColumnDef<Link>[] = [
     {
@@ -205,7 +208,7 @@ export function LinksContent({
           onSearch={handleSearch}
           pagination={{
             totalPages,
-            currentPage: page
+            currentPage: page,
           }}
         />
       </div>
