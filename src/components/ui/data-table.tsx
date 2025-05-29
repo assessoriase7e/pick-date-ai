@@ -247,7 +247,7 @@ export function DataTable<TData>({
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
           </Button>
-          <span className="text-sm w-full text-center">
+          <span className="text-sm w-full lg:w-auto text-center">
             {pagination.currentPage} de {pagination.totalPages + 1}
           </span>
           <Button

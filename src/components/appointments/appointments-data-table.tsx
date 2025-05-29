@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentDetails } from "./appointment-details";
 import {
   Select,
@@ -14,10 +13,10 @@ import {
 } from "@/components/ui/select";
 import { AppointmentFullData } from "@/types/calendar";
 import { Collaborator } from "@prisma/client";
-import { AppointmentsMobileView } from "./AppointmentsMobileView";
 import { DataTable } from "@/components/ui/data-table";
 import { Toggle } from "@/components/ui/toggle";
 import { CalendarClock, History } from "lucide-react";
+import { getAppointments } from "@/actions/appointments/getMany";
 
 interface AppointmentsDataTableProps {
   columns: ColumnDef<any>[];
@@ -37,12 +36,12 @@ export function AppointmentsDataTable({
 }: AppointmentsDataTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(
     null
   );
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Recuperar parâmetros da URL
   const initialSearch = searchParams.get("search") || "";
@@ -58,28 +57,9 @@ export function AppointmentsDataTable({
     { id: "startTime", desc: timeFilter === "past" },
   ]);
 
-  // Atualizar a URL quando os filtros mudarem
-  useEffect(() => {
-    const params = new URLSearchParams();
-
-    if (searchTerm) {
-      params.set("search", searchTerm);
-    }
-
-    if (collaboratorFilter !== "all") {
-      params.set("collaborator", collaboratorFilter);
-    }
-
-    if (timeFilter !== "past") {
-      params.set("timeFilter", timeFilter);
-    }
-
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    router.push(newUrl, { scroll: false });
-  }, [searchTerm, collaboratorFilter, timeFilter]);
-
   const handleCollaboratorChange = (value: string) => {
     setCollaboratorFilter(value);
+    updateUrlParams(searchTerm, value, timeFilter);
   };
 
   const handleDetailsClick = (appointment: any) => {
@@ -90,6 +70,37 @@ export function AppointmentsDataTable({
   const closeDetails = () => {
     setIsDetailsOpen(false);
     setSelectedAppointment(null);
+  };
+
+  // Função para atualizar os parâmetros da URL
+  const updateUrlParams = (search: string, collaborator: string, timeFilter: string) => {
+    const params = new URLSearchParams();
+
+    if (search) {
+      params.set("search", search);
+    }
+
+    if (collaborator !== "all") {
+      params.set("collaborator", collaborator);
+    }
+
+    if (timeFilter !== "past") {
+      params.set("timeFilter", timeFilter);
+    }
+
+    const page = searchParams.get("page");
+    if (page && page !== "1") {
+      params.set("page", page);
+    }
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.push(newUrl, { scroll: false });
+  };
+
+  // Função para lidar com a busca
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    updateUrlParams(value, collaboratorFilter, timeFilter);
   };
 
   // Efeito para adicionar event listeners aos botões de resumo
@@ -125,9 +136,11 @@ export function AppointmentsDataTable({
     <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
       <Toggle
         pressed={timeFilter === "future"}
-        onPressedChange={(pressed) =>
-          setTimeFilter(pressed ? "future" : "past")
-        }
+        onPressedChange={(pressed) => {
+          const newTimeFilter = pressed ? "future" : "past";
+          setTimeFilter(newTimeFilter);
+          updateUrlParams(searchTerm, collaboratorFilter, newTimeFilter);
+        }}
         className="gap-2 border border-border w-full"
       >
         {timeFilter === "future" ? (
@@ -164,68 +177,20 @@ export function AppointmentsDataTable({
 
   return (
     <div className="space-y-4">
-      {isMobile ? (
-        <AppointmentsMobileView
-          appointments={appointments}
-          onDetailsClick={handleDetailsClick}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={appointments}
-          sortableColumns={[
-            "client.fullName",
-            "collaborator.name",
-            "startTime",
-          ]}
-          headerContent={headerContent}
-          enableSearch={true}
-          searchPlaceholder="Buscar agendamentos..."
-          pageSize={50}
-          enablePagination={false}
-        />
-      )}
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Página {pagination.currentPage} de {pagination.totalPages}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const prevPage = Math.max(1, pagination.currentPage - 1);
-              const params = new URLSearchParams(searchParams.toString());
-              if (prevPage > 1) {
-                params.set("page", String(prevPage));
-              } else {
-                params.delete("page");
-              }
-              router.push(`?${params.toString()}`);
-            }}
-            disabled={pagination.currentPage <= 1}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const nextPage = Math.min(
-                pagination.totalPages,
-                pagination.currentPage + 1
-              );
-              const params = new URLSearchParams(searchParams.toString());
-              params.set("page", String(nextPage));
-              router.push(`?${params.toString()}`);
-            }}
-            disabled={pagination.currentPage >= pagination.totalPages}
-          >
-            Próxima
-          </Button>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={appointments}
+        sortableColumns={[
+          "client.fullName",
+          "collaborator.name",
+          "startTime",
+        ]}
+        headerContent={headerContent}
+        enableSearch={true}
+        searchPlaceholder="Buscar agendamentos..."
+        pagination={pagination}
+        onSearch={handleSearch}
+      />
 
       <AppointmentDetails
         appointment={selectedAppointment}
