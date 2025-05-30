@@ -2,7 +2,7 @@ import Logo from "@/components/Logo";
 
 const FOOTER_TEXTS = {
   title: "Pick Date AI",
-  copyright: "© 2024 Pick Date AI. Todos os direitos reservados."
+  copyright: "© 2025 Pick Date AI. Todos os direitos reservados.",
 };
 
 export function Footer() {

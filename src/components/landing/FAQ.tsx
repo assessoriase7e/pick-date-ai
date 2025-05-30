@@ -1,4 +1,9 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FAQ_TEXTS = {
   title: "Perguntas Frequentes",
@@ -6,25 +11,20 @@ const FAQ_TEXTS = {
   questions: [
     {
       question: "Como funciona a inteligência artificial do Pick Date AI?",
-      answer: "Nossa IA utiliza processamento de linguagem natural avançado para entender as solicitações dos clientes e automaticamente agendar, reagendar ou cancelar compromissos. O sistema aprende continuamente com as interações para melhorar suas respostas."
-    },
-    {
-      question: "Posso integrar com meu sistema atual?",
-      answer: "Sim! O Pick Date AI oferece APIs robustas e integrações nativas com os principais sistemas de CRM, calendários (Google, Outlook) e plataformas de comunicação (WhatsApp, Telegram). Nossa equipe técnica pode ajudar na implementação."
+      answer:
+        "Nossa IA utiliza processamento de linguagem natural avançado para entender as solicitações dos clientes e automaticamente agendar, reagendar ou cancelar compromissos. O sistema aprende continuamente com as interações para melhorar suas respostas.",
     },
     {
       question: "Meus dados estão seguros?",
-      answer: "Absolutamente. Utilizamos criptografia de ponta a ponta, armazenamento seguro em nuvem com backup automático e seguimos rigorosamente a LGPD. Seus dados e os de seus clientes estão completamente protegidos."
-    },
-    {
-      question: "Existe período de teste gratuito?",
-      answer: "Sim! Oferecemos 14 dias de teste gratuito com acesso completo a todas as funcionalidades do plano Professional. Não é necessário cartão de crédito para começar."
+      answer:
+        "Absolutamente. Utilizamos criptografia de ponta a ponta, armazenamento seguro em nuvem com backup automático e seguimos rigorosamente a LGPD. Seus dados e os de seus clientes estão completamente protegidos.",
     },
     {
       question: "Como é o suporte técnico?",
-      answer: "Oferecemos suporte técnico especializado via chat, email e telefone. Clientes do plano Professional têm suporte prioritário com tempo de resposta garantido de até 2 horas durante horário comercial."
-    }
-  ]
+      answer:
+        "Oferecemos suporte técnico especializado via chat, email e telefone.",
+    },
+  ],
 };
 
 export function FAQ() {
@@ -32,7 +32,9 @@ export function FAQ() {
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-4xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{FAQ_TEXTS.title}</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {FAQ_TEXTS.title}
+          </h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
             {FAQ_TEXTS.subtitle}
           </p>
@@ -40,11 +42,12 @@ export function FAQ() {
         <div className="mt-16">
           <Accordion type="single" collapsible className="w-full">
             {FAQ_TEXTS.questions.map((item, index) => (
-              <AccordionItem key={`item-${index + 1}`} value={`item-${index + 1}`}>
+              <AccordionItem
+                key={`item-${index + 1}`}
+                value={`item-${index + 1}`}
+              >
                 <AccordionTrigger>{item.question}</AccordionTrigger>
-                <AccordionContent>
-                  {item.answer}
-                </AccordionContent>
+                <AccordionContent>{item.answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
