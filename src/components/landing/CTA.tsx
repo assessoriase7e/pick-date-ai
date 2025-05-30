@@ -8,7 +8,7 @@ const CTA_TEXTS = {
   subtitle:
     "Junte-se a centenas de empresas que já transformaram seu atendimento com Pick Date AI",
   buttons: {
-    startTrial: "Começar Teste Gratuito",
+    startTrial: "Comece",
     learnMore: "Saber Mais",
     accessDashboard: "Começar",
   },
@@ -32,18 +32,14 @@ export function CTA() {
               </Button>
             </Link>
             <Link href="#features">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
-              >
+              <Button size="lg" variant="outline">
                 {CTA_TEXTS.buttons.learnMore}
               </Button>
             </Link>
           </SignedOut>
           <SignedIn>
             <Link href="/chat">
-              <Button size="lg" variant="secondary" className="px-8">
+              <Button size="lg" className="px-8">
                 {CTA_TEXTS.buttons.accessDashboard}{" "}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
