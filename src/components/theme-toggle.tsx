@@ -26,12 +26,10 @@ export function ThemeToggle() {
       {theme === "dark" ? (
         <span className="flex items-center gap-2">
           <Moon className="h-5 w-5" />
-          <p>Escuro</p>
         </span>
       ) : (
         <span className="flex items-center gap-2">
           <Sun className="h-5 w-5" />
-          <p>Claro</p>
         </span>
       )}
     </Button>

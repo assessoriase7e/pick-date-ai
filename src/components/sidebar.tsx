@@ -1,5 +1,5 @@
 "use client";
-import { useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import { SidebarItem } from "./sidebarItem";
 import { SidebarSubmenu } from "./sidebar-submenu";
@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import Logo from "./Logo";
 import { Separator } from "./ui/separator";
 import { useSidebarRoutes } from "@/mocked/sidebar";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
   const { user } = useUser();
@@ -78,7 +79,7 @@ export function Sidebar() {
 
   const DesktopSidebar = () => (
     <div className="h-svh border-r p-5 fixed z-50 bg-background w-20">
-      <aside className="flex flex-col gap-5 h-full">
+      <aside className="flex flex-col gap-5 h-full items-center">
         <Logo className="h-10 w-10" />
         <Separator />
         <div className="flex-1 flex flex-col overflow-y-auto  space-y-2 overflow-x-hidden">
@@ -102,6 +103,10 @@ export function Sidebar() {
             )
           )}
         </div>
+
+        <Separator />
+        <ThemeToggle />
+        <UserButton />
       </aside>
     </div>
   );

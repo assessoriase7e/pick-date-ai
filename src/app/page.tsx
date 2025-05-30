@@ -1,43 +1,23 @@
-import { Hero } from "@/components/hero";
-import Logo from "@/components/Logo";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Header } from "@/components/landing/Header";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Benefits } from "@/components/landing/Benefits";
+import { Pricing } from "@/components/landing/Pricing";
+import { FAQ } from "@/components/landing/FAQ";
+import { CTA } from "@/components/landing/CTA";
+import { Footer } from "@/components/landing/Footer";
 
 export default async function Home() {
   return (
-    <main>
-      <div className="h-20 w-full border-b border-border flex  items-center">
-        <div className="mx-auto flex justify-between items-center w-full px-10">
-          <div className="flex items-center gap-2">
-            <Logo />
-            <p className="font-semibold text-2xl">Pick Date AI</p>
-          </div>
-
-          <SignedOut>
-            <Link href="/sign-in">
-              <Button variant="outline">Entrar</Button>
-            </Link>
-          </SignedOut>
-
-          <SignedIn>
-            <div className="flex items-center justify-center gap-2">
-              <Link href="/calendar">
-                <Button>
-                  Painel <ChevronRight />
-                </Button>
-              </Link>
-
-              <Separator orientation="vertical" className="h-10" />
-
-              <UserButton />
-            </div>
-          </SignedIn>
-        </div>
-      </div>
+    <main className="min-h-screen overflow-x-hidden">
+      <Header />
       <Hero />
+      <Features />
+      <Benefits />
+      <Pricing />
+      <CTA />
+      <FAQ />
+      <Footer />
     </main>
   );
 }

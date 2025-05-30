@@ -35,7 +35,6 @@ export default function RootLayout({
         <ClerkProvider localization={ptBR}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Toaster duration={3000} position="top-center" />
-
             <Suspense>
               <UTSSR />
             </Suspense>
