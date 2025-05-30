@@ -25,14 +25,13 @@ export function Header() {
           </p>
         </div>
 
-        <SignedOut>
-          <Link href="/sign-in">
-            <Button variant="outline">{HEADER_TEXTS.buttons.signIn}</Button>
-          </Link>
-        </SignedOut>
-
         <div className="flex gap-5">
           <ThemeToggle />
+          <SignedOut>
+            <Link href="/sign-in">
+              <Button variant="outline">{HEADER_TEXTS.buttons.signIn}</Button>
+            </Link>
+          </SignedOut>
 
           <SignedIn>
             <div className="flex items-center justify-center gap-2">
