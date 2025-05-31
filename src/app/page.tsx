@@ -9,7 +9,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default async function Home() {
   return (
-    <main className="min-h-screen overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden relative">
       <Header />
       <Hero />
       <Features />
