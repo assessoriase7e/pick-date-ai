@@ -8,7 +8,7 @@ import {
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
-import { ShimmerButton } from "../magicui/shimmer-button";
+import { MovingBorderButton } from "../ui/moving-border";
 
 const PRICING_TEXTS = {
   title: "Planos Simples e Transparentes",
@@ -56,7 +56,7 @@ const PRICING_TEXTS = {
 
 export function Pricing() {
   return (
-    <section className="py-24 sm:py-32 bg-muted/50">
+    <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -105,16 +105,16 @@ export function Pricing() {
               <div className="mt-8">
                 <SignedOut>
                   <Link href="/sign-up">
-                    <ShimmerButton className="w-full">
+                    <MovingBorderButton className="w-full">
                       {PRICING_TEXTS.plans[0].buttonText}
-                    </ShimmerButton>
+                    </MovingBorderButton>
                   </Link>
                 </SignedOut>
                 <SignedIn>
                   <Link href="/chat">
-                    <ShimmerButton className="w-full">
+                    <MovingBorderButton className="w-full">
                       {PRICING_TEXTS.dashboardButtonText}
-                    </ShimmerButton>
+                    </MovingBorderButton>
                   </Link>
                 </SignedIn>
               </div>

@@ -27,19 +27,19 @@ export function CTA() {
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <SignedOut>
             <Link href="/sign-up">
-              <Button size="lg" variant="secondary" className="px-8">
+              <Button size="lg" className="px-8 bg-accent text-background">
                 {CTA_TEXTS.buttons.startTrial}
               </Button>
             </Link>
             <Link href="#features">
-              <Button size="lg" variant="outline">
+              <Button size="lg" className="bg-accent text-background">
                 {CTA_TEXTS.buttons.learnMore}
               </Button>
             </Link>
           </SignedOut>
           <SignedIn>
             <Link href="/chat">
-              <Button size="lg" className="px-8">
+              <Button size="lg" className="px-8 bg-accent text-background">
                 {CTA_TEXTS.buttons.accessDashboard}{" "}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>

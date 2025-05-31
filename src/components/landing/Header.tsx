@@ -16,7 +16,7 @@ const HEADER_TEXTS = {
 
 export function Header() {
   return (
-    <div className="h-20 w-full border-b border-border flex items-center sticky top-0 bg-background/80 backdrop-blur-sm z-50">
+    <div className="h-20 w-full border-b border-border flex items-center sticky top-0 z-50 bg-background/25 backdrop-blur-md">
       <div className="mx-auto flex justify-between items-center w-full px-10">
         <div className="flex items-center gap-2">
           <Logo />
@@ -26,7 +26,8 @@ export function Header() {
         </div>
 
         <div className="flex gap-5">
-          <ThemeToggle />
+          {/* Remova ou comente a linha abaixo para ocultar o toggle de tema */}
+          {/* <ThemeToggle /> */}
           <SignedOut>
             <Link href="/sign-in">
               <Button variant="outline">{HEADER_TEXTS.buttons.signIn}</Button>

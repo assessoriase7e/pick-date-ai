@@ -4,7 +4,6 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
-import { ThemeProvider } from "next-themes";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { extractRouterConfig } from "uploadthing/server";
@@ -30,16 +29,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning className="!scroll-smooth">
       <body className={montserrat.className}>
         <ClerkProvider localization={ptBR}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Toaster duration={3000} position="top-center" />
-            <Suspense>
-              <UTSSR />
-            </Suspense>
-            {children}
-          </ThemeProvider>
+          <Toaster duration={3000} position="top-center" />
+          <Suspense>
+            <UTSSR />
+          </Suspense>
+          {children}
         </ClerkProvider>
       </body>
     </html>

@@ -1,124 +1,108 @@
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
-import {
-  Bot,
-  Calendar,
-  Users,
-  FileText,
-  MessageSquare,
-  Link,
-  File,
-  UserX,
-  Code,
-  Shield,
-  CalendarDays,
-  UserCheck,
-  AlertTriangle,
-  Bell,
-} from "lucide-react";
 
 const FEATURES_DATA = [
   {
     name: "Gestão Completa",
     description: "CRUD de serviços, calendários, colaboradores e agendamentos",
-    icon: Users,
+    icon: "Users",
     className: "md:col-span-1",
     href: "#gestao",
   },
   {
     name: "Associação Inteligente",
     description: "Associação entre colaborador, serviço e calendário",
-    icon: UserCheck,
+    icon: "UserCheck",
     className: "md:col-span-1",
     href: "#associacao",
   },
   {
     name: "Controle Financeiro",
     description: "Controle da comissão de cada colaborador",
-    icon: FileText,
+    icon: "FileText",
     className: "md:col-span-1",
     href: "#comissao",
   },
   {
     name: "Links Úteis",
     description: "Links úteis para serem enviados pelo agente via WhatsApp",
-    icon: Link,
+    icon: "Link",
     className: "md:col-span-1",
     href: "#links",
   },
   {
     name: "Envio de Arquivos",
     description: "Arquivos úteis para serem enviados pelo agente via WhatsApp",
-    icon: File,
+    icon: "File",
     className: "md:col-span-1",
     href: "#arquivos",
   },
   {
     name: "Lista de Bloqueio",
     description: "Black list de clientes que a IA não atende",
-    icon: UserX,
+    icon: "UserX",
     className: "md:col-span-1",
     href: "#blacklist",
   },
   {
     name: "Script Personalizado",
     description: "Script de agendamento customizado",
-    icon: Code,
+    icon: "Code",
     className: "md:col-span-1",
     href: "#script",
   },
   {
     name: "Regras Customizadas",
     description: "Regras customizadas para seu negócio",
-    icon: Shield,
+    icon: "Shield",
     className: "md:col-span-1",
     href: "#regras",
   },
   {
     name: "Múltiplos Calendários",
     description: "Criação e gerenciamento de múltiplos calendários",
-    icon: CalendarDays,
+    icon: "CalendarDays",
     className: "md:col-span-1",
     href: "#calendarios",
   },
   {
     name: "Agendamento Inteligente",
     description: "Agendamento relacionado ao profissional e ao serviço",
-    icon: Calendar,
+    icon: "Calendar",
     className: "md:col-span-1",
     href: "#agendamento",
   },
   {
     name: "Detecção de Conflitos",
     description: "Detecção automática de conflitos de horários",
-    icon: AlertTriangle,
+    icon: "AlertTriangle",
     className: "md:col-span-1",
     href: "#conflitos",
   },
   {
     name: "Lembretes Automáticos",
     description: "Sistema de lembretes automáticos para clientes",
-    icon: Bell,
+    icon: "Bell",
     className: "md:col-span-1",
     href: "#lembretes",
   },
   {
     name: "IA com Linguagem Natural",
     description: "Agente com processamento de linguagem natural",
-    icon: Bot,
+    icon: "Bot",
     className: "md:col-span-1",
     href: "#ia-linguagem",
   },
   {
     name: "Respostas Contextuais",
     description: "Agente com respostas contextuais inteligentes",
-    icon: MessageSquare,
+    icon: "MessageSquare",
     className: "md:col-span-1",
     href: "#respostas",
   },
   {
     name: "Relatórios Completos",
     description: "Relatório completo das operações do seu negócio",
-    icon: FileText,
+    icon: "FileText",
     className: "md:col-span-1",
     href: "#relatorios",
   },
@@ -126,7 +110,7 @@ const FEATURES_DATA = [
 
 export function Features() {
   return (
-    <section id="features" className="py-24 sm:py-32 bg-muted/50">
+    <section id="features" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -143,7 +127,7 @@ export function Features() {
                 key={feature.name}
                 name={feature.name}
                 description={feature.description}
-                Icon={feature.icon}
+                iconName={feature.icon}
                 className={feature.className}
                 href={feature.href}
                 background={

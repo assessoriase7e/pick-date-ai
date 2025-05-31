@@ -18,6 +18,9 @@ export function Footer() {
             {FOOTER_TEXTS.copyright}
           </p>
         </div>
+        <div className="flex items-center justify-center">
+          Assessoria Se7e: 60.058.940/0001-63
+        </div>
       </div>
     </footer>
   );

@@ -6,18 +6,23 @@ import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
+import { LandingThemeProvider } from "@/components/landing/landing-theme-provider";
 
 export default async function Home() {
   return (
-    <main className="min-h-screen overflow-x-hidden relative">
-      <Header />
-      <Hero />
-      <Features />
-      <Benefits />
-      <Pricing />
-      <CTA />
-      <FAQ />
-      <Footer />
-    </main>
+    <LandingThemeProvider>
+      <div className="relative overflow-hidden">
+        <Header />
+        <Hero />
+      </div>
+      <main className="min-h-screen relative overflow-hidden">
+        <Features />
+        <Benefits />
+        <Pricing />
+        <CTA />
+        <FAQ />
+        <Footer />
+      </main>
+    </LandingThemeProvider>
   );
 }

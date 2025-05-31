@@ -1,16 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Orb from "../ui/orb-animation";
 
 const HERO_TEXTS = {
   title: "Pick Date AI",
-  description:
-    "Revolucione seu agendamento com inteligência artificial. Automatize reservas, otimize horários e ofereça uma experiência excepcional aos seus clientes.",
+  description: "Revolucione seu agendamento com inteligência artificial.",
   buttons: {
     startFree: "Comece",
-    seeFeatures: "Ver Recursos",
+    seeFeatures: "Recursos",
     accessDashboard: "Dashboard",
   },
 };
@@ -26,16 +25,21 @@ export function Hero() {
         <div className="relative left-0 aspect-[1155/678] w-[800px] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary to-secondary opacity-30 sm:w-[72.1875rem]"></div>
       </div>
 
-      <section className="flex flex-col lg:flex-row gap-5 isolate px-6 pt-14 lg:px-8 min-h-[calc(100svh-5rem)] mx-auto max-w-6xl overflow-hidden items-center justify-center">
-        <div className="flex items-center justify-center h-full w-full flex-[2] order-2 lg:order-1 mb-20 lg:mb-0 ">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <section className="flex flex-col lg:flex-row isolate px-6 lg:px-8 min-h-[calc(100svh-5rem)] mx-auto max-w-6xl overflow-hidden items-center justify-center relative">
+        <div className="absolute w-full h-full -z-10 mix-blend-screen">
+          <Orb hoverIntensity={0} hue={287} forceHoverState={false} />
+        </div>
+
+        <div className="flex items-center justify-center h-full w-full lg:mb-0">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-foreground">
               {HERO_TEXTS.title}
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg leading-8 text-foreground max-w-2xl mx-auto">
               {HERO_TEXTS.description}
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
+
+            <div className="flex items-center justify-center gap-x-6">
               <SignedOut>
                 <Link href="/chat">
                   <Button size="lg" className="px-8">
@@ -58,16 +62,6 @@ export function Hero() {
               </SignedIn>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center justify-center h-full w-full flex-1 order-1 lg:order-2">
-          <Image
-            alt="3d icon"
-            width={1000}
-            height={1000}
-            src="/bot-3d-icon.png"
-            className="w-full h-auto"
-          />
         </div>
       </section>
     </div>
