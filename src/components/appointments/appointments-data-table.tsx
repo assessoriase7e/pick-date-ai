@@ -60,13 +60,6 @@ export function AppointmentsDataTable({
     setIsLoading(false);
   }, [appointments]);
 
-  // Efeito para ativar o loading quando houver sorting
-  useEffect(() => {
-    if (sorting.length > 0) {
-      setIsLoading(true);
-    }
-  }, [sorting]);
-
   const handleCollaboratorChange = (value: string) => {
     setCollaboratorFilter(value);
     updateUrlParams(searchTerm, value, timeFilter);
