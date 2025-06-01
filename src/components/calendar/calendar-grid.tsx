@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { AppointmentFullData } from "@/types/calendar";
+import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarDay } from "./calendar-types";
 import { MobileCalendarView } from "./views/mobile-calendar-view";
@@ -16,6 +16,8 @@ interface CalendarGridProps {
   appointments: Record<string, AppointmentFullData[]>;
   calendarId: number;
   loading?: boolean;
+  calendars?: CalendarFullData[];
+  setCalendarIdQueryParam?: (id: string) => void;
 }
 
 export function CalendarGrid({
@@ -26,6 +28,8 @@ export function CalendarGrid({
   selectedDate,
   appointments,
   calendarId,
+  calendars,
+  setCalendarIdQueryParam,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
@@ -168,11 +172,13 @@ export function CalendarGrid({
     isSelected,
     getAppointmentsForDay,
     formatMonth,
+    calendars,
+    setCalendarIdQueryParam,
   };
 
   return (
-    <div className="w-full">
-      <span className="block lg:hidden">
+    <div className="w-full h-full flex">
+      <span className="block lg:hidden w-full h-full">
         <MobileCalendarView
           {...commonProps}
           selectedYear={selectedYear}
@@ -182,7 +188,7 @@ export function CalendarGrid({
         />
       </span>
 
-      <span className="hidden lg:block">
+      <span className="hidden lg:block w-full h-full">
         <DesktopCalendarView {...commonProps} isLoading={isLoading} />
       </span>
     </div>

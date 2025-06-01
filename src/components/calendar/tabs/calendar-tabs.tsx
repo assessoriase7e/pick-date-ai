@@ -8,6 +8,8 @@ import { DesktopCalendarTabs } from "./desktop-calendar-tabs";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import IsTableLoading from "../../isTableLoading";
+import { Button } from "@/components/ui/button";
+import { Edit, Plus, Share2, Trash2 } from "lucide-react";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
@@ -47,6 +49,7 @@ export function CalendarTabs({
   const [loading, setLoading] = useState<boolean>(false);
 
   const isMobile = useIsMobile();
+  const currentCalendar = calendars.find((cal) => cal.id === calendarId);
 
   const handleChangeCalendar = async (id: string) => {
     setLoading(true);
@@ -56,6 +59,17 @@ export function CalendarTabs({
   useEffect(() => {
     setLoading(false);
   }, [calendarId]);
+
+  const commonProps = {
+    currentDate,
+    selectedDate,
+    appointments,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
+    calendars,
+    setCalendarIdQueryParam: handleChangeCalendar,
+  };
 
   return (
     <div className="flex-1 overflow-hidden">
@@ -78,36 +92,79 @@ export function CalendarTabs({
         className="h-full flex flex-col gap-2 relative"
       >
         {!isMobile && (
-          <DesktopCalendarTabs
-            calendars={calendars}
-            calendarId={calendarId}
-            setCalendarIdQueryParam={handleChangeCalendar}
-            openEditModal={openEditModal}
-            openDeleteModal={openDeleteModal}
-            openShareModal={() => setShareOpen(true)}
-            setCreateOpen={setOpen}
-          />
+          <DesktopCalendarTabs calendars={calendars} calendarId={calendarId} />
         )}
 
         <IsTableLoading isPageChanging={loading} />
 
-        {calendars.map((calendar) => (
-          <TabsContent
-            key={calendar.id}
-            value={String(calendar.id)}
-            className="flex-1 mt-0 h-full"
-          >
-            <CalendarGrid
-              currentDate={currentDate}
-              goToPreviousMonth={goToPreviousMonth}
-              goToNextMonth={goToNextMonth}
-              goToToday={goToToday}
-              selectedDate={selectedDate}
-              appointments={appointments}
-              calendarId={calendar.id}
-            />
-          </TabsContent>
-        ))}
+        {/* Layout Desktop com botões laterais */}
+        {!isMobile ? (
+          <div className="flex h-full">
+            {/* Botões de ação na lateral esquerda */}
+            <div className="flex flex-col gap-2 w-12">
+              <Button
+                onClick={() => setOpen(true)}
+                size="icon"
+                className="flex-shrink-0"
+                title="Novo Calendário"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              {currentCalendar && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShareOpen(true)}
+                    title="Compartilhar calendário"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => openEditModal(currentCalendar)}
+                    title="Editar calendário"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => openDeleteModal(currentCalendar)}
+                    title="Excluir calendário"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Calendário */}
+            <div className="flex-1 pr-12">
+              {calendars.map((calendar) => (
+                <TabsContent
+                  key={calendar.id}
+                  value={String(calendar.id)}
+                  className="flex-1 mt-0 h-full"
+                >
+                  <CalendarGrid {...commonProps} calendarId={calendar.id} />
+                </TabsContent>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Layout Mobile sem botões laterais */
+          calendars.map((calendar) => (
+            <TabsContent
+              key={calendar.id}
+              value={String(calendar.id)}
+              className="flex-1 mt-0 h-full"
+            >
+              <CalendarGrid {...commonProps} calendarId={calendar.id} />
+            </TabsContent>
+          ))
+        )}
       </Tabs>
 
       <CalendarActionsModal
