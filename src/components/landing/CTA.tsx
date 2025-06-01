@@ -38,7 +38,7 @@ export function CTA() {
             </Link>
           </SignedOut>
           <SignedIn>
-            <Link href="/chat">
+            <Link href="https://wa.me/5517988421625">
               <Button size="lg" className="px-8 bg-accent text-background">
                 {CTA_TEXTS.buttons.accessDashboard}{" "}
                 <ChevronRight className="ml-2 h-4 w-4" />

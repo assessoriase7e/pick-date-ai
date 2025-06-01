@@ -41,7 +41,7 @@ export function Hero() {
 
             <div className="flex items-center justify-center gap-x-6">
               <SignedOut>
-                <Link href="/chat">
+                <Link href="https://wa.me/5517988421625">
                   <Button size="lg" className="px-8">
                     {HERO_TEXTS.buttons.startFree}
                   </Button>

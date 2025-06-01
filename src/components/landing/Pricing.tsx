@@ -111,7 +111,7 @@ export function Pricing() {
                   </Link>
                 </SignedOut>
                 <SignedIn>
-                  <Link href="/chat">
+                  <Link href="https://wa.me/5517988421625">
                     <MovingBorderButton className="w-full">
                       {PRICING_TEXTS.dashboardButtonText}
                     </MovingBorderButton>
