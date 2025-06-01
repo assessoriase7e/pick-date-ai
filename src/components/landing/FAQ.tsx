@@ -24,6 +24,11 @@ const FAQ_TEXTS = {
       answer:
         "Oferecemos suporte técnico especializado via chat, email e telefone.",
     },
+    {
+      question: "Como funciona o pagamento?",
+      answer:
+        "O pagamento é realizado antes do início das operações, via PIX ou cartão.",
+    },
   ],
 };
 

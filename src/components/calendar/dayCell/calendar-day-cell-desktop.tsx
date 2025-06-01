@@ -29,7 +29,7 @@ export function CalendarDayCellDesktop({
 
   // Const of styles
   const baseDayStyles =
-    "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed group dark:shadow-[-0px_2px_5px_rgba(0,0,0,0.5)] dark:border-zinc-900/50 ";
+    "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed group dark:border-zinc-800/50 ";
 
   const inactiveMonthStyles =
     "bg-muted text-muted-foreground dark:bg-muted/30 dark:text-muted-foreground";
