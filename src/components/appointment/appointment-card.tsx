@@ -31,15 +31,8 @@ export function AppointmentCard({
         onClick={onEdit}
         className="cursor-pointer h-full"
       >
-        <Card className="z-20 text-sm h-full border-none">
-          <CardHeader
-            className={cn(
-              "h-full bg-primary rounded-md p-1 pl-4 border-b border-background",
-              duration <= 20 && "p-0 pl-4"
-            )}
-          >
-            <span className="w-[90%] h-1 bg-background/20 absolute bottom-0 mx-auto left-0 right-0 rounded-t-2xl" />
-
+        <Card className="z-20 text-sm h-full flex justify-center border-none bg-primary p-0 rounded-none">
+          <CardHeader className={cn("p-0 pl-4 rounded-none")}>
             <h4 className="font-medium truncate flex gap-2 text-background dark:text-foreground text-xs lg:text-md h-full z-50">
               <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
               <span> | </span>
