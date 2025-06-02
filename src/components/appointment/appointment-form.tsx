@@ -426,7 +426,7 @@ export function AppointmentForm({
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                Cancelar
+                Cancelar Agendamento
               </Button>
             </>
           )}
