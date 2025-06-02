@@ -140,6 +140,7 @@ export async function createAppointment({
       include: {
         client: true,
         service: true,
+        collaborator: true,
       },
     });
 

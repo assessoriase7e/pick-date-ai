@@ -34,6 +34,8 @@ import {
 } from "../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
+// Substituir a importação do useAutoPrint (linha 31)
+import { useAutoPrint } from "@/hooks/use-auto-print";
 
 type FormValues = z.infer<typeof createAppointmentSchema>;
 
@@ -66,6 +68,9 @@ export function AppointmentForm({
   const [activeTab, setActiveTab] = useState<string>(
     appointment ? "resumo" : "editar"
   );
+
+  // Usando o hook simplificado
+  const { printAppointment, isPrinting } = useAutoPrint();
 
   const isEditing = !!appointment;
 
@@ -238,6 +243,16 @@ export function AppointmentForm({
         result = await createAppointment(appointmentData);
         if (!result.success) throw new Error(result.error);
         toast.success("Agendamento criado com sucesso!");
+
+        // Remover a verificação de isConnected ao criar agendamento
+        if (!isEditing && result.data?.id) {
+          try {
+            await printAppointment(result.data.id);
+          } catch (printError) {
+            console.error("Erro ao imprimir comanda:", printError);
+            toast.error("Não foi possível imprimir a comanda");
+          }
+        }
       }
 
       onSuccess();
@@ -393,14 +408,26 @@ export function AppointmentForm({
 
         <div className="mt-auto flex flex-col lg:flex-row justify-end gap-2">
           {isEditing && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              Cancelar
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  appointment?.id && printAppointment(appointment.id)
+                }
+                disabled={isPrinting}
+              >
+                {isPrinting ? "Imprimindo..." : "Imprimir Comanda"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </Button>
+            </>
           )}
         </div>
       </TabsContent>
