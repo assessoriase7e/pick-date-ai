@@ -412,6 +412,7 @@ export function AppointmentForm({
               <Button
                 type="button"
                 variant="outline"
+                className="hidden md:block"
                 onClick={() =>
                   appointment?.id && printAppointment(appointment.id)
                 }
