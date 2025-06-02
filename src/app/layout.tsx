@@ -3,13 +3,12 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ptBR } from "@clerk/localizations";
 import { connection } from "next/server";
-import { Suspense } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 async function UTSSR() {
   await connection();
@@ -30,15 +29,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning className="!scroll-smooth">
-      <body className={montserrat.className}>
-        <ClerkProvider localization={ptBR}>
-          <Toaster duration={3000} position="top-center" />
-          <Suspense>
-            <UTSSR />
-          </Suspense>
-          {children}
-        </ClerkProvider>
-      </body>
+      <ClerkProvider>
+        <body className={montserrat.className}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </body>
+      </ClerkProvider>
     </html>
   );
 }
