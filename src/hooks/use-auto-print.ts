@@ -3,6 +3,8 @@
 import { toast } from "sonner";
 import { useState } from "react";
 import { getPrintData } from "@/actions/appointments/print";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export function useAutoPrint() {
   const [isPrinting, setIsPrinting] = useState(false);
@@ -59,6 +61,26 @@ export function useAutoPrint() {
 
   // Função para gerar o HTML da comanda
   const generateReceiptHtml = (printData: any): string => {
+    // Formatar datas no mesmo formato que o componente de detalhes
+    const startTime = new Date(printData.startTime);
+    const endTime = new Date(printData.endTime);
+
+    const formatDate = (date: Date) => {
+      return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    };
+
+    const formatTime = (date: Date) => {
+      return format(date, "HH:mm", { locale: ptBR });
+    };
+
+    // Formatar preço no mesmo formato que o componente de detalhes
+    const formatCurrency = (value: number) => {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    };
+
     return `
       <html>
         <head>
@@ -82,7 +104,7 @@ export function useAutoPrint() {
             }
   
             @page {
-              size: 10px;
+              size: 80mm;
               margin: 10mm;
             }
   
@@ -91,6 +113,16 @@ export function useAutoPrint() {
               font-size: 12px;
               margin: 0;
               padding: 10px;
+            }
+
+            .section {
+              margin-bottom: 15px;
+            }
+
+            .section-title {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 5px;
             }
   
             p {
@@ -102,6 +134,10 @@ export function useAutoPrint() {
               border-top: 1px solid #000;
               margin: 8px 0;
             }
+
+            .label {
+              font-weight: medium;
+            }
           </style>
         </head>
         <body>
@@ -110,27 +146,41 @@ export function useAutoPrint() {
           }</strong></div>
           <div><strong>COMANDA DE SERVIÇO</strong></div>
           <hr/>
-          <p><strong>Cliente:</strong> ${printData.clientName}</p>
-          <p><strong>Serviço:</strong> ${printData.serviceName}</p>
-          <p><strong>Início:</strong> ${printData.startTime}</p>
-          <p><strong>Fim:</strong> ${printData.endTime}</p>
-          ${
-            printData.collaboratorName
-              ? `<p><strong>Profissional:</strong> ${printData.collaboratorName}</p>`
-              : ""
-          }
-          ${
-            printData.price !== undefined
-              ? `<p><strong>Valor:</strong> R$ ${Number(
-                  printData.price
-                ).toFixed(2)}</p>`
-              : ""
-          }
-          ${
-            printData.notes
-              ? `<p><strong>Observações:</strong> ${printData.notes}</p>`
-              : ""
-          }
+
+          <div class="section">
+            <div class="section-title">Detalhes do Agendamento</div>
+            <p><span class="label">Data:</span> ${formatDate(startTime)}</p>
+            <p><span class="label">Horário:</span> ${formatTime(startTime)} às ${formatTime(endTime)}</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Cliente</div>
+            <p><span class="label">Nome:</span> ${printData.clientName}</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Serviço</div>
+            <p><span class="label">Nome:</span> ${printData.serviceName}</p>
+            ${printData.price !== undefined ? 
+              `<p><span class="label">Valor:</span> ${formatCurrency(printData.price)}</p>` : 
+              ''}
+          </div>
+
+          ${printData.collaboratorName ? 
+            `<div class="section">
+              <div class="section-title">Profissional</div>
+              <p><span class="label">Nome:</span> ${printData.collaboratorName}</p>
+            </div>` : 
+            ''}
+
+          ${printData.notes ? 
+            `<div class="section">
+              <div class="section-title">Observações</div>
+              <p>${printData.notes}</p>
+            </div>` : 
+            ''}
+
+          <hr/>
           <div class="footer">Obrigado pela preferência!</div>
         </body>
       </html>
