@@ -10,7 +10,7 @@ export async function getPrintData(appointmentId: number) {
     if (!userId) {
       return {
         success: false,
-        error: "Não autorizado"
+        error: "Não autorizado",
       };
     }
 
@@ -30,36 +30,7 @@ export async function getPrintData(appointmentId: number) {
     if (!appointment) {
       return {
         success: false,
-        error: "Agendamento não encontrado"
-      };
-    }
-
-    // Buscar impressoras ativas que não excluem este serviço
-    const printers = await prisma.printer.findMany({
-      where: {
-        userId,
-        isActive: true,
-      },
-      include: {
-        excludedServices: {
-          where: {
-            serviceId: appointment.serviceId,
-          },
-        },
-      },
-    });
-
-    // Filtrar impressoras disponíveis
-    const availablePrinters = printers.filter(
-      (printer) => printer.excludedServices.length === 0
-    );
-
-    if (availablePrinters.length === 0) {
-      return {
-        success: true,
-        message: "Nenhuma impressora disponível para este serviço",
-        printers: [],
-        printData: null
+        error: "Agendamento não encontrado",
       };
     }
 
@@ -84,14 +55,13 @@ export async function getPrintData(appointmentId: number) {
 
     return {
       success: true,
-      printers: availablePrinters.map((p) => p.systemPrinterName),
       printData,
     };
   } catch (error) {
     console.error("Erro ao obter dados para impressão:", error);
     return {
       success: false,
-      error: "Erro interno do servidor"
+      error: "Erro interno do servidor",
     };
   }
 }

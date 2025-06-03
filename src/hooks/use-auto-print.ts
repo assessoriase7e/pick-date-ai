@@ -13,20 +13,15 @@ export function useAutoPrint() {
     try {
       setIsPrinting(true);
 
-      // Usar a server action em vez da chamada à API
       const result = await getPrintData(appointmentId);
 
       if (!result.success) {
-        if (result.error) {
-          toast.error(result.error);
-        } else {
-          toast.info(`Nenhuma impressão necessária: ${result.message}`);
-        }
+        toast.error(result.error || "Erro ao obter dados para impressão");
         return;
       }
 
       if (!result.printData) {
-        toast.info(result.message || "Nenhuma impressora disponível");
+        toast.error("Dados para impressão não encontrados");
         return;
       }
 
@@ -189,8 +184,6 @@ export function useAutoPrint() {
 
   return {
     printAppointment,
-    isPrinting,
-    // Sempre retorna true para compatibilidade com o código existente
-    isConnected: true,
+    isPrinting
   };
 }
