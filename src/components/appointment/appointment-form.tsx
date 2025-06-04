@@ -243,16 +243,6 @@ export function AppointmentForm({
         result = await createAppointment(appointmentData);
         if (!result.success) throw new Error(result.error);
         toast.success("Agendamento criado com sucesso!");
-
-        // Na parte do onSubmit, remover a verificação de isConnected
-if (!isEditing && result.data?.id) {
-  try {
-    await printAppointment(result.data.id);
-  } catch (printError) {
-    console.error("Erro ao imprimir comanda:", printError);
-    toast.error("Não foi possível imprimir a comanda");
-  }
-}
       }
 
       onSuccess();
