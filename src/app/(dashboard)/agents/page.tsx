@@ -31,7 +31,7 @@ export default async function AgentesPage() {
       }
     : undefined;
 
-  const hasProfile = profile.email;
+  const hasProfile = profile?.email;
 
   return (
     <div className="container relative mx-auto max-w-2xl">
