@@ -60,9 +60,12 @@ export const changeAppointmentStatusSchema = z.object({
 
 export const calendarSchema = z.object({
   name: z.string().optional(),
-  collaboratorId: z.number(),
+  collaboratorId: z.number({
+    invalid_type_error: "Colaborador é obrigatório",
+    required_error: "Colaborador é obrigatório",
+  }),
   isActive: z.boolean(),
-  accessCode: z.string(),
+  accessCode: z.string().min(1, "Código de acesso é obrigatório"),
 });
 
 export type CalendarFormValues = z.infer<typeof calendarSchema>;
