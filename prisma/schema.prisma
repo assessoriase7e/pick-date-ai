@@ -7,6 +7,193 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  color     String?   // Cor para identificação visual
+  userId    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  services  Service[]
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("category")
+}
+
+model Service {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  price                Float
+  availableDays        String[]
+  notes                String?
+  userId               String
+  categoryId           Int?                  // Nova coluna para categoria
+  durationMinutes      Int                   @default(30)
+  commission           Float?                @default(0)
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  appointments         Appointment[]
+  clientServices       ClientService[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category             Category?             @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  serviceCollaborators ServiceCollaborator[]
+
+  @@map("service")
+}
+
+model ServiceCollaborator {
+  id             Int          @id @default(autoincrement())
+  serviceId      Int
+  collaboratorId Int
+  createdAt      DateTime     @default(now())
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, collaboratorId])
+  @@map("serviceCollaborator")
+}
+
+model Client {
+  id             Int             @id @default(autoincrement())
+  fullName       String
+  phone          String
+  birthDate      DateTime?
+  notes          String?
+  userId         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  appointments   Appointment[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientServices ClientService[]
+
+  @@map("client")
+}
+
+model ClientService {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  serviceId Int
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("clientservice")
+}
+
+model Calendar {
+  id             Int           @id @default(autoincrement())
+  name           String?
+  collaboratorId Int?
+  userId         String
+  isActive       Boolean       @default(true)
+  accessCode     String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  appointments   Appointment[]
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("calendar")
+}
+
+model Collaborator {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  phone                String
+  profession           String
+  description          String?
+  userId               String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  appointments         Appointment[]
+  calendars            Calendar[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceCollaborators ServiceCollaborator[]
+  workHours            WorkHour[]
+
+  @@map("collaborator")
+}
+
+model WorkHour {
+  id             Int          @id @default(autoincrement())
+  day            String
+  startTime      String
+  endTime        String
+  breakStart     String?
+  breakEnd       String?
+  collaboratorId Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+
+  @@map("workhour")
+}
+
+model Appointment {
+  id             Int           @id @default(autoincrement())
+  startTime      DateTime
+  endTime        DateTime
+  status         String        @default("scheduled")
+  notes          String?
+  servicePrice   Float?
+  finalPrice     Float?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  userId         String
+  clientId       Int?
+  serviceId      Int
+  calendarId     Int
+  collaboratorId Int?
+  calendar       Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  client         Client?       @relation(fields: [clientId], references: [id])
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  service        Service       @relation(fields: [serviceId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("appointment")
+}
+
+model FileRecord {
+  id          Int      @id @default(autoincrement())
+  fileUrl     String
+  fileName    String
+  fileType    String
+  description String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("filerecord")
+}
+
+model BlackList {
+  id        Int              @id @default(autoincrement())
+  userId    String           @unique
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phones    BlackListPhone[]
+
+  @@map("blacklist")
+}
+
+model BlackListPhone {
+  id          Int       @id @default(autoincrement())
+  number      String
+  name        String?
+  blackListId Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@map("blacklistphone")
+}
+
 model User {
   id                 String              @id
   email              String              @unique
@@ -26,6 +213,7 @@ model User {
   attendantPrompts   AttendantPrompt?
   blackList          BlackList?
   calendars          Calendar[]
+  categories         Category[]            // Nova relação
   client             Client[]
   collaborator       Collaborator[]
   evolutionInstances EvolutionInstance[]
@@ -235,175 +423,4 @@ model EvolutionInstance {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("evolutioninstance")
-}
-
-model Service {
-  id                   Int                   @id @default(autoincrement())
-  name                 String
-  price                Float
-  availableDays        String[]
-  notes                String?
-  userId               String
-  durationMinutes      Int                   @default(30)
-  commission           Float?                @default(0)
-  isActive             Boolean               @default(true)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  appointments         Appointment[]
-  clientServices       ClientService[]
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  serviceCollaborators ServiceCollaborator[]
-
-  @@map("service")
-}
-
-model ServiceCollaborator {
-  id             Int          @id @default(autoincrement())
-  serviceId      Int
-  collaboratorId Int
-  createdAt      DateTime     @default(now())
-  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
-  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@unique([serviceId, collaboratorId])
-  @@map("serviceCollaborator")
-}
-
-model Client {
-  id             Int             @id @default(autoincrement())
-  fullName       String
-  phone          String
-  birthDate      DateTime?
-  notes          String?
-  userId         String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  appointments   Appointment[]
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientServices ClientService[]
-
-  @@map("client")
-}
-
-model ClientService {
-  id        Int      @id @default(autoincrement())
-  clientId  Int
-  serviceId Int
-  date      DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@map("clientservice")
-}
-
-model Calendar {
-  id             Int           @id @default(autoincrement())
-  name           String?
-  collaboratorId Int?
-  userId         String
-  isActive       Boolean       @default(true)
-  accessCode     String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  appointments   Appointment[]
-  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("calendar")
-}
-
-model Collaborator {
-  id                   Int                   @id @default(autoincrement())
-  name                 String
-  phone                String
-  profession           String
-  description          String?
-  userId               String
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  appointments         Appointment[]
-  calendars            Calendar[]
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  serviceCollaborators ServiceCollaborator[]
-  workHours            WorkHour[]
-
-  @@map("collaborator")
-}
-
-model WorkHour {
-  id             Int          @id @default(autoincrement())
-  day            String
-  startTime      String
-  endTime        String
-  breakStart     String?
-  breakEnd       String?
-  collaboratorId Int
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
-
-  @@map("workhour")
-}
-
-model Appointment {
-  id             Int           @id @default(autoincrement())
-  startTime      DateTime
-  endTime        DateTime
-  status         String        @default("scheduled")
-  notes          String?
-  servicePrice   Float?
-  finalPrice     Float?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  userId         String
-  clientId       Int?
-  serviceId      Int
-  calendarId     Int
-  collaboratorId Int?
-  calendar       Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  client         Client?       @relation(fields: [clientId], references: [id])
-  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
-  service        Service       @relation(fields: [serviceId], references: [id])
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("appointment")
-}
-
-model FileRecord {
-  id          Int      @id @default(autoincrement())
-  fileUrl     String
-  fileName    String
-  fileType    String
-  description String
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("filerecord")
-}
-
-model BlackList {
-  id        Int              @id @default(autoincrement())
-  userId    String           @unique
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phones    BlackListPhone[]
-
-  @@map("blacklist")
-}
-
-model BlackListPhone {
-  id          Int       @id @default(autoincrement())
-  number      String
-  name        String?
-  blackListId Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
-
-  @@map("blacklistphone")
 }
