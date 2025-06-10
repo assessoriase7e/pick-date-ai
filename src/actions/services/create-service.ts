@@ -23,6 +23,7 @@ export async function createService(data: ServiceFormValues) {
         availableDays: data.availableDays,
         notes: data.notes,
         userId: user.id,
+        categoryId: data.categoryId,
         durationMinutes: data.durationMinutes,
         commission: data.commission !== undefined ? Number(data.commission) : 0,
         isActive: data.isActive !== undefined ? data.isActive : true,

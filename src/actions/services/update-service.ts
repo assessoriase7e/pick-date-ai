@@ -49,6 +49,7 @@ export async function updateService(
           price: data.price,
           availableDays: data.availableDays,
           notes: data.notes,
+          categoryId: data.categoryId,
           durationMinutes: data.durationMinutes,
           commission:
             data.commission !== undefined ? Number(data.commission) : 0,

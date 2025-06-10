@@ -93,6 +93,7 @@ export async function getServices({
               collaborator: true,
             },
           },
+          category: true, // Incluir a categoria
         },
       }),
       prisma.service.count({
@@ -109,12 +110,12 @@ export async function getServices({
         totalPages,
         currentPage: page,
       },
-    } as const;
+    };
   } catch (error) {
     console.error("Erro ao buscar serviços:", error);
     return {
       success: false,
-      error: "Falha ao buscar serviços",
-    } as const;
+      error: "Erro interno do servidor",
+    };
   }
 }
