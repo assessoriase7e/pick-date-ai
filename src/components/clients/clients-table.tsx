@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, Users } from "lucide-react";
+import { Edit, Trash2, FileText, Users, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
@@ -227,28 +227,40 @@ export default function ClientsTable({
       {/* Campos de busca personalizados */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-2 mb-4 w-full">
         <div className="flex flex-col lg:flex-row gap-2 w-full">
-          <Input
-            placeholder="Buscar por nome..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="lg:max-w-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
-          <Input
-            placeholder="Buscar por telefone..."
-            value={phoneTerm}
-            onChange={(e) => setPhoneTerm(e.target.value)}
-            className="lg:max-w-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
+          <div className="flex">
+            <div className="h-9 w-14 flex items-center justify-center border rounded-md rounded-r-none">
+              <FileText className="h-4 w-4" />
+            </div>
+            <Input
+              placeholder="Buscar por nome..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="lg:max-w-sm rounded-l-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
+            />
+          </div>
+
+          <div className="flex">
+            <div className="h-9 w-14 flex items-center justify-center border rounded-md rounded-r-none">
+              <Phone className="h-4 w-4" />
+            </div>
+
+            <Input
+              placeholder="Buscar por telefone..."
+              value={phoneTerm}
+              onChange={(e) => setPhoneTerm(e.target.value)}
+              className="lg:max-w-sm rounded-l-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
+            />
+          </div>
         </div>
         {headerContent}
       </div>
