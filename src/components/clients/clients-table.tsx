@@ -28,6 +28,7 @@ import { Client } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Input } from "../ui/input";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -52,28 +53,41 @@ export default function ClientsTable({
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [phoneTerm, setPhoneTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedPhoneTerm = useDebounce(phoneTerm, 500);
 
   useEffect(() => {
     const search = searchParams.get("search");
+    const phone = searchParams.get("phone");
     if (search) {
       setSearchTerm(search);
+    }
+    if (phone) {
+      setPhoneTerm(phone);
     }
   }, [searchParams]);
 
   useEffect(() => {
-    if (debouncedSearchTerm !== undefined) {
+    if (debouncedSearchTerm !== undefined || debouncedPhoneTerm !== undefined) {
       const params = new URLSearchParams(searchParams.toString());
+
       if (debouncedSearchTerm) {
         params.set("search", debouncedSearchTerm);
-        params.set("page", "1");
       } else {
         params.delete("search");
-        params.set("page", "1");
       }
+
+      if (debouncedPhoneTerm) {
+        params.set("phone", debouncedPhoneTerm);
+      } else {
+        params.delete("phone");
+      }
+
+      params.set("page", "1");
       router.push(`${pathname}?${params.toString()}`);
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, debouncedPhoneTerm]);
 
   const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
@@ -179,16 +193,63 @@ export default function ClientsTable({
   ];
 
   const headerContent = (
-    <Button onClick={() => setIsNewClientDialogOpen(true)}>
+    <Button
+      onClick={() => setIsNewClientDialogOpen(true)}
+      className="w-full lg:max-w-xs"
+    >
       <Users className="mr-2 h-4 w-4" />
       Novo Cliente
     </Button>
   );
 
+  // Função para executar busca manual
+  const handleSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    } else {
+      params.delete("search");
+    }
+
+    if (phoneTerm) {
+      params.set("phone", phoneTerm);
+    } else {
+      params.delete("phone");
+    }
+
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <>
-      {/* Campo de busca personalizado */}
-      <div className="flex items-center justify-between gap-2 mb-4">
+      {/* Campos de busca personalizados */}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-2 mb-4 w-full">
+        <div className="flex flex-col lg:flex-row gap-2 w-full">
+          <Input
+            placeholder="Buscar por nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="lg:max-w-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+          />
+          <Input
+            placeholder="Buscar por telefone..."
+            value={phoneTerm}
+            onChange={(e) => setPhoneTerm(e.target.value)}
+            className="lg:max-w-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+          />
+        </div>
         {headerContent}
       </div>
 
@@ -209,7 +270,7 @@ export default function ClientsTable({
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
       >
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-full lg:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Novo Cliente</DialogTitle>
           </DialogHeader>
@@ -221,7 +282,7 @@ export default function ClientsTable({
         open={isEditClientDialogOpen}
         onOpenChange={setIsEditClientDialogOpen}
       >
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-full lg::max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Editar Cliente</DialogTitle>
           </DialogHeader>

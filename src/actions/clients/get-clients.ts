@@ -60,6 +60,14 @@ export async function getClients({
       };
     }
 
+    // Se tiver query de telefone com contains
+    if (where?.phone && typeof where.phone === "string") {
+      finalWhere.phone = {
+        contains: where.phone,
+        mode: "insensitive",
+      };
+    }
+
     const [clients, total] = await Promise.all([
       prisma.client.findMany({
         where: finalWhere,

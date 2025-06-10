@@ -6,13 +6,14 @@ interface ClientsPageProps {
   searchParams: Promise<{
     page?: string;
     search?: string;
+    phone?: string;
     sortField?: string;
     sortDirection?: string;
   }>;
 }
 
 export default async function ClientsPage({ searchParams }: ClientsPageProps) {
-  const { page, search, sortField, sortDirection } = await searchParams;
+  const { page, search, phone, sortField, sortDirection } = await searchParams;
   const pageParam = Number(page) || 1;
 
   const where: any = {};
@@ -20,6 +21,13 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
   if (search) {
     where.fullName = {
       contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  if (phone) {
+    where.phone = {
+      contains: phone,
       mode: "insensitive",
     };
   }
