@@ -174,7 +174,7 @@ export function ServicesSection({
   const headerContent = (
     <div className="flex items-center gap-2">
       <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="max-w-[250px]">
           <SelectValue placeholder="Filtrar por profissional" />
         </SelectTrigger>
         <SelectContent>

@@ -87,9 +87,9 @@ export function CollaboratorCommission({
           <div className="w-full">
             <SelectWithScroll
               label="Profissional"
-              placeholder="Todos os profissionais"
+              placeholder="Todos"
               options={[
-                { id: null, name: "Todos os profissionais" }, // Opção para limpar o filtro
+                { id: null, name: "Todos" }, // Opção para limpar o filtro
                 ...collaborators,
               ]}
               value={selectedCollaborator ?? ""}
