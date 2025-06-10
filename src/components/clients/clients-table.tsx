@@ -258,8 +258,7 @@ export default function ClientsTable({
         data={clients}
         sortableColumns={["fullName", "phone", "birthDate"]}
         headerContent={null}
-        enableSearch={true}
-        searchPlaceholder="Buscar clientes..."
+        enableSearch={false}
         pagination={pagination}
         onSearch={(value) => {
           setSearchTerm(value);
