@@ -56,7 +56,7 @@ export function CalendarHeader({
             </DrawerTrigger>
             <DrawerContent className="space-y-2 p-2">
               <DrawerHeader>
-                <DrawerTitle>Opções do Calendário</DrawerTitle>
+                <DrawerTitle>Opções</DrawerTitle>
               </DrawerHeader>
               <Button
                 variant="outline"
