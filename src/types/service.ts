@@ -1,4 +1,4 @@
-import { Collaborator, Service, ServiceCollaborator } from "@prisma/client";
+import { Service, ServiceCollaborator, Collaborator, Category } from "@prisma/client";
 
 type ServiceWithCollaborators = ServiceCollaborator & {
   collaborator: Collaborator;
@@ -6,4 +6,5 @@ type ServiceWithCollaborators = ServiceCollaborator & {
 
 export type ServiceFullData = Service & {
   serviceCollaborators: ServiceWithCollaborators[];
+  category?: Category | null;
 };

@@ -8,12 +8,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ServiceForm } from "./service-form";
+import { Category } from "@prisma/client";
 
 interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: any;
   collaborators: any[];
+  categories: Category[]; // Adicionar esta propriedade
 }
 
 export function ServiceModal({
@@ -21,6 +23,7 @@ export function ServiceModal({
   onClose,
   initialData,
   collaborators,
+  categories, // Adicionar este parâmetro
 }: ServiceModalProps) {
   const title = initialData ? "Editar Serviço" : "Novo Serviço";
   const description = initialData
@@ -38,6 +41,7 @@ export function ServiceModal({
           initialData={initialData}
           onSuccess={onClose}
           collaborators={collaborators}
+          categories={categories} // Passar as categorias para o ServiceForm
         />
       </DialogContent>
     </Dialog>

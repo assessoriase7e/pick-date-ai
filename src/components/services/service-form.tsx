@@ -31,12 +31,13 @@ import { updateService } from "@/actions/services/update-service";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Collaborator } from "@prisma/client";
+import { Category, Collaborator } from "@prisma/client";
 
 interface ServiceFormProps {
   initialData?: any;
   onSuccess: () => void;
   collaborators: Collaborator[];
+  categories: Category[]; // Nova propriedade
 }
 
 const daysOfWeek = [
@@ -53,6 +54,7 @@ export function ServiceForm({
   initialData,
   onSuccess,
   collaborators,
+  categories = [], // Add default empty array
 }: ServiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCollaborators, setSelectedCollaborators] = useState<
@@ -74,6 +76,7 @@ export function ServiceForm({
         initialData?.serviceCollaborators?.map(
           (sc: any) => sc.collaboratorId
         ) || [],
+      categoryId: initialData?.categoryId || null, // Nova propriedade
       durationMinutes: initialData?.durationMinutes || 30,
       commission: initialData?.commission,
       isActive:
@@ -121,6 +124,7 @@ export function ServiceForm({
       availableDays: values.availableDays || [],
       notes: values.notes || "",
       collaboratorIds: values.collaboratorIds || [],
+      categoryId: values.categoryId || null, // Adicionar esta linha
       durationMinutes: values.durationMinutes || 30,
       commission: values.commission || 0,
       isActive: values.isActive !== undefined ? values.isActive : true,
@@ -152,47 +156,93 @@ export function ServiceForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome</FormLabel>
+              <FormLabel>Nome do Serviço</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do serviço" {...field} />
+                <Input placeholder="Digite o nome do serviço" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field: { onChange, value, ...field } }) => (
-            <FormItem>
-              <FormLabel>Preço</FormLabel>
-              <FormControl>
-                <NumericFormat
-                  customInput={Input}
-                  prefix="R$"
-                  placeholder="R$ 0,00"
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  decimalScale={2}
-                  allowNegative={false}
-                  value={value}
-                  onValueChange={(values) => {
-                    onChange(values.floatValue);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Layout em grid para preço e categoria lado a lado */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Preço</FormLabel>
+                <FormControl>
+                  <NumericFormat
+                    customInput={Input}
+                    prefix="R$"
+                    placeholder="R$ 0,00"
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    decimalScale={2}
+                    allowNegative={false}
+                    value={value}
+                    onValueChange={(values) => {
+                      onChange(values.floatValue);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Categoria</FormLabel>
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === "none" ? null : Number(value))
+                  }
+                  value={field.value?.toString() || "none"}
+                >
+                  <FormControl className="w-full">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Sem categoria</SelectItem>
+                    {categories?.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id.toString()}
+                      >
+                        <div className="flex items-center gap-2">
+                          {category.color && (
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                          )}
+                          {category.name}
+                        </div>
+                      </SelectItem>
+                    )) || []}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Remover a seção de categoria que estava antes do preço */}
         <FormField
           control={form.control}
           name="isActive"

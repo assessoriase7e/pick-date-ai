@@ -11,6 +11,7 @@ import {
   File,
   Bolt,
   ListCollapse,
+  Box,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -66,6 +67,12 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       href: "/collaborators",
       color: "text-emerald-500",
       isActive: pathname === "/collaborators",
+    },
+    {
+      href: "/categories",
+      icon: Box,
+      label: "Categorias",
+      isActive: pathname === "/categories",
     },
     {
       href: "/files",

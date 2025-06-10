@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ServiceModal } from "./service-modal";
 import { DeleteServiceModal } from "./delete-service-modal";
 import { deleteService } from "@/actions/services/delete-service";
-import { Collaborator, Service } from "@prisma/client";
+import { Category, Collaborator, Service } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
 import {
   Select,
@@ -34,6 +34,7 @@ import { createServiceColumns } from "./services-columns";
 interface ServicesSectionProps {
   services: ServiceFullData[];
   collaborators: Collaborator[];
+  categories: Category[];
   pagination: {
     totalPages: number;
     currentPage: number;
@@ -54,6 +55,7 @@ export function ServicesSection({
   collaborators,
   pagination: initialPagination,
   initialFilters,
+  categories,
 }: ServicesSectionProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -132,7 +134,7 @@ export function ServicesSection({
     router.push(url);
   };
 
-  const handleEdit = (service: any) => {
+  const handleEdit = (service: Service) => {
     setEditingService(service);
     setIsModalOpen(true);
   };
@@ -210,6 +212,7 @@ export function ServicesSection({
         onClose={handleModalClose}
         initialData={editingService}
         collaborators={collaborators}
+        categories={categories}
       />
 
       {deletingService && (

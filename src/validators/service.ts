@@ -6,6 +6,7 @@ export const serviceSchema = z.object({
   availableDays: z.array(z.string()),
   notes: z.string().nullable(),
   collaboratorIds: z.array(z.number()),
+  categoryId: z.number().nullable().optional(), // Nova propriedade
   durationMinutes: z.number().min(1, "Duração deve ser maior que zero"),
   commission: z.number().nullable().optional(),
   isActive: z.boolean(),

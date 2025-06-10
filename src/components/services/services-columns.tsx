@@ -1,3 +1,4 @@
+"use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Users } from "lucide-react";
@@ -73,6 +74,26 @@ const getStatusBadge = (service: ServiceFullData) => {
   );
 };
 
+const formatCategory = (service: ServiceFullData) => {
+  if (service.category) {
+    return (
+      <Badge
+        className="text-xs"
+        variant="outline"
+        style={{
+          backgroundColor: service.category.color
+            ? service.category.color + "20"
+            : undefined,
+          borderColor: service.category.color || undefined,
+        }}
+      >
+        {service.category.name}
+      </Badge>
+    );
+  }
+  return <Badge variant="secondary">Nenhuma</Badge>;
+};
+
 export const createServiceColumns = ({
   onEdit,
   onDelete,
@@ -83,6 +104,11 @@ export const createServiceColumns = ({
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("name")}</div>
     ),
+  },
+  {
+    id: "category",
+    header: "Categoria",
+    cell: ({ row }) => formatCategory(row.original),
   },
   {
     accessorKey: "durationMinutes",
