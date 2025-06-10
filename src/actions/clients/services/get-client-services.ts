@@ -11,6 +11,12 @@ type ExtendedClientService = ClientService & {
   startTime?: Date;
   endTime?: Date;
   description?: string;
+  collaborator?: {
+    id: number;
+    name: string;
+    profession: string;
+  } | null;
+  servicePrice?: number;
 };
 
 type GetClientServicesResponse =
@@ -85,6 +91,13 @@ export async function getClientServices(
       },
       include: {
         service: true,
+        collaborator: {
+          select: {
+            id: true,
+            name: true,
+            profession: true,
+          },
+        },
       },
       orderBy: {
         startTime: "desc",
@@ -110,6 +123,8 @@ export async function getClientServices(
             ? appointment.notes.substring(0, 57) + "..."
             : appointment.notes
           : "",
+        collaborator: appointment.collaborator,
+        servicePrice: appointment.servicePrice || appointment.service.price,
       })
     );
 

@@ -14,6 +14,12 @@ interface ClientService {
   endTime?: Date;
   description?: string;
   status?: string;
+  collaborator?: {
+    id: number;
+    name: string;
+    profession: string;
+  } | null;
+  servicePrice?: number;
 }
 
 type ClientServiceWithRelations = ClientService;
@@ -44,10 +50,34 @@ export default function ClientServicesTable({
     });
   };
 
+  const formatCurrency = (value: number | undefined) => {
+    if (!value) return "-";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
   const columns: ColumnDef<ClientServiceWithRelations>[] = [
     {
       accessorKey: "service.name",
       header: "Serviço",
+    },
+    {
+      accessorKey: "collaborator.name",
+      header: "Profissional",
+      cell: ({ row }) => {
+        const collaborator = row.original.collaborator;
+        return collaborator ? collaborator.name : "-";
+      },
+    },
+    {
+      accessorKey: "servicePrice",
+      header: "Preço",
+      cell: ({ row }) => {
+        const price = row.original.servicePrice || row.original.service.price;
+        return formatCurrency(price);
+      },
     },
     {
       accessorKey: "date",
@@ -81,7 +111,7 @@ export default function ClientServicesTable({
         enableSearch={true}
         pagination={{
           totalPages: pagination.pages,
-          currentPage: pagination.currentPage
+          currentPage: pagination.currentPage,
         }}
       />
     </>

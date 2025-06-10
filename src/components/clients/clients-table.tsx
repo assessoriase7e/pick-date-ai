@@ -225,7 +225,7 @@ export default function ClientsTable({
   return (
     <>
       {/* Campos de busca personalizados */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-2 mb-4 w-full">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-2 w-full">
         <div className="flex flex-col lg:flex-row gap-2 w-full">
           <div className="flex">
             <div className="h-9 w-14 flex items-center justify-center border rounded-md rounded-r-none">

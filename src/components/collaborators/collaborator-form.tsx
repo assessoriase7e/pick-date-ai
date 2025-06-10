@@ -291,53 +291,55 @@ export function CollaboratorForm({
           </Button>
         </div>
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Telefone</FormLabel>
-              <FormControl>
-                <PatternFormat
-                  format="(##) #####-####"
-                  mask="_"
-                  customInput={Input}
-                  placeholder="(00) 00000-0000"
-                  value={field.value}
-                  onValueChange={(values) => {
-                    field.onChange(values.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="profession"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profissão</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Telefone</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma profissão" />
-                  </SelectTrigger>
+                  <PatternFormat
+                    format="(##) #####-####"
+                    mask="_"
+                    customInput={Input}
+                    placeholder="(00) 00000-0000"
+                    value={field.value}
+                    onValueChange={(values) => {
+                      field.onChange(values.value);
+                    }}
+                  />
                 </FormControl>
-                <SelectContent>
-                  {collabRoles.map((role) => (
-                    <SelectItem key={role.id} value={role.name}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="profession"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Profissão</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma profissão" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {collabRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
