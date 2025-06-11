@@ -5,15 +5,16 @@ import { columns } from "@/components/files/columns";
 export const dynamic = "force-dynamic";
 
 interface FilesPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     search?: string;
-  };
+  }>;
 }
 
 export default async function FilesPage({ searchParams }: FilesPageProps) {
-  const page = Number(searchParams.page) || 1;
-  const search = searchParams.search;
+  const sParams = await searchParams;
+  const page = Number(sParams.page) || 1;
+  const search = sParams.search;
 
   const filesResult = await listFiles(page, 10, search);
   const files = filesResult.success ? filesResult.data.files : [];
@@ -22,12 +23,7 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
 
   return (
     <div className="space-y-4">
-      <FilesContent 
-        columns={columns} 
-        data={files} 
-        totalPages={totalPages}
-        currentPage={currentPage}
-      />
+      <FilesContent columns={columns} data={files} totalPages={totalPages} currentPage={currentPage} />
     </div>
   );
 }

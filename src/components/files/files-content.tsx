@@ -30,7 +30,7 @@ export function FilesContent({ columns, data, totalPages, currentPage }: FilesCo
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+      <div className="flex items-center space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-2xl font-bold">Gerenciamento de Arquivos</h1>
           <p className="text-muted-foreground">Gerencie os arquivos que serão enviados</p>
@@ -44,12 +44,7 @@ export function FilesContent({ columns, data, totalPages, currentPage }: FilesCo
       <CreateFileDialog isOpen={isDialogOpen} onClose={closeDialog} />
 
       <Suspense fallback={<div>Carregando arquivos...</div>}>
-        <FilesDataTable 
-          data={data} 
-          columns={columns} 
-          totalPages={totalPages}
-          currentPage={currentPage}
-        />
+        <FilesDataTable data={data} columns={columns} totalPages={totalPages} currentPage={currentPage} />
       </Suspense>
     </div>
   );

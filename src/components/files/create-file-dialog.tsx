@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createFile } from "@/actions/files/create";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,16 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     });
   };
 
+  // Função para resetar o formulário
+  const resetForm = () => {
+    setFileData({
+      fileName: "",
+      description: "",
+      fileUrl: "",
+      fileType: "",
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,12 +68,13 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     try {
       const result = await createFile({
         fileName: fileData.fileName,
-        description: fileData.description,
+        description: fileData.description || "",
         fileUrl: fileData.fileUrl,
         fileType: fileData.fileType,
       });
 
       if (result.success) {
+        resetForm(); // Resetar o formulário
         onClose();
         router.refresh();
       } else {
@@ -77,14 +88,18 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     }
   };
 
+  // Resetar formulário ao fechar o modal
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Novo Arquivo</DialogTitle>
-          <DialogDescription>
-            Faça o upload de um arquivo para o sistema.
-          </DialogDescription>
+          <DialogDescription>Faça o upload de um arquivo para o sistema.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,9 +119,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                           />
                         ) : (
                           <div className=" p-4 rounded-lg flex items-center justify-center">
-                            <span className="text-muted-foreground">
-                              Arquivo carregado
-                            </span>
+                            <span className="text-muted-foreground">Arquivo carregado</span>
                           </div>
                         )}
                       </div>
@@ -121,10 +134,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                     </div>
                   ) : (
                     <div>
-                      <UploadthingUploader
-                        onUploadComplete={handleUploadComplete}
-                        endpoint="fileUploader"
-                      />
+                      <UploadthingUploader onUploadComplete={handleUploadComplete} endpoint="fileUploader" />
                     </div>
                   )}
                 </div>
@@ -136,9 +146,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
               <Input
                 id="fileName"
                 value={fileData.fileName}
-                onChange={(e) =>
-                  setFileData({ ...fileData, fileName: e.target.value })
-                }
+                onChange={(e) => setFileData({ ...fileData, fileName: e.target.value })}
                 className="mt-2"
                 placeholder="Digite o nome do arquivo..."
                 required
@@ -150,9 +158,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
               <Textarea
                 id="description"
                 value={fileData.description}
-                onChange={(e) =>
-                  setFileData({ ...fileData, description: e.target.value })
-                }
+                onChange={(e) => setFileData({ ...fileData, description: e.target.value })}
                 className="mt-2"
                 placeholder="Descreva o arquivo..."
                 required
@@ -161,12 +167,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting || !fileData.fileUrl}>
