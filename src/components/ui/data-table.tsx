@@ -9,14 +9,7 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -116,27 +109,15 @@ export function DataTable<TData>({
       return (
         <div className="space-y-4">
           {table.getRowModel().rows.map((row) => (
-            <div
-              key={row.id}
-              className="p-4 rounded-md border bg-card shadow-sm"
-            >
+            <div key={row.id} className="p-4 rounded-md border bg-card shadow-sm">
               {row.getVisibleCells().map((cell) => {
                 // Obtém o cabeçalho da coluna para exibir junto com o valor
-                const header = columns.find(
-                  (col) => (col as any).id === cell.column.id
-                )?.header as string;
+                const header = columns.find((col) => (col as any).id === cell.column.id)?.header as string;
 
                 return (
                   <div key={cell.id} className="py-2 border-b last:border-0">
-                    <div className="font-medium text-sm text-muted-foreground">
-                      {header}
-                    </div>
-                    <div>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </div>
+                    <div className="font-medium text-sm text-muted-foreground">{header}</div>
+                    <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
                   </div>
                 );
               })}
@@ -145,11 +126,7 @@ export function DataTable<TData>({
         </div>
       );
     } else {
-      return (
-        <div className="text-center p-4 border rounded-md">
-          Nenhum resultado encontrado.
-        </div>
-      );
+      return <div className="text-center p-4 border rounded-md">Nenhum resultado encontrado.</div>;
     }
   };
 
@@ -172,9 +149,7 @@ export function DataTable<TData>({
 
       <div className="relative">
         {/* Componente de loading */}
-        <IsTableLoading
-          isPageChanging={isPageChanging || isSearching || isloading}
-        />
+        <IsTableLoading isPageChanging={isPageChanging || isSearching || isloading} />
 
         {isMobile ? (
           // Visualização mobile (cards)
@@ -190,21 +165,14 @@ export function DataTable<TData>({
                       <TableHead key={header.id}>
                         {header.isPlaceholder ? null : (
                           <div
-                            className={
-                              sortableColumns.includes(header.column.id)
-                                ? "cursor-pointer select-none"
-                                : ""
-                            }
+                            className={sortableColumns.includes(header.column.id) ? "cursor-pointer select-none" : ""}
                             onClick={
                               sortableColumns.includes(header.column.id)
                                 ? header.column.getToggleSortingHandler()
                                 : undefined
                             }
                           >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            {flexRender(header.column.columnDef.header, header.getContext())}
                           </div>
                         )}
                       </TableHead>
@@ -217,21 +185,13 @@ export function DataTable<TData>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
                       Nenhum resultado encontrado.
                     </TableCell>
                   </TableRow>
@@ -261,9 +221,7 @@ export function DataTable<TData>({
             size="sm"
             className="w-full lg:w-auto"
             onClick={() => navigateToPage(pagination.currentPage + 1)}
-            disabled={
-              pagination.currentPage >= pagination.totalPages || isPageChanging
-            }
+            disabled={pagination.currentPage >= pagination.totalPages || isPageChanging}
           >
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>

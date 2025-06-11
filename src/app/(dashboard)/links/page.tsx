@@ -20,6 +20,8 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
   const totalPages = result.success ? result.data!.totalPages : 1;
   const { id: userId } = await currentUser();
 
+  console.log(links);
+
   return (
     <div className="space-y-6">
       <div>

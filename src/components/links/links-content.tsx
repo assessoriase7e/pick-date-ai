@@ -1,6 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
 import { DeleteLinkModal } from "./delete-link-modal";
@@ -13,7 +12,6 @@ import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { listLinks } from "@/actions/links/getMany";
 
 type LinksContentProps = {
   links: Link[];
@@ -22,12 +20,7 @@ type LinksContentProps = {
   userId: string;
 };
 
-export function LinksContent({ links, totalPages: initialTotalPages, currentPage, userId }: LinksContentProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const page = currentPage || Number(searchParams.get("page")) || 1;
-
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
+export function LinksContent({ links, totalPages, currentPage, userId }: LinksContentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
@@ -98,22 +91,6 @@ export function LinksContent({ links, totalPages: initialTotalPages, currentPage
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  // Função para lidar com a busca
-  const handleSearch = useCallback(
-    async (searchTerm: string) => {
-      try {
-        setIsLoading(true);
-        const result = await listLinks(page, 20, searchTerm);
-      } catch (error) {
-        console.error("Error searching links:", error);
-        toast.error("Erro ao buscar links");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [page]
-  );
-
   const columns: ColumnDef<Link>[] = [
     {
       header: "Título",
@@ -174,10 +151,9 @@ export function LinksContent({ links, totalPages: initialTotalPages, currentPage
           enableSearch={true}
           searchPlaceholder="Buscar links..."
           sortableColumns={["title", "url", "description"]}
-          onSearch={handleSearch}
           pagination={{
             totalPages,
-            currentPage: page,
+            currentPage,
           }}
         />
       </div>
