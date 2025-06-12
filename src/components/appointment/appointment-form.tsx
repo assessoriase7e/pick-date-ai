@@ -1,12 +1,5 @@
 "use client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
@@ -24,14 +17,7 @@ import { updateAppointment } from "@/actions/appointments/update";
 import { deleteAppointment } from "@/actions/appointments/delete";
 import { z } from "zod";
 import { Client, Service } from "@prisma/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
 // Substituir a importação do useAutoPrint (linha 31)
@@ -62,12 +48,8 @@ export function AppointmentForm({
 }: ExtendedAppointmentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedServiceDuration, setSelectedServiceDuration] = useState<
-    number | null
-  >(null);
-  const [activeTab, setActiveTab] = useState<string>(
-    appointment ? "resumo" : "editar"
-  );
+  const [selectedServiceDuration, setSelectedServiceDuration] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>(appointment ? "resumo" : "editar");
 
   // Usando o hook simplificado
   const { printAppointment, isPrinting } = useAutoPrint();
@@ -78,9 +60,7 @@ export function AppointmentForm({
     return moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
   };
 
-  const defaultStartTime = appointment
-    ? moment(appointment.startTime).format("HH:mm")
-    : initialStartTime ?? "09:00";
+  const defaultStartTime = appointment ? moment(appointment.startTime).format("HH:mm") : initialStartTime ?? "09:00";
 
   const defaultEndTime = appointment
     ? moment(appointment.endTime).format("HH:mm")
@@ -97,8 +77,8 @@ export function AppointmentForm({
           notes: appointment.notes || "",
           calendarId: calendar.id,
           servicePrice: appointment.servicePrice || null,
-          finalPrice:
-            appointment.finalPrice || appointment.servicePrice || null,
+          finalPrice: appointment.finalPrice || appointment.servicePrice || null,
+          collaboratorId: appointment.collaboratorId || calendar.collaboratorId,
         }
       : {
           startTime: defaultStartTime,
@@ -107,6 +87,7 @@ export function AppointmentForm({
           calendarId: calendar.id,
           servicePrice: null,
           finalPrice: null,
+          collaboratorId: calendar.collaboratorId,
         },
   });
 
@@ -141,9 +122,7 @@ export function AppointmentForm({
     const startTime = form.watch("startTime");
     // Só atualiza automaticamente se NÃO estiver editando (ou seja, criando novo)
     if (!isEditing && selectedServiceDuration && startTime) {
-      const newEndTime = moment(startTime, "HH:mm")
-        .add(selectedServiceDuration, "minutes")
-        .format("HH:mm");
+      const newEndTime = moment(startTime, "HH:mm").add(selectedServiceDuration, "minutes").format("HH:mm");
       form.setValue("endTime", newEndTime);
     }
   }, [selectedServiceDuration, form.watch("startTime")]);
@@ -153,16 +132,13 @@ export function AppointmentForm({
     form.reset({
       clientId: appointment?.clientId || null,
       serviceId: appointment?.serviceId || null,
-      startTime: appointment?.startTime
-        ? moment(appointment.startTime).format("HH:mm")
-        : initialStartTime || "09:00",
-      endTime: appointment?.endTime
-        ? moment(appointment.endTime).format("HH:mm")
-        : initialEndTime || "10:00",
+      startTime: appointment?.startTime ? moment(appointment.startTime).format("HH:mm") : initialStartTime || "09:00",
+      endTime: appointment?.endTime ? moment(appointment.endTime).format("HH:mm") : initialEndTime || "10:00",
       notes: appointment?.notes || "",
       calendarId: calendar.id || null,
       servicePrice: appointment?.servicePrice || null,
       finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
+      collaboratorId: appointment?.collaboratorId || calendar.collaboratorId,
     });
   }, [
     appointment,
@@ -171,14 +147,13 @@ export function AppointmentForm({
     initialStartTime,
     initialEndTime,
     calendar.id,
+    calendar.collaboratorId,
   ]);
 
   const onSubmit = async (values: FormValues) => {
     try {
       if (!calendar?.isActive) {
-        toast.error(
-          "Esta agenda está inativa e não permite novos agendamentos"
-        );
+        toast.error("Esta agenda está inativa e não permite novos agendamentos");
         return;
       }
 
@@ -192,9 +167,7 @@ export function AppointmentForm({
       endTime.setHours(endHour, endMinute, 0, 0);
 
       if (endTime <= startTime) {
-        toast.error(
-          "O horário de término deve ser depois do horário de início"
-        );
+        toast.error("O horário de término deve ser depois do horário de início");
         return;
       }
 
@@ -205,11 +178,7 @@ export function AppointmentForm({
         return;
       }
 
-      const hasConflict = checkTimeConflict(
-        startTime,
-        endTime,
-        appointment?.id
-      );
+      const hasConflict = checkTimeConflict(startTime, endTime, appointment?.id);
       if (hasConflict) {
         toast.error("Já existe um agendamento nesse horário");
         return;
@@ -227,9 +196,14 @@ export function AppointmentForm({
         status: "scheduled",
         servicePrice: values.servicePrice ?? null,
         finalPrice: values.finalPrice ?? null,
-        collaboratorId: calendar.collaboratorId || null,
+        collaboratorId: calendar.collaboratorId,
       };
 
+      // Verificar se o colaborador existe
+      if (!calendar.collaboratorId) {
+        toast.error("Este calendário não possui um colaborador associado");
+        return;
+      }
       let result;
 
       if (isEditing && appointment) {
@@ -261,8 +235,7 @@ export function AppointmentForm({
           <DialogHeader>
             <DialogTitle>Agenda Inativa</DialogTitle>
             <DialogDescription>
-              Esta agenda está temporariamente inativa e não está aceitando
-              novos agendamentos.
+              Esta agenda está temporariamente inativa e não está aceitando novos agendamentos.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -292,9 +265,7 @@ export function AppointmentForm({
 
   // Busca os dados do cliente e serviço para exibir no resumo
   const clientData = clients.find((c) => c.id === form.getValues("clientId"));
-  const serviceData = services.find(
-    (s) => s.id === form.getValues("serviceId")
-  );
+  const serviceData = services.find((s) => s.id === form.getValues("serviceId"));
 
   // Formata o preço para exibição
   const formatCurrency = (value: number | null | undefined) => {
@@ -306,11 +277,7 @@ export function AppointmentForm({
   };
 
   return (
-    <Tabs
-      defaultValue={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full"
-    >
+    <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger
           value="resumo"
@@ -319,17 +286,13 @@ export function AppointmentForm({
         >
           Resumo
         </TabsTrigger>
-        <TabsTrigger value="editar">
-          {isEditing ? "Editar" : "Criar"}
-        </TabsTrigger>
+        <TabsTrigger value="editar">{isEditing ? "Editar" : "Criar"}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="resumo" className="space-y-5">
         <div>
           <p className="text-2xl font-semibold">Detalhes do Agendamento</p>
-          <p className="text-muted-foreground">
-            Informações completas sobre o agendamento
-          </p>
+          <p className="text-muted-foreground">Informações completas sobre o agendamento</p>
         </div>
 
         <div className="flex-1 space-y-4">
@@ -357,9 +320,7 @@ export function AppointmentForm({
             <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="font-medium">Data</p>
-              <p className="text-muted-foreground">
-                {moment(date).format("DD/MM/YYYY")}
-              </p>
+              <p className="text-muted-foreground">{moment(date).format("DD/MM/YYYY")}</p>
             </div>
           </div>
 
@@ -377,9 +338,7 @@ export function AppointmentForm({
             <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="font-medium">Valor</p>
-              <p className="text-muted-foreground">
-                {formatCurrency(form.getValues("finalPrice"))}
-              </p>
+              <p className="text-muted-foreground">{formatCurrency(form.getValues("finalPrice"))}</p>
             </div>
           </div>
 
@@ -388,9 +347,7 @@ export function AppointmentForm({
               <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div>
                 <p className="font-medium">Observações</p>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {form.getValues("notes")}
-                </p>
+                <p className="text-muted-foreground whitespace-pre-wrap">{form.getValues("notes")}</p>
               </div>
             </div>
           )}
@@ -403,19 +360,12 @@ export function AppointmentForm({
                 type="button"
                 variant="outline"
                 className="hidden md:block"
-                onClick={() =>
-                  appointment?.id && printAppointment(appointment.id)
-                }
+                onClick={() => appointment?.id && printAppointment(appointment.id)}
                 disabled={isPrinting}
               >
                 {isPrinting ? "Imprimindo..." : "Imprimir Comanda"}
               </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
+              <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
                 Cancelar Agendamento
               </Button>
             </>
@@ -425,18 +375,11 @@ export function AppointmentForm({
 
       <TabsContent value="editar">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 flex flex-col justify-between h-full"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col justify-between h-full">
             <div>
-              <p className="text-2xl font-semibold">
-                {isEditing ? "Edição do Agendamento" : "Criação do Agendamento"}
-              </p>
+              <p className="text-2xl font-semibold">{isEditing ? "Edição do Agendamento" : "Criação do Agendamento"}</p>
               <p className="text-muted-foreground">
-                {isEditing
-                  ? "Atualize as informações do agendamento"
-                  : "Crie um novo agendamento"}
+                {isEditing ? "Atualize as informações do agendamento" : "Crie um novo agendamento"}
               </p>
             </div>
 
@@ -573,11 +516,7 @@ export function AppointmentForm({
 
             <div className="flex flex-col justify-end w-full gap-2">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>Salvando...</>
-                ) : (
-                  <>{isEditing ? "Atualizar" : "Salvar"}</>
-                )}
+                {isLoading ? <>Salvando...</> : <>{isEditing ? "Atualizar" : "Salvar"}</>}
               </Button>
             </div>
           </form>

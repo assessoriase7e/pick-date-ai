@@ -7,32 +7,14 @@ import { toast } from "sonner";
 import moment from "moment";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { createAppointment } from "@/actions/appointments/create";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Service, Client } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTrigger,
-} from "../ui/drawer";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "../ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AppointmentFullData } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
@@ -42,7 +24,7 @@ const publicAppointmentSchema = z.object({
   serviceId: z.number().min(1, "Serviço é obrigatório"),
   startTime: z.string().min(1, "Horário de início é obrigatório"),
   endTime: z.string().min(1, "Horário de término é obrigatório"),
-  collaboratorId: z.number().optional().nullable(),
+  collaboratorId: z.number().min(1, "Colaborador é obrigatório"), // ALTERADO: removido optional e nullable
   notes: z.string().optional(),
 });
 
@@ -73,31 +55,24 @@ export function PublicAppointmentForm({
 }: PublicAppointmentFormProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedServiceDuration, setSelectedServiceDuration] =
-    useState<number>(60);
+  const [selectedServiceDuration, setSelectedServiceDuration] = useState<number>(60);
   const [openClientDrawer, setOpenClientDrawer] = useState(false);
   const [openServiceDrawer, setOpenServiceDrawer] = useState(false);
   const [searchClient, setSearchClient] = useState("");
   const [searchService, setSearchService] = useState("");
 
   const defaultStartTime = `${hour.toString().padStart(2, "0")}:00`;
-  const defaultEndTime = moment(defaultStartTime, "HH:mm")
-    .add(1, "hour")
-    .format("HH:mm");
+  const defaultEndTime = moment(defaultStartTime, "HH:mm").add(1, "hour").format("HH:mm");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(publicAppointmentSchema),
     defaultValues: {
       clientId: appointment?.clientId || null,
       serviceId: appointment?.serviceId || null,
-      startTime: appointment
-        ? moment(appointment.startTime).format("HH:mm")
-        : defaultStartTime,
-      endTime: appointment
-        ? moment(appointment.endTime).format("HH:mm")
-        : defaultEndTime,
+      startTime: appointment ? moment(appointment.startTime).format("HH:mm") : defaultStartTime,
+      endTime: appointment ? moment(appointment.endTime).format("HH:mm") : defaultEndTime,
       notes: appointment?.notes || "",
-      collaboratorId,
+      collaboratorId: collaboratorId, // ALTERADO: sempre obrigatório
     },
   });
 
@@ -115,9 +90,7 @@ export function PublicAppointmentForm({
   useEffect(() => {
     const startTime = form.watch("startTime");
     if (selectedServiceDuration && startTime) {
-      const newEndTime = moment(startTime, "HH:mm")
-        .add(selectedServiceDuration, "minutes")
-        .format("HH:mm");
+      const newEndTime = moment(startTime, "HH:mm").add(selectedServiceDuration, "minutes").format("HH:mm");
       form.setValue("endTime", newEndTime);
     }
   }, [selectedServiceDuration, form.watch("startTime")]);
@@ -138,9 +111,7 @@ export function PublicAppointmentForm({
 
       // Verificar se o horário de término é depois do início
       if (endTime <= startTime) {
-        toast.error(
-          "O horário de término deve ser depois do horário de início"
-        );
+        toast.error("O horário de término deve ser depois do horário de início");
         setIsLoading(false);
         return;
       }
@@ -152,10 +123,8 @@ export function PublicAppointmentForm({
         endTime,
         notes: values.notes || null,
         status: "scheduled",
-        servicePrice:
-          services?.find((s) => s.id === values.serviceId)?.price ?? null,
-        finalPrice:
-          services?.find((s) => s.id === values.serviceId)?.price ?? null,
+        servicePrice: services?.find((s) => s.id === values.serviceId)?.price ?? null,
+        finalPrice: services?.find((s) => s.id === values.serviceId)?.price ?? null,
         collaboratorId,
         clientId: values.clientId,
       };
@@ -174,18 +143,12 @@ export function PublicAppointmentForm({
         throw new Error(result.error);
       }
 
-      toast.success(
-        appointment
-          ? "Agendamento atualizado com sucesso!"
-          : "Agendamento criado com sucesso!"
-      );
+      toast.success(appointment ? "Agendamento atualizado com sucesso!" : "Agendamento criado com sucesso!");
       onSuccess();
     } catch (error) {
       console.error("Erro ao salvar agendamento:", error);
       toast.error(
-        appointment
-          ? "Ocorreu um erro ao atualizar o agendamento"
-          : "Ocorreu um erro ao criar o agendamento"
+        appointment ? "Ocorreu um erro ao atualizar o agendamento" : "Ocorreu um erro ao criar o agendamento"
       );
     } finally {
       setIsLoading(false);
@@ -195,8 +158,7 @@ export function PublicAppointmentForm({
   const filteredClients =
     clients?.filter(
       (client) =>
-        client.fullName.toLowerCase().includes(searchClient.toLowerCase()) ||
-        client.phone.includes(searchClient)
+        client.fullName.toLowerCase().includes(searchClient.toLowerCase()) || client.phone.includes(searchClient)
     ) || [];
 
   const filteredServices = (services || []).filter((service) =>
@@ -208,9 +170,7 @@ export function PublicAppointmentForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <h2 className="text-xl font-semibold mb-2">Novo Agendamento</h2>
-          <p className="text-muted-foreground mb-4">
-            {moment(date).format("DD/MM/YYYY")}
-          </p>
+          <p className="text-muted-foreground mb-4">{moment(date).format("DD/MM/YYYY")}</p>
         </div>
 
         <FormField
@@ -220,19 +180,11 @@ export function PublicAppointmentForm({
             <FormItem className="flex flex-col">
               <FormLabel>Selecione um Cliente</FormLabel>
               {isMobile ? (
-                <Drawer
-                  open={openClientDrawer}
-                  onOpenChange={setOpenClientDrawer}
-                >
+                <Drawer open={openClientDrawer} onOpenChange={setOpenClientDrawer}>
                   <DrawerTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between"
-                    >
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
                       {field.value
-                        ? clients?.find((client) => client.id === field.value)
-                            ?.fullName || "Selecione um cliente"
+                        ? clients?.find((client) => client.id === field.value)?.fullName || "Selecione um cliente"
                         : "Selecione um cliente"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -240,9 +192,7 @@ export function PublicAppointmentForm({
                   <DrawerContent>
                     <DrawerHeader></DrawerHeader>
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">
-                        Selecionar Cliente
-                      </h2>
+                      <h2 className="text-lg font-semibold mb-4">Selecionar Cliente</h2>
                       <Input
                         placeholder="Buscar cliente..."
                         value={searchClient}
@@ -250,14 +200,9 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div
-                      className="p-4 pt-0 overflow-y-auto"
-                      style={{ maxHeight: "60svh" }}
-                    >
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: "60svh" }}>
                       {filteredClients.length === 0 ? (
-                        <p className="text-center text-muted-foreground">
-                          Nenhum cliente encontrado.
-                        </p>
+                        <p className="text-center text-muted-foreground">Nenhum cliente encontrado.</p>
                       ) : (
                         filteredClients.map((client) => (
                           <Button
@@ -270,12 +215,7 @@ export function PublicAppointmentForm({
                             }}
                           >
                             <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === client.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
+                              className={cn("mr-2 h-4 w-4", field.value === client.id ? "opacity-100" : "opacity-0")}
                             />
                             {client.fullName} - {client.phone}
                           </Button>
@@ -285,28 +225,18 @@ export function PublicAppointmentForm({
                   </DrawerContent>
                 </Drawer>
               ) : (
-                <Dialog
-                  open={openClientDrawer}
-                  onOpenChange={setOpenClientDrawer}
-                >
+                <Dialog open={openClientDrawer} onOpenChange={setOpenClientDrawer}>
                   <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between"
-                    >
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
                       {field.value
-                        ? clients?.find((client) => client.id === field.value)
-                            ?.fullName || "Selecione um cliente"
+                        ? clients?.find((client) => client.id === field.value)?.fullName || "Selecione um cliente"
                         : "Selecione um cliente"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">
-                        Selecionar Cliente
-                      </h2>
+                      <h2 className="text-lg font-semibold mb-4">Selecionar Cliente</h2>
                       <Input
                         placeholder="Buscar cliente..."
                         value={searchClient}
@@ -314,14 +244,9 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div
-                      className="p-4 pt-0 overflow-y-auto"
-                      style={{ maxHeight: "400px" }}
-                    >
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: "400px" }}>
                       {filteredClients.length === 0 ? (
-                        <p className="text-center text-muted-foreground">
-                          Nenhum cliente encontrado.
-                        </p>
+                        <p className="text-center text-muted-foreground">Nenhum cliente encontrado.</p>
                       ) : (
                         filteredClients.map((client) => (
                           <Button
@@ -334,12 +259,7 @@ export function PublicAppointmentForm({
                             }}
                           >
                             <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === client.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
+                              className={cn("mr-2 h-4 w-4", field.value === client.id ? "opacity-100" : "opacity-0")}
                             />
                             {client.fullName} - {client.phone}
                           </Button>
@@ -361,29 +281,18 @@ export function PublicAppointmentForm({
             <FormItem className="flex flex-col">
               <FormLabel>Serviço</FormLabel>
               {isMobile ? (
-                <Drawer
-                  open={openServiceDrawer}
-                  onOpenChange={setOpenServiceDrawer}
-                >
+                <Drawer open={openServiceDrawer} onOpenChange={setOpenServiceDrawer}>
                   <DrawerTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between"
-                    >
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
                       {field.value
-                        ? services?.find(
-                            (service) => service.id === field.value
-                          )?.name || "Selecione um serviço"
+                        ? services?.find((service) => service.id === field.value)?.name || "Selecione um serviço"
                         : "Selecione um serviço"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </DrawerTrigger>
                   <DrawerContent>
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">
-                        Selecionar Serviço
-                      </h2>
+                      <h2 className="text-lg font-semibold mb-4">Selecionar Serviço</h2>
                       <Input
                         placeholder="Buscar serviço..."
                         value={searchService}
@@ -391,14 +300,9 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div
-                      className="p-4 pt-0 overflow-y-auto"
-                      style={{ maxHeight: "60svh" }}
-                    >
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: "60svh" }}>
                       {filteredServices.length === 0 ? (
-                        <p className="text-center text-muted-foreground">
-                          Nenhum serviço encontrado.
-                        </p>
+                        <p className="text-center text-muted-foreground">Nenhum serviço encontrado.</p>
                       ) : (
                         filteredServices.map((service) => (
                           <Button
@@ -411,12 +315,7 @@ export function PublicAppointmentForm({
                             }}
                           >
                             <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === service.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
+                              className={cn("mr-2 h-4 w-4", field.value === service.id ? "opacity-100" : "opacity-0")}
                             />
                             {service.name} - {service.durationMinutes}min - R$
                             {service.price?.toFixed(2)}
@@ -427,20 +326,11 @@ export function PublicAppointmentForm({
                   </DrawerContent>
                 </Drawer>
               ) : (
-                <Dialog
-                  open={openServiceDrawer}
-                  onOpenChange={setOpenServiceDrawer}
-                >
+                <Dialog open={openServiceDrawer} onOpenChange={setOpenServiceDrawer}>
                   <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between"
-                    >
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
                       {field.value
-                        ? services?.find(
-                            (service) => service.id === field.value
-                          )?.name || "Selecione um serviço"
+                        ? services?.find((service) => service.id === field.value)?.name || "Selecione um serviço"
                         : "Selecione um serviço"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -451,9 +341,7 @@ export function PublicAppointmentForm({
                       <DialogTitle></DialogTitle>
                     </DialogHeader>
                     <div className="p-4 pb-0">
-                      <h2 className="text-lg font-semibold mb-4">
-                        Selecionar Serviço
-                      </h2>
+                      <h2 className="text-lg font-semibold mb-4">Selecionar Serviço</h2>
                       <Input
                         placeholder="Buscar serviço..."
                         value={searchService}
@@ -461,14 +349,9 @@ export function PublicAppointmentForm({
                         className="mb-4"
                       />
                     </div>
-                    <div
-                      className="p-4 pt-0 overflow-y-auto"
-                      style={{ maxHeight: "400px" }}
-                    >
+                    <div className="p-4 pt-0 overflow-y-auto" style={{ maxHeight: "400px" }}>
                       {filteredServices.length === 0 ? (
-                        <p className="text-center text-muted-foreground">
-                          Nenhum serviço encontrado.
-                        </p>
+                        <p className="text-center text-muted-foreground">Nenhum serviço encontrado.</p>
                       ) : (
                         filteredServices.map((service) => (
                           <Button
@@ -481,12 +364,7 @@ export function PublicAppointmentForm({
                             }}
                           >
                             <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === service.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
+                              className={cn("mr-2 h-4 w-4", field.value === service.id ? "opacity-100" : "opacity-0")}
                             />
                             {service.name} - {service.durationMinutes}min - R$
                             {service.price?.toFixed(2)}

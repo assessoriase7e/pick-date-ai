@@ -25,7 +25,7 @@ export const updateAppointmentSchema = z.object({
   endTime: z.date(),
   notes: z.string().nullable(),
   finalPrice: z.number().nullable().optional(),
-  collaboratorId: z.number().optional(),
+  collaboratorId: z.number().min(1, "Colaborador é obrigatório"), // ALTERADO: removido optional
 });
 
 // Adicione ao schema de validação existente
@@ -38,6 +38,7 @@ export const createAppointmentSchema = z.object({
   calendarId: z.number().min(1, "Calendário é obrigatório"),
   servicePrice: z.number().nullable().optional(),
   finalPrice: z.number().nullable().optional(),
+  collaboratorId: z.number().min(1, "Colaborador é obrigatório"), // ADICIONADO: validação obrigatória
 });
 
 export const getAppointmentsByDateSchema = z.object({

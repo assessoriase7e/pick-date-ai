@@ -26,10 +26,18 @@ export async function createAppointment({
   status: string;
   servicePrice: number | null;
   finalPrice: number | null;
-  collaboratorId: number | null;
+  collaboratorId: number; // ALTERADO: removido | null
   isPublic?: Boolean;
 }) {
   try {
+    // ADICIONADO: Validação obrigatória do colaborador
+    if (!collaboratorId) {
+      return {
+        success: false,
+        error: "Colaborador é obrigatório para criar um agendamento",
+      };
+    }
+
     let userId: string | null = null;
 
     // Se for cliente público, buscar o userId pelo calendário
@@ -134,7 +142,7 @@ export async function createAppointment({
         status,
         servicePrice: finalServicePrice,
         finalPrice: finalFinalPrice,
-        collaboratorId,
+        collaboratorId, // Agora sempre será um número válido
         userId,
       },
       include: {

@@ -61,15 +61,36 @@ export default async function DaySchedulePage({
       ? servicesResponse.data
       : [];
 
+  // Verificar se o calendário e colaborador existem
+  if (!getCalendarByIdResponse.success || !getCalendarByIdResponse.data) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">
+          Calendário não encontrado.
+        </p>
+      </div>
+    );
+  }
+
+  if (!collaboratorResponse.success || !collaboratorResponse.data?.collaborator) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">
+          Este calendário não possui um colaborador associado. Configure um colaborador antes de criar agendamentos.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <DayScheduleContent
       calendarId={calendarId}
       date={date}
       appointments={appointments}
-      collaborator={collaboratorResponse.data?.collaborator!}
+      collaborator={collaboratorResponse.data.collaborator}
       clients={clients}
       services={services}
-      calendar={getCalendarByIdResponse.data!}
+      calendar={getCalendarByIdResponse.data}
     />
   );
 }
