@@ -2,12 +2,7 @@
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
@@ -16,12 +11,7 @@ import { useSidebarRoutes } from "@/mocked/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { Dock, DockIcon } from "./magicui/dock";
 import Link from "next/link";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function DockMenu() {
   const { user } = useUser();
@@ -45,12 +35,14 @@ export function DockMenu() {
 
   const MobileMenu = () => (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button size="icon" className="md:hidden fixed top-4 left-4 z-50 ">
-          <Menu />
-          <span className="sr-only">Menu</span>
-        </Button>
-      </SheetTrigger>
+      <div className="w-full border-b border-border">
+        <SheetTrigger asChild>
+          <Button size="icon" className="md:hidden m-4 z-50">
+            <Menu />
+            <span className="sr-only">Menu</span>
+          </Button>
+        </SheetTrigger>
+      </div>
 
       <SheetContent side="left" className="w-full">
         <SheetHeader className="flex justify-center items-center py-4">
@@ -60,10 +52,7 @@ export function DockMenu() {
         <div className="flex-1 overflow-y-auto py-6 px-4">
           {routes.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Button
-                variant={item.isActive ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
+              <Button variant={item.isActive ? "default" : "ghost"} className="w-full justify-start">
                 <item.icon className="h-5 w-5 mr-2" />
                 <span>{item.label}</span>
               </Button>
@@ -83,10 +72,7 @@ export function DockMenu() {
         <Separator orientation="vertical" className="h-8" />
 
         {routes.map((item) => (
-          <DockIcon
-            key={item.href}
-            className={item.isActive ? "bg-primary text-primary-foreground" : ""}
-          >
+          <DockIcon key={item.href} className={item.isActive ? "bg-primary text-primary-foreground" : ""}>
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -94,10 +80,7 @@ export function DockMenu() {
                     <item.icon className="h-6 w-6" />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-background border border-border"
-                >
+                <TooltipContent side="top" className="bg-background border border-border">
                   {item.label}
                 </TooltipContent>
               </Tooltip>
