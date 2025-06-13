@@ -12,20 +12,33 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    // Obter o userId do parâmetro de consulta
+    // Obter o nome da instância do parâmetro de consulta
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const instance = searchParams.get("instance");
 
-    if (!userId) {
+    if (!instance) {
       return NextResponse.json(
-        { error: "UserId é obrigatório" },
+        { error: "Instância não fornecida" },
         { status: 400 }
+      );
+    }
+
+    // Buscar a instância e o usuário associado
+    const evolutionInstance = await prisma.evolutionInstance.findFirst({
+      where: { name: instance },
+      include: { user: true },
+    });
+
+    if (!evolutionInstance) {
+      return NextResponse.json(
+        { error: "Instância não encontrada" },
+        { status: 404 }
       );
     }
 
     // Verificar se o usuário tem o agente de atendimento ativo
     const attendantPrompt = await prisma.attendantPrompt.findFirst({
-      where: { userId },
+      where: { userId: evolutionInstance.userId },
       select: { isActive: true },
     });
 
