@@ -105,10 +105,10 @@ export async function sendAppointmentNotifications({
       let personalizedMessage = message;
 
       // Substituir variáveis
-      personalizedMessage = personalizedMessage.replace(/<client_name>/g, appointment.client?.fullName || "Cliente");
+      personalizedMessage = personalizedMessage.replace(/{{nome_cliente}}/g, appointment.client?.fullName || "Cliente");
 
       personalizedMessage = personalizedMessage.replace(
-        /<date>/g,
+        /{{data}}/g,
         format(appointment.startTime, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
           locale: ptBR,
         })

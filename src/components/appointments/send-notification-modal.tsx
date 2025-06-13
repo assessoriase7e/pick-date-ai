@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { sendAppointmentNotifications } from "@/actions/appointments/send-notifications";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, User, GripVertical } from "lucide-react";
+import { CalendarIcon, User, GripVertical, RefreshCw } from "lucide-react";
 
 const notificationSchema = z.object({
   date: z.date({
@@ -28,9 +28,9 @@ interface SendNotificationModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const defaultMessage = `Olá <client_name>! 👋
+const defaultMessage = `Olá {{nome_cliente}}! 👋
 
-Lembramos que você tem um agendamento marcado para o dia <date>.
+Lembramos que você tem um agendamento marcado para o dia {{data}}.
 
 Aguardamos você!
 
@@ -39,8 +39,8 @@ Qualquer dúvida, entre em contato conosco.`;
 const STORAGE_KEY = "notification_message";
 
 const variables = [
-  { label: "Cliente", value: "<client_name>", icon: User },
-  { label: "Data", value: "<date>", icon: CalendarIcon },
+  { label: "Nome do Cliente", value: "{{nome_cliente}}", icon: User },
+  { label: "Data", value: "{{data}}", icon: CalendarIcon },
 ];
 
 export function SendNotificationModal({ open, onOpenChange }: SendNotificationModalProps) {
@@ -71,6 +71,11 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
     });
     return () => subscription.unsubscribe();
   }, [form]);
+
+  const resetToDefaultMessage = () => {
+    form.setValue("message", defaultMessage);
+    toast.success("Mensagem padrão restaurada");
+  };
 
   const handleDragStart = (variable: string) => {
     setDraggedVariable(variable);
@@ -147,7 +152,18 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
           </div>
 
           <div className="space-y-2">
-            <Label>Mensagem personalizada</Label>
+            <div className="flex justify-between items-center">
+              <Label>Mensagem personalizada</Label>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                onClick={resetToDefaultMessage} 
+                title="Restaurar mensagem padrão"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
             <Textarea
               {...form.register("message")}
               placeholder="Digite sua mensagem..."
