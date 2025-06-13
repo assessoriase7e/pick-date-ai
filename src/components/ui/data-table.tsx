@@ -8,6 +8,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   SortingState,
+  RowSelectionState,
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,11 @@ interface DataTableProps<TData> {
   onSearch?: (value: string) => void;
   setIsLoading?: (loading: boolean) => void;
   isloading?: boolean;
+  // Novas props para seleção
+  enableSelection?: boolean;
+  selectedIds?: (string | number)[];
+  onSelectionChange?: (selectedIds: (string | number)[]) => void;
+  getRowId?: (row: TData) => string | number;
 }
 
 export function DataTable<TData>({
@@ -45,15 +51,40 @@ export function DataTable<TData>({
   onSearch,
   isloading,
   setIsLoading,
+  enableSelection = false,
+  selectedIds = [],
+  onSelectionChange,
+  getRowId,
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isPageChanging, setIsPageChanging] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+
+  // Sincronizar rowSelection com selectedIds
+  useEffect(() => {
+    if (enableSelection && getRowId) {
+      const newRowSelection: RowSelectionState = {};
+      // Usar um Set para melhorar a performance da busca
+      const selectedIdsSet = new Set(selectedIds.map((id) => String(id)));
+
+      // Atribuir diretamente os índices das linhas que correspondem aos IDs selecionados
+      data.forEach((row, index) => {
+        const rowId = String(getRowId(row));
+        if (selectedIdsSet.has(rowId)) {
+          newRowSelection[index] = true;
+        }
+      });
+
+      setRowSelection(newRowSelection);
+    }
+  }, [selectedIds, data, enableSelection, getRowId]);
 
   // Desativa o loading quando o componente é remontado (dados atualizados)
   useEffect(() => {
@@ -69,11 +100,42 @@ export function DataTable<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    onRowSelectionChange: (updater) => {
+      if (!enableSelection) return;
+
+      const newRowSelection = typeof updater === "function" ? updater(rowSelection) : updater;
+      setRowSelection(newRowSelection);
+
+      if (onSelectionChange && getRowId) {
+        // Extrair os IDs das linhas selecionadas
+        const newSelectedIds = Object.keys(newRowSelection)
+          .filter((key) => newRowSelection[key])
+          .map((key) => {
+            const rowIndex = parseInt(key);
+            const row = data[rowIndex];
+            return row ? getRowId(row) : null;
+          })
+          .filter((id) => id !== null);
+
+        // Garantir que o callback seja chamado com os IDs corretos
+        onSelectionChange(newSelectedIds);
+      }
+    },
     state: {
       globalFilter,
       sorting,
+      ...(enableSelection && { rowSelection }),
     },
     onGlobalFilterChange: setGlobalFilter,
+    enableRowSelection: true, // Sempre habilitar seleção de linha
+    enableMultiRowSelection: true, // Esta linha permite seleção múltipla
+    getRowId: getRowId
+      ? (row, index) => {
+          if (!row) return index.toString();
+          const id = getRowId(row);
+          return id ? id.toString() : index.toString();
+        }
+      : (row, index) => index.toString(), // Fallback para usar índice
   });
 
   // Função para navegar entre páginas usando query params
@@ -148,7 +210,6 @@ export function DataTable<TData>({
       </div>
 
       <div className="relative">
-        {/* Componente de loading */}
         <IsTableLoading isPageChanging={isPageChanging || isSearching || isloading} />
 
         {isMobile ? (
@@ -182,13 +243,24 @@ export function DataTable<TData>({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                  table.getRowModel().rows.map((row) => {
+                    // Forçar a avaliação do estado de seleção como booleano
+                    const isSelected = row.getIsSelected() === true;
+                    return (
+                      <TableRow
+                        key={row.id}
+                        data-state={isSelected ? "selected" : undefined}
+                        // Adicionar classe personalizada para debug
+                        className={isSelected ? "bg-muted" : ""}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={columns.length} className="h-24 text-center">
