@@ -282,7 +282,7 @@ CREATE TABLE "calendar" (
     "collaboratorId" INTEGER,
     "userId" TEXT NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "accessCode" TEXT,
+    "accessCode" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -296,12 +296,26 @@ CREATE TABLE "collaborator" (
     "phone" TEXT NOT NULL,
     "profession" TEXT NOT NULL,
     "description" TEXT,
-    "workingHours" JSONB NOT NULL,
     "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "collaborator_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "workhour" (
+    "id" SERIAL NOT NULL,
+    "day" TEXT NOT NULL,
+    "startTime" TEXT NOT NULL,
+    "endTime" TEXT NOT NULL,
+    "breakStart" TEXT,
+    "breakEnd" TEXT,
+    "collaboratorId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "workhour_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -461,6 +475,9 @@ ALTER TABLE "calendar" ADD CONSTRAINT "calendar_userId_fkey" FOREIGN KEY ("userI
 
 -- AddForeignKey
 ALTER TABLE "collaborator" ADD CONSTRAINT "collaborator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "workhour" ADD CONSTRAINT "workhour_collaboratorId_fkey" FOREIGN KEY ("collaboratorId") REFERENCES "collaborator"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "appointment" ADD CONSTRAINT "appointment_calendarId_fkey" FOREIGN KEY ("calendarId") REFERENCES "calendar"("id") ON DELETE CASCADE ON UPDATE CASCADE;
