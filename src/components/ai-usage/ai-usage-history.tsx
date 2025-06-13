@@ -63,11 +63,13 @@ export function AIUsageHistory({
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+      started: { label: "Iniciado", variant: "secondary" },
+      in_progress: { label: "Em Andamento", variant: "secondary" },
       completed: { label: "Concluído", variant: "default" },
       abandoned: { label: "Abandonado", variant: "destructive" },
-      in_progress: { label: "Em Andamento", variant: "secondary" },
+      transferred: { label: "Transferido", variant: "outline" },
     };
-
+  
     const statusInfo = statusMap[status] || { label: status, variant: "outline" as const };
     return <Badge variant={statusInfo.variant} className="text-xs">{statusInfo.label}</Badge>;
   };
