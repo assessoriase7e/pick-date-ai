@@ -247,7 +247,7 @@ export function AppointmentsDataTable({
             </Button>
           </>
         )}
-        <Button onClick={handleNotificationClick} className="flex items-center gap-2" variant="outline">
+        <Button onClick={handleNotificationClick} className="flex items-center gap-2 w-full md:w-min" variant="outline">
           <MessageCircle className="h-4 w-4" />
           Emitir aviso
         </Button>
