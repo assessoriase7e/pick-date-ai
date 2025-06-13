@@ -11,6 +11,7 @@ import {
   File,
   Bolt,
   ListCollapse,
+  Brain,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -85,6 +86,13 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       href: "/agents",
       color: "text-emerald-500",
       isActive: pathname === "/agents",
+    },
+    {
+      label: "Uso da IA", // Nova rota adicionada
+      icon: Brain,
+      href: "/ai-usage",
+      color: "text-purple-500",
+      isActive: pathname === "/ai-usage",
     },
     {
       label: "Relatórios",
