@@ -9,13 +9,7 @@ import { DeleteServiceModal } from "./delete-service-modal";
 import { deleteService } from "@/actions/services/delete-service";
 import { Collaborator, Service } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,18 +61,10 @@ export function ServicesSection({
     message: string;
   }>({ show: false, action: async () => {}, message: "" });
 
-  const [searchTerm, setSearchTerm] = useState(
-    initialFilters?.searchTerm || ""
-  );
-  const [collaboratorFilter, setCollaboratorFilter] = useState(
-    initialFilters?.collaboratorFilter || "all"
-  );
-  const [sortField, setSortField] = useState<SortField>(
-    initialFilters?.sortField || "name"
-  );
-  const [sortDirection, setSortDirection] = useState<SortDirection>(
-    initialFilters?.sortDirection || "asc"
-  );
+  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || "");
+  const [collaboratorFilter, setCollaboratorFilter] = useState(initialFilters?.collaboratorFilter || "all");
+  const [sortField, setSortField] = useState<SortField>(initialFilters?.sortField || "name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(initialFilters?.sortDirection || "asc");
   const [pagination, setPagination] = useState(initialPagination);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -172,9 +158,9 @@ export function ServicesSection({
 
   // Conteúdo do cabeçalho da tabela (filtro de colaboradores e botão de novo serviço)
   const headerContent = (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-min">
       <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
-        <SelectTrigger className="max-w-[250px]">
+        <SelectTrigger className="w-full md:max-w-[250px]">
           <SelectValue placeholder="Filtrar por profissional" />
         </SelectTrigger>
         <SelectContent>
@@ -186,7 +172,7 @@ export function ServicesSection({
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={() => setIsModalOpen(true)}>
+      <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-min">
         <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
       </Button>
     </div>
@@ -225,16 +211,12 @@ export function ServicesSection({
       {/* Diálogo de confirmação para ações */}
       <AlertDialog
         open={confirmAction.show}
-        onOpenChange={(open) =>
-          !open && setConfirmAction({ ...confirmAction, show: false })
-        }
+        onOpenChange={(open) => !open && setConfirmAction({ ...confirmAction, show: false })}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação</AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmAction.message}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{confirmAction.message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
