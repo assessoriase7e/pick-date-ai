@@ -3,18 +3,25 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
 import { AppointmentDetails } from "./appointment-details";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SendNotificationModal } from "./send-notification-modal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { AppointmentFullData } from "@/types/calendar";
 import { Collaborator } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { Toggle } from "@/components/ui/toggle";
-import { CalendarClock, History } from "lucide-react";
+import { CalendarClock, History, MessageCircle } from "lucide-react";
+import { checkConnectedInstances } from "@/actions/agents/evolution/check-connected-instances";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AppointmentsDataTableProps {
   columns: ColumnDef<any>[];
@@ -35,11 +42,11 @@ export function AppointmentsDataTable({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(
-    null
-  );
+  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInstanceAlert, setShowInstanceAlert] = useState(false);
 
   // Recuperar parâmetros da URL
   const initialSearch = searchParams.get("search") || "";
@@ -48,12 +55,9 @@ export function AppointmentsDataTable({
 
   // Estados locais
   const [searchTerm, setSearchTerm] = useState(initialSearch);
-  const [collaboratorFilter, setCollaboratorFilter] =
-    useState(initialCollaborator);
+  const [collaboratorFilter, setCollaboratorFilter] = useState(initialCollaborator);
   const [timeFilter, setTimeFilter] = useState(initialTimeFilter);
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "startTime", desc: timeFilter === "past" },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "startTime", desc: timeFilter === "past" }]);
 
   // Efeito para desativar o loading quando o componente for recarregado
   useEffect(() => {
@@ -75,12 +79,36 @@ export function AppointmentsDataTable({
     setSelectedAppointment(null);
   };
 
+  // Função para verificar instância e abrir modal
+  const handleNotificationClick = async () => {
+    try {
+      const result = await checkConnectedInstances();
+      
+      if (!result.success) {
+        toast.error(result.error || "Erro ao verificar instâncias");
+        return;
+      }
+
+      if (!result.hasConnectedInstance) {
+        setShowInstanceAlert(true);
+        return;
+      }
+
+      // Se há instância conectada, abrir o modal
+      setIsNotificationModalOpen(true);
+    } catch (error) {
+      toast.error("Erro inesperado ao verificar instâncias");
+    }
+  };
+
+  // Função para redirecionar para a página de agentes
+  const handleGoToAgents = () => {
+    setShowInstanceAlert(false);
+    router.push("/agents");
+  };
+
   // Função para atualizar os parâmetros da URL
-  const updateUrlParams = (
-    search: string,
-    collaborator: string,
-    timeFilter: string
-  ) => {
+  const updateUrlParams = (search: string, collaborator: string, timeFilter: string) => {
     const params = new URLSearchParams();
 
     if (search) {
@@ -118,9 +146,7 @@ export function AppointmentsDataTable({
 
       if (button) {
         const appointmentId = button.getAttribute("data-appointment-id");
-        const appointment = appointments.find(
-          (item) => item.id === Number(appointmentId)
-        );
+        const appointment = appointments.find((item) => item.id === Number(appointmentId));
 
         if (appointment) {
           handleDetailsClick(appointment);
@@ -141,6 +167,13 @@ export function AppointmentsDataTable({
 
   const headerContent = (
     <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
+      <div className="flex gap-2">
+        <Button onClick={handleNotificationClick} className="flex items-center gap-2" variant="outline">
+          <MessageCircle className="h-4 w-4" />
+          Emitir aviso
+        </Button>
+      </div>
+
       <Toggle
         pressed={timeFilter === "future"}
         onPressedChange={(pressed) => {
@@ -163,10 +196,7 @@ export function AppointmentsDataTable({
         )}
       </Toggle>
 
-      <Select
-        value={collaboratorFilter}
-        onValueChange={handleCollaboratorChange}
-      >
+      <Select value={collaboratorFilter} onValueChange={handleCollaboratorChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Filtrar por profissional" />
         </SelectTrigger>
@@ -197,11 +227,30 @@ export function AppointmentsDataTable({
         setIsLoading={setIsLoading}
       />
 
-      <AppointmentDetails
-        appointment={selectedAppointment}
-        isOpen={isDetailsOpen}
-        onClose={closeDetails}
-      />
+      <AppointmentDetails appointment={selectedAppointment} isOpen={isDetailsOpen} onClose={closeDetails} />
+
+      <SendNotificationModal open={isNotificationModalOpen} onOpenChange={setIsNotificationModalOpen} />
+
+      {/* Alert Dialog para instância não conectada */}
+      <AlertDialog open={showInstanceAlert} onOpenChange={setShowInstanceAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>WhatsApp não conectado</AlertDialogTitle>
+            <AlertDialogDescription>
+              Para enviar notificações via WhatsApp, você precisa ter uma instância conectada. 
+              Configure e conecte uma instância na seção "Agentes" antes de continuar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowInstanceAlert(false)}>
+              Fechar
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleGoToAgents} className="bg-primary">
+              Ir para Agentes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

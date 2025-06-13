@@ -8,21 +8,14 @@ const evoAxios = Axios.create({
 });
 
 export const evolution = () => {
-  const sendMessage = async ({
-    instance,
-    text,
-    number,
-  }: {
-    instance: string;
-    text: string;
-    number: string;
-  }) => {
+  const sendMessage = async ({ instance, text, number }: { instance: string; text: string; number: string }) => {
     try {
       return await evoAxios.post(`/message/sendText/${instance}`, {
         text,
         number,
       });
     } catch (error) {
+      console.log(error);
       throw new Error("Error when send message via evolution");
     }
   };
