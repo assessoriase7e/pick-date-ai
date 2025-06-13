@@ -194,9 +194,9 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-4 relative">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-2 w-full">
         {enableSearch && (
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={searchPlaceholder}

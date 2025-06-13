@@ -1,30 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, Search, ArrowUpDown } from "lucide-react";
+import { PlusCircle, FileText, Pencil, Trash2 } from "lucide-react";
 import { CollaboratorModal } from "./collaborator-modal";
 import { deleteCollaborator } from "@/actions/collaborators/delete-collaborator";
-import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Pagination } from "../ui/pagination";
 import { useRouter, usePathname } from "next/navigation";
 import { Service } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { CollaboratorServicesDialog } from "./collaborator-services-dialog";
-import { Input } from "@/components/ui/input";
 import { ServiceFullData } from "@/types/service";
 import { useDebounce } from "@/hooks/use-debounce";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import IsTableLoading from "../isTableLoading";
 import Link from "next/link";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -52,25 +42,16 @@ export function CollaboratorsSection({
   const router = useRouter();
   const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCollaborator, setSelectedCollaborator] =
-    useState<CollaboratorFullData | null>(null);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<CollaboratorFullData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [isPageChanging, setIsPageChanging] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState(
-    initialFilters?.searchTerm || ""
-  );
-  const [serviceFilter, setServiceFilter] = useState(
-    initialFilters?.serviceFilter || "all"
-  );
-  const [sortField, setSortField] = useState<SortField>(
-    initialFilters?.sortField || "name"
-  );
-  const [sortDirection, setSortDirection] = useState<SortDirection>(
-    initialFilters?.sortDirection || "asc"
-  );
+  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || "");
+  const [serviceFilter, setServiceFilter] = useState(initialFilters?.serviceFilter || "all");
+  const [sortField, setSortField] = useState<SortField>(initialFilters?.sortField || "name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(initialFilters?.sortDirection || "asc");
   const [pagination, setPagination] = useState(initialPagination);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -147,11 +128,6 @@ export function CollaboratorsSection({
       setIsDeleting(false);
     }
   };
-
-  const handlePageChange = (page: number) => {
-    updateUrl(page);
-  };
-
   // Efeito para detectar quando a página foi totalmente carregada
   useEffect(() => {
     if (isPageChanging) {
@@ -159,183 +135,78 @@ export function CollaboratorsSection({
     }
   }, [collaborators]);
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
   };
 
-  const handleShowServices = (collaborator: CollaboratorFullData) => {
-    const services = collaborator?.ServiceCollaborator?.map((sc) => sc.service);
-    setSelectedServices(services || []);
-    setIsServicesDialogOpen(true);
-  };
+  // Definir as colunas da tabela
+  const columns: ColumnDef<CollaboratorFullData>[] = [
+    {
+      id: "name",
+      header: "Nome",
+      accessorKey: "name",
+      cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+    },
+    {
+      id: "phone",
+      header: "Telefone",
+      accessorKey: "phone",
+      cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+    },
+    {
+      id: "profession",
+      header: "Profissão",
+      accessorKey: "profession",
+      cell: ({ row }) => <div>{row.getValue("profession")}</div>,
+    },
+    {
+      id: "actions",
+      header: "Ações",
+      cell: ({ row }) => {
+        const collaborator = row.original;
+        return (
+          <div className="flex space-x-2">
+            <Button variant="outline" size="icon" asChild>
+              <Link href={`/collaborators/${collaborator.id}/services`}>
+                <FileText className="h-4 w-4" />
+              </Link>
+            </Button>
 
-  const SortableHeader = ({
-    field,
-    label,
-  }: {
-    field: SortField;
-    label: string;
-  }) => (
-    <TableHead
-      className="cursor-pointer hover:bg-muted/50"
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center">
-        {label}
-        {sortField === field && (
-          <ArrowUpDown
-            className={`ml-1 h-4 w-4 ${
-              sortDirection === "desc" ? "rotate-180" : ""
-            }`}
-          />
-        )}
-      </div>
-    </TableHead>
-  );
+            <Button variant="outline" size="icon" onClick={() => handleEdit(collaborator)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="text-destructive"
+              onClick={() => handleDelete(collaborator.id)}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-4 relative">
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-lg">
-          <div className="relative w-full">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar profissionais..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Profissional
-        </Button>
-      </div>
-
-      {/* Visualização Desktop */}
-      <div className="rounded-md border hidden md:block relative">
-        <IsTableLoading isPageChanging={isPageChanging} />
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortableHeader field="name" label="Nome" />
-              <SortableHeader field="phone" label="Telefone" />
-              <SortableHeader field="profession" label="Profissão" />
-              <TableHead className="w-[150px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {collaborators.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">
-                  Nenhum profissional encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              collaborators.map((collaborator) => (
-                <TableRow key={collaborator.id}>
-                  <TableCell className="font-medium">
-                    {collaborator.name}
-                  </TableCell>
-                  <TableCell>{collaborator.phone}</TableCell>
-                  <TableCell>{collaborator.profession}</TableCell>
-
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="icon" asChild>
-                        <Link
-                          href={`/collaborators/${collaborator.id}/services`}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Link>
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(collaborator)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => handleDelete(collaborator.id)}
-                        disabled={isDeleting}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Visualização Mobile */}
-      <div className="md:hidden space-y-4">
-        {collaborators.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground rounded-md border">
-            Nenhum profissional encontrado
-          </div>
-        ) : (
-          collaborators.map((collaborator) => (
-            <div
-              key={collaborator.id}
-              className="rounded-md border p-4 space-y-3"
-            >
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <h3 className="font-medium">{collaborator.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {collaborator.phone}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {collaborator.profession}
-                  </p>
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEdit(collaborator)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => handleDelete(collaborator.id)}
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" asChild>
-                    <Link href={`/collaborators/${collaborator.id}/services`}>
-                      <FileText className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <Pagination
-        currentPage={pagination.currentPage}
-        totalPages={pagination.totalPages}
-        onPageChange={handlePageChange}
+      <DataTable
+        columns={columns}
+        data={collaborators}
+        sortableColumns={["name", "phone", "profession"]}
+        enableSearch={true}
+        searchPlaceholder="Buscar profissionais..."
+        pagination={pagination}
+        onSearch={handleSearch}
+        isloading={isPageChanging}
+        headerContent={
+          <Button onClick={() => setIsModalOpen(true)} className="w-full lg:w-min">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Profissional
+          </Button>
+        }
       />
 
       <CollaboratorModal
