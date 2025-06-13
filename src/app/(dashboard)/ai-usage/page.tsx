@@ -13,11 +13,7 @@ type AIUsageSearchParamsProps = {
   [key: string]: string | string[] | undefined;
 };
 
-export default async function AIUsagePage({
-  searchParams,
-}: {
-  searchParams: Promise<AIUsageSearchParamsProps>;
-}) {
+export default async function AIUsagePage({ searchParams }: { searchParams: Promise<AIUsageSearchParamsProps> }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1");
   const search = params.search || "";
@@ -38,9 +34,14 @@ export default async function AIUsagePage({
   const pagination = historyResult.success ? historyResult.pagination : { totalPages: 1, currentPage: 1 };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Uso da IA</h1>
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Uso da IA</h1>
+          <p className="text-sm text-muted-foreground mt-1 sm:mt-0">
+            Acompanhe o uso e histórico dos atendimentos da IA
+          </p>
+        </div>
       </div>
 
       <Suspense
@@ -60,8 +61,8 @@ export default async function AIUsagePage({
           </div>
         }
       >
-        <AIUsageHistory 
-          history={history} 
+        <AIUsageHistory
+          history={history}
           pagination={pagination}
           currentSearch={search}
           currentSortField={sortField}
