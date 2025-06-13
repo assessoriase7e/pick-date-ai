@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,6 +36,8 @@ Aguardamos você!
 
 Qualquer dúvida, entre em contato conosco.`;
 
+const STORAGE_KEY = "notification_message";
+
 const variables = [
   { label: "Cliente", value: "<client_name>", icon: User },
   { label: "Data", value: "<date>", icon: CalendarIcon },
@@ -51,6 +53,24 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
       message: defaultMessage,
     },
   });
+
+  // Carregar a mensagem do localStorage quando o componente montar
+  useEffect(() => {
+    const savedMessage = localStorage.getItem(STORAGE_KEY);
+    if (savedMessage) {
+      form.setValue("message", savedMessage);
+    }
+  }, [form]);
+
+  // Salvar a mensagem no localStorage quando ela mudar
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (value.message) {
+        localStorage.setItem(STORAGE_KEY, value.message);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const handleDragStart = (variable: string) => {
     setDraggedVariable(variable);
@@ -90,7 +110,8 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
       if (result.success) {
         toast.success(`Avisos enviados com sucesso para ${result.count} agendamentos!`);
         onOpenChange(false);
-        form.reset();
+        // Não resetamos o form aqui para manter a mensagem salva
+        // form.reset();
       } else {
         toast.error(result.error || "Erro ao enviar avisos");
       }

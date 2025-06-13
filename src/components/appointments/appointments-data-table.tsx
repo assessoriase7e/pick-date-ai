@@ -83,7 +83,7 @@ export function AppointmentsDataTable({
   const handleNotificationClick = async () => {
     try {
       const result = await checkConnectedInstances();
-      
+
       if (!result.success) {
         toast.error(result.error || "Erro ao verificar instâncias");
         return;
@@ -181,7 +181,7 @@ export function AppointmentsDataTable({
           setTimeFilter(newTimeFilter);
           updateUrlParams(searchTerm, collaboratorFilter, newTimeFilter);
         }}
-        className="gap-2 border border-border w-full"
+        className="gap-2 border border-border w-full h-9"
       >
         {timeFilter === "future" ? (
           <>
@@ -237,14 +237,12 @@ export function AppointmentsDataTable({
           <AlertDialogHeader>
             <AlertDialogTitle>WhatsApp não conectado</AlertDialogTitle>
             <AlertDialogDescription>
-              Para enviar notificações via WhatsApp, você precisa ter uma instância conectada. 
-              Configure e conecte uma instância na seção "Agentes" antes de continuar.
+              Para enviar notificações via WhatsApp, você precisa ter uma instância conectada. Configure e conecte uma
+              instância na seção "Agentes" antes de continuar.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowInstanceAlert(false)}>
-              Fechar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => setShowInstanceAlert(false)}>Fechar</AlertDialogAction>
             <AlertDialogAction onClick={handleGoToAgents} className="bg-primary">
               Ir para Agentes
             </AlertDialogAction>
