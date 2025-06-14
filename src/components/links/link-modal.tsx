@@ -19,8 +19,10 @@ interface LinkModalProps {
 export function LinkModal({ isOpen, onClose, title, description, initialData, onSubmit }: LinkModalProps) {
   return (
     <ConfirmationDialog open={isOpen} onOpenChange={onClose} title={title} showFooter={false}>
-      <p className="text-sm text-muted-foreground mb-6">{description}</p>
-      <LinkForm initialData={initialData} onSubmit={onSubmit} onCancel={onClose} />
+      <div className="h-full flex flex-col items-center justify-center w-full">
+        <p className="text-sm text-muted-foreground mb-6">{description}</p>
+        <LinkForm initialData={initialData} onSubmit={onSubmit} onCancel={onClose} />
+      </div>
     </ConfirmationDialog>
   );
 }

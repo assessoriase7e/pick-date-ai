@@ -4,14 +4,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -56,7 +49,7 @@ export function LinkForm({ initialData, onSubmit, onCancel }: LinkFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 w-full">
         <FormField
           control={form.control}
           name="url"
@@ -92,11 +85,7 @@ export function LinkForm({ initialData, onSubmit, onCancel }: LinkFormProps) {
             <FormItem>
               <FormLabel>Descrição</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Digite a descrição do link"
-                  className="min-h-[100px]"
-                  {...field}
-                />
+                <Textarea placeholder="Digite a descrição do link" className="min-h-[100px]" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,10 +93,7 @@ export function LinkForm({ initialData, onSubmit, onCancel }: LinkFormProps) {
         />
 
         <div className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? "Salvando..." : "Salvar"}
           </Button>
         </div>

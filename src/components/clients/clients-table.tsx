@@ -267,7 +267,9 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
         showFooter={false}
         size="lg"
       >
-        <ClientForm onSuccess={handleClientFormSuccess} />
+        <div className="h-full flex items-center justify-center">
+          <ClientForm onSuccess={handleClientFormSuccess} />
+        </div>
       </ConfirmationDialog>
 
       <ConfirmationDialog

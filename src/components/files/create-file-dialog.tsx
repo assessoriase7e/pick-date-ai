@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createFile } from "@/actions/files/create";
 import { Button } from "@/components/ui/button";
@@ -89,14 +89,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
 
   const customFooter = (
     <>
-      <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-        Cancelar
-      </Button>
-      <Button 
-        type="submit" 
-        disabled={isSubmitting || !fileData.fileUrl}
-        onClick={handleSubmit}
-      >
+      <Button type="submit" disabled={isSubmitting || !fileData.fileUrl} onClick={handleSubmit}>
         {isSubmitting ? "Criando..." : "Criar"}
       </Button>
     </>
@@ -112,7 +105,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
       showFooter={true}
       customFooter={customFooter}
     >
-      <div className="space-y-6">
+      <div className="space-y-6 flex items-center justify-center h-full">
         <div className="space-y-4">
           <div>
             <Label htmlFor="file">Arquivo</Label>

@@ -138,8 +138,8 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <LinkIcon className="mr-2 h-4 w-4" /> Novo link
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full md:w-min">
+          <LinkIcon className="mr-2 h-4 w-4 " /> Novo link
         </Button>
       </div>
 
