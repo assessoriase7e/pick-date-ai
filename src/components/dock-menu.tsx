@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Menu } from "lucide-react";
+import { Menu, SquareChartGantt } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -12,6 +12,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { Dock, DockIcon } from "./magicui/dock";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DockDropdownMenu, useDropdownMenuItems } from "./dock-dropdown-menu";
 
 export function DockMenu() {
   const { user } = useUser();
@@ -32,6 +33,13 @@ export function DockMenu() {
   if (!user) {
     return null;
   }
+
+  // Páginas que devem ficar no dropdown de configurações
+  const configDropdownPaths = ["/config", "/profile", "/links", "/agents", "/files"];
+  const configDropdownItems = useDropdownMenuItems(routes, configDropdownPaths);
+
+  // Páginas que ficam diretamente na dock
+  const mainRoutes = routes.filter((route) => !configDropdownPaths.includes(route.href));
 
   const MobileMenu = () => (
     <Sheet>
@@ -65,13 +73,13 @@ export function DockMenu() {
 
   const DesktopDock = () => (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-      <Dock className="bg-background/80 border border-border shadow-lg">
+      <Dock className="bg-background/80 border border-border shadow-lg" iconMagnification={40} iconDistance={40}>
         <DockIcon>
           <Logo className="h-8 w-8" />
         </DockIcon>
         <Separator orientation="vertical" className="h-8" />
 
-        {routes.map((item) => (
+        {mainRoutes.map((item) => (
           <DockIcon key={item.href} className={item.isActive ? "bg-primary text-primary-foreground" : ""}>
             <TooltipProvider>
               <Tooltip delayDuration={0}>
@@ -89,6 +97,19 @@ export function DockMenu() {
         ))}
 
         <Separator orientation="vertical" className="h-8" />
+
+        {/* Dropdown Menu para Configurações */}
+        <DockIcon>
+          <DockDropdownMenu
+            triggerIcon={SquareChartGantt}
+            triggerTooltip="Outros"
+            items={configDropdownItems}
+            groupLabel="Outras Opções"
+            side="top"
+            align="center"
+          />
+        </DockIcon>
+
         <DockIcon>
           <ThemeToggle />
         </DockIcon>
