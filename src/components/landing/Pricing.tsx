@@ -12,6 +12,7 @@ const PRICING_TEXTS = {
     "Múltiplos colaboradores",
     "Serviços ilimitados",
     "Lembrete de agendamento",
+    "Perguntas e Respostas via IA",
     "Calendário compartilhado",
     "Envio de arquivos via IA",
     "Envio de links via IA",
