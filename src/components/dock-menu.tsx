@@ -35,7 +35,7 @@ export function DockMenu() {
   }
 
   // Páginas que devem ficar no dropdown de configurações
-  const configDropdownPaths = ["/config", "/profile", "/links", "/agents", "/files"];
+  const configDropdownPaths = ["/config", "/profile", "/links", "/agents", "/files", "/questions"];
   const configDropdownItems = useDropdownMenuItems(routes, configDropdownPaths);
 
   // Páginas que ficam diretamente na dock

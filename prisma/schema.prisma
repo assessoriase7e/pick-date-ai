@@ -38,6 +38,7 @@ model User {
   services           Service[]
   whatsapp           Whatsapp?
   aiUsages           AIUsage[]           
+  questionTexts      QuestionText[]      // Adicionar esta linha
 
   @@map("user")
 }
@@ -427,4 +428,17 @@ model AIUsage {
   @@index([userId, date]) // Índice para consultas por usuário e data
   @@index([clientPhone])  // Índice para consultas por telefone do cliente
   @@map("aiusage")
+}
+
+model QuestionText {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  content     String   @db.Text
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("questiontext")
 }
