@@ -36,11 +36,7 @@ type ReportsSearchParamsProps = {
   [key: string]: string | string[] | undefined;
 };
 
-export default async function ReportsPage({
-  searchParams,
-}: {
-  searchParams: Promise<ReportsSearchParamsProps>;
-}) {
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<ReportsSearchParamsProps> }) {
   const user = await currentUser();
   const dashboardResult = await getDashboardData();
   const dashboardData = dashboardResult.success
@@ -87,28 +83,17 @@ export default async function ReportsPage({
         .toDate()
     : moment().add(1, "month").endOf("day").toDate();
 
-  const revenueResult = await getRevenueByPeriod(
-    formatedFromRevenue,
-    formatedToRevenue
-  );
+  const revenueResult = await getRevenueByPeriod(formatedFromRevenue, formatedToRevenue);
   const revenueData = revenueResult.success ? revenueResult.data : [];
 
   const monthlyRevenueResult =
     fromMonthlyRevenue || toMonthlyRevenue
-      ? await getRevenueByPeriod(
-          formatedFromMonthlyRevenue,
-          formatedToMonthlyRevenue
-        )
+      ? await getRevenueByPeriod(formatedFromMonthlyRevenue, formatedToMonthlyRevenue)
       : revenueResult;
 
-  const monthlyRevenueData = monthlyRevenueResult.success
-    ? monthlyRevenueResult.monthlyData
-    : [];
+  const monthlyRevenueData = monthlyRevenueResult.success ? monthlyRevenueResult.monthlyData : [];
 
-  const periodRevenue = revenueData.reduce(
-    (total, item) => total + item.revenue,
-    0
-  );
+  const periodRevenue = revenueData.reduce((total, item) => total + item.revenue, 0);
 
   const formatedFromCollab = fromCollab
     ? moment(fromCollab as string)
@@ -122,9 +107,7 @@ export default async function ReportsPage({
     : today;
 
   const collaboratorsResult = await getCollaborators();
-  const collaborators = collaboratorsResult.success
-    ? collaboratorsResult.data
-    : [];
+  const collaborators = collaboratorsResult.success ? collaboratorsResult.data : [];
 
   const commissionResult = await getCollaboratorCommission(
     Number(collaboratorId),
@@ -138,9 +121,7 @@ export default async function ReportsPage({
   const topClients = topClientsResult.success ? topClientsResult.data : [];
 
   const topClientsBySpendingResult = await getTopClientsBySpending(5);
-  const topClientsBySpending = topClientsBySpendingResult.success
-    ? topClientsBySpendingResult.data
-    : [];
+  const topClientsBySpending = topClientsBySpendingResult.success ? topClientsBySpendingResult.data : [];
 
   // Datas para agendamentos cancelados
   const formatedFromCanceled = fromCanceled
@@ -167,21 +148,11 @@ export default async function ReportsPage({
     : moment().add(1, "M").endOf("day").toDate();
 
   // Buscar dados de agendamentos cancelados e agendados
-  const canceledAppointmentsResult = await getCanceledAppointments(
-    formatedFromCanceled,
-    formatedToCanceled
-  );
-  const canceledAppointments = canceledAppointmentsResult.success
-    ? canceledAppointmentsResult.data
-    : [];
+  const canceledAppointmentsResult = await getCanceledAppointments(formatedFromCanceled, formatedToCanceled);
+  const canceledAppointments = canceledAppointmentsResult.success ? canceledAppointmentsResult.data : [];
 
-  const scheduledAppointmentsResult = await getScheduledAppointments(
-    formatedFromScheduled,
-    formatedToScheduled
-  );
-  const scheduledAppointments = scheduledAppointmentsResult.success
-    ? scheduledAppointmentsResult.data
-    : [];
+  const scheduledAppointmentsResult = await getScheduledAppointments(formatedFromScheduled, formatedToScheduled);
+  const scheduledAppointments = scheduledAppointmentsResult.success ? scheduledAppointmentsResult.data : [];
 
   // Buscar aniversariantes do mês atual
   const currentMonth = moment().month() + 1;
@@ -211,9 +182,7 @@ export default async function ReportsPage({
     <div className="space-y-6 border border-border border-dashed p-5 rounded-lg bg-card">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-        <p className="text-muted-foreground">
-          Visualize os dados e métricas do seu negócio.
-        </p>
+        <p className="text-muted-foreground">Visualize os dados e métricas do seu negócio.</p>
       </div>
 
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
@@ -231,8 +200,8 @@ export default async function ReportsPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="flex flex-col lg:flex-row gap-5 col-span-1 lg:col-span-4">
           <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-4 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
                 <Suspense fallback={<LoaderCircle className="animate-spin" />}>
                   <MonthlyRevenueChart
                     data={monthlyRevenueData}
@@ -270,10 +239,7 @@ export default async function ReportsPage({
         </Suspense>
 
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <TopClients
-            topClientsByServices={topClients}
-            topClientsBySpending={topClientsBySpending}
-          />
+          <TopClients topClientsByServices={topClients} topClientsBySpending={topClientsBySpending} />
         </Suspense>
       </div>
 

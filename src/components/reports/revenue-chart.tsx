@@ -8,13 +8,7 @@ import moment from "moment";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRevenueByPeriod } from "@/actions/reports/getRevenueByPeriod";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 interface RevenueChartProps {
   data: any[];
@@ -23,12 +17,7 @@ interface RevenueChartProps {
   initialToDate?: Date;
 }
 
-export function RevenueChart({
-  data: initialData,
-  config,
-  initialFromDate,
-  initialToDate,
-}: RevenueChartProps) {
+export function RevenueChart({ data: initialData, config, initialFromDate, initialToDate }: RevenueChartProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState(initialData);
@@ -72,18 +61,13 @@ export function RevenueChart({
   }, []);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader className="lg:flex-row justify-between gap-5">
         <div>
           <CardTitle>Receita Diária</CardTitle>
           <CardDescription>Gráfico de receita por dia.</CardDescription>
         </div>
-        <DatePickerWithRange
-          date={dateRange}
-          onDateChange={handleDateChange}
-          fromKey="fromRevenue"
-          toKey="toRevenue"
-        />
+        <DatePickerWithRange date={dateRange} onDateChange={handleDateChange} fromKey="fromRevenue" toKey="toRevenue" />
       </CardHeader>
       <CardContent>
         <div className="h-60">
