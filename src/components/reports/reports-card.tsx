@@ -4,7 +4,7 @@ import { DateRange } from "react-day-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import { DatePickerWithRange } from "../ui/date-picker-range";
 import { LucideIcon } from "lucide-react";
 
@@ -17,20 +17,12 @@ interface ReportsCardProps {
   onDateChange?: (range: DateRange | undefined) => void;
 }
 
-export function ReportsCard({
-  title,
-  value,
-  icon: Icon,
-  formatter,
-  showDatePicker,
-  onDateChange,
-}: ReportsCardProps) {
+export function ReportsCard({ title, value, icon: Icon, formatter, showDatePicker, onDateChange }: ReportsCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const router = useRouter();
 
-  const displayValue =
-    typeof value === "number" && formatter ? formatter(value) : value;
+  const displayValue = typeof value === "number" && formatter ? formatter(value) : value;
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -64,19 +56,19 @@ export function ReportsCard({
             >
               <Calendar className="h-4 w-4" />
             </Button>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Selecione o período</DialogTitle>
-                </DialogHeader>
-                <DatePickerWithRange
-                  date={dateRange}
-                  onDateChange={handleDateChange}
-                  fromKey="fromRevenue"
-                  toKey="toRevenue"
-                />
-              </DialogContent>
-            </Dialog>
+            <ConfirmationDialog
+              open={isModalOpen}
+              onOpenChange={setIsModalOpen}
+              title="Selecione o período"
+              showFooter={false}
+            >
+              <DatePickerWithRange
+                date={dateRange}
+                onDateChange={handleDateChange}
+                fromKey="fromRevenue"
+                toKey="toRevenue"
+              />
+            </ConfirmationDialog>
           </>
         )}
       </CardContent>

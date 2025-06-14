@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { CollaboratorForm } from "./collaborator-form";
 
 interface CollaboratorModalProps {
@@ -26,14 +20,17 @@ export function CollaboratorModal({
     : "Adicione um novo profissional ao sistema.";
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] overflow-y-auto h-svh lg:h-[90svh]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <CollaboratorForm initialData={initialData} onSuccess={onClose} />
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title={title}
+      description={description}
+      confirmText=""
+      cancelText=""
+      showFooter={false}
+      size="lg"
+    >
+      <CollaboratorForm initialData={initialData} onSuccess={onClose} />
+    </ConfirmationDialog>
   );
 }

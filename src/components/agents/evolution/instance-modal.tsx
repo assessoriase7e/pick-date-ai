@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { InstanceForm } from "./instance-form";
 
 interface InstanceModalProps {
@@ -17,32 +11,37 @@ interface InstanceModalProps {
   companyName?: string;
 }
 
-export function InstanceModal({
-  isOpen,
-  onClose,
-  initialData,
-  profilePhone,
-  companyName,
+export function InstanceModal({ 
+  isOpen, 
+  onClose, 
+  initialData, 
+  profilePhone, 
+  companyName 
 }: InstanceModalProps) {
   const title = initialData ? "Editar Instância" : "Nova Instância";
-  const description = initialData
-    ? "Edite os detalhes da instância do WhatsApp"
-    : "Crie uma nova instância do WhatsApp";
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title={title}
+      showFooter={false}
+      size="md"
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {initialData
+            ? "Edite os detalhes da instância do WhatsApp"
+            : "Crie uma nova instância do WhatsApp"}
+        </p>
+        
         <InstanceForm
           initialData={initialData}
           onSuccess={onClose}
           profilePhone={profilePhone}
           companyName={companyName}
         />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ConfirmationDialog>
   );
 }

@@ -2,18 +2,7 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Calendar, User, Scissors, ClipboardList } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -148,27 +137,21 @@ export function AppointmentDetails({
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Detalhes do Agendamento</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="h-[80vh] px-4">{content}</ScrollArea>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Detalhes do Agendamento</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="max-h-[70vh]">{content}</ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Detalhes do Agendamento"
+      confirmText="Fechar"
+      cancelText=""
+      onConfirm={onClose}
+      variant="default"
+      size="md"
+      showFooter={true}
+    >
+      <ScrollArea className={isMobile ? "h-[60vh]" : "max-h-[70vh]"}>
+        {content}
+      </ScrollArea>
+    </ConfirmationDialog>
   );
 }

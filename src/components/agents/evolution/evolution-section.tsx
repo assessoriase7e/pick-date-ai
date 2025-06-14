@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash, Bolt, QrCode, RefreshCw } from "lucide-react";
 import { InstanceModal } from "./instance-modal";
@@ -16,14 +10,8 @@ import { QRCodeModal } from "./qrcode-modal";
 import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
 import { EvolutionInstance } from "@prisma/client";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface EvolutionSectionProps {
   profilePhone?: string;
@@ -31,32 +19,30 @@ interface EvolutionSectionProps {
   companyName?: string;
 }
 
-export function EvolutionSection({
-  profilePhone,
-  instances,
-  companyName,
-}: EvolutionSectionProps) {
+export function EvolutionSection({ profilePhone, instances, companyName }: EvolutionSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const [selectedInstance, setSelectedInstance] =
-    useState<EvolutionInstance>(null);
+  const [selectedInstance, setSelectedInstance] = useState<EvolutionInstance>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [instanceToDelete, setInstanceToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     if (!instanceToDelete) return;
+    setIsDeleting(true);
     try {
       const result = await deleteInstance(instanceToDelete);
       if (result.success) {
         toast.success("Instância excluída com sucesso");
+        setDeleteDialogOpen(false);
+        setInstanceToDelete(null);
       } else {
         toast.error(result.error || "Erro ao excluir instância");
       }
     } catch (error) {
       toast.error("Ocorreu um erro ao excluir a instância");
     } finally {
-      setDeleteDialogOpen(false);
-      setInstanceToDelete(null);
+      setIsDeleting(false);
     }
   };
 
@@ -138,11 +124,7 @@ export function EvolutionSection({
                     <Separator orientation="vertical" className="h-10" />
 
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => refreshStatus()}
-                      >
+                      <Button variant="outline" size="icon" onClick={() => refreshStatus()}>
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                       <Button
@@ -155,19 +137,11 @@ export function EvolutionSection({
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(instance)}
-                      >
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(instance)}>
                         <Bolt className="h-4 w-4" />
                       </Button>
                       {instance.status !== "open" && (
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleQRCode(instance)}
-                        >
+                        <Button variant="outline" size="icon" onClick={() => handleQRCode(instance)}>
                           <QrCode className="h-4 w-4" />
                         </Button>
                       )}
@@ -189,31 +163,19 @@ export function EvolutionSection({
       />
 
       {selectedInstance && (
-        <QRCodeModal
-          isOpen={isQRModalOpen}
-          onClose={handleQRModalClose}
-          instance={selectedInstance}
-        />
+        <QRCodeModal isOpen={isQRModalOpen} onClose={handleQRModalClose} instance={selectedInstance} />
       )}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-          </DialogHeader>
-          <div>Tem certeza que deseja excluir esta instância?</div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Confirmar exclusão"
+        description="Tem certeza que deseja excluir esta instância?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="destructive"
+        onConfirm={handleDelete}
+        loading={isDeleting}
+      />
     </Card>
   );
 }

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
@@ -127,91 +127,94 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
     }
   };
 
+  const customFooter = (
+    <>
+      <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        Cancelar
+      </Button>
+      <Button type="submit" disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
+        {isLoading ? "Enviando..." : "Enviar Avisos"}
+      </Button>
+    </>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Emitir Aviso de Agendamento</DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2 ">
-            <Label>Selecione a data</Label>
-            <div className="border rounded-md p-3 w-full flex flex-col items-center justify-center">
-              <Calendar
-                mode="single"
-                selected={form.watch("date")}
-                onSelect={(date) => date && form.setValue("date", date)}
-                locale={ptBR}
-                className="mx-auto"
-              />
-            </div>
-            {form.formState.errors.date && (
-              <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label>Mensagem personalizada</Label>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon" 
-                onClick={resetToDefaultMessage} 
-                title="Restaurar mensagem padrão"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-            <Textarea
-              {...form.register("message")}
-              placeholder="Digite sua mensagem..."
-              className="min-h-[120px] resize-none"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
+    <ConfirmationDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Emitir Aviso de Agendamento"
+      size="lg"
+      showFooter={true}
+      customFooter={customFooter}
+    >
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Label>Selecione a data</Label>
+          <div className="border rounded-md p-3 w-full flex flex-col items-center justify-center">
+            <Calendar
+              mode="single"
+              selected={form.watch("date")}
+              onSelect={(date) => date && form.setValue("date", date)}
+              locale={ptBR}
+              className="mx-auto"
             />
-            {form.formState.errors.message && (
-              <p className="text-sm text-destructive">{form.formState.errors.message.message}</p>
-            )}
           </div>
+          {form.formState.errors.date && (
+            <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
+          )}
+        </div>
 
-          <div className="space-y-3">
-            <Label>Variáveis disponíveis</Label>
-            <div className="flex flex-wrap gap-2">
-              {variables.map((variable) => {
-                const Icon = variable.icon;
-                return (
-                  <Badge
-                    key={variable.value}
-                    variant="secondary"
-                    className="cursor-grab active:cursor-grabbing hover:bg-secondary/80 transition-colors px-3 py-2"
-                    draggable
-                    onDragStart={() => handleDragStart(variable.value)}
-                    onClick={() => insertVariable(variable.value)}
-                  >
-                    <GripVertical className="h-3 w-3 mr-1" />
-                    <Icon className="h-3 w-3 mr-1" />
-                    {variable.label}
-                  </Badge>
-                );
-              })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              💡 Arraste as badges para a mensagem ou clique para inserir no final do texto
-            </p>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label>Mensagem personalizada</Label>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              onClick={resetToDefaultMessage} 
+              title="Restaurar mensagem padrão"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
+          <Textarea
+            {...form.register("message")}
+            placeholder="Digite sua mensagem..."
+            className="min-h-[120px] resize-none"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          />
+          {form.formState.errors.message && (
+            <p className="text-sm text-destructive">{form.formState.errors.message.message}</p>
+          )}
+        </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Enviando..." : "Enviar Avisos"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-3">
+          <Label>Variáveis disponíveis</Label>
+          <div className="flex flex-wrap gap-2">
+            {variables.map((variable) => {
+              const Icon = variable.icon;
+              return (
+                <Badge
+                  key={variable.value}
+                  variant="secondary"
+                  className="cursor-grab active:cursor-grabbing hover:bg-secondary/80 transition-colors px-3 py-2"
+                  draggable
+                  onDragStart={() => handleDragStart(variable.value)}
+                  onClick={() => insertVariable(variable.value)}
+                >
+                  <GripVertical className="h-3 w-3 mr-1" />
+                  <Icon className="h-3 w-3 mr-1" />
+                  {variable.label}
+                </Badge>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            💡 Arraste as badges para a mensagem ou clique para inserir no final do texto
+          </p>
+        </div>
+      </div>
+    </ConfirmationDialog>
   );
 }

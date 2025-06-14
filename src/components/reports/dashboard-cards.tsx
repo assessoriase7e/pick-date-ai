@@ -8,12 +8,7 @@ import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BirthdayCard } from "./birthday-card";
 
 interface DashboardCardProps {
@@ -25,20 +20,12 @@ interface DashboardCardProps {
   onDateChange?: (range: DateRange | undefined) => void;
 }
 
-function DashboardCard({
-  title,
-  value,
-  icon: Icon,
-  formatter,
-  showDatePicker,
-  onDateChange,
-}: DashboardCardProps) {
+function DashboardCard({ title, value, icon: Icon, formatter, showDatePicker, onDateChange }: DashboardCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const router = useRouter();
 
-  const displayValue =
-    typeof value === "number" && formatter ? formatter(value) : value;
+  const displayValue = typeof value === "number" && formatter ? formatter(value) : value;
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -72,19 +59,19 @@ function DashboardCard({
             >
               <Calendar className="h-4 w-4" />
             </Button>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Selecione o período</DialogTitle>
-                </DialogHeader>
-                <DatePickerWithRange
-                  date={dateRange}
-                  onDateChange={handleDateChange}
-                  fromKey="fromRevenue"
-                  toKey="toRevenue"
-                />
-              </DialogContent>
-            </Dialog>
+            <ConfirmationDialog
+              open={isModalOpen}
+              onOpenChange={setIsModalOpen}
+              title="Selecione o período"
+              showFooter={false}
+            >
+              <DatePickerWithRange
+                date={dateRange}
+                onDateChange={handleDateChange}
+                fromKey="fromRevenue"
+                toKey="toRevenue"
+              />
+            </ConfirmationDialog>
           </>
         )}
       </CardContent>
@@ -132,28 +119,14 @@ export function DashboardCards({
     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <DashboardCard title="Clientes Atuais" value={clientCount} icon={Users} />
 
-      <DashboardCard
-        title="Agendamentos Realizados"
-        value={completedAppointmentsCount}
-        icon={CalendarCheck}
-      />
+      <DashboardCard title="Agendamentos Realizados" value={completedAppointmentsCount} icon={CalendarCheck} />
+
+      <DashboardCard title="Agendamentos Futuros" value={futureAppointmentsCount} icon={Calendar} />
+
+      <DashboardCard title="Agendamentos Cancelados" value={canceledAppointmentsCount} icon={Calendar} />
 
       <DashboardCard
-        title="Agendamentos Futuros"
-        value={futureAppointmentsCount}
-        icon={Calendar}
-      />
-
-      <DashboardCard
-        title="Agendamentos Cancelados"
-        value={canceledAppointmentsCount}
-        icon={Calendar}
-      />
-
-      <DashboardCard
-        title={
-          fromRevenue && toRevenue ? "Faturamento Período" : "Faturamento Hoje"
-        }
+        title={fromRevenue && toRevenue ? "Faturamento Período" : "Faturamento Hoje"}
         value={fromRevenue && toRevenue ? periodRevenue || 0 : todayRevenue}
         icon={DollarSign}
         formatter={currencyFormatter}

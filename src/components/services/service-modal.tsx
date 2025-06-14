@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ServiceForm } from "./service-form";
 
 interface ServiceModalProps {
@@ -28,18 +22,21 @@ export function ServiceModal({
     : "Adicione um novo serviço ao sistema.";
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90svh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title={title}
+      size="lg"
+      showFooter={false}
+    >
+      <p className="text-sm text-muted-foreground mb-6">{description}</p>
+      <div className="max-h-[60vh] overflow-y-auto">
         <ServiceForm
           initialData={initialData}
           onSuccess={onClose}
           collaborators={collaborators}
         />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ConfirmationDialog>
   );
 }

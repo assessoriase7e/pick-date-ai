@@ -16,12 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import ClientForm from "./client-form";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Client } from "@prisma/client";
@@ -38,10 +33,7 @@ interface ClientsTableProps {
   };
 }
 
-export default function ClientsTable({
-  clients,
-  pagination = { totalPages: 1, currentPage: 1 },
-}: ClientsTableProps) {
+export default function ClientsTable({ clients, pagination = { totalPages: 1, currentPage: 1 } }: ClientsTableProps) {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,19 +163,11 @@ export default function ClientsTable({
               </Button>
             </Link>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleEditClick(client)}
-            >
+            <Button variant="outline" size="icon" onClick={() => handleEditClick(client)}>
               <Edit className="h-4 w-4" />
             </Button>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleDeleteClick(client.id)}
-            >
+            <Button variant="outline" size="icon" onClick={() => handleDeleteClick(client.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -193,10 +177,7 @@ export default function ClientsTable({
   ];
 
   const headerContent = (
-    <Button
-      onClick={() => setIsNewClientDialogOpen(true)}
-      className="w-full lg:max-w-xs"
-    >
+    <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:max-w-xs">
       <Users className="mr-2 h-4 w-4" />
       Novo Cliente
     </Button>
@@ -277,49 +258,40 @@ export default function ClientsTable({
         }}
       />
 
-      <Dialog
+      <ConfirmationDialog
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
+        title="Novo Cliente"
+        confirmText=""
+        cancelText=""
+        showFooter={false}
+        size="lg"
       >
-        <DialogContent className="w-full lg:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Novo Cliente</DialogTitle>
-          </DialogHeader>
-          <ClientForm onSuccess={handleClientFormSuccess} />
-        </DialogContent>
-      </Dialog>
+        <ClientForm onSuccess={handleClientFormSuccess} />
+      </ConfirmationDialog>
 
-      <Dialog
+      <ConfirmationDialog
         open={isEditClientDialogOpen}
         onOpenChange={setIsEditClientDialogOpen}
+        title="Editar Cliente"
+        confirmText=""
+        cancelText=""
+        showFooter={false}
+        size="lg"
       >
-        <DialogContent className="w-full lg::max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Editar Cliente</DialogTitle>
-          </DialogHeader>
-          <ClientForm
-            initialData={clientToEdit}
-            onSuccess={handleClientFormSuccess}
-          />
-        </DialogContent>
-      </Dialog>
+        <ClientForm initialData={clientToEdit} onSuccess={handleClientFormSuccess} />
+      </ConfirmationDialog>
 
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este cliente? Esta ação não pode
-              ser desfeita.
+              Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>
-              Cancelar
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={isDeleting}
