@@ -7,8 +7,9 @@ import Orb from "../ui/orb-animation";
 const HERO_TEXTS = {
   title: "Pick Date AI",
   description: "Revolucione seu agendamento com inteligência artificial.",
+  freeTrialText: "3 dias grátis para testar!",
   buttons: {
-    startFree: "Comece",
+    startFree: "Teste 3 Dias Grátis",
     seeFeatures: "Recursos",
     accessDashboard: "Dashboard",
   },
@@ -17,9 +18,11 @@ const HERO_TEXTS = {
 export function Hero() {
   return (
     <div className="overflow-hidden">
-      <div className="absolute  -top-40 right-0 -z-10 transform-gpu overflow-hidden blur-3xl">
+      <div className="absolute -top-40 right-0 -z-10 transform-gpu overflow-hidden blur-3xl">
         <div className="relative right-0 aspect-[1155/678] w-[800px] translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary to-secondary opacity-30 sm:w-[72.1875rem]"></div>
       </div>
+
+      <div className="absolute bottom-0 ledt-0 h-44 w-full bg-gradient-to-t from-background to-transparent"></div>
 
       <div className="absolute left-0 bottom-0 -z-10 transform-gpu overflow-hidden blur-3xl">
         <div className="relative left-0 aspect-[1155/678] w-[800px] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary to-secondary opacity-30 sm:w-[72.1875rem]"></div>
@@ -35,9 +38,10 @@ export function Hero() {
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-foreground">
               {HERO_TEXTS.title}
             </h1>
-            <p className="text-lg leading-8 text-foreground max-w-2xl mx-auto">
-              {HERO_TEXTS.description}
-            </p>
+            <p className="text-lg leading-8 text-foreground max-w-2xl mx-auto">{HERO_TEXTS.description}</p>
+            <div className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-2 rounded-full text-lg font-semibold inline-block mb-4">
+              {HERO_TEXTS.freeTrialText}
+            </div>
 
             <div className="flex items-center justify-center gap-x-6">
               <SignedOut>
@@ -55,8 +59,7 @@ export function Hero() {
               <SignedIn>
                 <Link href="/calendar">
                   <Button size="lg" className="px-8">
-                    {HERO_TEXTS.buttons.accessDashboard}{" "}
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    {HERO_TEXTS.buttons.accessDashboard} <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               </SignedIn>

@@ -7,8 +7,9 @@ const CTA_TEXTS = {
   title: "Pronto para revolucionar seus agendamentos?",
   subtitle:
     "Junte-se a centenas de empresas que já transformaram seu atendimento com Pick Date AI",
+  freeTrialText: "Teste grátis por 3 dias - sem compromisso!",
   buttons: {
-    startTrial: "Comece",
+    startTrial: "Teste 3 Dias Grátis",
     learnMore: "Saber Mais",
     accessDashboard: "Começar",
   },
@@ -24,6 +25,11 @@ export function CTA() {
         <p className="mt-6 text-lg leading-8 text-primary-foreground/80">
           {CTA_TEXTS.subtitle}
         </p>
+        <div className="mt-4 mb-6">
+          <span className="bg-white/20 text-primary-foreground px-6 py-3 rounded-full text-lg font-semibold inline-block">
+            {CTA_TEXTS.freeTrialText}
+          </span>
+        </div>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <SignedOut>
             <Link href="/sign-up">

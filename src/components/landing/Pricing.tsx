@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
 import { MovingBorderButton } from "../ui/moving-border";
@@ -7,6 +6,18 @@ import { MovingBorderButton } from "../ui/moving-border";
 const PRICING_TEXTS = {
   title: "Planos Simples e Transparentes",
   subtitle: "Escolha o plano ideal para o seu negócio",
+  freeTrialText: "🎉 Todos os planos incluem 3 dias grátis para testar!",
+  basicFeatures: [
+    "Múltiplos calendários",
+    "Múltiplos colaboradores",
+    "Serviços ilimitados",
+    "Lembrete de agendamento",
+    "Calendário compartilhado",
+    "Edição de agendamento",
+    "Cadastro de clientes",
+    "Histórico de clientes",
+    "Histórico do profissional",
+  ],
   includedFeatures: [
     "Múltiplos calendários",
     "Múltiplos colaboradores",
@@ -30,30 +41,46 @@ const PRICING_TEXTS = {
   ],
   plans: [
     {
-      name: "100 Atendimentos",
+      name: "Agenda Base",
+      description: "Agendamento simples sem IA",
+      price: "R$ 89",
+      period: "/mês",
+      features: [
+        "Agendamento manual",
+        "3 Calendários",
+        "Cadastro de clientes manual",
+        "Histórico de serviços",
+        "Suporte via email",
+        "Demais funções básicas",
+      ],
+      buttonText: "Teste 3 Dias Grátis",
+      isBasic: true,
+    },
+    {
+      name: "100 Atendimentos IA",
       description: "Ideal para pequenos negócios",
       price: "R$ 190",
       period: "/mês",
       features: ["100 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Começar Agora",
+      buttonText: "Teste 3 Dias Grátis",
     },
     {
-      name: "200 Atendimentos",
+      name: "200 Atendimentos IA",
       description: "Para negócios em crescimento",
       price: "R$ 329",
       period: "/mês",
       features: ["200 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Começar Agora",
+      buttonText: "Teste 3 Dias Grátis",
       recommended: true,
       discount: "10% Off",
     },
     {
-      name: "300 Atendimentos",
+      name: "300 Atendimentos IA",
       description: "Para negócios estabelecidos",
       price: "R$ 467",
       period: "/mês",
-      features: ["300 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp", ,],
-      buttonText: "Começar Agora",
+      features: ["300 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
+      buttonText: "Teste 3 Dias Grátis",
       discount: "15% Off",
     },
   ],
@@ -76,17 +103,26 @@ const PRICING_TEXTS = {
 };
 
 export function Pricing() {
+  // Separar planos básicos dos planos com IA
+  const basicPlan = PRICING_TEXTS.plans.find((plan) => plan.isBasic);
+  const aiPlans = PRICING_TEXTS.plans.filter((plan) => !plan.isBasic);
+
   return (
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{PRICING_TEXTS.title}</h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">{PRICING_TEXTS.subtitle}</p>
+          <div className="mt-4">
+            <span className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-2 rounded-full text-lg font-semibold inline-block">
+              {PRICING_TEXTS.freeTrialText}
+            </span>
+          </div>
         </div>
 
-        {/* Funcionalidades Incluídas */}
-        <div className="mx-auto mt-12 max-w-4xl">
-          <h3 className="text-xl font-bold mb-6 text-center">Funcionalidades Incluídas em Todos os Planos</h3>
+        {/* Funcionalidades Incluídas nos Planos com IA */}
+        <div className="mx-auto mt-12 max-w-5xl">
+          <h3 className="text-xl font-bold mb-6 text-center">Funcionalidades Incluídas nos Planos com IA</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {PRICING_TEXTS.includedFeatures.map((feature, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -97,13 +133,16 @@ export function Pricing() {
           </div>
         </div>
 
-        {/* Planos */}
+        {/* Planos com IA */}
         <div className="mx-auto mt-16 max-w-5xl">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {PRICING_TEXTS.plans.map((plan, index) => (
+          <h3 className="text-xl font-bold mb-6 text-center">Planos com Inteligência Artificial</h3>
+          <div className="flex flex-col lg:flex-row gap-5 h-full items-center">
+            {aiPlans.map((plan, index) => (
               <Card
                 key={index}
-                className={`flex flex-col justify-between relative ${plan.recommended ? "border-primary" : ""}`}
+                className={`flex flex-col justify-between relative ${
+                  plan.recommended ? "border-primary lg:hover:scale-110 transition lg:h-[110%]" : ""
+                }`}
               >
                 {plan.recommended && (
                   <span className="absolute top-3 right-3 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground z-10">
@@ -133,26 +172,53 @@ export function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-8">
-                    <SignedOut>
-                      <Link href="/sign-up">
-                        <MovingBorderButton className="w-full">{plan.buttonText}</MovingBorderButton>
-                      </Link>
-                    </SignedOut>
-                    <SignedIn>
-                      <Link href="https://wa.me/5517988421625">
-                        <MovingBorderButton className="w-full">{PRICING_TEXTS.dashboardButtonText}</MovingBorderButton>
-                      </Link>
-                    </SignedIn>
-                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
 
+        {/* Plano Básico */}
+        {basicPlan && (
+          <div className="mx-auto mt-5 max-w-xs px-5 lg:px-0">
+            <h3 className="text-xl font-bold mb-6 text-center">Plano Básico</h3>
+            <Card className="flex justify-between relative">
+              <CardHeader className="flex-row justify-center">
+                <CardTitle className="text-2xl mt-5">{basicPlan.name}</CardTitle>
+                <CardDescription>{basicPlan.description}</CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">{basicPlan.price}</span>
+                  <span className="text-muted-foreground">{basicPlan.period}</span>
+                </div>
+              </CardHeader>
+
+              <CardContent className="flex-1 flex justify-center">
+                <div className="mb-4 p-3 rounded-lg">
+                  <h4 className="font-semibold mb-2">Funcionalidades Básicas:</h4>
+                  <ul className="space-y-1 text-sm">
+                    {basicPlan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className="mt-8 max-w-5xl mx-auto ">
+          <Link href="https://wa.me/5517988421625">
+            <MovingBorderButton className="w-full text-2xl" containerClassName="h-32">
+              Comecar
+            </MovingBorderButton>
+          </Link>
+        </div>
+
         {/* Adicionais */}
-        <div className="mx-auto mt-12 max-w-4xl">
+        <div className="mx-auto mt-5 max-w-4xl">
           <h3 className="text-xl font-bold mb-6 text-center">Adicionais</h3>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {PRICING_TEXTS.addons.map((addon, index) => (
@@ -163,18 +229,20 @@ export function Pricing() {
                   </span>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-xl mt-5">{addon.name}</CardTitle>
-                  <div className="mt-4">
+                  <CardTitle className="text-xl mt-5 text-center lg:text-start">{addon.name}</CardTitle>
+                  <div className="mt-4 flex flex-col items-center justify-center lg:justify-start lg:flex-row">
                     <span className="text-3xl font-bold">{addon.price}</span>
                     <span className="text-muted-foreground">{addon.period}</span>
                   </div>
 
-                  {addon.description && <CardDescription className="mt-2">{addon.description}</CardDescription>}
+                  {addon.description && (
+                    <CardDescription className="mt-2 text-center lg:text-start">{addon.description}</CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
                     <Plus className="h-4 w-4 text-blue-500" />
-                    <span>Adicione conforme sua necessidade</span>
+                    <span className="text-center lg:text-start">Adicione conforme sua necessidade</span>
                   </div>
                 </CardContent>
               </Card>
