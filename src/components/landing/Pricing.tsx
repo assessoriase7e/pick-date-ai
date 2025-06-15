@@ -57,39 +57,51 @@ const PRICING_TEXTS = {
       isBasic: true,
     },
     {
-      name: "100 Atendimentos IA",
+      name: "IA 100",
       description: "Ideal para pequenos negócios",
       price: "R$ 190",
       period: "/mês",
-      features: ["100 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
+      features: [
+        "100 atendimentos mensais",
+        "3 Calendários inicias",
+        ,
+        "Reset a cada 24 horas",
+        "Suporte via Whatsapp",
+      ],
       buttonText: "Teste 3 Dias Grátis",
     },
     {
-      name: "200 Atendimentos IA",
+      name: "IA 200",
       description: "Para negócios em crescimento",
       price: "R$ 329",
       period: "/mês",
-      features: ["200 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
+      features: ["200 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
       buttonText: "Teste 3 Dias Grátis",
       recommended: true,
       discount: "10% Off",
     },
     {
-      name: "300 Atendimentos IA",
+      name: "IA 300",
       description: "Para negócios estabelecidos",
       price: "R$ 467",
       period: "/mês",
-      features: ["300 atendimentos mensais", "Reset a cada 24 horas", "Suporte via Whatsapp"],
+      features: ["300 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
       buttonText: "Teste 3 Dias Grátis",
       discount: "15% Off",
     },
   ],
   addons: [
     {
-      name: "Pack Adicional",
+      name: "Atendimentos Adicionais",
       price: "R$ 25",
       period: "/10 atendimentos",
-      description: "Adicione mais atendimentos conforme necessário",
+      description: "Adicione mais atendimentos IA conforme necessário",
+    },
+    {
+      name: "Calendário Adicional",
+      price: "R$ 10",
+      period: "/1 Agenda",
+      description: "Adicione mais agendas conforme necessário",
     },
     {
       name: "SDR (Prospecção de clientes)",
@@ -134,12 +146,12 @@ export function Pricing() {
         </div>
 
         {/* Planos com IA */}
-        <div className="mx-auto">
+        <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 h-full gap-5">
             <Card className="flex justify-between relative">
               <CardHeader className="flex-row justify-center">
                 <CardTitle className="text-2xl mt-5">{basicPlan.name}</CardTitle>
-                <CardDescription>{basicPlan.description}</CardDescription>
+                <CardDescription className="text-xs">{basicPlan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">{basicPlan.price}</span>
                   <span className="text-muted-foreground">{basicPlan.period}</span>
@@ -148,7 +160,6 @@ export function Pricing() {
 
               <CardContent className="flex-1 flex justify-center">
                 <div className="mb-4 p-3 rounded-lg">
-                  <h4 className="font-semibold mb-2">Funcionalidades Básicas:</h4>
                   <ul className="space-y-1 text-sm">
                     {basicPlan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-2">
@@ -178,12 +189,12 @@ export function Pricing() {
                 )}
                 <CardHeader>
                   <CardTitle className="text-2xl mt-5">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardDescription className="text-xs">{plan.description}</CardDescription>
                   <div className="mt-4">
                     <span className="text-4xl font-bold">{plan.price}</span>
                     <span className="text-muted-foreground">{plan.period}</span>
-                    {plan.discount && <span className="ml-2 text-sm text-green-500">{plan.discount}</span>}
                   </div>
+                  {plan.discount && <span className="text-sm text-green-500">{plan.discount}</span>}
                 </CardHeader>
                 <CardContent className="flex-1">
                   <ul className="space-y-3 text-sm">
@@ -201,8 +212,8 @@ export function Pricing() {
         </div>
 
         {/* Adicionais */}
-        <div className="mx-auto mt-5 max-w-4xl">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {PRICING_TEXTS.addons.map((addon, index) => (
               <Card key={index} className="flex flex-col justify-between relative">
                 {addon.comingSoon && (
@@ -214,7 +225,7 @@ export function Pricing() {
                   <CardTitle className="text-xl mt-5 text-center lg:text-start">{addon.name}</CardTitle>
                   <div className="mt-4 flex flex-col items-center justify-center lg:justify-start lg:flex-row">
                     <span className="text-3xl font-bold">{addon.price}</span>
-                    <span className="text-muted-foreground">{addon.period}</span>
+                    <span className="ml-1 text-muted-foreground">{addon.period}</span>
                   </div>
 
                   {addon.description && (
@@ -232,7 +243,7 @@ export function Pricing() {
           </div>
         </div>
 
-        <div className="mt-8 max-w-5xl mx-auto ">
+        <div className="max-w-7xl mx-auto ">
           <Link href="https://wa.me/5517988421625">
             <MovingBorderButton className="w-full text-2xl" containerClassName="h-32">
               Comecar
