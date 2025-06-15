@@ -17,9 +17,8 @@ export function ServiceModal({ isOpen, onClose, initialData, collaborators }: Se
   return (
     <ConfirmationDialog open={isOpen} onOpenChange={onClose} title={title} size="lg" showFooter={false}>
       <p className="text-sm text-muted-foreground mb-6">{description}</p>
-      <div className="max-h-[90svh] overflow-y-auto">
-        <ServiceForm initialData={initialData} onSuccess={onClose} collaborators={collaborators} />
-      </div>
+
+      <ServiceForm initialData={initialData} onSuccess={onClose} collaborators={collaborators} />
     </ConfirmationDialog>
   );
 }

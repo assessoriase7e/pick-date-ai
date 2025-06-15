@@ -60,7 +60,7 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size], "h-svh lg:h-[90svh] flex flex-col overflow-y-auto")}>
+      <DialogContent className={cn(sizeClasses[size], "h-svh lg:max-h-[90svh] flex flex-col overflow-y-auto")}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
