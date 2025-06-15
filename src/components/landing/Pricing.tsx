@@ -43,7 +43,7 @@ const PRICING_TEXTS = {
     {
       name: "Agenda Base",
       description: "Agendamento simples sem IA",
-      price: "R$ 89",
+      price: "R$ 59,90",
       period: "/mês",
       features: [
         "Agendamento manual",
@@ -108,9 +108,9 @@ export function Pricing() {
   const aiPlans = PRICING_TEXTS.plans.filter((plan) => !plan.isBasic);
 
   return (
-    <section className="py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+    <section>
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 w-full space-y-20">
+        <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{PRICING_TEXTS.title}</h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">{PRICING_TEXTS.subtitle}</p>
           <div className="mt-4">
@@ -121,7 +121,7 @@ export function Pricing() {
         </div>
 
         {/* Funcionalidades Incluídas nos Planos com IA */}
-        <div className="mx-auto mt-12 max-w-5xl">
+        <div className="mx-auto max-w-5xl">
           <h3 className="text-xl font-bold mb-6 text-center">Funcionalidades Incluídas nos Planos com IA</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {PRICING_TEXTS.includedFeatures.map((feature, index) => (
@@ -134,15 +134,37 @@ export function Pricing() {
         </div>
 
         {/* Planos com IA */}
-        <div className="mx-auto mt-16 max-w-5xl">
-          <h3 className="text-xl font-bold mb-6 text-center">Planos com Inteligência Artificial</h3>
-          <div className="flex flex-col lg:flex-row gap-5 h-full items-center">
+        <div className="mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 h-full gap-5">
+            <Card className="flex justify-between relative">
+              <CardHeader className="flex-row justify-center">
+                <CardTitle className="text-2xl mt-5">{basicPlan.name}</CardTitle>
+                <CardDescription>{basicPlan.description}</CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">{basicPlan.price}</span>
+                  <span className="text-muted-foreground">{basicPlan.period}</span>
+                </div>
+              </CardHeader>
+
+              <CardContent className="flex-1 flex justify-center">
+                <div className="mb-4 p-3 rounded-lg">
+                  <h4 className="font-semibold mb-2">Funcionalidades Básicas:</h4>
+                  <ul className="space-y-1 text-sm">
+                    {basicPlan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
             {aiPlans.map((plan, index) => (
               <Card
                 key={index}
-                className={`flex flex-col justify-between relative ${
-                  plan.recommended ? "border-primary lg:hover:scale-110 transition lg:h-[110%]" : ""
-                }`}
+                className={`flex flex-col justify-between relative ${plan.recommended ? "border-primary" : ""}`}
               >
                 {plan.recommended && (
                   <span className="absolute top-3 right-3 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground z-10">
@@ -178,48 +200,8 @@ export function Pricing() {
           </div>
         </div>
 
-        {/* Plano Básico */}
-        {basicPlan && (
-          <div className="mx-auto mt-5 max-w-xs px-5 lg:px-0">
-            <h3 className="text-xl font-bold mb-6 text-center">Plano Básico</h3>
-            <Card className="flex justify-between relative">
-              <CardHeader className="flex-row justify-center">
-                <CardTitle className="text-2xl mt-5">{basicPlan.name}</CardTitle>
-                <CardDescription>{basicPlan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{basicPlan.price}</span>
-                  <span className="text-muted-foreground">{basicPlan.period}</span>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex-1 flex justify-center">
-                <div className="mb-4 p-3 rounded-lg">
-                  <h4 className="font-semibold mb-2">Funcionalidades Básicas:</h4>
-                  <ul className="space-y-1 text-sm">
-                    {basicPlan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div className="mt-8 max-w-5xl mx-auto ">
-          <Link href="https://wa.me/5517988421625">
-            <MovingBorderButton className="w-full text-2xl" containerClassName="h-32">
-              Comecar
-            </MovingBorderButton>
-          </Link>
-        </div>
-
         {/* Adicionais */}
         <div className="mx-auto mt-5 max-w-4xl">
-          <h3 className="text-xl font-bold mb-6 text-center">Adicionais</h3>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {PRICING_TEXTS.addons.map((addon, index) => (
               <Card key={index} className="flex flex-col justify-between relative">
@@ -248,6 +230,14 @@ export function Pricing() {
               </Card>
             ))}
           </div>
+        </div>
+
+        <div className="mt-8 max-w-5xl mx-auto ">
+          <Link href="https://wa.me/5517988421625">
+            <MovingBorderButton className="w-full text-2xl" containerClassName="h-32">
+              Comecar
+            </MovingBorderButton>
+          </Link>
         </div>
       </div>
     </section>

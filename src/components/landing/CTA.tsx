@@ -5,8 +5,7 @@ import Link from "next/link";
 
 const CTA_TEXTS = {
   title: "Pronto para revolucionar seus agendamentos?",
-  subtitle:
-    "Junte-se a centenas de empresas que já transformaram seu atendimento com Pick Date AI",
+  subtitle: "Junte-se a centenas de empresas que já transformaram seu atendimento com Pick Date AI",
   freeTrialText: "Teste grátis por 3 dias - sem compromisso!",
   buttons: {
     startTrial: "Teste 3 Dias Grátis",
@@ -17,14 +16,10 @@ const CTA_TEXTS = {
 
 export function CTA() {
   return (
-    <section className="py-24 sm:py-32 bg-primary">
+    <section className="bg-primary py-10">
       <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
-          {CTA_TEXTS.title}
-        </h2>
-        <p className="mt-6 text-lg leading-8 text-primary-foreground/80">
-          {CTA_TEXTS.subtitle}
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">{CTA_TEXTS.title}</h2>
+        <p className="mt-6 text-lg leading-8 text-primary-foreground/80">{CTA_TEXTS.subtitle}</p>
         <div className="mt-4 mb-6">
           <span className="bg-white/20 text-primary-foreground px-6 py-3 rounded-full text-lg font-semibold inline-block">
             {CTA_TEXTS.freeTrialText}
@@ -46,8 +41,7 @@ export function CTA() {
           <SignedIn>
             <Link href="https://wa.me/5517988421625">
               <Button size="lg" className="px-8 bg-accent text-background">
-                {CTA_TEXTS.buttons.accessDashboard}{" "}
-                <ChevronRight className="ml-2 h-4 w-4" />
+                {CTA_TEXTS.buttons.accessDashboard} <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </SignedIn>

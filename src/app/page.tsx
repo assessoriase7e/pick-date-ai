@@ -15,7 +15,7 @@ export default async function Home() {
         <Header />
         <Hero />
       </div>
-      <main className="min-h-screen relative overflow-hidden">
+      <main className="min-h-screen relative overflow-hidden space-y-40">
         <Features />
         <Benefits />
         <Pricing />
