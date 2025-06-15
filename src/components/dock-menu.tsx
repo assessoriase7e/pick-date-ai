@@ -13,6 +13,7 @@ import { Dock, DockIcon } from "./magicui/dock";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DockDropdownMenu, useDropdownMenuItems } from "./dock-dropdown-menu";
+import { SubscriptionStatus } from "./SubscriptionStatus";
 
 export function DockMenu() {
   const { user } = useUser();
@@ -97,6 +98,11 @@ export function DockMenu() {
         ))}
 
         <Separator orientation="vertical" className="h-8" />
+
+        {/* Componente de Status da Assinatura */}
+        <DockIcon>
+          <SubscriptionStatus />
+        </DockIcon>
 
         {/* Dropdown Menu para Configurações */}
         <DockIcon>
