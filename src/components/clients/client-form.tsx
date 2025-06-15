@@ -1,13 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,10 +17,7 @@ interface ClientFormProps {
   onSuccess?: () => void;
 }
 
-export default function ClientForm({
-  initialData,
-  onSuccess,
-}: ClientFormProps) {
+export default function ClientForm({ initialData, onSuccess }: ClientFormProps) {
   const { toast } = useToast();
 
   const form = useForm<ClientFormValues>({
@@ -36,9 +26,7 @@ export default function ClientForm({
       id: initialData?.id || undefined,
       fullName: initialData?.fullName || "",
       phone: initialData?.phone || "",
-      birthDate: initialData?.birthDate
-        ? new Date(initialData.birthDate)
-        : undefined,
+      birthDate: initialData?.birthDate ? new Date(initialData.birthDate) : undefined,
       observations: initialData?.observations || "",
     },
   });
@@ -133,11 +121,7 @@ export default function ClientForm({
             <FormItem>
               <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Observações sobre o cliente"
-                  className="resize-none"
-                  {...field}
-                />
+                <Textarea placeholder="Observações sobre o cliente" className="resize-none" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
