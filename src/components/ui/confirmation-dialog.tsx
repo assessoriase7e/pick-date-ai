@@ -60,13 +60,13 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size], "h-svh md:h-min flex flex-col")}>
+      <DialogContent className={cn(sizeClasses[size], "h-svh lg:h-[90svh] flex flex-col overflow-y-auto")}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         {/* Conteúdo principal com scroll se necessário */}
-        <div className="flex-1 overflow-y-auto h-svh">
+        <div className="flex-1">
           {children
             ? children
             : description && (
