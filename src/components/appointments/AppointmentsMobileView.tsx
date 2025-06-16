@@ -11,10 +11,7 @@ interface AppointmentsMobileViewProps {
   onDetailsClick: (appointment: AppointmentFullData) => void;
 }
 
-export function AppointmentsMobileView({
-  appointments,
-  onDetailsClick,
-}: AppointmentsMobileViewProps) {
+export function AppointmentsMobileView({ appointments, onDetailsClick }: AppointmentsMobileViewProps) {
   return (
     <div className="space-y-4">
       {appointments.length > 0 ? (
@@ -25,9 +22,7 @@ export function AppointmentsMobileView({
           let statusClass = "";
           let statusLabel = "";
 
-          if (
-            format(startTime, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
-          ) {
+          if (format(startTime, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")) {
             statusClass = "bg-primary text-primary-foreground";
             statusLabel = "Hoje";
           } else if (startTime > today) {
@@ -44,9 +39,7 @@ export function AppointmentsMobileView({
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-primary" />
-                    <h3 className="font-medium">
-                      {appointment.client?.fullName || "Cliente Deletado"}
-                    </h3>
+                    <h3 className="font-medium">{appointment.client?.fullName || "Cliente Deletado"}</h3>
                   </div>
                   <Badge variant="outline" className={statusClass}>
                     {statusLabel}
@@ -71,11 +64,7 @@ export function AppointmentsMobileView({
                 </div>
 
                 <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDetailsClick(appointment)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => onDetailsClick(appointment)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Ver detalhes
                   </Button>
@@ -85,9 +74,7 @@ export function AppointmentsMobileView({
           );
         })
       ) : (
-        <div className="text-center py-10 border rounded-md">
-          Nenhum agendamento encontrado.
-        </div>
+        <div className="text-center py-10 border rounded-md">Nenhum agendamento encontrado.</div>
       )}
     </div>
   );

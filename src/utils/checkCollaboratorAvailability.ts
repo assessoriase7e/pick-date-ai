@@ -10,22 +10,12 @@ export const isCollaboratorAvailable = (
 
   const dayOfWeek = startTime.getDay();
 
-  const dayNames = [
-    "Domingo",
-    "Segunda-feira",
-    "Terça-feira",
-    "Quarta-feira",
-    "Quinta-feira",
-    "Sexta-feira",
-    "Sábado",
-  ];
+  const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
   const dayName = dayNames[dayOfWeek];
 
   // Busca o horário de trabalho correspondente ao dia da semana
-  const daySchedule = collaborator.workHours.find(
-    (entry) => entry.day.toLowerCase() === dayName.toLowerCase()
-  );
+  const daySchedule = collaborator.workHours.find((entry) => entry.day.toLowerCase() === dayName.toLowerCase());
 
   if (!daySchedule) {
     return false;
@@ -48,9 +38,7 @@ export const isCollaboratorAvailable = (
     millisecond: 0,
   });
 
-  const isWithinWorkHours =
-    appointmentStart.isSameOrAfter(periodStart) &&
-    appointmentEnd.isSameOrBefore(periodEnd);
+  const isWithinWorkHours = appointmentStart.isSameOrAfter(periodStart) && appointmentEnd.isSameOrBefore(periodEnd);
 
   if (!isWithinWorkHours) return false;
 
@@ -70,8 +58,7 @@ export const isCollaboratorAvailable = (
     millisecond: 0,
   });
 
-  const isDuringBreak =
-    appointmentStart.isBefore(breakEnd) && appointmentEnd.isAfter(breakStart);
+  const isDuringBreak = appointmentStart.isBefore(breakEnd) && appointmentEnd.isAfter(breakStart);
 
   return !isDuringBreak;
 };

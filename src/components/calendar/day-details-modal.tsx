@@ -6,7 +6,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
-import { MobileDaySchedule } from "./mobile-day-schedule";
+import { MobileDaySchedule } from "./mobile/mobile-day-schedule";
 import { Client, Collaborator, Service } from "@prisma/client";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import React from "react";
@@ -144,8 +144,8 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <p className="text-muted-foreground mb-4">
-                    Selecione um horário na lista à esquerda para criar um novo agendamento ou clique em um
-                    agendamento existente para editá-lo.
+                    Selecione um horário na lista à esquerda para criar um novo agendamento ou clique em um agendamento
+                    existente para editá-lo.
                   </p>
                 </div>
               )}

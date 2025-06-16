@@ -28,9 +28,7 @@ export function PublicDayScheduleGrid({
   clients,
   collaboratorId,
 }: PublicDayScheduleGridProps) {
-  const activeAppointments = appointments.filter(
-    (appointment) => appointment.status !== "canceled"
-  );
+  const activeAppointments = appointments.filter((appointment) => appointment.status !== "canceled");
 
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");
@@ -44,19 +42,10 @@ export function PublicDayScheduleGrid({
     const result = activeAppointments.filter((appointment) => {
       const appointmentStart = moment(appointment.startTime);
       const appointmentEnd = moment(appointment.endTime);
-      const currentHourStart = moment(selectedDate)
-        .hour(hour)
-        .minute(0)
-        .second(0);
-      const currentHourEnd = moment(selectedDate)
-        .hour(hour)
-        .minute(59)
-        .second(59);
+      const currentHourStart = moment(selectedDate).hour(hour).minute(0).second(0);
+      const currentHourEnd = moment(selectedDate).hour(hour).minute(59).second(59);
 
-      return (
-        appointmentStart.isSameOrBefore(currentHourEnd) &&
-        appointmentEnd.isAfter(currentHourStart)
-      );
+      return appointmentStart.isSameOrBefore(currentHourEnd) && appointmentEnd.isAfter(currentHourStart);
     });
     return result;
   };
@@ -70,8 +59,7 @@ export function PublicDayScheduleGrid({
     onHourClick(hour);
   };
 
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<AppointmentFullData | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentFullData | null>(null);
 
   const handleAppointmentClick = (appointment: AppointmentFullData) => {
     setSelectedAppointment(appointment);
@@ -91,8 +79,7 @@ export function PublicDayScheduleGrid({
               key={hour}
               className={cn(
                 "h-20 flex items-center justify-center border-b",
-                isNightHour(hour) &&
-                  "bg-background brightness-90 dark:brightness-50"
+                isNightHour(hour) && "bg-background brightness-90 dark:brightness-50"
               )}
             >
               <span className="text-sm font-medium">{formatHour(hour)}</span>
@@ -112,8 +99,7 @@ export function PublicDayScheduleGrid({
                   key={hour}
                   className={cn(
                     "h-20 border-b transition-colors cursor-pointer",
-                    isNightHour(hour) &&
-                      "bg-background brightness-90 dark:brightness-50",
+                    isNightHour(hour) && "bg-background brightness-90 dark:brightness-50",
                     !isOccupied && "hover:bg-muted/20",
                     isOccupied && "bg-muted/10 hover:bg-muted/20",
                     selectedHour === hour && "ring-2 ring-primary"

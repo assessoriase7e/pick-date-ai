@@ -28,9 +28,9 @@ export default async function CalendarPage({
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : 0;
   const requestedCalendarId = Number(sParams.calendarId);
-  
+
   // Verificar se o calendário solicitado existe
-  const calendarExists = requestedCalendarId && calendars.some(cal => cal.id === requestedCalendarId);
+  const calendarExists = requestedCalendarId && calendars.some((cal) => cal.id === requestedCalendarId);
   const calendarId = calendarExists ? requestedCalendarId : initialCalendarId;
 
   const currentDate = sParams.date ? moment(sParams.date).toDate() : moment().startOf("day").toDate();
@@ -70,7 +70,7 @@ export default async function CalendarPage({
   const allClients: Record<number, any[]> = {};
   const allServices: Record<number, any[]> = {};
   const allCollaborators: Record<number, any> = {};
-  
+
   // Carregar dados para todos os calendários
   for (const calendar of calendars) {
     const [clientsRes, servicesRes, collaboratorRes] = await Promise.all([
@@ -78,7 +78,7 @@ export default async function CalendarPage({
       getServicesByCalendar(calendar.id),
       getCalendarCollaborator(calendar.id),
     ]);
-    
+
     allClients[calendar.id] = clientsRes.success ? clientsRes.data : [];
     allServices[calendar.id] = servicesRes.success ? servicesRes.data : [];
     allCollaborators[calendar.id] = collaboratorRes.success ? collaboratorRes.data?.collaborator || null : null;

@@ -1,23 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
-import { CalendarViewProps } from "../calendar-types";
+import { CalendarViewProps } from "../../../types/calendar";
 import { CalendarDayCell } from "../dayCell/calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
 import IsTableLoading from "../../isTableLoading";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MonthYearPicker } from "../../ui/month-year-picker";
 import { CalendarFullData } from "@/types/calendar";
@@ -77,15 +66,10 @@ export function DesktopCalendarView({
     setLoading(false);
   }, [pDate]);
 
-  const selectedCalendar = calendars?.find(
-    (cal) => cal.id === parseInt(calendarId)
-  );
+  const selectedCalendar = calendars?.find((cal) => cal.id === parseInt(calendarId));
 
   return (
-    <div
-      ref={calendarRef}
-      className="flex flex-col h-full border rounded-lg relative w-full"
-    >
+    <div ref={calendarRef} className="flex flex-col h-full border rounded-lg relative w-full">
       {IsDayLoading && <IsTableLoading isPageChanging={IsDayLoading} />}
 
       {/* Cabeçalho */}
@@ -97,17 +81,12 @@ export function DesktopCalendarView({
                 <h2 className="text-lg lg:text-2xl font-semibold cursor-pointer hover:text-primary transition-colors capitalize">
                   {formatMonth(currentDate)}
                 </h2>
-                <p className="text-xs text-muted-foreground">
-                  Clique para selecionar data
-                </p>
+                <p className="text-xs text-muted-foreground">Clique para selecionar data</p>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] p-6">
               <DialogTitle></DialogTitle>
-              <MonthYearPicker
-                currentDate={currentDate}
-                onMonthChange={handleDateSelect}
-              />
+              <MonthYearPicker currentDate={currentDate} onMonthChange={handleDateSelect} />
             </DialogContent>
           </Dialog>
         </div>
@@ -115,10 +94,7 @@ export function DesktopCalendarView({
         {/* Select de calendários */}
         {calendars && setCalendarIdQueryParam && (
           <div className="flex-1 max-w-[200px]">
-            <Select
-              value={String(calendarId)}
-              onValueChange={setCalendarIdQueryParam}
-            >
+            <Select value={String(calendarId)} onValueChange={setCalendarIdQueryParam}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione um calendário">
                   {selectedCalendar
@@ -133,9 +109,7 @@ export function DesktopCalendarView({
               <SelectContent className="max-h-[300px] overflow-y-auto">
                 {calendars.map((calendar) => (
                   <SelectItem key={calendar.id} value={String(calendar.id)}>
-                    {calendar.name
-                      ? `${calendar.name} | ${calendar.collaborator?.name}`
-                      : calendar.collaborator?.name}
+                    {calendar.name ? `${calendar.name} | ${calendar.collaborator?.name}` : calendar.collaborator?.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -144,30 +118,13 @@ export function DesktopCalendarView({
         )}
 
         <div className="flex items-center space-x-1 sm:space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(goToPreviousMonth)}
-          >
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(goToPreviousMonth)}>
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(goToToday)}
-            className="w-20"
-          >
-            {loading ? (
-              <LoaderCircle className="animate-spin text-primary" />
-            ) : (
-              "Hoje"
-            )}
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(goToToday)} className="w-20">
+            {loading ? <LoaderCircle className="animate-spin text-primary" /> : "Hoje"}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(goToNextMonth)}
-          >
+          <Button variant="outline" size="sm" onClick={() => handlePageChange(goToNextMonth)}>
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
@@ -176,10 +133,7 @@ export function DesktopCalendarView({
       {/* Dias da Semana */}
       <div className="grid grid-cols-7 text-center py-1 sm:py-2 border-b bg-muted/20">
         {weekDays.map((day, index) => (
-          <div
-            key={index}
-            className="text-[10px] sm:text-xs lg:text-lg font-medium"
-          >
+          <div key={index} className="text-[10px] sm:text-xs lg:text-lg font-medium">
             {day}
           </div>
         ))}

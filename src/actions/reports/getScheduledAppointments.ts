@@ -3,14 +3,9 @@ import { prisma } from "@/lib/db";
 import { AppointmentFullData } from "@/types/calendar";
 import { auth } from "@clerk/nextjs/server";
 
-type ScheduledAppointmentsResult =
-  | { success: true; data: AppointmentFullData[] }
-  | { success: false; error: string };
+type ScheduledAppointmentsResult = { success: true; data: AppointmentFullData[] } | { success: false; error: string };
 
-export const getScheduledAppointments = async (
-  from: Date,
-  to: Date
-): Promise<ScheduledAppointmentsResult> => {
+export const getScheduledAppointments = async (from: Date, to: Date): Promise<ScheduledAppointmentsResult> => {
   const { userId } = await auth();
   if (!userId) {
     return { success: false, error: "Usuário não autenticado" };

@@ -3,9 +3,9 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDay } from "./calendar-types";
-import { MobileCalendarView } from "./views/mobile-calendar-view";
-import { DesktopCalendarView } from "./views/desktop-calendar-view";
+import { CalendarDay } from "../../types/calendar";
+import { MobileCalendarView } from "./mobile/mobile-calendar-view";
+import { DesktopCalendarView } from "./desktop/desktop-calendar-view";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -60,12 +60,12 @@ export function CalendarGrid({
     if (currentParams !== prevSearchParams) {
       setIsLoading(true);
       setPrevSearchParams(currentParams);
-      
+
       // Usar timeout para evitar setState imediato
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [searchParams, prevSearchParams, isInitialLoad]);

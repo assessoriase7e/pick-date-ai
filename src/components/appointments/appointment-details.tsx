@@ -17,11 +17,7 @@ interface AppointmentDetailsProps {
   onClose: () => void;
 }
 
-export function AppointmentDetails({
-  appointment,
-  isOpen,
-  onClose,
-}: AppointmentDetailsProps) {
+export function AppointmentDetails({ appointment, isOpen, onClose }: AppointmentDetailsProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   if (!appointment) return null;
@@ -54,13 +50,11 @@ export function AppointmentDetails({
             <span className="font-medium">Data:</span> {formatDate(startTime)}
           </p>
           <p>
-            <span className="font-medium">Horário:</span>{" "}
-            {formatTime(startTime)} às {formatTime(endTime)}
+            <span className="font-medium">Horário:</span> {formatTime(startTime)} às {formatTime(endTime)}
           </p>
           {appointment.status && (
             <p>
-              <span className="font-medium">Status:</span>{" "}
-              {i18nStatus[appointment.status as StatusKey]}
+              <span className="font-medium">Status:</span> {i18nStatus[appointment.status as StatusKey]}
             </p>
           )}
         </div>
@@ -73,12 +67,10 @@ export function AppointmentDetails({
         </div>
         <div className="pl-7 space-y-1">
           <p>
-            <span className="font-medium">Nome:</span>{" "}
-            {appointment?.client?.fullName || "Cliente deletado"}
+            <span className="font-medium">Nome:</span> {appointment?.client?.fullName || "Cliente deletado"}
           </p>
           <p>
-            <span className="font-medium">Telefone:</span>{" "}
-            {appointment?.client?.phone || "Cliente deletado"}
+            <span className="font-medium">Telefone:</span> {appointment?.client?.phone || "Cliente deletado"}
           </p>
         </div>
       </div>
@@ -90,17 +82,14 @@ export function AppointmentDetails({
         </div>
         <div className="pl-7 space-y-1">
           <p>
-            <span className="font-medium">Nome:</span>{" "}
-            {appointment.service.name}
+            <span className="font-medium">Nome:</span> {appointment.service.name}
           </p>
           <p>
-            <span className="font-medium">Valor:</span>{" "}
-            {formatCurrency(appointment.service.price)}
+            <span className="font-medium">Valor:</span> {formatCurrency(appointment.service.price)}
           </p>
           {appointment.finalPrice && (
             <p>
-              <span className="font-medium">Valor Final:</span>{" "}
-              {formatCurrency(appointment.finalPrice)}
+              <span className="font-medium">Valor Final:</span> {formatCurrency(appointment.finalPrice)}
             </p>
           )}
         </div>
@@ -113,12 +102,10 @@ export function AppointmentDetails({
         </div>
         <div className="pl-7 space-y-1">
           <p>
-            <span className="font-medium">Nome:</span>{" "}
-            {appointment.collaborator.name}
+            <span className="font-medium">Nome:</span> {appointment.collaborator.name}
           </p>
           <p>
-            <span className="font-medium">Profissão:</span>{" "}
-            {appointment.collaborator.profession}
+            <span className="font-medium">Profissão:</span> {appointment.collaborator.profession}
           </p>
         </div>
       </div>
@@ -149,9 +136,7 @@ export function AppointmentDetails({
       size="md"
       showFooter={true}
     >
-      <ScrollArea className={isMobile ? "h-[60vh]" : "max-h-[70vh]"}>
-        {content}
-      </ScrollArea>
+      <ScrollArea className={isMobile ? "h-[60vh]" : "max-h-[70vh]"}>{content}</ScrollArea>
     </ConfirmationDialog>
   );
 }

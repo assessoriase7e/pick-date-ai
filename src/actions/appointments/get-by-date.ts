@@ -10,9 +10,7 @@ type GetAppointmentsByDateReturn = {
   error?: string;
 };
 
-export async function getAppointmentsByDate(
-  date: Date
-): Promise<GetAppointmentsByDateReturn> {
+export async function getAppointmentsByDate(date: Date): Promise<GetAppointmentsByDateReturn> {
   try {
     const { userId } = await auth();
 

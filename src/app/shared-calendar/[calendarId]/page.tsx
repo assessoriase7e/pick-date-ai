@@ -44,11 +44,7 @@ export default async function SharedCalendarPage({
   const currentDate = sParams.date ? new Date(sParams.date) : new Date();
 
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
-  const res = await getAppointmentsByMonth(
-    currentDate,
-    Number(calendarId),
-    false
-  );
+  const res = await getAppointmentsByMonth(currentDate, Number(calendarId), false);
 
   if (res?.success && res?.data) {
     res.data.forEach((appointment: AppointmentFullData) => {
@@ -56,9 +52,7 @@ export default async function SharedCalendarPage({
         return;
       }
 
-      const dateKey = new Date(appointment.startTime)
-        .toISOString()
-        .split("T")[0];
+      const dateKey = new Date(appointment.startTime).toISOString().split("T")[0];
 
       if (!appointmentsByDate[dateKey]) {
         appointmentsByDate[dateKey] = [];

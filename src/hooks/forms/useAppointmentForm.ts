@@ -20,11 +20,7 @@ interface UseAppointmentFormProps {
   date: Date;
   appointment?: AppointmentFullData;
   onSuccess: () => void;
-  checkTimeConflict: (
-    startTime: Date,
-    endTime: Date,
-    excludeId?: string
-  ) => boolean;
+  checkTimeConflict: (startTime: Date, endTime: Date, excludeId?: string) => boolean;
   calendarId: string;
   initialStartTime?: string;
   initialEndTime?: string;
@@ -39,20 +35,12 @@ export function useAppointmentForm({
   initialStartTime,
   initialEndTime,
 }: UseAppointmentFormProps) {
-  const {
-    clients,
-    services,
-    isLoadingClients,
-    isLoadingServices,
-    fetchClients,
-    fetchServices,
-  } = useAppointmentDataStore();
+  const { clients, services, isLoadingClients, isLoadingServices, fetchClients, fetchServices } =
+    useAppointmentDataStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedServiceDuration, setSelectedServiceDuration] = useState<
-    number | null
-  >(null);
+  const [selectedServiceDuration, setSelectedServiceDuration] = useState<number | null>(null);
 
   const isEditing = !!appointment;
 
@@ -60,9 +48,7 @@ export function useAppointmentForm({
     return moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
   };
 
-  const defaultStartTime = appointment
-    ? moment(appointment.startTime).format("HH:mm")
-    : initialStartTime ?? "09:00";
+  const defaultStartTime = appointment ? moment(appointment.startTime).format("HH:mm") : initialStartTime ?? "09:00";
 
   const defaultEndTime = appointment
     ? moment(appointment.endTime).format("HH:mm")
@@ -108,9 +94,7 @@ export function useAppointmentForm({
     }
 
     const dayOfWeek = moment(date).locale("pt-br").format("dddd");
-    const dayName =
-      daysMap[dayOfWeek] ||
-      dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+    const dayName = daysMap[dayOfWeek] || dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
     return service.availableDays.includes(dayName);
   };
 
@@ -128,9 +112,7 @@ export function useAppointmentForm({
   useEffect(() => {
     const startTime = form.watch("startTime");
     if (selectedServiceDuration && startTime) {
-      const newEndTime = moment(startTime, "HH:mm")
-        .add(selectedServiceDuration, "minutes")
-        .format("HH:mm");
+      const newEndTime = moment(startTime, "HH:mm").add(selectedServiceDuration, "minutes").format("HH:mm");
       form.setValue("endTime", newEndTime);
     }
   }, [selectedServiceDuration, form.watch("startTime")]);
@@ -162,17 +144,11 @@ export function useAppointmentForm({
       endTime.setHours(endHour, endMinute, 0, 0);
 
       if (endTime <= startTime) {
-        toast.error(
-          "O horário de término deve ser depois do horário de início"
-        );
+        toast.error("O horário de término deve ser depois do horário de início");
         return;
       }
 
-      const hasConflict = checkTimeConflict(
-        startTime,
-        endTime,
-        appointment?.id
-      );
+      const hasConflict = checkTimeConflict(startTime, endTime, appointment?.id);
       if (hasConflict) {
         toast.error("Já existe um agendamento nesse horário");
         return;

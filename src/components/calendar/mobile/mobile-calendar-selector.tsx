@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarFullData } from "@/types/calendar";
 
 interface MobileCalendarSelectorProps {
@@ -22,9 +16,7 @@ export function MobileCalendarSelector({
   setCalendarIdQueryParam,
   onLongPress,
 }: MobileCalendarSelectorProps) {
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
-    null
-  );
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
   const handleTouchStart = (calendar: CalendarFullData) => {
     const timer = setTimeout(() => {
@@ -51,15 +43,9 @@ export function MobileCalendarSelector({
   return (
     <div className="lg:hidden w-full mb-4">
       <div className="flex gap-2 mb-2">
-        <Select
-          value={String(calendarId)}
-          onValueChange={setCalendarIdQueryParam}
-        >
+        <Select value={String(calendarId)} onValueChange={setCalendarIdQueryParam}>
           <SelectTrigger className="w-full">
-            <SelectValue>
-              {calendars.find((c) => c.id === calendarId)?.name ||
-                "Selecione um calendário"}
-            </SelectValue>
+            <SelectValue>{calendars.find((c) => c.id === calendarId)?.name || "Selecione um calendário"}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {calendars.map((calendar: CalendarFullData) => (
@@ -73,9 +59,7 @@ export function MobileCalendarSelector({
               >
                 <span className="flex items-center justify-between w-full">
                   <span>
-                    {calendar?.name
-                      ? `${calendar.name} | ${calendar.collaborator?.name}`
-                      : calendar.collaborator?.name}
+                    {calendar?.name ? `${calendar.name} | ${calendar.collaborator?.name}` : calendar.collaborator?.name}
                   </span>
                 </span>
               </SelectItem>

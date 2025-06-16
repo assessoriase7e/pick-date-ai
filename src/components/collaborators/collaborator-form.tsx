@@ -3,23 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { createCollaborator } from "@/actions/collaborators/create-collaborator";
 import { updateCollaborator } from "@/actions/collaborators/update-collaborator";
@@ -35,20 +22,9 @@ interface CollaboratorFormProps {
   onSuccess?: () => void;
 }
 
-const daysOfWeek = [
-  "Segunda-feira",
-  "Terça-feira",
-  "Quarta-feira",
-  "Quinta-feira",
-  "Sexta-feira",
-  "Sábado",
-  "Domingo",
-];
+const daysOfWeek = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
 
-export function CollaboratorForm({
-  initialData,
-  onSuccess,
-}: CollaboratorFormProps) {
+export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -92,9 +68,7 @@ export function CollaboratorForm({
 
       if (result.success) {
         toast({
-          title: initialData
-            ? "Profissional atualizado"
-            : "Profissional criado",
+          title: initialData ? "Profissional atualizado" : "Profissional criado",
           description: initialData
             ? "O profissional foi atualizado com sucesso."
             : "O profissional foi criado com sucesso.",
@@ -106,19 +80,14 @@ export function CollaboratorForm({
       } else {
         toast({
           variant: "destructive",
-          title: initialData
-            ? "Erro ao atualizar profissional"
-            : "Erro ao criar profissional",
-          description:
-            result.error || "Ocorreu um erro ao processar a solicitação.",
+          title: initialData ? "Erro ao atualizar profissional" : "Erro ao criar profissional",
+          description: result.error || "Ocorreu um erro ao processar a solicitação.",
         });
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: initialData
-          ? "Erro ao atualizar profissional"
-          : "Erro ao criar profissional",
+        title: initialData ? "Erro ao atualizar profissional" : "Erro ao criar profissional",
         description: "Ocorreu um erro ao processar a solicitação.",
       });
     } finally {
@@ -128,9 +97,7 @@ export function CollaboratorForm({
 
   // Função para verificar se o dia já está selecionado
   const isDayAlreadySelected = (selectedDay: string, currentIndex: number) => {
-    return fields.some(
-      (field, index) => index !== currentIndex && field.day === selectedDay
-    );
+    return fields.some((field, index) => index !== currentIndex && field.day === selectedDay);
   };
 
   return (
@@ -156,10 +123,7 @@ export function CollaboratorForm({
           </div>
 
           {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className="flex flex-col gap-4 p-4 border rounded-lg"
-            >
+            <div key={field.id} className="flex flex-col gap-4 p-4 border rounded-lg">
               <div className="flex justify-between items-center">
                 <h4 className="text-sm font-medium">Horário {index + 1}</h4>
 
@@ -180,8 +144,7 @@ export function CollaboratorForm({
                           toast({
                             variant: "destructive",
                             title: "Dia já selecionado",
-                            description:
-                              "Este dia da semana já está em uso em outro horário.",
+                            description: "Este dia da semana já está em uso em outro horário.",
                           });
                           return;
                         }
@@ -196,11 +159,7 @@ export function CollaboratorForm({
                       </FormControl>
                       <SelectContent>
                         {daysOfWeek.map((day) => (
-                          <SelectItem
-                            key={day}
-                            value={day}
-                            disabled={isDayAlreadySelected(day, index)}
-                          >
+                          <SelectItem key={day} value={day} disabled={isDayAlreadySelected(day, index)}>
                             {day}
                           </SelectItem>
                         ))}

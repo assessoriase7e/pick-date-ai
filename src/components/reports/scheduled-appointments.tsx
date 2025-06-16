@@ -1,24 +1,11 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
 import moment from "moment";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getScheduledAppointments } from "@/actions/reports/getScheduledAppointments";
 import {
   ColumnDef,
@@ -31,12 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { AppointmentMobileCard } from "./appointment-mobile-card";
 import { Appointment } from "@prisma/client";
 import { AppointmentFullData } from "@/types/calendar";
@@ -77,8 +59,7 @@ export function ScheduledAppointments({
 }: ScheduledAppointmentsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [appointments, setAppointments] =
-    useState<Appointment[]>(initialAppointments);
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [loading, setLoading] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -136,9 +117,7 @@ export function ScheduledAppointments({
       <CardHeader className="lg:flex-row justify-between gap-5">
         <div>
           <CardTitle>Agendamentos Confirmados</CardTitle>
-          <CardDescription>
-            Visualize os agendamentos confirmados por período
-          </CardDescription>
+          <CardDescription>Visualize os agendamentos confirmados por período</CardDescription>
         </div>
         <DatePickerWithRange
           date={dateRange}
@@ -151,12 +130,8 @@ export function ScheduledAppointments({
         <div className="flex items-center py-4">
           <Input
             placeholder="Filtrar por cliente..."
-            value={
-              (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("clientName")?.setFilterValue(event.target.value)
-            }
+            value={(table.getColumn("clientName")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("clientName")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
         </div>
@@ -180,10 +155,7 @@ export function ScheduledAppointments({
                         <TableHead key={header.id}>
                           {header.isPlaceholder
                             ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                            : flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -195,20 +167,14 @@ export function ScheduledAppointments({
                       <TableRow key={row.id}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         Nenhum resultado.
                       </TableCell>
                     </TableRow>
@@ -241,12 +207,7 @@ export function ScheduledAppointments({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
+              <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button

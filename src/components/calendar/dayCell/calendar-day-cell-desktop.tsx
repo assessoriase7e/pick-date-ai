@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CalendarDay } from "../calendar-types";
+import { CalendarDay } from "../../../types/calendar";
 import { AppointmentFullData } from "@/types/calendar";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -31,16 +31,13 @@ export function CalendarDayCellDesktop({
   const baseDayStyles =
     "border p-1 min-h-[50px] sm:min-h-[80px] relative hover:bg-muted/30 cursor-pointer transition-colors rounded-lg border-dashed group dark:border-zinc-800/50 ";
 
-  const inactiveMonthStyles =
-    "bg-muted text-muted-foreground dark:bg-muted/30 dark:text-muted-foreground";
+  const inactiveMonthStyles = "bg-muted text-muted-foreground dark:bg-muted/30 dark:text-muted-foreground";
 
   const selectedDayStyles = "ring-2 ring-ring";
 
-  const baseContentStyles =
-    "flex flex-col h-full relative group-hover:text-primary  transition";
+  const baseContentStyles = "flex flex-col h-full relative group-hover:text-primary  transition";
 
-  const baseDateStyles =
-    "lg:text-lg font-medium flex items-center justify-center h-full select-none";
+  const baseDateStyles = "lg:text-lg font-medium flex items-center justify-center h-full select-none";
 
   const activeAppointmentStyles =
     "bg-primary border-primary text-background dark:bg-primary dark:text-foreground dark:border-primary";

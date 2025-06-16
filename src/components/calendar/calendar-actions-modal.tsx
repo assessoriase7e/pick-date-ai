@@ -10,13 +10,7 @@ interface CalendarActionsModalProps {
   onDelete: (calendar: CalendarFullData) => void;
 }
 
-export function CalendarActionsModal({
-  open,
-  onOpenChange,
-  calendar,
-  onEdit,
-  onDelete,
-}: CalendarActionsModalProps) {
+export function CalendarActionsModal({ open, onOpenChange, calendar, onEdit, onDelete }: CalendarActionsModalProps) {
   return (
     <ConfirmationDialog
       open={open}

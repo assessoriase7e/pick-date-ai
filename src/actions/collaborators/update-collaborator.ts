@@ -4,10 +4,7 @@ import { getClerkUser } from "../auth/getClerkUser";
 import { revalidatePath } from "next/cache";
 import { FullCollaborator } from "@/types/calendar";
 
-export async function updateCollaborator(
-  id: number,
-  data: Omit<FullCollaborator, "id" | "createdAt" | "updatedAt">
-) {
+export async function updateCollaborator(id: number, data: Omit<FullCollaborator, "id" | "createdAt" | "updatedAt">) {
   try {
     const user = await getClerkUser();
 

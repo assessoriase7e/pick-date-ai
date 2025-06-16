@@ -1,19 +1,9 @@
 "use client";
 import moment from "moment";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppointmentFullData } from "@/types/calendar";
 import { PublicDayScheduleGrid } from "./public-day-schedule-grid";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useEffect, useState } from "react";
 import { PublicAppointmentForm } from "./public-appointment-form";
 import { Client, Service } from "@prisma/client";
@@ -64,9 +54,7 @@ export function PublicDayDetailsModal({
     setShowAppointmentForm(selectedHour !== null);
   }, [selectedHour]);
 
-  const formattedDate = moment(dayDetails.date).format(
-    "DD [de] MMMM [de] YYYY"
-  );
+  const formattedDate = moment(dayDetails.date).format("DD [de] MMMM [de] YYYY");
 
   const handleAppointmentSuccess = () => {
     setShowAppointmentForm(false);
@@ -130,9 +118,7 @@ export function PublicDayDetailsModal({
         <DrawerContent className="max-w-xl h-svh p-0 flex flex-col">
           <DrawerHeader className="p-2 flex items-center justify-center pt-10">
             <DrawerTitle className="text-xl">
-              {showAppointmentForm
-                ? "Novo Agendamento"
-                : `Horários disponíveis para ${formattedDate}`}
+              {showAppointmentForm ? "Novo Agendamento" : `Horários disponíveis para ${formattedDate}`}
             </DrawerTitle>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto p-4">{renderContent()}</div>
@@ -146,9 +132,7 @@ export function PublicDayDetailsModal({
       <DialogContent className="max-w-xl h-svh lg:h-[80svh] p-0 flex flex-col">
         <DialogHeader className="p-2 flex items-center justify-center pt-10">
           <DialogTitle className="text-xl">
-            {showAppointmentForm
-              ? "Novo Agendamento"
-              : `Horários disponíveis para ${formattedDate}`}
+            {showAppointmentForm ? "Novo Agendamento" : `Horários disponíveis para ${formattedDate}`}
           </DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto p-4">{renderContent()}</div>

@@ -1,10 +1,5 @@
 import moment from "moment";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppointmentFullData } from "@/types/calendar";
 import { PublicAppointmentForm } from "./public-appointment-form";
 import { Client, Service } from "@prisma/client";
@@ -34,10 +29,7 @@ export function PublicAppointmentDetailsModal({
     onClose();
   };
 
-  const handleCancelEdit = async (
-    appointmentId: number,
-    isPublic: boolean = false
-  ): Promise<void> => {
+  const handleCancelEdit = async (appointmentId: number, isPublic: boolean = false): Promise<void> => {
     try {
       const result = await cancelAppointment(
         {

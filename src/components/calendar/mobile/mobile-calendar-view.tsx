@@ -1,14 +1,8 @@
 import { useRef, useMemo } from "react";
-import { CalendarViewProps } from "../calendar-types";
+import { CalendarViewProps } from "../../../types/calendar";
 import { CalendarDayCell } from "../dayCell/calendar-day-cell";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import moment from "moment";
 import { Loader2 } from "lucide-react";
 import { weekDays } from "@/mocked/calendar";
@@ -65,10 +59,7 @@ export function MobileCalendarView({
 
       {/* Seletor de Ano */}
       <div className="p-4 border-b">
-        <Select
-          value={selectedYear.toString()}
-          onValueChange={handleYearChange}
-        >
+        <Select value={selectedYear.toString()} onValueChange={handleYearChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecione o ano" />
           </SelectTrigger>
@@ -83,18 +74,13 @@ export function MobileCalendarView({
       </div>
 
       {/* Lista Horizontal de Meses */}
-      <div
-        ref={monthsScrollRef}
-        className="flex w-[90svw] overflow-x-auto p-2 border-b scrollbar-hide"
-      >
+      <div ref={monthsScrollRef} className="flex w-[90svw] overflow-x-auto p-2 border-b scrollbar-hide">
         {months.map((month) => (
           <div
             key={month.index}
             className={cn(
               "flex-shrink-0 px-4 py-2 mx-1 rounded-full cursor-pointer",
-              month.isCurrentMonth
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/20"
+              month.isCurrentMonth ? "bg-primary text-primary-foreground" : "bg-muted/20"
             )}
             onClick={() => handleMonthClick(month.index)}
           >

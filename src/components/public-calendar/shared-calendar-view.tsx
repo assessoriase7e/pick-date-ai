@@ -114,9 +114,7 @@ export function SharedCalendarView({
       <div className="mb-8 text-center w-full">
         <h1 className="text-3xl font-bold mb-2">{calendar.name}</h1>
         {calendar.collaborator && (
-          <p className="text-lg text-muted-foreground">
-            Profissional: {calendar.collaborator.name}
-          </p>
+          <p className="text-lg text-muted-foreground">Profissional: {calendar.collaborator.name}</p>
         )}
       </div>
 

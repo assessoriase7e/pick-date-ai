@@ -14,12 +14,7 @@ interface AppointmentCardProps {
   duration: number;
 }
 
-export function AppointmentCard({
-  appointment,
-  onEdit,
-  style,
-  duration,
-}: AppointmentCardProps) {
+export function AppointmentCard({ appointment, onEdit, style, duration }: AppointmentCardProps) {
   const { startTime, endTime, client, service } = appointment;
 
   return (
@@ -34,15 +29,12 @@ export function AppointmentCard({
         <Card className="z-20 text-sm h-full flex justify-center border-none bg-primary p-0 rounded-none">
           <CardHeader className={cn("p-0 pl-4 rounded-none")}>
             <h4 className="font-medium truncate flex gap-2 text-background dark:text-foreground text-xs lg:text-md h-full z-50">
-              <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p>{" "}
-              <span> | </span>
-              <p>{service?.name}</p>{" "}
-              <span className="hidden lg:block"> | </span>
+              <p>{getShortName(client?.fullName) || "Cliente Deletado"}</p> <span> | </span>
+              <p>{service?.name}</p> <span className="hidden lg:block"> | </span>
               <div className="hidden lg:flex">
                 <Clock className="h-3 w-3 mr-1" />
                 <span>
-                  {moment(startTime).format("HH:mm")} -{" "}
-                  {moment(endTime).format("HH:mm")}
+                  {moment(startTime).format("HH:mm")} - {moment(endTime).format("HH:mm")}
                 </span>
               </div>
             </h4>

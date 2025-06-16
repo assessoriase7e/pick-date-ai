@@ -2,12 +2,7 @@
 
 import { AppointmentFullData } from "@/types/calendar";
 import { formatCurrency } from "@/lib/format-utils";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Calendar, ScissorsSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
@@ -22,10 +17,7 @@ interface CollaboratorServicesTableProps {
   };
 }
 
-export function CollaboratorServicesTable({
-  appointments,
-  pagination,
-}: CollaboratorServicesTableProps) {
+export function CollaboratorServicesTable({ appointments, pagination }: CollaboratorServicesTableProps) {
   const router = useRouter();
 
   const formatDate = (date: Date) => {
@@ -59,8 +51,7 @@ export function CollaboratorServicesTable({
     {
       accessorKey: "finalPrice",
       header: "Preço",
-      cell: ({ row }) =>
-        formatCurrency(row.original.finalPrice || row.original.service.price),
+      cell: ({ row }) => formatCurrency(row.original.finalPrice || row.original.service.price),
     },
     {
       accessorKey: "startTime",
@@ -77,9 +68,7 @@ export function CollaboratorServicesTable({
       header: "Horário",
       cell: ({ row }) =>
         row.original.startTime && row.original.endTime
-          ? `${formatTime(row.original.startTime)} - ${formatTime(
-              row.original.endTime
-            )}`
+          ? `${formatTime(row.original.startTime)} - ${formatTime(row.original.endTime)}`
           : "-",
     },
     {
@@ -88,9 +77,7 @@ export function CollaboratorServicesTable({
       cell: ({ row }) => (
         <TooltipProvider>
           <Tooltip delayDuration={0}>
-            <TooltipTrigger>
-              {truncateText(row.original.notes || "-")}
-            </TooltipTrigger>
+            <TooltipTrigger>{truncateText(row.original.notes || "-")}</TooltipTrigger>
             <TooltipContent className="w-44">
               <p>{row.original.notes || "-"}</p>
             </TooltipContent>
@@ -144,15 +131,10 @@ export function CollaboratorServicesTable({
       {/* Visualização Mobile */}
       <div className="lg:hidden space-y-4">
         {appointments.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground rounded-md border">
-            Nenhum serviço encontrado
-          </div>
+          <div className="text-center py-6 text-muted-foreground rounded-md border">Nenhum serviço encontrado</div>
         ) : (
           appointments.map((appointment) => (
-            <div
-              key={appointment.id}
-              className="rounded-md border p-4 space-y-3"
-            >
+            <div key={appointment.id} className="rounded-md border p-4 space-y-3">
               <div className="grid grid-cols-2">
                 <div className="space-y-1">
                   <h3 className="font-medium flex gap-2">
@@ -162,26 +144,18 @@ export function CollaboratorServicesTable({
                   <p className="text-sm text-muted-foreground flex gap-2">
                     <Calendar /> {formatDate(appointment.startTime)}
                   </p>
-                  {appointment.notes && (
-                    <p className="text-sm text-muted-foreground">
-                      {appointment.notes}
-                    </p>
-                  )}
+                  {appointment.notes && <p className="text-sm text-muted-foreground">{appointment.notes}</p>}
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-medium flex gap-2">
-                    {formatCurrency(
-                      appointment.finalPrice || appointment.service.price
-                    ) || "Serviço não encontrado"}
+                    {formatCurrency(appointment.finalPrice || appointment.service.price) || "Serviço não encontrado"}
                   </h3>
                   <p className="text-sm text-muted-foreground flex gap-2">
                     <User /> {appointment.client?.fullName}
                   </p>
                 </div>
               </div>
-              <p className="text-muted-foreground text-xs">
-                {appointment.notes || "Nenhuma observação"}
-              </p>
+              <p className="text-muted-foreground text-xs">{appointment.notes || "Nenhuma observação"}</p>
             </div>
           ))
         )}

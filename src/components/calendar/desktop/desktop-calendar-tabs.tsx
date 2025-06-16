@@ -5,10 +5,7 @@ interface DesktopCalendarTabsProps {
   calendarId: number;
 }
 
-export function DesktopCalendarTabs({
-  calendars,
-  calendarId,
-}: DesktopCalendarTabsProps) {
+export function DesktopCalendarTabs({ calendars, calendarId }: DesktopCalendarTabsProps) {
   const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
 
   return null; // Componente não renderiza mais nada

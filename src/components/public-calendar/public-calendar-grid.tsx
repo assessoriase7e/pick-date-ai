@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { AppointmentFullData } from "@/types/calendar";
-import { CalendarDay } from "../calendar/calendar-types";
-import { DesktopCalendarView } from "../calendar/views/desktop-calendar-view";
+import { CalendarDay } from "../../types/calendar";
+import { DesktopCalendarView } from "../calendar/desktop/desktop-calendar-view";
 import { PublicDayDetailsModal } from "./public-day-details-modal";
 import { Client, Service } from "@prisma/client";
 
@@ -48,10 +48,7 @@ export function PublicCalendarGrid({
 
     const days: CalendarDay[] = [];
 
-    const prevMonthStart = moment(startOfMonth).subtract(
-      startDayOfWeek,
-      "days"
-    );
+    const prevMonthStart = moment(startOfMonth).subtract(startDayOfWeek, "days");
     for (let i = 0; i < startDayOfWeek; i++) {
       const date = moment(prevMonthStart).add(i, "days");
       days.push({
@@ -130,9 +127,7 @@ export function PublicCalendarGrid({
 
       <PublicDayDetailsModal
         dayDetails={dayDetails}
-        appointments={getAppointmentsForDay(
-          moment(dayDetails?.date || new Date())
-        )}
+        appointments={getAppointmentsForDay(moment(dayDetails?.date || new Date()))}
         closeDayDetails={() => setDayDetails(null)}
         selectedHour={selectedHour}
         onHourClick={handleHourClick}
