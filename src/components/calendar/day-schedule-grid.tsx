@@ -11,15 +11,8 @@ interface DayScheduleGridProps {
   selectedHour: number | null;
 }
 
-export function DayScheduleGrid({
-  appointments,
-  onHourClick,
-  onEditAppointment,
-  selectedHour,
-}: DayScheduleGridProps) {
-  const activeAppointments = appointments.filter(
-    (appointment) => appointment.status !== "canceled"
-  );
+export function DayScheduleGrid({ appointments, onHourClick, onEditAppointment, selectedHour }: DayScheduleGridProps) {
+  const activeAppointments = appointments.filter((appointment) => appointment.status !== "canceled");
 
   const formatHour = (hour: number) => {
     return moment().hour(hour).minute(0).format("HH:mm");
@@ -37,17 +30,13 @@ export function DayScheduleGrid({
     <div className="flex-1 overflow-y-auto">
       <div className="flex h-full">
         {/* Régua de horas */}
-        <div
-          className="w-16 flex-shrink-0 border-r bg-muted/20"
-          style={{ minHeight: "1920px" }}
-        >
+        <div className="w-16 flex-shrink-0 border-r bg-muted/20" style={{ minHeight: "1920px" }}>
           {hoursOfDay.map((hour) => (
             <div
               key={hour}
               className={cn(
                 "h-20 flex items-center justify-center border-b",
-                isNightHour(hour) &&
-                  "bg-background brightness-90 dark:brightness-50"
+                isNightHour(hour) && "bg-background brightness-90 dark:brightness-50"
               )}
             >
               <span className="text-sm font-medium">{formatHour(hour)}</span>
@@ -58,14 +47,13 @@ export function DayScheduleGrid({
         {/* Área de conteúdo para compromissos */}
         <div className="flex-1 relative">
           {/* Grid de horas para clicar */}
-          <div className="absolute inset-0 grid grid-rows-[repeat(24,80px)] z-10">
+          <div className="absolute inset-0 grid grid-rows-[repeat(24,80px)] z-10 pr-2">
             {hoursOfDay.map((hour) => (
               <div
                 key={hour}
                 className={cn(
                   "h-20 border-b hover:bg-muted/20 transition-colors cursor-pointer",
-                  isNightHour(hour) &&
-                    "bg-background brightness-90 dark:brightness-50",
+                  isNightHour(hour) && "bg-background brightness-90 dark:brightness-50",
                   selectedHour === hour && "ring-2 ring-primary"
                 )}
                 onClick={() => handleHourClick(hour)}

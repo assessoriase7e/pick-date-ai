@@ -18,6 +18,7 @@ interface CalendarGridProps {
   loading?: boolean;
   calendars?: CalendarFullData[];
   setCalendarIdQueryParam?: (id: string) => void;
+  onDayClick?: (date: Date) => void; // Adicionar esta prop
 }
 
 export function CalendarGrid({
@@ -30,12 +31,12 @@ export function CalendarGrid({
   calendarId,
   calendars,
   setCalendarIdQueryParam,
+  onDayClick,
 }: CalendarGridProps) {
   const today = moment();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname =
-    typeof window !== "undefined" ? window.location.pathname : "";
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const isSharedCalendar = pathname.includes("shared-calendar");
 
   const [selectedYear, setSelectedYear] = useState(moment(currentDate).year());
@@ -74,10 +75,7 @@ export function CalendarGrid({
 
     const days: CalendarDay[] = [];
 
-    const prevMonthStart = moment(startOfMonth).subtract(
-      startDayOfWeek,
-      "days"
-    );
+    const prevMonthStart = moment(startOfMonth).subtract(startDayOfWeek, "days");
     for (let i = 0; i < startDayOfWeek; i++) {
       const date = moment(prevMonthStart).add(i, "days");
       days.push({
@@ -125,16 +123,10 @@ export function CalendarGrid({
   };
 
   const handleDayClick = (date: Date) => {
-    setIsLoading(true);
-
-    const baseUrl = isSharedCalendar
-      ? `/shared-calendar/${calendarId}`
-      : "/calendar/day";
-    const params = new URLSearchParams();
-    params.set("calendarId", String(calendarId));
-    params.set("date", date.toISOString());
-
-    router.push(`${baseUrl}?${params.toString()}`);
+    if (onDayClick) {
+      onDayClick(date);
+    }
+    // Remover o fallback que usa query params
   };
 
   const handleYearChange = (year: string) => {

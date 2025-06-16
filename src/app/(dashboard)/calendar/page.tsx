@@ -18,22 +18,15 @@ export default async function CalendarPage({
 }) {
   const sParams = await searchParams;
 
-  const [response, collaboratorsResponse] = await Promise.all([
-    listCalendars(),
-    getCollaborators({ limit: 100 }),
-  ]);
+  const [response, collaboratorsResponse] = await Promise.all([listCalendars(), getCollaborators({ limit: 100 })]);
 
   const calendars = response.success && response.data ? response.data : [];
-  const collaborators = collaboratorsResponse.success
-    ? collaboratorsResponse.data
-    : [];
+  const collaborators = collaboratorsResponse.success ? collaboratorsResponse.data : [];
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : 0;
   const calendarId = Number(sParams.calendarId) || initialCalendarId;
 
-  const currentDate = sParams.date
-    ? moment(sParams.date).toDate()
-    : moment().startOf("day").toDate();
+  const currentDate = sParams.date ? moment(sParams.date).toDate() : moment().startOf("day").toDate();
 
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   const res = await getAppointmentsByMonth(currentDate, Number(calendarId));
@@ -59,15 +52,10 @@ export default async function CalendarPage({
 
   if (sParams.selectedDay) {
     selectedDayDate = moment(sParams.selectedDay).toDate();
-    const dayResponse = await getAppointmentsByCalendarAndDate(
-      calendarId,
-      selectedDayDate
-    );
+    const dayResponse = await getAppointmentsByCalendarAndDate(calendarId, selectedDayDate);
 
     if (dayResponse.success && dayResponse.data) {
-      selectedDayAppointments = dayResponse.data.filter(
-        (appointment) => appointment.status !== "canceled"
-      );
+      selectedDayAppointments = dayResponse.data.filter((appointment) => appointment.status !== "canceled");
     }
   }
 

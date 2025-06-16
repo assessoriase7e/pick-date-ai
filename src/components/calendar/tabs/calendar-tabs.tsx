@@ -39,6 +39,7 @@ export function CalendarTabs({
   goToNextMonth,
   goToToday,
   selectedDate,
+  openDayDetails, // Esta prop já existe na interface mas não estava sendo usada
   appointments,
   setOpen,
   setShareOpen,
@@ -69,6 +70,7 @@ export function CalendarTabs({
     goToToday,
     calendars,
     setCalendarIdQueryParam: handleChangeCalendar,
+    onDayClick: openDayDetails, // Adicionar esta linha
   };
 
   return (
