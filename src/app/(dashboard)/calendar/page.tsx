@@ -6,6 +6,9 @@ import { AppointmentFullData } from "@/types/calendar";
 import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 import moment from "moment";
+import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
+import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
+import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 
 export default async function CalendarPage({
   searchParams,
@@ -63,6 +66,24 @@ export default async function CalendarPage({
     }
   }
 
+  // Antes do return, adicione:
+  const allClients: Record<number, any[]> = {};
+  const allServices: Record<number, any[]> = {};
+  const allCollaborators: Record<number, any> = {};
+  
+  // Carregar dados para todos os calendários
+  for (const calendar of calendars) {
+    const [clientsRes, servicesRes, collaboratorRes] = await Promise.all([
+      getClientsByCalendar(calendar.id),
+      getServicesByCalendar(calendar.id),
+      getCalendarCollaborator(calendar.id),
+    ]);
+    
+    allClients[calendar.id] = clientsRes.success ? clientsRes.data : [];
+    allServices[calendar.id] = servicesRes.success ? servicesRes.data : [];
+    allCollaborators[calendar.id] = collaboratorRes.success ? collaboratorRes.data?.collaborator || null : null;
+  }
+
   return (
     <CalendarContent
       calendars={calendars}
@@ -72,6 +93,9 @@ export default async function CalendarPage({
       selectedDay={selectedDayDate}
       selectedDayAppointments={selectedDayAppointments}
       collaborators={collaborators}
+      allClients={allClients}
+      allServices={allServices}
+      allCollaborators={allCollaborators}
     />
   );
 }

@@ -60,11 +60,14 @@ export function CalendarGrid({
     if (currentParams !== prevSearchParams) {
       setIsLoading(true);
       setPrevSearchParams(currentParams);
+      
+      // Usar timeout para evitar setState imediato
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-
-    return () => {
-      setIsLoading(false);
-    };
   }, [searchParams, prevSearchParams, isInitialLoad]);
 
   const calendarDays = useMemo(() => {

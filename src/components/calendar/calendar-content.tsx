@@ -1,7 +1,8 @@
 "use client";
+
 import moment from "moment";
 import "moment/locale/pt-br";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -10,20 +11,16 @@ import { CalendarHeader } from "./calendar-header";
 import { CalendarModals } from "./calendar-modals";
 import { EmptyCalendarState } from "./empty-calendar-state";
 import { CalendarTabs } from "./tabs/calendar-tabs";
-import { AppointmentFullData, CalendarFullData, CalendarWithFullCollaborator } from "@/types/calendar";
+import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useCalendarQuery } from "@/hooks/useCalendarQuery";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
-import { Calendar, Client, Collaborator, Service } from "@prisma/client";
+import { Calendar } from "@prisma/client";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { CalendarLimitModal } from "./calendar-limit-modal";
-import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
-import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
-import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
-import { getCalendarById } from "@/actions/calendars/getById";
-import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
+import { DayDetailsModal } from "./day-details-modal";
 
 moment.locale("pt-br");
 
@@ -35,6 +32,9 @@ interface CalendarContentProps {
   selectedDay: Date | null;
   selectedDayAppointments: AppointmentFullData[];
   collaborators: CollaboratorFullData[];
+  allClients: Record<number, any[]>;
+  allServices: Record<number, any[]>;
+  allCollaborators: Record<number, any>;
 }
 
 export function CalendarContent({
@@ -44,22 +44,41 @@ export function CalendarContent({
   appointments,
   currentDate,
   selectedDay,
+  allClients,
+  allServices,
+  allCollaborators,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
-  const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
-  const { toast } = useToast();
-  const { limit, current, canCreateMore } = useCalendarLimits();
+  const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
+  const [dayModalOpen, setDayModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const { activeCalendarId, activeDate, setCalendarId, goToPreviousMonth, goToNextMonth, goToToday, openDayDetails } =
-    useCalendarQuery({
+  const { toast } = useToast();
+  const { limit, current } = useCalendarLimits();
+
+  const { activeCalendarId, activeDate, setCalendarId, goToPreviousMonth, goToNextMonth, goToToday } = useCalendarQuery(
+    {
       initialCalendarId: calendarId || calendars[0]?.id,
       initialDate: currentDate,
       availableCalendarIds: calendars.map((cal) => cal.id),
-    });
+    }
+  );
+
+  const activeCalendar = calendars.find((cal) => cal.id === activeCalendarId);
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDate(date);
+    setDayModalOpen(true);
+  };
+
+  const handleCloseDayModal = () => {
+    setDayModalOpen(false);
+    setSelectedDate(null);
+  };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
     try {
@@ -110,7 +129,6 @@ export function CalendarContent({
 
       setEditOpen(false);
       setSelectedCalendar(null);
-
       await revalidatePathAction("/calendar");
 
       toast({
@@ -131,20 +149,11 @@ export function CalendarContent({
     if (!selectedCalendar) return;
 
     try {
-      // Delete future appointments
       await deleteManyAppointments({ selectedCalendar });
+      await deleteCalendar({ id: selectedCalendar.id });
 
-      // Deleta calendar
-      await deleteCalendar({
-        id: selectedCalendar.id,
-      });
-
-      // Verificar se o calendário deletado é o ativo atualmente
       const isCurrentCalendar = selectedCalendar.id === activeCalendarId;
-
-      // Se for o calendário ativo e há outros calendários disponíveis
       if (isCurrentCalendar && calendars.length > 1) {
-        // Encontrar o primeiro calendário que não seja o deletado
         const remainingCalendar = calendars.find((cal) => cal.id !== selectedCalendar.id);
         if (remainingCalendar) {
           setCalendarId(String(remainingCalendar.id));
@@ -152,9 +161,9 @@ export function CalendarContent({
       }
 
       revalidatePathAction("/calendar");
-
       setDeleteOpen(false);
       setSelectedCalendar(null);
+
       toast({
         title: "Sucesso",
         description: "Calendário e agendamentos futuros excluídos com sucesso",
@@ -182,100 +191,6 @@ export function CalendarContent({
   if (calendars.length === 0) {
     return <EmptyCalendarState collaborators={collaborators} />;
   }
-
-  const [dayModalOpen, setDayModalOpen] = useState(false);
-  const [dayModalData, setDayModalData] = useState<{
-    date: Date | null;
-    appointments: AppointmentFullData[];
-    collaborator: Collaborator;
-    clients: Client[];
-    services: Service[];
-    calendar: CalendarWithFullCollaborator;
-  }>({ date: null, appointments: [], collaborator: null, clients: [], services: [], calendar: null });
-
-  // No início do componente, carregar uma vez
-  const [staticData, setStaticData] = useState({
-    collaborator: null,
-    clients: [],
-    services: [],
-    calendar: null,
-    loaded: false,
-  });
-
-  useEffect(() => {
-    const loadStaticData = async () => {
-      if (!staticData.loaded) {
-        const [collaboratorRes, clientsRes, servicesRes, calendarRes] = await Promise.all([
-          getCalendarCollaborator(activeCalendarId),
-          getClientsByCalendar(activeCalendarId),
-          getServicesByCalendar(activeCalendarId),
-          getCalendarById(activeCalendarId),
-        ]);
-
-        setStaticData({
-          collaborator: collaboratorRes.success ? collaboratorRes.data?.collaborator : null,
-          clients: clientsRes.success ? clientsRes.data : [],
-          services: servicesRes.success ? servicesRes.data : [],
-          calendar: calendarRes.success ? calendarRes.data : null,
-          loaded: true,
-        });
-      }
-    };
-
-    loadStaticData();
-  }, [activeCalendarId]);
-
-  // Simplificar loadDayModalData para carregar apenas appointments
-  const loadDayModalData = async (date: Date) => {
-    try {
-      const appointmentsRes = await getAppointmentsByCalendarAndDate(activeCalendarId, date);
-
-      setDayModalData({
-        date,
-        appointments: appointmentsRes.success ? appointmentsRes.data.filter((apt) => apt.status !== "canceled") : [],
-        ...staticData, // usar dados já carregados
-      });
-
-      setDayModalOpen(true);
-    } catch (error) {
-      console.error("Erro ao carregar dados do modal:", error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar dados do dia",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleCloseDayModal = () => {
-    setDayModalOpen(false);
-  };
-
-  const handleDayClick = (date: Date) => {
-    // Abrir modal imediatamente com dados básicos
-    setDayModalData({
-      date,
-      appointments: [], // será carregado depois
-      ...staticData,
-    });
-    setDayModalOpen(true);
-
-    // Carregar appointments em background
-    loadDayAppointments(date);
-  };
-
-  const loadDayAppointments = async (date: Date) => {
-    try {
-      const appointmentsRes = await getAppointmentsByCalendarAndDate(activeCalendarId, date);
-
-      setDayModalData((prev) => ({
-        ...prev,
-        appointments: appointmentsRes.success ? appointmentsRes.data.filter((apt) => apt.status !== "canceled") : [],
-      }));
-    } catch (error) {
-      console.error("Erro ao carregar compromissos:", error);
-    }
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -321,6 +236,20 @@ export function CalendarContent({
       />
 
       <CalendarLimitModal open={limitModalOpen} onOpenChange={setLimitModalOpen} currentCount={current} limit={limit} />
+
+      {selectedDate && activeCalendar && (
+        <DayDetailsModal
+          isOpen={dayModalOpen}
+          onClose={handleCloseDayModal}
+          date={selectedDate}
+          calendarId={activeCalendarId}
+          calendar={activeCalendar}
+          clients={allClients[activeCalendarId] || []}
+          services={allServices[activeCalendarId] || []}
+          collaborator={allCollaborators[activeCalendarId] || null}
+          appointments={appointments}
+        />
+      )}
     </div>
   );
 }

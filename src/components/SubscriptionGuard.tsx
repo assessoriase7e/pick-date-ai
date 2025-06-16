@@ -20,14 +20,24 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   useEffect(() => {
     if (!user || isLoading) return;
 
-    // Usar canAccessPremiumFeatures que já inclui verificação de lifetime users
+    // Verificar se a rota atual requer acesso premium
+    const requiresPremium = RESTRICTED_PATHS.some(path => pathname.startsWith(path));
+    
+    if (!requiresPremium) return;
+
+    // Se não pode acessar recursos premium, redirecionar para pricing
     if (!canAccessPremiumFeatures) {
       router.push("/pricing");
       return;
     }
 
     // Se tem assinatura mas está inativa (não se aplica a lifetime users)
-    if (subscription && !["active", "trialing"].includes(subscription.status)) {
+    // O canAccessPremiumFeatures já considera lifetime users, então esta verificação
+    // só será executada para usuários não-lifetime
+    if (subscription && !canAccessPremiumFeatures && ![
+      "active", 
+      "trialing"
+    ].includes(subscription.status)) {
       router.push("/payment/pending");
       return;
     }

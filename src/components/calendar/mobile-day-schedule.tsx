@@ -2,11 +2,8 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
-<<<<<<< HEAD
-=======
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
->>>>>>> dev-subscription
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
@@ -110,13 +107,6 @@ export function MobileDaySchedule({
   };
 
   return (
-<<<<<<< HEAD
-    <div className="container space-y-2">
-      <div className="w-full p-3 px-4 bg-primary rounded-lg">
-        <h2 className="text-sm font-medium text-center">
-          {collaborator.name} | {collaborator.profession} | {formattedDate}
-        </h2>
-=======
     <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
       <Button variant="ghost" onClick={handleBackToCalendar} className="mr-auto">
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -126,7 +116,6 @@ export function MobileDaySchedule({
       <div className="flex items-center flex-col">
         <h1 className="text-xl font-bold ml-auto text-center">Agendamentos para {formattedDate}</h1>
         <h2 className="p-1 px-6 bg-primary rounded-full text-white">{collaborator.name}</h2>
->>>>>>> dev-subscription
       </div>
       <div className="w-full">
         <div className="border rounded-lg overflow-y-auto h-[80svh]">
