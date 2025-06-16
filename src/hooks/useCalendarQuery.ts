@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface UseCalendarQueryProps {
@@ -11,12 +11,27 @@ interface UseCalendarQueryProps {
 export function useCalendarQuery({
   initialCalendarId,
   initialDate,
+  availableCalendarIds,
 }: UseCalendarQueryProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const activeCalendarId =
-    Number(searchParams.get("calendarId")) || initialCalendarId;
+  const urlCalendarId = Number(searchParams.get("calendarId"));
+  
+  // Verificar se o calendário da URL existe nos calendários disponíveis
+  const isValidCalendarId = urlCalendarId && availableCalendarIds.includes(urlCalendarId);
+  
+  const activeCalendarId = isValidCalendarId ? urlCalendarId : initialCalendarId;
+  
+  // Redirecionar automaticamente se o calendário da URL não existir
+  useEffect(() => {
+    if (urlCalendarId && !isValidCalendarId && availableCalendarIds.length > 0) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("calendarId", String(initialCalendarId));
+      router.replace(`/calendar?${params.toString()}`);
+    }
+  }, [urlCalendarId, isValidCalendarId, initialCalendarId, availableCalendarIds.length, router, searchParams]);
+
   const activeDate = searchParams.get("date")
     ? new Date(searchParams.get("date")!)
     : initialDate;

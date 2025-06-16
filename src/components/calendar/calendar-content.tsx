@@ -17,6 +17,8 @@ import { useCalendarQuery } from "@/hooks/useCalendarQuery";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 import { Calendar } from "@prisma/client";
+import { useCalendarLimits } from "@/hooks/use-calendar-limits";
+import { CalendarLimitModal } from "./calendar-limit-modal";
 
 moment.locale("pt-br");
 
@@ -42,8 +44,10 @@ export function CalendarContent({
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<any>(null);
   const { toast } = useToast();
+  const { limit, current, canCreateMore } = useCalendarLimits();
 
   const {
     activeCalendarId,
@@ -73,6 +77,9 @@ export function CalendarContent({
         });
         setOpen(false);
         revalidatePathAction("/calendar");
+      } else if (response.error === "CALENDAR_LIMIT_EXCEEDED") {
+        setLimitModalOpen(true);
+        setOpen(false);
       } else {
         toast({
           title: "Erro ao criar calendário",
@@ -85,7 +92,7 @@ export function CalendarContent({
       console.error("Erro ao criar calendário:", error);
       toast({
         title: "Erro ao criar calendário",
-        description: "Ocorreu um erro ao criar o calendário.",
+        description: "Ocorreu um erro inesperado ao criar o calendário.",
         variant: "destructive",
       });
     }
@@ -124,18 +131,30 @@ export function CalendarContent({
 
   const handleDeleteCalendar = async () => {
     if (!selectedCalendar) return;
-
+  
     try {
       // Delete future appointments
       await deleteManyAppointments({ selectedCalendar });
-
+  
       // Deleta calendar
       await deleteCalendar({
         id: selectedCalendar.id,
       });
-
+  
+      // Verificar se o calendário deletado é o ativo atualmente
+      const isCurrentCalendar = selectedCalendar.id === activeCalendarId;
+      
+      // Se for o calendário ativo e há outros calendários disponíveis
+      if (isCurrentCalendar && calendars.length > 1) {
+        // Encontrar o primeiro calendário que não seja o deletado
+        const remainingCalendar = calendars.find(cal => cal.id !== selectedCalendar.id);
+        if (remainingCalendar) {
+          setCalendarId(String(remainingCalendar.id));
+        }
+      }
+  
       revalidatePathAction("/calendar");
-
+  
       setDeleteOpen(false);
       setSelectedCalendar(null);
       toast({
@@ -207,6 +226,13 @@ export function CalendarContent({
         handleDeleteCalendar={handleDeleteCalendar}
         collaborators={collaborators}
         selectedCalendar={selectedCalendar}
+      />
+      
+      <CalendarLimitModal
+        open={limitModalOpen}
+        onOpenChange={setLimitModalOpen}
+        currentCount={current}
+        limit={limit}
       />
     </div>
   );
