@@ -4,10 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import {
-  AppointmentFullData,
-  CalendarWithFullCollaborator,
-} from "@/types/calendar";
+import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
@@ -36,22 +33,20 @@ export function MobileDaySchedule({
 }: MobileDayScheduleProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<AppointmentFullData | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentFullData | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const selectedHour = searchParams.get("hour")
-    ? parseInt(searchParams.get("hour")!)
-    : null;
+  const selectedHour = searchParams.get("hour") ? parseInt(searchParams.get("hour")!) : null;
   const startTime = searchParams.get("startTime");
   const endTime = searchParams.get("endTime");
 
-  const formattedDate = moment(date)
-    .locale("pt-br")
-    .format("DD [de] MMMM [de] YYYY");
+  const formattedDate = moment(date).locale("pt-br").format("DD [de] MMMM [de] YYYY");
 
   const handleBackToCalendar = () => {
-    router.push(`/calendar?calendarId=${calendarId}`);
+    const params = new URLSearchParams();
+    params.set("calendarId", String(calendarId));
+    params.set("date", date.toISOString());
+    router.push(`/calendar?${params.toString()}`);
   };
 
   const handleHourClick = (hour: number) => {
@@ -97,11 +92,7 @@ export function MobileDaySchedule({
     }
   };
 
-  const checkTimeConflict = (
-    startTime: Date,
-    endTime: Date,
-    excludeId?: number
-  ): boolean => {
+  const checkTimeConflict = (startTime: Date, endTime: Date, excludeId?: number): boolean => {
     return appointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
       if (appointment.status !== "scheduled") return false;
@@ -111,30 +102,21 @@ export function MobileDaySchedule({
 
       return (
         (startTime < appointmentEnd && endTime > appointmentStart) ||
-        (startTime.getTime() === appointmentStart.getTime() &&
-          endTime.getTime() === appointmentEnd.getTime())
+        (startTime.getTime() === appointmentStart.getTime() && endTime.getTime() === appointmentEnd.getTime())
       );
     });
   };
 
   return (
     <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
-      <Button
-        variant="ghost"
-        onClick={handleBackToCalendar}
-        className="mr-auto"
-      >
+      <Button variant="ghost" onClick={handleBackToCalendar} className="mr-auto">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar
       </Button>
 
       <div className="flex items-center flex-col">
-        <h1 className="text-xl font-bold ml-auto text-center">
-          Agendamentos para {formattedDate}
-        </h1>
-        <h2 className="p-1 px-6 bg-primary rounded-full text-white">
-          {collaborator.name}
-        </h2>
+        <h1 className="text-xl font-bold ml-auto text-center">Agendamentos para {formattedDate}</h1>
+        <h2 className="p-1 px-6 bg-primary rounded-full text-white">{collaborator.name}</h2>
       </div>
 
       <Separator />

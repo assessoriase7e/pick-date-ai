@@ -4,10 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import {
-  AppointmentFullData,
-  CalendarWithFullCollaborator,
-} from "@/types/calendar";
+import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
@@ -36,14 +33,11 @@ export function DayScheduleContent({
 }: DayScheduleContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<AppointmentFullData | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentFullData | null>(null);
   const [showForm, setShowForm] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const selectedHour = searchParams.get("hour")
-    ? parseInt(searchParams.get("hour")!)
-    : null;
+  const selectedHour = searchParams.get("hour") ? parseInt(searchParams.get("hour")!) : null;
   const startTime = searchParams.get("startTime");
   const endTime = searchParams.get("endTime");
 
@@ -72,7 +66,10 @@ export function DayScheduleContent({
 
   // A partir daqui, apenas código para desktop
   const handleBackToCalendar = () => {
-    router.push(`/calendar?calendarId=${calendarId}`);
+    const params = new URLSearchParams();
+    params.set("calendarId", String(calendarId));
+    params.set("date", date.toISOString());
+    router.push(`/calendar?${params.toString()}`);
   };
 
   const handleHourClick = (hour: number) => {
@@ -115,11 +112,7 @@ export function DayScheduleContent({
     }
   };
 
-  const checkTimeConflict = (
-    startTime: Date,
-    endTime: Date,
-    excludeId?: number
-  ): boolean => {
+  const checkTimeConflict = (startTime: Date, endTime: Date, excludeId?: number): boolean => {
     return appointments.some((appointment) => {
       if (excludeId && appointment.id === excludeId) return false;
       if (appointment.status !== "scheduled") return false;
@@ -129,8 +122,7 @@ export function DayScheduleContent({
 
       return (
         (startTime < appointmentEnd && endTime > appointmentStart) ||
-        (startTime.getTime() === appointmentStart.getTime() &&
-          endTime.getTime() === appointmentEnd.getTime())
+        (startTime.getTime() === appointmentStart.getTime() && endTime.getTime() === appointmentEnd.getTime())
       );
     });
   };
@@ -138,11 +130,7 @@ export function DayScheduleContent({
   return (
     <div className="container mx-auto h-full flex flex-col items-end justify-center w-full gap-5">
       <div className="flex w-full">
-        <Button
-          variant="ghost"
-          onClick={handleBackToCalendar}
-          className="mr-auto"
-        >
+        <Button variant="ghost" onClick={handleBackToCalendar} className="mr-auto">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
@@ -180,8 +168,8 @@ export function DayScheduleContent({
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <p className="text-muted-foreground mb-4">
-                Selecione um horário na lista à esquerda para criar um novo
-                agendamento ou clique em um agendamento existente para editá-lo.
+                Selecione um horário na lista à esquerda para criar um novo agendamento ou clique em um agendamento
+                existente para editá-lo.
               </p>
             </div>
           )}
