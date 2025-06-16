@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface UseCalendarQueryProps {
@@ -11,12 +11,16 @@ interface UseCalendarQueryProps {
 export function useCalendarQuery({
   initialCalendarId,
   initialDate,
+  availableCalendarIds,
 }: UseCalendarQueryProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const activeCalendarId =
-    Number(searchParams.get("calendarId")) || initialCalendarId;
+  const urlCalendarId = Number(searchParams.get("calendarId"));
+  const isValidCalendarId = urlCalendarId && availableCalendarIds.includes(urlCalendarId);
+  const activeCalendarId = isValidCalendarId ? urlCalendarId : initialCalendarId;
+  
+  // Preservar a data da URL se existir, senão usar a data inicial
   const activeDate = searchParams.get("date")
     ? new Date(searchParams.get("date")!)
     : initialDate;
@@ -66,14 +70,18 @@ export function useCalendarQuery({
   }, [activeCalendarId, router, searchParams]);
 
   const openDayDetails = (date: Date) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
+    params.set("calendarId", String(activeCalendarId));
+    params.set("date", activeDate.toISOString()); // Preservar a data atual do calendário
     params.set("selectedDay", date.toISOString());
     router.push(`/calendar?${params.toString()}`);
   };
 
   const closeDayDetails = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("selectedDay");
+    const params = new URLSearchParams();
+    params.set("calendarId", String(activeCalendarId));
+    params.set("date", activeDate.toISOString()); // Preservar a data atual
+    // Não incluir selectedDay para fechá-lo
     router.push(`/calendar?${params.toString()}`);
   };
 

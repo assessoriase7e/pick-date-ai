@@ -24,7 +24,11 @@ export default async function CalendarPage({
   const collaborators = collaboratorsResponse.success ? collaboratorsResponse.data : [];
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : 0;
-  const calendarId = Number(sParams.calendarId) || initialCalendarId;
+  const requestedCalendarId = Number(sParams.calendarId);
+  
+  // Verificar se o calendário solicitado existe
+  const calendarExists = requestedCalendarId && calendars.some(cal => cal.id === requestedCalendarId);
+  const calendarId = calendarExists ? requestedCalendarId : initialCalendarId;
 
   const currentDate = sParams.date ? moment(sParams.date).toDate() : moment().startOf("day").toDate();
 

@@ -1,20 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import moment from "moment";
-<<<<<<< HEAD
-=======
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
->>>>>>> dev-subscription
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 import { toast } from "sonner";
 import { Client, Collaborator, Service } from "@prisma/client";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { MobileDaySchedule } from "./mobile-day-schedule";
 
-interface MobileDayScheduleProps {
+interface DayScheduleContentProps {
   calendarId: number;
   date: Date;
   appointments: AppointmentFullData[];
@@ -24,7 +22,7 @@ interface MobileDayScheduleProps {
   calendar: CalendarWithFullCollaborator;
 }
 
-export function MobileDaySchedule({
+export function DayScheduleContent({
   calendarId,
   date,
   collaborator,
@@ -32,18 +30,41 @@ export function MobileDaySchedule({
   clients,
   services,
   calendar,
-}: MobileDayScheduleProps) {
+}: DayScheduleContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentFullData | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const selectedHour = searchParams.get("hour") ? parseInt(searchParams.get("hour")!) : null;
   const startTime = searchParams.get("startTime");
   const endTime = searchParams.get("endTime");
 
-  const formattedDate = moment(date).locale("pt-br").format("DD [de] MMMM [de] YYYY");
+  const formattedDate = moment(date).locale("pt-br").format("DD/MM/YYYY");
 
+  useEffect(() => {
+    if (selectedHour !== null || startTime || selectedAppointment) {
+      setShowForm(true);
+    }
+  }, [selectedHour, startTime, selectedAppointment]);
+
+  // Renderiza o componente mobile se estiver em um dispositivo móvel
+  if (isMobile) {
+    return (
+      <MobileDaySchedule
+        calendarId={calendarId}
+        date={date}
+        collaborator={collaborator}
+        appointments={appointments}
+        clients={clients}
+        services={services}
+        calendar={calendar}
+      />
+    );
+  }
+
+  // A partir daqui, apenas código para desktop
   const handleBackToCalendar = () => {
     const params = new URLSearchParams();
     params.set("calendarId", String(calendarId));
@@ -60,7 +81,6 @@ export function MobileDaySchedule({
     params.set("endTime", `${endHour.toString().padStart(2, "0")}:00`);
 
     setSelectedAppointment(null);
-    setShowForm(true);
 
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
@@ -72,8 +92,6 @@ export function MobileDaySchedule({
     params.delete("endTime");
 
     setSelectedAppointment(appointment);
-    setShowForm(true);
-
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
@@ -110,26 +128,21 @@ export function MobileDaySchedule({
   };
 
   return (
-<<<<<<< HEAD
-    <div className="container space-y-2">
-      <div className="w-full p-3 px-4 bg-primary rounded-lg">
-        <h2 className="text-sm font-medium text-center">
-          {collaborator.name} | {collaborator.profession} | {formattedDate}
-        </h2>
-=======
-    <div className="container mx-auto h-full flex flex-col items-center justify-center w-full gap-5">
-      <Button variant="ghost" onClick={handleBackToCalendar} className="mr-auto">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Voltar
-      </Button>
-
-      <div className="flex items-center flex-col">
-        <h1 className="text-xl font-bold ml-auto text-center">Agendamentos para {formattedDate}</h1>
-        <h2 className="p-1 px-6 bg-primary rounded-full text-white">{collaborator.name}</h2>
->>>>>>> dev-subscription
+    <div className="container mx-auto h-full flex flex-col items-end justify-center w-full gap-5">
+      <div className="flex w-full">
+        <Button variant="ghost" onClick={handleBackToCalendar} className="mr-auto">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+        </Button>
+        <div className="grid grid-cols-1 gap-2 border border-primary rounded-xl p-4 px-5 bg-primary text-white">
+          <h2 className="p-1 px-6 bg-foreground/25 rounded-lg ">
+            {collaborator.name} | {collaborator.profession} | {formattedDate}
+          </h2>
+        </div>
       </div>
-      <div className="w-full">
-        <div className="border rounded-lg overflow-y-auto h-[80svh]">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4  w-full">
+        <div className="border rounded-lg overflow-y-auto h-[calc(100svh-300px)]">
           <DayScheduleGrid
             appointments={appointments}
             onHourClick={handleHourClick}
@@ -137,15 +150,9 @@ export function MobileDaySchedule({
             selectedHour={selectedHour}
           />
         </div>
-      </div>
 
-      {/* Drawer para o formulário de agendamento */}
-      <Drawer open={showForm} onOpenChange={setShowForm}>
-        <DrawerHeader>
-          <DrawerTitle></DrawerTitle>
-        </DrawerHeader>
-        <DrawerContent>
-          <div className="p-5">
+        <div className="border rounded-lg p-4">
+          {showForm ? (
             <AppointmentForm
               date={date}
               appointment={selectedAppointment || undefined}
@@ -158,9 +165,16 @@ export function MobileDaySchedule({
               services={services}
               calendar={calendar}
             />
-          </div>
-        </DrawerContent>
-      </Drawer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <p className="text-muted-foreground mb-4">
+                Selecione um horário na lista à esquerda para criar um novo agendamento ou clique em um agendamento
+                existente para editá-lo.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

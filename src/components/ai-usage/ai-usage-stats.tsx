@@ -2,20 +2,31 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Brain, Users } from "lucide-react";
+import { Brain, Users, CreditCard } from "lucide-react";
 
 type AIUsageStatsProps = {
   stats: {
     uniqueAttendances: number;
     totalAttendances: number;
+    monthlyLimit: number;
+    remainingCredits: number;
   };
 };
 
 export function AIUsageStats({ stats }: AIUsageStatsProps) {
-  const progressPercentage = Math.min((stats.uniqueAttendances / 100) * 100, 100);
+  const isLifetimeUser = stats.monthlyLimit === Infinity;
+  const progressPercentage = stats.monthlyLimit > 0 && stats.monthlyLimit !== Infinity
+    ? Math.min((stats.uniqueAttendances / stats.monthlyLimit) * 100, 100)
+    : 0;
+
+  const getProgressColor = () => {
+    if (progressPercentage >= 90) return "bg-red-500";
+    if (progressPercentage >= 75) return "bg-yellow-500";
+    return "bg-green-500";
+  };
 
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium leading-tight">
@@ -25,12 +36,50 @@ export function AIUsageStats({ stats }: AIUsageStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="text-xl sm:text-2xl font-bold">{stats.uniqueAttendances}/100</div>
-            <Progress value={progressPercentage} className="w-full h-2" />
-            <p className="text-xs text-muted-foreground">
-              {progressPercentage.toFixed(1)}% do limite mensal
-            </p>
+            <div className="text-xl sm:text-2xl font-bold">
+              {stats.uniqueAttendances}/{isLifetimeUser ? "∞" : (stats.monthlyLimit || "∞")}
+            </div>
+            {stats.monthlyLimit > 0 && !isLifetimeUser && (
+              <>
+                <Progress 
+                  value={progressPercentage} 
+                  className="w-full h-2" 
+                  indicatorClassName={getProgressColor()}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {progressPercentage.toFixed(1)}% do limite mensal
+                </p>
+              </>
+            )}
+            {(stats.monthlyLimit === 0 || isLifetimeUser) && (
+              <p className="text-xs text-muted-foreground">
+                {isLifetimeUser ? "Acesso Lifetime - Ilimitado" : "Sem plano de IA ativo"}
+              </p>
+            )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium leading-tight">
+            Créditos Restantes
+          </CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-xl sm:text-2xl font-bold">
+            {isLifetimeUser ? "∞" : (stats.monthlyLimit > 0 ? stats.remainingCredits : "∞")}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {isLifetimeUser 
+              ? "Créditos ilimitados (Lifetime)"
+              : (stats.monthlyLimit > 0 
+                ? "Créditos disponíveis este mês"
+                : "Sem limite de créditos"
+              )
+            }
+          </p>
         </CardContent>
       </Card>
 
