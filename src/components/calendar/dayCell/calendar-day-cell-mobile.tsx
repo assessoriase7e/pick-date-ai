@@ -62,7 +62,7 @@ export function CalendarDayCellMobile({
           </div>
           {activeAppointments?.length > 0 && (
             <span className="text-sm bg-primary/20 text-primary px-2 py-1 rounded-full select-none dark:bg-primary/30 dark:text-primary-foreground">
-              {activeAppointments.length} agendamento(s)
+              {activeAppointments.length}
             </span>
           )}
         </div>

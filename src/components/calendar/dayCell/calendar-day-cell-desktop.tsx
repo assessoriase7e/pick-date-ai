@@ -107,7 +107,7 @@ export function CalendarDayCellDesktop({
           {activeAppointments.length > 0 && (
             <span className={appointmentCountStyles}>
               {activeAppointments.length}
-              <span className="hidden lg:block ml-1">agendamento(s)</span>
+              <span className="hidden lg:block ml-1">Clientes</span>
             </span>
           )}
         </div>
