@@ -29,7 +29,12 @@ export default async function AIUsagePage({ searchParams }: { searchParams: Prom
     }),
   ]);
 
-  const stats = statsResult.success ? statsResult.data : { uniqueAttendances: 0, totalAttendances: 0 };
+  const stats = statsResult.success ? statsResult.data : { 
+    uniqueAttendances: 0, 
+    totalAttendances: 0,
+    monthlyLimit: 0,
+    remainingCredits: 0
+  };
   const history = historyResult.success ? historyResult.data : [];
   const pagination = historyResult.success ? historyResult.pagination : { totalPages: 1, currentPage: 1 };
 
