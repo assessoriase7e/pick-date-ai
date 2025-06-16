@@ -1,6 +1,11 @@
+"use client";
+
 import { useUser } from "@clerk/nextjs";
-import useSWR from "swr";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getSubscriptionStatus } from "@/actions/subscription/get-status";
+import { createSubscription } from "@/actions/subscription/create-checkout";
+import { cancelSubscription } from "@/actions/subscription/cancel";
+import { createPortalSession } from "@/actions/subscription/portal";
 
 interface SubscriptionData {
   subscription: {
@@ -24,60 +29,65 @@ interface SubscriptionData {
   };
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export function useSubscription() {
   const { user } = useUser();
+  const [data, setData] = useState<SubscriptionData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const { data, error, mutate } = useSWR<SubscriptionData>(user ? `/api/subscription/status` : null, fetcher, {
-    refreshInterval: 24 * 60 * 60 * 1000, // 24 horas
-    revalidateOnFocus: false,
-  });
-
-  const createSubscription = useCallback(async (priceId: string) => {
-    const response = await fetch("/api/subscription/create-checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ priceId }),
-    });
-
-    const data = await response.json();
-
-    if (data.url) {
-      window.location.href = data.url;
+  const fetchSubscriptionStatus = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
     }
 
-    return data;
+    try {
+      setIsLoading(true);
+      setError(null);
+      const subscriptionData = await getSubscriptionStatus();
+      setData(subscriptionData);
+    } catch (err) {
+      setError(err as Error);
+      console.error("Erro ao buscar status da assinatura:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchSubscriptionStatus();
+  }, [fetchSubscriptionStatus]);
+
+  const handleCreateSubscription = useCallback(async (priceId: string) => {
+    try {
+      await createSubscription(priceId);
+      // A função createSubscription já faz o redirect, então não precisamos fazer mais nada
+    } catch (error) {
+      console.error("Erro ao criar assinatura:", error);
+      throw error;
+    }
   }, []);
 
-  const cancelSubscription = useCallback(async () => {
-    const response = await fetch("/api/subscription/cancel", {
-      method: "POST",
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      mutate();
+  const handleCancelSubscription = useCallback(async () => {
+    try {
+      await cancelSubscription();
+      // Recarregar os dados após cancelar
+      await fetchSubscriptionStatus();
+      return { success: true };
+    } catch (error) {
+      console.error("Erro ao cancelar assinatura:", error);
+      throw error;
     }
+  }, [fetchSubscriptionStatus]);
 
-    return result;
-  }, [mutate]);
-
-  const createPortalSession = useCallback(async () => {
-    const response = await fetch("/api/subscription/portal", {
-      method: "POST",
-    });
-
-    const data = await response.json();
-
-    if (data.url) {
-      window.location.href = data.url;
+  const handleCreatePortalSession = useCallback(async () => {
+    try {
+      await createPortalSession();
+      // A função createPortalSession já faz o redirect
+    } catch (error) {
+      console.error("Erro ao criar sessão do portal:", error);
+      throw error;
     }
-
-    return data;
   }, []);
 
   return {
@@ -88,11 +98,11 @@ export function useSubscription() {
     trialDaysRemaining: data?.trialDaysRemaining ?? 0,
     hasRemainingCredits: data?.hasRemainingCredits ?? true,
     aiCreditsInfo: data?.aiCreditsInfo,
-    isLoading: !error && !data,
+    isLoading,
     error,
-    createSubscription,
-    cancelSubscription,
-    createPortalSession,
-    refresh: mutate,
+    createSubscription: handleCreateSubscription,
+    cancelSubscription: handleCancelSubscription,
+    createPortalSession: handleCreatePortalSession,
+    refresh: fetchSubscriptionStatus,
   };
 }

@@ -34,7 +34,7 @@ export function PricingCards({ plans }: PricingCardsProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-2xl text-center mb-12">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">Planos Simples e Transparentes</h1>

@@ -1,5 +1,5 @@
-import { PricingCards } from "@/components/pricing/PricingCards";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
+import { PricingPageContent } from "@/components/pricing/PricingPageContent";
 
 // IDs dos produtos do Stripe vindos das variáveis de ambiente
 const STRIPE_PRODUCT_IDS = {
@@ -90,21 +90,24 @@ const ADDITIONAL_CALENDAR_PLAN = {
   features: ["+10 calendários extras", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
 };
 
+const ADDITIONAL_AI_PLAN = {
+  id: "add-ai",
+  name: "Atendimentos Adicionais",
+  description: "Adicione mais atendimentos IA ao seu plano",
+  price: "R$ 49,90",
+  period: "/mês",
+  productId: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!,
+  features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
+};
+
 export default function PricingPage() {
   return (
     <SubscriptionGuard>
-      <div className="space-y-8">
-        <PricingCards plans={PLANS} />
-
-        {/* Seção de Calendários Adicionais */}
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold mb-2">Precisa de Mais Calendários?</h3>
-            <p className="text-muted-foreground text-sm">Adicione calendários extras ao seu plano base</p>
-          </div>
-          <PricingCards plans={[ADDITIONAL_CALENDAR_PLAN]} />
-        </div>
-      </div>
+      <PricingPageContent 
+        plans={PLANS}
+        additionalCalendarPlan={ADDITIONAL_CALENDAR_PLAN}
+        additionalAiPlan={ADDITIONAL_AI_PLAN}
+      />
     </SubscriptionGuard>
   );
 }
