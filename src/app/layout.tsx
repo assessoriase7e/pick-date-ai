@@ -11,6 +11,7 @@ const montserrat = Montserrat({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Pick Date AI",
   description: "Sistema de agendamento via agentes de IA",
+  manifest: "/manifest.json",
   openGraph: {
     title: "Pick Date AI",
     description: "Sistema de agendamento via agentes de IA",
@@ -29,7 +30,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pick Date AI",
     description: "Sistema de agendamento via agentes de IA",
-    site: "https://pickdate.assessoriase7e.cloud",
     images: [
       "https://opengraph.b-cdn.net/production/images/606d9d48-8583-4565-a91c-4ae12c36d6c0.png?token=wb14_cC2fG1RiY6rVANhwiMkoVjZmTcpR8K5ZI5jl08&height=150&width=268&expires=33286115382",
     ],
