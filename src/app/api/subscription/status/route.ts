@@ -1,10 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { Subscription } from "@prisma/client";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 // Interface para a resposta
 interface SubscriptionStatusResponse {
@@ -22,13 +23,18 @@ interface SubscriptionStatusResponse {
 }
 
 // Função para obter o limite de créditos baseado na assinatura
-function getAICreditsLimit(subscription: any): number {
+function getAICreditsLimit(subscription: any, user?: any): number {
+  // Verificar se é usuário lifetime primeiro
+  if (user && isLifetimeUser()) {
+    return Infinity;
+  }
+
   if (!subscription || subscription.status !== "active") {
     return 0;
   }
 
   const { stripePriceId } = subscription;
-  
+
   if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
     return 100;
   }
@@ -38,7 +44,7 @@ function getAICreditsLimit(subscription: any): number {
   if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
     return 300;
   }
-  
+
   return 0;
 }
 
@@ -49,6 +55,10 @@ export async function GET() {
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Buscar usuário do Clerk para verificar metadados
+    const clerkUser = await currentUser();
+    const isLifetime = clerkUser ? isLifetimeUser() : false;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -107,7 +117,7 @@ export async function GET() {
         ];
 
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
-        
+
         // Verificar créditos de IA se for um plano com IA
         const aiLimit = getAICreditsLimit(subscription);
         if (aiLimit > 0) {
@@ -116,7 +126,7 @@ export async function GET() {
 
           // Buscar uso de IA do mês atual
           const aiUsageResult = await prisma.aIUsage.groupBy({
-            by: ['clientPhone'],
+            by: ["clientPhone"],
             where: {
               userId,
               date: {
@@ -136,12 +146,12 @@ export async function GET() {
             remaining: remainingCredits,
           };
         }
-        
+
         // A assinatura só é considerada ativa se tiver status ativo E créditos restantes (para planos de IA)
         if (aiLimit > 0) {
           isSubscriptionActive = isSubscriptionActive && hasRemainingCredits;
         }
-        
+
         canAccessPremiumFeatures = isTrialActive || isSubscriptionActive;
       } catch (error) {
         console.error("Erro ao verificar assinatura no Stripe:", error);
@@ -162,6 +172,22 @@ export async function GET() {
       hasRemainingCredits,
       aiCreditsInfo,
     };
+
+    // Para usuários lifetime, sempre retornar como ativo
+    if (isLifetime) {
+      return NextResponse.json({
+        subscription: user?.subscription || null,
+        isTrialActive: false,
+        isSubscriptionActive: true,
+        canAccessPremiumFeatures: true,
+        hasRemainingCredits: true,
+        aiCreditsInfo: {
+          used: 0, // Pode manter o uso real se quiser
+          limit: Infinity,
+          remaining: Infinity,
+        },
+      });
+    }
 
     return NextResponse.json(response);
   } catch (error) {

@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 type GetAIUsageStatsResponse =
   | {
@@ -17,13 +18,20 @@ type GetAIUsageStatsResponse =
   | { success: false; error: string };
 
 // Função para obter o limite de créditos baseado na assinatura
-function getAICreditsLimit(subscription: any): number {
+const getAICreditsLimit = async (subscription: any, user?: any): Promise<number> => {
+  const isLifeTime = await isLifetimeUser();
+
+  if (user && isLifeTime) {
+    console.log("Usuário lifetime");
+    return Infinity; // Usuários lifetime têm créditos ilimitados
+  }
+
   if (!subscription || subscription.status !== "active") {
     return 0; // Sem assinatura = sem créditos
   }
 
   const { stripePriceId } = subscription;
-  
+
   // Verificar pelos IDs dos produtos de IA
   if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
     return 100;
@@ -34,12 +42,14 @@ function getAICreditsLimit(subscription: any): number {
   if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
     return 300;
   }
-  
+
   return 0; // Outros planos não têm créditos de IA
-}
+};
 
 export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
   const { userId } = await auth();
+  const isLifetime = await isLifetimeUser();
+
   if (!userId) {
     return {
       success: false,
@@ -48,7 +58,6 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
   }
 
   try {
-    // Buscar usuário com assinatura
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -63,13 +72,57 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
       };
     }
 
+    const clerkUser = await currentUser();
+    const monthlyLimit = await getAICreditsLimit(user.subscription, clerkUser);
+
+    // Se for usuário lifetime, retornar valores especiais
+    if (clerkUser && isLifetime) {
+      const currentMonth = new Date();
+      const startDate = startOfMonth(currentMonth);
+      const endDate = endOfMonth(currentMonth);
+
+      const [uniqueAttendances, totalAttendances] = await Promise.all([
+        prisma.aIUsage
+          .findMany({
+            where: {
+              userId,
+              createdAt: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+            distinct: ["clientPhone"],
+          })
+          .then((results) => results.length),
+        prisma.aIUsage.count({
+          where: {
+            userId,
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        }),
+      ]);
+
+      return {
+        success: true,
+        data: {
+          uniqueAttendances,
+          totalAttendances,
+          monthlyLimit: Infinity,
+          remainingCredits: Infinity,
+        },
+      };
+    }
+
     const now = new Date();
     const startOfCurrentMonth = startOfMonth(now);
     const endOfCurrentMonth = endOfMonth(now);
 
     // Buscar atendimentos únicos do mês atual usando groupBy
     const uniqueAttendancesResult = await prisma.aIUsage.groupBy({
-      by: ['clientPhone'],
+      by: ["clientPhone"],
       where: {
         userId,
         date: {
@@ -92,8 +145,7 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
       },
     });
 
-    // Obter limite baseado na assinatura
-    const monthlyLimit = getAICreditsLimit(user.subscription);
+    // Calcular créditos restantes
     const remainingCredits = Math.max(0, monthlyLimit - uniqueAttendances);
 
     return {
@@ -106,10 +158,10 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
       },
     };
   } catch (error) {
-    console.error("Erro ao buscar estatísticas de uso da IA:", error);
+    console.error("Erro ao buscar estatísticas de uso de IA:", error);
     return {
       success: false,
-      error: "Falha ao buscar estatísticas de uso da IA",
+      error: "Erro interno do servidor",
     };
   }
 }

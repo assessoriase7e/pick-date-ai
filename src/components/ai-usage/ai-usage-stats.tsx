@@ -14,7 +14,8 @@ type AIUsageStatsProps = {
 };
 
 export function AIUsageStats({ stats }: AIUsageStatsProps) {
-  const progressPercentage = stats.monthlyLimit > 0 
+  const isLifetimeUser = stats.monthlyLimit === Infinity;
+  const progressPercentage = stats.monthlyLimit > 0 && stats.monthlyLimit !== Infinity
     ? Math.min((stats.uniqueAttendances / stats.monthlyLimit) * 100, 100)
     : 0;
 
@@ -36,9 +37,9 @@ export function AIUsageStats({ stats }: AIUsageStatsProps) {
         <CardContent>
           <div className="space-y-3">
             <div className="text-xl sm:text-2xl font-bold">
-              {stats.uniqueAttendances}/{stats.monthlyLimit || "∞"}
+              {stats.uniqueAttendances}/{isLifetimeUser ? "∞" : (stats.monthlyLimit || "∞")}
             </div>
-            {stats.monthlyLimit > 0 && (
+            {stats.monthlyLimit > 0 && !isLifetimeUser && (
               <>
                 <Progress 
                   value={progressPercentage} 
@@ -50,9 +51,9 @@ export function AIUsageStats({ stats }: AIUsageStatsProps) {
                 </p>
               </>
             )}
-            {stats.monthlyLimit === 0 && (
+            {(stats.monthlyLimit === 0 || isLifetimeUser) && (
               <p className="text-xs text-muted-foreground">
-                Sem plano de IA ativo
+                {isLifetimeUser ? "Acesso Lifetime - Ilimitado" : "Sem plano de IA ativo"}
               </p>
             )}
           </div>
@@ -68,12 +69,15 @@ export function AIUsageStats({ stats }: AIUsageStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-xl sm:text-2xl font-bold">
-            {stats.monthlyLimit > 0 ? stats.remainingCredits : "∞"}
+            {isLifetimeUser ? "∞" : (stats.monthlyLimit > 0 ? stats.remainingCredits : "∞")}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {stats.monthlyLimit > 0 
-              ? "Créditos disponíveis este mês"
-              : "Sem limite de créditos"
+            {isLifetimeUser 
+              ? "Créditos ilimitados (Lifetime)"
+              : (stats.monthlyLimit > 0 
+                ? "Créditos disponíveis este mês"
+                : "Sem limite de créditos"
+              )
             }
           </p>
         </CardContent>
