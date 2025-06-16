@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
+import { checkUserSubscriptionAccess } from "@/lib/subscription-guard";
 
 export async function createAppointment({
   clientId,
@@ -26,11 +27,11 @@ export async function createAppointment({
   status: string;
   servicePrice: number | null;
   finalPrice: number | null;
-  collaboratorId: number; // ALTERADO: removido | null
-  isPublic?: Boolean;
+  collaboratorId: number;
+  isPublic?: boolean;
 }) {
   try {
-    // ADICIONADO: Validação obrigatória do colaborador
+    // Validação obrigatória do colaborador
     if (!collaboratorId) {
       return {
         success: false,
@@ -40,7 +41,6 @@ export async function createAppointment({
 
     let userId: string | null = null;
 
-    // Se for cliente público, buscar o userId pelo calendário
     if (isPublic) {
       const calendar = await prisma.calendar.findUnique({
         where: { id: calendarId },
@@ -55,8 +55,17 @@ export async function createAppointment({
       }
 
       userId = calendar.userId;
+
+      const hasSubscriptionAccess = await checkUserSubscriptionAccess(userId);
+
+      if (!hasSubscriptionAccess) {
+        return {
+          success: false,
+          error:
+            "Este calendário não está disponível para agendamentos. O proprietário precisa de uma assinatura ativa.",
+        };
+      }
     } else {
-      // Caso contrário, autenticação é obrigatória
       const authResult = await auth();
 
       if (!authResult || !authResult.userId) {
@@ -69,7 +78,6 @@ export async function createAppointment({
       userId = authResult.userId;
     }
 
-    // Criar ou reutilizar cliente público
     let actualClientId = clientId ?? null;
 
     // Verificar conflitos de horário
@@ -77,30 +85,16 @@ export async function createAppointment({
       where: {
         OR: [
           {
-            startTime: {
-              lte: startTime,
-            },
-            endTime: {
-              gt: startTime,
-            },
+            startTime: { lte: startTime },
+            endTime: { gt: startTime },
           },
           {
-            startTime: {
-              lt: endTime,
-            },
-            endTime: {
-              gte: endTime,
-            },
+            startTime: { lt: endTime },
+            endTime: { gte: endTime },
           },
           {
-            startTime: {
-              gte: startTime,
-              lte: endTime,
-            },
-            endTime: {
-              gte: startTime,
-              lte: endTime,
-            },
+            startTime: { gte: startTime, lte: endTime },
+            endTime: { gte: startTime, lte: endTime },
           },
         ],
         status: "scheduled",
@@ -142,7 +136,7 @@ export async function createAppointment({
         status,
         servicePrice: finalServicePrice,
         finalPrice: finalFinalPrice,
-        collaboratorId, // Agora sempre será um número válido
+        collaboratorId,
         userId,
       },
       include: {
@@ -164,7 +158,7 @@ export async function createAppointment({
     console.error("Erro ao criar agendamento:", error);
     return {
       success: false,
-      error: "Falha ao criar agendamento",
+      error: "Erro interno ao criar agendamento",
     };
   }
 }

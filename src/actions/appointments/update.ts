@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { Appointment } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { checkUserSubscriptionAccess } from "@/lib/subscription-guard";
 
 export async function updateAppointment(
   id: number,
@@ -41,6 +42,16 @@ export async function updateAppointment(
       }
 
       userId = calendar.userId;
+
+      const hasSubscriptionAccess = await checkUserSubscriptionAccess(userId);
+
+      if (!hasSubscriptionAccess) {
+        return {
+          success: false,
+          error:
+            "Este calendário não está disponível para atualizações. O proprietário precisa de uma assinatura ativa.",
+        };
+      }
     } else {
       const authResult = await auth();
 
