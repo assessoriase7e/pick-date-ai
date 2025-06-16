@@ -29,8 +29,8 @@ interface SubscriptionData {
   };
 }
 
-function getAICreditsLimit(subscription: any, user?: any): number {
-  if (user && isLifetimeUser()) {
+async function getAICreditsLimit(subscription: any, user?: any): Promise<number> {
+  if (user && await isLifetimeUser()) {
     return Infinity;
   }
 
@@ -62,7 +62,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
     }
 
     const clerkUser = await currentUser();
-    const isLifetime = clerkUser ? isLifetimeUser() : false;
+    const isLifetime = clerkUser ? await isLifetimeUser() : false;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -114,7 +114,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
 
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
 
-        const aiLimit = getAICreditsLimit(subscription);
+        const aiLimit = await getAICreditsLimit(subscription);
         if (aiLimit > 0) {
           const startOfCurrentMonth = startOfMonth(now);
           const endOfCurrentMonth = endOfMonth(now);

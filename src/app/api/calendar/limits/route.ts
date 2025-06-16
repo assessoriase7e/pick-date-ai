@@ -13,7 +13,7 @@ export async function GET() {
 
     // Buscar usuário do Clerk para verificar metadados
     const clerkUser = await currentUser();
-    const isLifetime = clerkUser ? isLifetimeUser() : false;
+    const isLifetime = clerkUser ? await isLifetimeUser() : false;
 
     // Se for usuário lifetime, retornar limites ilimitados
     if (isLifetime) {
@@ -45,8 +45,8 @@ export async function GET() {
     }
 
     const current = user.calendars.length;
-    const limit = getCalendarLimit(user.subscription);
-    const isAiPlan = isAiSubscription(user.subscription);
+    const limit = await getCalendarLimit(user.subscription, clerkUser);
+    const isAiPlan = await isAiSubscription(user.subscription, clerkUser);
     const hasAdditionalCalendars = hasAdditionalCalendarSubscription(user.subscription);
 
     return NextResponse.json({
@@ -62,9 +62,9 @@ export async function GET() {
   }
 }
 
-function getCalendarLimit(subscription: any, user?: any): number {
+async function getCalendarLimit(subscription: any, user?: any): Promise<number> {
   // Verificar se é usuário lifetime primeiro
-  if (user && isLifetimeUser()) {
+  if (user && await isLifetimeUser()) {
     return Infinity;
   }
 
@@ -91,9 +91,9 @@ function getCalendarLimit(subscription: any, user?: any): number {
   return 3;
 }
 
-function isAiSubscription(subscription: any, user?: any): boolean {
+async function isAiSubscription(subscription: any, user?: any): Promise<boolean> {
   // Usuários lifetime são considerados como tendo plano AI
-  if (user && isLifetimeUser()) {
+  if (user && await isLifetimeUser()) {
     return true;
   }
 

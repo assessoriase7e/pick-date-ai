@@ -23,9 +23,9 @@ interface SubscriptionStatusResponse {
 }
 
 // Função para obter o limite de créditos baseado na assinatura
-function getAICreditsLimit(subscription: any, user?: any): number {
+async function getAICreditsLimit(subscription: any, user?: any): Promise<number> {
   // Verificar se é usuário lifetime primeiro
-  if (user && isLifetimeUser()) {
+  if (user && await isLifetimeUser()) {
     return Infinity;
   }
 
@@ -58,7 +58,7 @@ export async function GET() {
 
     // Buscar usuário do Clerk para verificar metadados
     const clerkUser = await currentUser();
-    const isLifetime = clerkUser ? isLifetimeUser() : false;
+    const isLifetime = clerkUser ? await isLifetimeUser() : false;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -119,7 +119,7 @@ export async function GET() {
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
 
         // Verificar créditos de IA se for um plano com IA
-        const aiLimit = getAICreditsLimit(subscription);
+        const aiLimit = await getAICreditsLimit(subscription);
         if (aiLimit > 0) {
           const startOfCurrentMonth = startOfMonth(now);
           const endOfCurrentMonth = endOfMonth(now);

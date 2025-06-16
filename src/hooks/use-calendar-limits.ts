@@ -22,43 +22,15 @@ export function useCalendarLimits() {
     revalidateOnFocus: false,
   });
 
-  const getCalendarLimit = (): number => {
-    // Verificar se é usuário lifetime
-    if (user && isLifetimeUser()) {
-      return Infinity;
-    }
-
-    if (!subscription || !isSubscriptionActive) {
-      return 3; // Plano base
-    }
-
-    const { stripePriceId } = subscription;
-
-    // Planos com IA não têm limite
-    if (
-      [
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-      ].includes(stripePriceId)
-    ) {
-      return Infinity;
-    }
-
-    // Verificar se tem assinatura de calendários adicionais
-    if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
-      return 13; // 3 base + 10 adicionais
-    }
-
-    return 3;
-  };
+  // Remover a função getCalendarLimit local e usar apenas os dados da API
+  // pois a verificação lifetime agora é feita no servidor
 
   return {
-    limit: data?.limit ?? getCalendarLimit(),
+    limit: data?.limit ?? 3, // fallback para plano base
     current: data?.current ?? 0,
     canCreateMore: data?.canCreateMore ?? true,
-    isAiPlan: data?.isAiPlan ?? (user ? isLifetimeUser() : false),
-    hasAdditionalCalendars: data?.hasAdditionalCalendars ?? (user ? isLifetimeUser() : false),
+    isAiPlan: data?.isAiPlan ?? false, // fallback para false
+    hasAdditionalCalendars: data?.hasAdditionalCalendars ?? false, // fallback para false
     isLoading: !error && !data,
     error,
     refresh: mutate,
