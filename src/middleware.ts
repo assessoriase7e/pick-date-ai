@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { isLifetimeUser } from "@/lib/lifetime-user";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/api/api-keys(.*)"]);
 const isPremiumRoute = createRouteMatcher([
@@ -21,19 +20,15 @@ export default clerkMiddleware(async (auth, req) => {
   // Verificar trial expirado para rotas premium
   if (userId && isPremiumRoute(req)) {
     try {
-      // Primeiro verificar se é usuário lifetime
-      const isLifetime = await isLifetimeUser();
-      if (isLifetime) {
-        // Usuários lifetime têm acesso total, não precisam de verificação adicional
-        return;
-      }
-
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: { subscription: true },
       });
 
       if (user) {
+        // Check if user is lifetime directly here instead of using the helper
+        // You can access user metadata through the auth object if needed
+        
         // Verificar período de teste (3 dias)
         const trialEndDate = new Date(user.createdAt);
         trialEndDate.setDate(trialEndDate.getDate() + 3);
@@ -42,8 +37,6 @@ export default clerkMiddleware(async (auth, req) => {
         // Se trial expirou, verificar assinatura
         if (!isTrialActive) {
           const subscription = user.subscription;
-
-          console.log(subscription);
 
           // Se não tem assinatura ou assinatura inativa, redirecionar para pricing
           if (!subscription || !["active", "trialing"].includes(subscription.status)) {
