@@ -43,7 +43,7 @@ const PRICING_TEXTS = {
     {
       name: "Agenda Base",
       description: "Agendamento simples sem IA",
-      price: "R$ 59,90",
+      price: "R$ 60",
       period: "/mês",
       features: [
         "Agendamento manual",
