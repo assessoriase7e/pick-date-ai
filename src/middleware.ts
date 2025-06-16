@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/api/api-keys(.*)"]);
 const isPremiumRoute = createRouteMatcher([
@@ -20,6 +21,13 @@ export default clerkMiddleware(async (auth, req) => {
   // Verificar trial expirado para rotas premium
   if (userId && isPremiumRoute(req)) {
     try {
+      // Primeiro verificar se é usuário lifetime
+      const isLifetime = await isLifetimeUser();
+      if (isLifetime) {
+        // Usuários lifetime têm acesso total, não precisam de verificação adicional
+        return;
+      }
+
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: { subscription: true },

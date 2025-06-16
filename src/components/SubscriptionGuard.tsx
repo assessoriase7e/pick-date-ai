@@ -15,23 +15,23 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
-  const { subscription, isTrialActive, isSubscriptionActive, isLoading } = useSubscription();
+  const { subscription, canAccessPremiumFeatures, isLoading } = useSubscription();
 
   useEffect(() => {
     if (!user || isLoading) return;
 
-    // Se trial expirou e não tem assinatura ativa
-    if (!isTrialActive && !isSubscriptionActive) {
+    // Usar canAccessPremiumFeatures que já inclui verificação de lifetime users
+    if (!canAccessPremiumFeatures) {
       router.push("/pricing");
       return;
     }
 
-    // Se tem assinatura mas está inativa
+    // Se tem assinatura mas está inativa (não se aplica a lifetime users)
     if (subscription && !["active", "trialing"].includes(subscription.status)) {
       router.push("/payment/pending");
       return;
     }
-  }, [pathname, user, subscription, isTrialActive, isSubscriptionActive, isLoading, router]);
+  }, [pathname, user, subscription, canAccessPremiumFeatures, isLoading, router]);
 
   // Mostrar loading enquanto verifica
   if (isLoading) {
