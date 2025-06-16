@@ -138,7 +138,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     throw new Error("Invalid subscription data: missing item");
   }
 
-  await prisma.subscription.update({
+  const updatedSubscription = await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
     data: {
       status: subscription.status,
@@ -147,15 +147,78 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   });
+
+  // Verificar se houve downgrade e se precisa desativar calendários
+  await checkAndHandleCalendarLimits(updatedSubscription.userId, subscription);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  await prisma.subscription.update({
+  const deletedSubscription = await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
     data: {
       status: "canceled",
     },
   });
+
+  // Verificar limites após cancelamento
+  await checkAndHandleCalendarLimits(deletedSubscription.userId, subscription);
+}
+
+async function checkAndHandleCalendarLimits(userId: string, subscription: Stripe.Subscription) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      subscription: true,
+      calendars: {
+        where: { isActive: true }
+      }
+    },
+  });
+
+  if (!user) return;
+
+  const currentActiveCalendars = user.calendars.length;
+  const newLimit = getCalendarLimit(user.subscription);
+
+  // Se excedeu o limite, desativar calendários mais antigos
+  if (currentActiveCalendars > newLimit) {
+    const calendarsToDeactivate = user.calendars
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .slice(newLimit);
+
+    await prisma.calendar.updateMany({
+      where: {
+        id: {
+          in: calendarsToDeactivate.map(c => c.id)
+        }
+      },
+      data: {
+        isActive: false
+      }
+    });
+  }
+}
+
+function getCalendarLimit(subscription: any): number {
+  if (!subscription || subscription.status !== "active") {
+    return 3;
+  }
+
+  const { stripePriceId } = subscription;
+  
+  if ([
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+  ].includes(stripePriceId)) {
+    return Infinity;
+  }
+  
+  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
+    return 13;
+  }
+  
+  return 3;
 }
 
 async function handlePaymentSucceeded(invoice: any) {

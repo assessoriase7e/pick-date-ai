@@ -80,10 +80,38 @@ const PLANS = [
   },
 ];
 
+const ADDITIONAL_CALENDAR_PLAN = {
+  id: "add-calendar",
+  name: "Calendários Adicionais",
+  description: "Adicione mais calendários ao seu plano base",
+  price: "R$ 29,90",
+  period: "/mês",
+  productId: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!,
+  features: [
+    "+10 calendários extras",
+    "Compatível com plano base",
+    "Faturamento separado",
+    "Cancele quando quiser",
+  ],
+};
+
 export default function PricingPage() {
   return (
     <SubscriptionGuard>
-      <PricingCards plans={PLANS} />
+      <div className="space-y-8">
+        <PricingCards plans={PLANS} />
+        
+        {/* Seção de Calendários Adicionais */}
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold mb-2">Precisa de Mais Calendários?</h3>
+            <p className="text-muted-foreground text-sm">
+              Adicione calendários extras ao seu plano base
+            </p>
+          </div>
+          <PricingCards plans={[ADDITIONAL_CALENDAR_PLAN]} />
+        </div>
+      </div>
     </SubscriptionGuard>
   );
 }
