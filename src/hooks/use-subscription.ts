@@ -16,6 +16,12 @@ interface SubscriptionData {
   isSubscriptionActive: boolean;
   canAccessPremiumFeatures: boolean;
   trialDaysRemaining?: number;
+  hasRemainingCredits: boolean;
+  aiCreditsInfo?: {
+    used: number;
+    limit: number;
+    remaining: number;
+  };
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -80,6 +86,8 @@ export function useSubscription() {
     isSubscriptionActive: data?.isSubscriptionActive ?? false,
     canAccessPremiumFeatures: data?.canAccessPremiumFeatures ?? false,
     trialDaysRemaining: data?.trialDaysRemaining ?? 0,
+    hasRemainingCredits: data?.hasRemainingCredits ?? true,
+    aiCreditsInfo: data?.aiCreditsInfo,
     isLoading: !error && !data,
     error,
     createSubscription,

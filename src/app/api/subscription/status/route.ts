@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { Subscription } from "@prisma/client";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 // Interface para a resposta
 interface SubscriptionStatusResponse {
@@ -12,6 +13,33 @@ interface SubscriptionStatusResponse {
   isSubscriptionActive: boolean;
   canAccessPremiumFeatures: boolean;
   trialDaysRemaining?: number;
+  hasRemainingCredits: boolean;
+  aiCreditsInfo?: {
+    used: number;
+    limit: number;
+    remaining: number;
+  };
+}
+
+// Função para obter o limite de créditos baseado na assinatura
+function getAICreditsLimit(subscription: any): number {
+  if (!subscription || subscription.status !== "active") {
+    return 0;
+  }
+
+  const { stripePriceId } = subscription;
+  
+  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
+    return 100;
+  }
+  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
+    return 200;
+  }
+  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
+    return 300;
+  }
+  
+  return 0;
 }
 
 export async function GET() {
@@ -47,6 +75,8 @@ export async function GET() {
     let subscription = user.subscription;
     let isSubscriptionActive = false;
     let canAccessPremiumFeatures = isTrialActive;
+    let hasRemainingCredits = true;
+    let aiCreditsInfo = undefined;
 
     if (subscription) {
       try {
@@ -69,7 +99,7 @@ export async function GET() {
           }
         }
 
-        // Status ativos conforme documentação do Stripe 2024 <mcreference link="https://docs.stripe.com/billing/subscriptions/webhooks" index="2">2</mcreference>
+        // Status ativos conforme documentação do Stripe
         const activeStatuses: Stripe.Subscription.Status[] = [
           "active",
           "trialing",
@@ -77,6 +107,41 @@ export async function GET() {
         ];
 
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
+        
+        // Verificar créditos de IA se for um plano com IA
+        const aiLimit = getAICreditsLimit(subscription);
+        if (aiLimit > 0) {
+          const startOfCurrentMonth = startOfMonth(now);
+          const endOfCurrentMonth = endOfMonth(now);
+
+          // Buscar uso de IA do mês atual
+          const aiUsageResult = await prisma.aIUsage.groupBy({
+            by: ['clientPhone'],
+            where: {
+              userId,
+              date: {
+                gte: startOfCurrentMonth,
+                lte: endOfCurrentMonth,
+              },
+            },
+          });
+
+          const usedCredits = aiUsageResult.length;
+          const remainingCredits = Math.max(0, aiLimit - usedCredits);
+          hasRemainingCredits = remainingCredits > 0;
+
+          aiCreditsInfo = {
+            used: usedCredits,
+            limit: aiLimit,
+            remaining: remainingCredits,
+          };
+        }
+        
+        // A assinatura só é considerada ativa se tiver status ativo E créditos restantes (para planos de IA)
+        if (aiLimit > 0) {
+          isSubscriptionActive = isSubscriptionActive && hasRemainingCredits;
+        }
+        
         canAccessPremiumFeatures = isTrialActive || isSubscriptionActive;
       } catch (error) {
         console.error("Erro ao verificar assinatura no Stripe:", error);
@@ -94,6 +159,8 @@ export async function GET() {
       isSubscriptionActive,
       canAccessPremiumFeatures,
       trialDaysRemaining,
+      hasRemainingCredits,
+      aiCreditsInfo,
     };
 
     return NextResponse.json(response);

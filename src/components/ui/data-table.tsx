@@ -274,7 +274,7 @@ export function DataTable<TData>({
         )}
       </div>
 
-      {pagination && (
+      {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-end space-x-2 mx-auto">
           <Button
             variant="outline"
