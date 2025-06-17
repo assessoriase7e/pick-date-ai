@@ -1,9 +1,9 @@
 "use client";
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { InstanceForm } from "./instance-form";
+import { SessionForm } from "./session-form";
 
-interface InstanceModalProps {
+interface SessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: any;
@@ -11,14 +11,14 @@ interface InstanceModalProps {
   companyName?: string;
 }
 
-export function InstanceModal({ 
+export function SessionModal({ 
   isOpen, 
   onClose, 
   initialData, 
   profilePhone, 
   companyName 
-}: InstanceModalProps) {
-  const title = initialData ? "Editar Instância" : "Nova Instância";
+}: SessionModalProps) {
+  const title = initialData ? "Editar Sessão" : "Nova Sessão";
 
   return (
     <ConfirmationDialog
@@ -31,11 +31,11 @@ export function InstanceModal({
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
           {initialData
-            ? "Edite os detalhes da instância do WhatsApp"
-            : "Crie uma nova instância do WhatsApp"}
+            ? "Edite os detalhes da sessão do WhatsApp"
+            : "Crie uma nova sessão do WhatsApp"}
         </p>
         
-        <InstanceForm
+        <SessionForm
           initialData={initialData}
           onSuccess={onClose}
           profilePhone={profilePhone}

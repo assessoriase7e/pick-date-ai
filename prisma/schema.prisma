@@ -28,7 +28,6 @@ model User {
   calendars          Calendar[]
   client             Client[]
   collaborator       Collaborator[]
-  evolutionInstances EvolutionInstance[]
   files              FileRecord[]
   followUpPrompts    FollowUpPrompt?
   links              Link[]
@@ -41,6 +40,7 @@ model User {
   questionTexts      QuestionText[]
   subscription       Subscription?
   paymentHistory     PaymentHistory[]
+  wahaInstances WahaInstance[]
 
   @@map("user")
 }
@@ -222,23 +222,6 @@ model AgentWhatsapp {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model EvolutionInstance {
-  id         Int      @id @default(autoincrement())
-  name       String
-  number     String
-  qrCode     String?
-  webhookUrl String?
-  apiKey     String?
-  status     String   @default("close")
-  type       String   @default("attendant")
-  userId     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("evolutioninstance")
 }
 
 model Service {
@@ -478,4 +461,22 @@ model PaymentHistory {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("paymenthistory")
+}
+
+
+model WahaInstance {
+  id         Int      @id @default(autoincrement())
+  name       String   // Session name no WAHA
+  number     String
+  qrCode     String?
+  webhookUrl String?
+  apiKey     String?
+  status     String   @default("STOPPED")
+  type       String   @default("attendant")
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wahainstance")
 }

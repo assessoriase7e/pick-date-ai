@@ -5,12 +5,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import moment from "moment";
-import { evolution } from "@/utils/evolution";
+import { waha } from "@/utils/waha";
 
 interface SendNotificationParams {
   date: Date;
   message: string;
-  instanceName?: string; // Nome da instância Evolution API
+  instanceName?: string; // Nome da sessão WAHA
 }
 
 interface SendNotificationResponse {
@@ -31,29 +31,28 @@ export async function sendAppointmentNotifications({
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Verificar se há uma instância Evolution configurada
-    let evolutionInstance;
+    // Verificar se há uma sessão WAHA configurada
+    let wahaSession;
     if (instanceName) {
-      evolutionInstance = await prisma.evolutionInstance.findFirst({
+      wahaSession = await prisma.wahaInstance.findFirst({
         where: {
           name: instanceName,
           userId,
         },
       });
     } else {
-      // Buscar a primeira instância ativa do usuário
-      evolutionInstance = await prisma.evolutionInstance.findFirst({
+      wahaSession = await prisma.wahaInstance.findFirst({
         where: {
           userId,
-          status: "open", // Apenas instâncias conectadas
+          status: "WORKING", // Status ativo no WAHA
         },
       });
     }
 
-    if (!evolutionInstance) {
+    if (!wahaSession) {
       return {
         success: false,
-        error: "Nenhuma instância do WhatsApp encontrada ou conectada. Configure uma instância na seção Agentes.",
+        error: "Nenhuma sessão WAHA ativa encontrada. Configure uma sessão na seção Agentes.",
       };
     }
 
@@ -123,8 +122,8 @@ export async function sendAppointmentNotifications({
       };
     });
 
-    // Enviar notificações via Evolution API
-    const evolutionApi = evolution();
+    // Enviar notificações via WAHA API
+    const wahaApi = waha();
     const failedNotifications: string[] = [];
     let successCount = 0;
 
@@ -136,16 +135,14 @@ export async function sendAppointmentNotifications({
       }
 
       try {
-        // Formatar número para o padrão internacional (remover caracteres especiais)
+        // Formatar número para o padrão do WAHA (formato @c.us)
         const formattedPhone = notification.clientPhone.replace(/\D/g, "");
+        const chatId = formattedPhone.startsWith("55") ? `${formattedPhone}@c.us` : `55${formattedPhone}@c.us`;
 
-        // Adicionar código do país se não estiver presente (assumindo Brasil +55)
-        const phoneNumber = formattedPhone.startsWith("55") ? formattedPhone : `55${formattedPhone}`;
-
-        await evolutionApi.sendMessage({
-          instance: evolutionInstance.name,
+        await wahaApi.sendMessage({
+          session: wahaSession.name,
           text: notification.message,
-          number: phoneNumber,
+          chatId: chatId,
         });
 
         successCount++;

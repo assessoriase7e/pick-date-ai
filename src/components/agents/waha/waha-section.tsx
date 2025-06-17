@@ -5,60 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash, Bolt, QrCode, RefreshCw } from "lucide-react";
-import { InstanceModal } from "./instance-modal";
+import { SessionModal } from "./session-modal";
 import { QRCodeModal } from "./qrcode-modal";
-import { deleteInstance } from "@/actions/agents/evolution/delete-instance";
-import { EvolutionInstance } from "@prisma/client";
+import { deleteSession } from "@/actions/agents/waha/delete-session";
+import { WahaInstance } from "@prisma/client";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { Separator } from "@/components/ui/separator";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
-interface EvolutionSectionProps {
+interface WahaSectionProps {
   profilePhone?: string;
-  instances: EvolutionInstance[];
+  sessions: WahaInstance[];
   companyName?: string;
 }
 
-export function EvolutionSection({ profilePhone, instances, companyName }: EvolutionSectionProps) {
+export function WahaSection({ profilePhone, sessions, companyName }: WahaSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const [selectedInstance, setSelectedInstance] = useState<EvolutionInstance>(null);
+  const [selectedSession, setSelectedSession] = useState<WahaInstance | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [instanceToDelete, setInstanceToDelete] = useState<number | null>(null);
+  const [sessionToDelete, setSessionToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!instanceToDelete) return;
+    if (!sessionToDelete) return;
     setIsDeleting(true);
     try {
-      const result = await deleteInstance(instanceToDelete);
+      const result = await deleteSession(sessionToDelete);
       if (result.success) {
-        toast.success("Instância excluída com sucesso");
+        toast.success("Sessão excluída com sucesso");
         setDeleteDialogOpen(false);
-        setInstanceToDelete(null);
+        setSessionToDelete(null);
       } else {
-        toast.error(result.error || "Erro ao excluir instância");
+        toast.error(result.error || "Erro ao excluir sessão");
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao excluir a instância");
+      toast.error("Ocorreu um erro ao excluir a sessão");
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleEdit = (instance: any) => {
-    setSelectedInstance(instance);
+  const handleEdit = (session: WahaInstance) => {
+    setSelectedSession(session);
     setIsModalOpen(true);
   };
 
-  const handleQRCode = (instance: any) => {
-    setSelectedInstance(instance);
+  const handleQRCode = (session: WahaInstance) => {
+    setSelectedSession(session);
     setIsQRModalOpen(true);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setSelectedInstance(null);
+    setSelectedSession(null);
   };
 
   const handleQRModalClose = () => {
@@ -71,10 +71,14 @@ export function EvolutionSection({ profilePhone, instances, companyName }: Evolu
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "open":
+      case "WORKING":
         return <Badge className="bg-green-500">Conectado</Badge>;
-      case "close":
+      case "STOPPED":
         return <Badge className="bg-red-500">Desconectado</Badge>;
+      case "STARTING":
+        return <Badge className="bg-yellow-500">Iniciando</Badge>;
+      case "SCAN_QR_CODE":
+        return <Badge className="bg-blue-500">Aguardando QR</Badge>;
       default:
         return <Badge className="bg-gray-500">{status}</Badge>;
     }
@@ -85,40 +89,40 @@ export function EvolutionSection({ profilePhone, instances, companyName }: Evolu
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Whatsapp</CardTitle>
-            <CardDescription>Canais de atendimento conectados</CardDescription>
+            <CardTitle>WhatsApp</CardTitle>
+            <CardDescription>Sessões de atendimento conectadas</CardDescription>
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>Nova Instância</Button>
+          <Button onClick={() => setIsModalOpen(true)}>Nova Sessão</Button>
         </div>
       </CardHeader>
       <CardContent>
-        {instances.length === 0 ? (
+        {sessions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            Nenhuma instância encontrada. Crie uma nova instância para começar.
+            Nenhuma sessão encontrada. Crie uma nova sessão para começar.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {instances.map((instance) => (
-              <Card key={instance.id} className="space-y-2">
-                <CardHeader className="flex  flex-col items-center justify-between">
+            {sessions.map((session) => (
+              <Card key={session.id} className="space-y-2">
+                <CardHeader className="flex flex-col items-center justify-between">
                   <div className="flex gap-2 items-center">
-                    <CardTitle className="text-lg">{instance.name}</CardTitle>
+                    <CardTitle className="text-lg">{session.name}</CardTitle>
                     <Separator orientation="vertical" className="h-10" />
-                    <CardDescription>{instance.number}</CardDescription>
+                    <CardDescription>{session.number}</CardDescription>
                   </div>
                   <div className="flex justify-end gap-2 pt-4">
                     <div className="flex items-center gap-2">
                       <span>
-                        {instance.type === "attendant"
+                        {session.type === "attendant"
                           ? "Recepcionista"
-                          : instance.type === "sdr"
+                          : session.type === "sdr"
                           ? "SDR"
-                          : instance.type === "followup"
+                          : session.type === "followup"
                           ? "Follow-up"
-                          : instance.type}
+                          : session.type}
                       </span>
                       <Separator orientation="vertical" className="h-10" />
-                      {getStatusBadge(instance.status)}
+                      {getStatusBadge(session.status)}
                     </div>
 
                     <Separator orientation="vertical" className="h-10" />
@@ -131,17 +135,17 @@ export function EvolutionSection({ profilePhone, instances, companyName }: Evolu
                         variant="outline"
                         size="icon"
                         onClick={() => {
-                          setInstanceToDelete(instance.id);
+                          setSessionToDelete(session.id);
                           setDeleteDialogOpen(true);
                         }}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" onClick={() => handleEdit(instance)}>
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(session)}>
                         <Bolt className="h-4 w-4" />
                       </Button>
-                      {instance.status !== "open" && (
-                        <Button variant="outline" size="icon" onClick={() => handleQRCode(instance)}>
+                      {session.status !== "WORKING" && (
+                        <Button variant="outline" size="icon" onClick={() => handleQRCode(session)}>
                           <QrCode className="h-4 w-4" />
                         </Button>
                       )}
@@ -154,22 +158,20 @@ export function EvolutionSection({ profilePhone, instances, companyName }: Evolu
         )}
       </CardContent>
 
-      <InstanceModal
+      <SessionModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        initialData={selectedInstance}
+        initialData={selectedSession}
         profilePhone={profilePhone}
         companyName={companyName}
       />
 
-      {selectedInstance && (
-        <QRCodeModal isOpen={isQRModalOpen} onClose={handleQRModalClose} instance={selectedInstance} />
-      )}
+      {selectedSession && <QRCodeModal isOpen={isQRModalOpen} onClose={handleQRModalClose} session={selectedSession} />}
       <ConfirmationDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="Confirmar exclusão"
-        description="Tem certeza que deseja excluir esta instância?"
+        description="Tem certeza que deseja excluir esta sessão?"
         confirmText="Excluir"
         cancelText="Cancelar"
         variant="destructive"
