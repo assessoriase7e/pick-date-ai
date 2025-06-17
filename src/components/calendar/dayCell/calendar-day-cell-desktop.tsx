@@ -105,7 +105,7 @@ export function CalendarDayCellDesktop({
             {dayObj.date.date()}
           </span>
           {activeAppointments.length > 0 && (
-            <span className={appointmentCountStyles}>
+            <span className={cn(appointmentCountStyles, "flex justify-center items-center w-full")}>
               {activeAppointments.length}
               <span className="hidden lg:block ml-1">Clientes</span>
             </span>
