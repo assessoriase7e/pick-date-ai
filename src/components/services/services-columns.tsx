@@ -6,12 +6,7 @@ import { formatCurrency } from "@/lib/format-utils";
 import { formatAvailableDays } from "@/lib/format-days";
 import { ServiceFullData } from "@/types/service";
 import { Collaborator } from "@prisma/client";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ServiceActionsProps = {
   onEdit: (service: ServiceFullData) => void;
@@ -21,10 +16,7 @@ type ServiceActionsProps = {
 const formatCollaborators = (service: ServiceFullData) => {
   const allCollaborators = [] as Collaborator[];
 
-  if (
-    service.serviceCollaborators &&
-    Array.isArray(service.serviceCollaborators)
-  ) {
+  if (service.serviceCollaborators && Array.isArray(service.serviceCollaborators)) {
     service.serviceCollaborators.forEach((sc) => {
       if (!allCollaborators.some((c) => c.id === sc.collaborator.id)) {
         allCollaborators.push(sc.collaborator);
@@ -47,7 +39,7 @@ const formatCollaborators = (service: ServiceFullData) => {
           <TooltipTrigger asChild>
             <Badge variant="outline" className="cursor-pointer">
               <Users className="h-3 w-3 mr-1" />
-              {allCollaborators.length} profissionais
+              {allCollaborators.length} pro.
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
@@ -66,23 +58,14 @@ const formatCollaborators = (service: ServiceFullData) => {
 const getStatusBadge = (service: ServiceFullData) => {
   const isActive = service.availableDays && service.availableDays.length > 0;
 
-  return (
-    <Badge variant={isActive ? "default" : "destructive"}>
-      {isActive ? "Ativo" : "Inativo"}
-    </Badge>
-  );
+  return <Badge variant={isActive ? "default" : "destructive"}>{isActive ? "Ativo" : "Inativo"}</Badge>;
 };
 
-export const createServiceColumns = ({
-  onEdit,
-  onDelete,
-}: ServiceActionsProps): ColumnDef<ServiceFullData>[] => [
+export const createServiceColumns = ({ onEdit, onDelete }: ServiceActionsProps): ColumnDef<ServiceFullData>[] => [
   {
     accessorKey: "name",
     header: "Nome",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
+    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "durationMinutes",
@@ -125,12 +108,7 @@ export const createServiceColumns = ({
           <Button variant="outline" size="icon" onClick={() => onEdit(service)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-destructive"
-            onClick={() => onDelete(service)}
-          >
+          <Button variant="outline" size="icon" className="text-destructive" onClick={() => onDelete(service)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
