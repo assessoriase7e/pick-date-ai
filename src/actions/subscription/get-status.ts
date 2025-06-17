@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { isLifetimeUser } from "@/lib/lifetime-user";
+import { getSubscriptionFromCache, setSubscriptionCache } from "@/utils/subscription-cache";
 
 interface SubscriptionData {
   subscription: {
@@ -60,6 +61,15 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
     if (!userId) {
       throw new Error("Unauthorized");
     }
+
+    // Verificar cache primeiro
+    const cachedData = await getSubscriptionFromCache(userId);
+    if (cachedData) {
+      console.log("Retornando dados de assinatura do cache");
+      return cachedData;
+    }
+
+    console.log("Cache não encontrado, buscando dados frescos");
 
     const clerkUser = await currentUser();
     const isLifetime = clerkUser ? await isLifetimeUser() : false;
@@ -151,9 +161,11 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
       }
     }
 
+    let result: SubscriptionData;
+
     // In the return statements, convert dates to strings
     if (isLifetime) {
-      return {
+      result = {
         subscription: user?.subscription
           ? {
               ...user.subscription,
@@ -172,23 +184,29 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
           remaining: Infinity,
         },
       };
+    } else {
+      result = {
+        subscription: subscription
+          ? {
+              ...subscription,
+              currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+              trialEnd: subscription.trialEnd?.toISOString(),
+            }
+          : null,
+        isTrialActive,
+        isSubscriptionActive,
+        canAccessPremiumFeatures,
+        trialDaysRemaining,
+        hasRemainingCredits,
+        aiCreditsInfo,
+      };
     }
 
-    return {
-      subscription: subscription
-        ? {
-            ...subscription,
-            currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-            trialEnd: subscription.trialEnd?.toISOString(),
-          }
-        : null,
-      isTrialActive,
-      isSubscriptionActive,
-      canAccessPremiumFeatures,
-      trialDaysRemaining,
-      hasRemainingCredits,
-      aiCreditsInfo,
-    };
+    // Salvar no cache
+    await setSubscriptionCache(userId, result);
+    console.log("Dados de assinatura salvos no cache");
+
+    return result;
   } catch (error) {
     console.error("Erro ao buscar status da assinatura:", error);
     throw error;

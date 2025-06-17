@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { revalidatePath } from "next/cache";
+import { invalidateSubscriptionCache } from "@/utils/subscription-cache";
 
 export async function cancelSubscription() {
   try {
@@ -18,25 +18,34 @@ export async function cancelSubscription() {
       include: { subscription: true },
     });
 
-    if (!user?.subscription) {
-      throw new Error("No subscription found");
+    if (!user || !user.subscription) {
+      throw new Error("Subscription not found");
     }
 
-    await stripe.subscriptions.update(user.subscription.stripeSubscriptionId, {
+    const { subscription } = user;
+
+    // Cancelar no Stripe
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
 
+    // Atualizar no banco de dados
     await prisma.subscription.update({
-      where: { id: user.subscription.id },
-      data: { cancelAtPeriodEnd: true },
+      where: { id: subscription.id },
+      data: {
+        cancelAtPeriodEnd: true,
+      },
     });
 
-    revalidatePath("/pricing");
-    revalidatePath("/settings");
+    // Invalidar cache
+    await invalidateSubscriptionCache(userId);
 
-    return { success: true };
+    return {
+      success: true,
+      message: "Subscription cancelled successfully",
+    };
   } catch (error) {
-    console.error("Erro ao cancelar assinatura:", error);
+    console.error("Error cancelling subscription:", error);
     throw error;
   }
 }

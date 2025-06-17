@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
+import { invalidateSubscriptionCache } from "@/utils/subscription-cache";
 
 // Enum para tipos de eventos do webhook
 enum StripeWebhookEvent {
@@ -146,10 +147,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       currentPeriodEnd: new Date(item.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
+    include: {
+      user: true
+    }
   });
 
-  // Verificar se houve downgrade e se precisa desativar calendários
-  await checkAndHandleCalendarLimits(updatedSubscription.userId, subscription);
+  // Invalidar cache do usuário
+  if (updatedSubscription.user) {
+    await invalidateSubscriptionCache(updatedSubscription.user.id);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -158,10 +164,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     data: {
       status: "canceled",
     },
+    include: {
+      user: true
+    }
   });
 
-  // Verificar limites após cancelamento
-  await checkAndHandleCalendarLimits(deletedSubscription.userId, subscription);
+  // Invalidar cache do usuário
+  if (deletedSubscription.user) {
+    await invalidateSubscriptionCache(deletedSubscription.user.id);
+  }
 }
 
 async function checkAndHandleCalendarLimits(userId: string, subscription: Stripe.Subscription) {
