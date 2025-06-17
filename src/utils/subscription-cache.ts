@@ -1,6 +1,6 @@
 import { redis } from "@/lib/redis";
 
-const CACHE_TTL = 300; // 5 minutos em segundos
+const CACHE_TTL = 21600; // 6 horas em segundos
 const getCacheKey = (userId: string) => `subscription:status:${userId}`;
 
 export const getSubscriptionFromCache = async (userId: string) => {
