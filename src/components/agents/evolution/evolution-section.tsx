@@ -100,7 +100,7 @@ export function EvolutionSection({ profilePhone, instances, companyName }: Evolu
           <div className="grid grid-cols-1 gap-4">
             {instances.map((instance) => (
               <Card key={instance.id} className="space-y-2">
-                <CardHeader className="items-center justify-between">
+                <CardHeader className="flex  flex-col items-center justify-between">
                   <div className="flex gap-2 items-center">
                     <CardTitle className="text-lg">{instance.name}</CardTitle>
                     <Separator orientation="vertical" className="h-10" />
