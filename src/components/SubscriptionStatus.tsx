@@ -4,6 +4,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { Crown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface SubscriptionStatusProps {
   className?: string;
@@ -11,6 +12,11 @@ interface SubscriptionStatusProps {
 
 export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
   const { isTrialActive, isSubscriptionActive, trialDaysRemaining, isLoading } = useSubscription();
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/pricing");
+  };
 
   if (isLoading) {
     return (
@@ -22,14 +28,14 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
 
   const getTooltipText = () => {
     if (isSubscriptionActive) {
-      return "Assinatura Ativa";
+      return "Assinatura Ativa - Clique para ver planos";
     }
     if (isTrialActive) {
       return `${trialDaysRemaining} dia${trialDaysRemaining !== 1 ? "s" : ""} restante${
         trialDaysRemaining !== 1 ? "s" : ""
-      } do período de teste`;
+      } do período de teste - Clique para ver planos`;
     }
-    return "Sem assinatura ativa";
+    return "Sem assinatura ativa - Clique para ver planos";
   };
 
   const getContent = () => {
@@ -47,8 +53,9 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <div
+            onClick={handleClick}
             className={cn(
-              "min-w-8 h-8 rounded-full flex items-center justify-center cursor-pointer border-2 border-foreground",
+              "min-w-8 h-8 rounded-full flex items-center justify-center cursor-pointer border-2 border-foreground hover:bg-accent transition-colors",
               className
             )}
           >

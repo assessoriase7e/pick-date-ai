@@ -46,7 +46,7 @@ export function PricingPageContent({ plans, additionalCalendarPlan, additionalAi
 
         <Button
           onClick={() => handleSubscribe(plan.productId)}
-          className="w-full bg-secondary hover:bg-secondary/90"
+          className="w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background"
           size="lg"
         >
           Adicionar ao Plano

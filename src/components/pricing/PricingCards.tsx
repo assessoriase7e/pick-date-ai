@@ -23,7 +23,7 @@ interface PricingCardsProps {
 }
 
 export function PricingCards({ plans }: PricingCardsProps) {
-  const { createSubscription } = useSubscription();
+  const { createSubscription, subscription } = useSubscription();
 
   const handleSubscribe = async (productId: string) => {
     try {
@@ -42,61 +42,68 @@ export function PricingCards({ plans }: PricingCardsProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`relative flex flex-col h-full ${
-                plan.recommended ? "border-primary ring-2 ring-primary/20 scale-105" : "border-border"
-              }`}
-            >
-              {plan.recommended && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
-                    Recomendado
-                  </span>
-                </div>
-              )}
+          {plans.map((plan) => {
+            const isCurrentPlan = subscription?.stripeProductId === plan.productId;
+            
+            return (
+              <Card
+                key={plan.id}
+                className={`relative flex flex-col h-full ${
+                  plan.recommended ? "border-primary ring-2 ring-primary/20 scale-105" : "border-border"
+                }`}
+              >
+                {plan.recommended && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
+                      Recomendado
+                    </span>
+                  </div>
+                )}
 
-              {plan.discount && !plan.recommended && (
-                <div className="absolute -top-3 right-4">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    {plan.discount}
-                  </span>
-                </div>
-              )}
+                {plan.discount && !plan.recommended && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      {plan.discount}
+                    </span>
+                  </div>
+                )}
 
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
-                <CardDescription className="text-sm">{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm">{plan.period}</span>
-                  {plan.discount && <div className="text-green-500 text-sm font-medium mt-1">{plan.discount}</div>}
-                </div>
-              </CardHeader>
+                <CardHeader className="text-center pb-4">
+                  <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                  <CardDescription className="text-sm">{plan.description}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">{plan.period}</span>
+                    {plan.discount && <div className="text-green-500 text-sm font-medium mt-1">{plan.discount}</div>}
+                  </div>
+                </CardHeader>
 
-              <CardContent className="flex-1 flex flex-col">
-                <ul className="space-y-2 flex-1 mb-6">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                <CardContent className="flex-1 flex flex-col">
+                  <ul className="space-y-2 flex-1 mb-6">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Button
-                  onClick={() => handleSubscribe(plan.productId)}
-                  className={`w-full ${
-                    plan.recommended ? "bg-primary hover:bg-primary/90" : "bg-secondary hover:bg-secondary/90"
-                  }`}
-                  size="lg"
-                >
-                  Assinar Plano
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <Button
+                    onClick={() => handleSubscribe(plan.productId)}
+                    disabled={isCurrentPlan}
+                    className={`w-full ${
+                      plan.recommended
+                        ? "bg-primary hover:bg-primary/90"
+                        : "bg-accent hover:bg-accent/90 text-foreground dark:text-background"
+                    } ${isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""}`}
+                    size="lg"
+                  >
+                    {isCurrentPlan ? "Plano Atual" : "Assinar Plano"}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

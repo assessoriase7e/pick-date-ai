@@ -14,11 +14,13 @@ import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DockDropdownMenu, useDropdownMenuItems } from "./dock-dropdown-menu";
 import { SubscriptionStatus } from "./SubscriptionStatus";
+import { useRouter } from "next/navigation";
 
 export function DockMenu() {
   const { user } = useUser();
   const { routes } = useSidebarRoutes();
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -42,6 +44,10 @@ export function DockMenu() {
   // Páginas que ficam diretamente na dock
   const mainRoutes = routes.filter((route) => !configDropdownPaths.includes(route.href));
 
+  const handleSubscriptionClick = () => {
+    router.push("/pricing");
+  };
+
   const MobileMenu = () => (
     <Sheet>
       <div className="w-full border-b border-border">
@@ -61,12 +67,19 @@ export function DockMenu() {
         <div className="flex-1 overflow-y-auto py-6 px-4">
           {routes.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Button variant={item.isActive ? "default" : "ghost"} className="w-full justify-start">
+              <Button variant={item.isActive ? "default" : "ghost"} className="w-full justify-start mb-2">
                 <item.icon className="h-5 w-5 mr-2" />
                 <span>{item.label}</span>
               </Button>
             </Link>
           ))}
+
+          <Separator className="my-4" />
+
+          <Button onClick={handleSubscriptionClick} variant="ghost" className="w-full justify-start mb-2">
+            <SubscriptionStatus className="mr-2" />
+            <span>Assinatura</span>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
