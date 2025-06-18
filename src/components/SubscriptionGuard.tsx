@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useUser } from "@clerk/nextjs";
@@ -16,32 +16,37 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const router = useRouter();
   const { user } = useUser();
   const { subscription, canAccessPremiumFeatures, isLoading } = useSubscription();
+  const hasRedirected = useRef(false);
+
+  // Memoizar se a rota requer premium
+  const requiresPremium = useMemo(() => {
+    return RESTRICTED_PATHS.some((path) => pathname.startsWith(path));
+  }, [pathname]);
 
   useEffect(() => {
-    if (!user || isLoading) return;
+    // Reset redirect flag when pathname changes
+    hasRedirected.current = false;
+  }, [pathname]);
 
-    // Verificar se a rota atual requer acesso premium
-    const requiresPremium = RESTRICTED_PATHS.some(path => pathname.startsWith(path));
-    
+  useEffect(() => {
+    if (!user || isLoading || hasRedirected.current) return;
+
     if (!requiresPremium) return;
 
     // Se não pode acessar recursos premium, redirecionar para pricing
     if (!canAccessPremiumFeatures) {
+      hasRedirected.current = true;
       router.push("/pricing");
       return;
     }
 
     // Se tem assinatura mas está inativa (não se aplica a lifetime users)
-    // O canAccessPremiumFeatures já considera lifetime users, então esta verificação
-    // só será executada para usuários não-lifetime
-    if (subscription && !canAccessPremiumFeatures && ![
-      "active", 
-      "trialing"
-    ].includes(subscription.status)) {
+    if (subscription && !canAccessPremiumFeatures && !["active", "trialing"].includes(subscription.status)) {
+      hasRedirected.current = true;
       router.push("/payment/pending");
       return;
     }
-  }, [pathname, user, subscription, canAccessPremiumFeatures, isLoading, router]);
+  }, [subscription?.status]);
 
   // Mostrar loading enquanto verifica
   if (isLoading) {

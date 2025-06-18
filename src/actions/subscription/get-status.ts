@@ -31,7 +31,7 @@ interface SubscriptionData {
 }
 
 async function getAICreditsLimit(subscription: any, user?: any): Promise<number> {
-  if (user && await isLifetimeUser()) {
+  if (user && (await isLifetimeUser())) {
     return Infinity;
   }
 
@@ -65,7 +65,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
     // Verificar cache primeiro
     const cachedData = await getSubscriptionFromCache(userId);
     if (cachedData) {
-      console.log("Retornando dados de assinatura do cache");
       return cachedData;
     }
 

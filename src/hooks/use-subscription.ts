@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { getSubscriptionStatus } from "@/actions/subscription/get-status";
 import { createSubscription } from "@/actions/subscription/create-checkout";
 import { cancelSubscription } from "@/actions/subscription/cancel";
@@ -34,14 +34,24 @@ export function useSubscription() {
   const [data, setData] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const fetchingRef = useRef(false);
+  const lastFetchRef = useRef<number>(0);
 
   const fetchSubscriptionStatus = useCallback(async () => {
-    if (!user) {
+    if (!user || fetchingRef.current) {
       setIsLoading(false);
       return;
     }
 
+    // Debounce: evitar múltiplas chamadas em menos de 1 segundo
+    const now = Date.now();
+    if (now - lastFetchRef.current < 1000) {
+      return;
+    }
+
     try {
+      fetchingRef.current = true;
+      lastFetchRef.current = now;
       setIsLoading(true);
       setError(null);
       const subscriptionData = await getSubscriptionStatus();
@@ -51,8 +61,9 @@ export function useSubscription() {
       console.error("Erro ao buscar status da assinatura:", err);
     } finally {
       setIsLoading(false);
+      fetchingRef.current = false;
     }
-  }, [user]);
+  }, [user?.id]); // Usar apenas user.id como dependência
 
   useEffect(() => {
     fetchSubscriptionStatus();
@@ -100,9 +111,9 @@ export function useSubscription() {
     aiCreditsInfo: data?.aiCreditsInfo,
     isLoading,
     error,
+    refetch: fetchSubscriptionStatus,
     createSubscription: handleCreateSubscription,
     cancelSubscription: handleCancelSubscription,
     createPortalSession: handleCreatePortalSession,
-    refresh: fetchSubscriptionStatus,
   };
 }
