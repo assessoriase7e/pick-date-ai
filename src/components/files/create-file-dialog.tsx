@@ -26,8 +26,15 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     fileType: "",
   });
 
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUploadBegin = () => {
+    setIsUploading(true);
+  };
+
   const handleUploadComplete = (res: any) => {
     setFileData({ ...fileData, ...res });
+    setIsUploading(false);
   };
 
   const handleRemoveFile = () => {
@@ -144,6 +151,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                 ) : (
                   <div>
                     <UploadthingUploader
+                      onUploadBegin={handleUploadBegin}
                       onUploadComplete={handleUploadComplete}
                       endpoint="fileUploader"
                     />
@@ -164,6 +172,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
               className="mt-2"
               placeholder="Digite o nome do arquivo..."
               required
+              disabled={isUploading}
             />
           </div>
 
@@ -178,6 +187,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
               className="mt-2"
               placeholder="Descreva o arquivo..."
               required
+              disabled={isUploading}
             />
           </div>
         </div>

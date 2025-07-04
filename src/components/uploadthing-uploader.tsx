@@ -7,6 +7,7 @@ import "@uploadthing/react/styles.css";
 const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 
 interface UploadthingUploaderProps {
+  onUploadBegin?: () => void;
   onUploadComplete: (data: {
     fileUrl: string;
     fileName: string;
@@ -18,6 +19,7 @@ interface UploadthingUploaderProps {
 }
 
 export function UploadthingUploader({
+  onUploadBegin,
   onUploadComplete,
   onUploadError,
   endpoint = "fileUploader",
@@ -27,6 +29,7 @@ export function UploadthingUploader({
     <UploadDropzone
       endpoint={endpoint}
       config={{ mode: "auto" }}
+      onUploadBegin={onUploadBegin}
       onClientUploadComplete={(res) => {
         if (res && res.length > 0) {
           const file = res[0];
