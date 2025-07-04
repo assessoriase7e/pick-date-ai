@@ -89,7 +89,11 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
 
   const customFooter = (
     <>
-      <Button type="submit" disabled={isSubmitting || !fileData.fileUrl} onClick={handleSubmit}>
+      <Button
+        type="submit"
+        disabled={isSubmitting || !fileData.fileUrl}
+        onClick={handleSubmit}
+      >
         {isSubmitting ? "Criando..." : "Criar"}
       </Button>
     </>
@@ -98,7 +102,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
   return (
     <ConfirmationDialog
       open={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={handleClose}
       title="Novo Arquivo"
       description="Faça o upload de um arquivo para o sistema."
       size="lg"
@@ -122,7 +126,9 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                         />
                       ) : (
                         <div className=" p-4 rounded-lg flex items-center justify-center">
-                          <span className="text-muted-foreground">Arquivo carregado</span>
+                          <span className="text-muted-foreground">
+                            Arquivo carregado
+                          </span>
                         </div>
                       )}
                     </div>
@@ -137,7 +143,10 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                   </div>
                 ) : (
                   <div>
-                    <UploadthingUploader onUploadComplete={handleUploadComplete} endpoint="fileUploader" />
+                    <UploadthingUploader
+                      onUploadComplete={handleUploadComplete}
+                      endpoint="fileUploader"
+                    />
                   </div>
                 )}
               </div>
@@ -149,7 +158,9 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
             <Input
               id="fileName"
               value={fileData.fileName}
-              onChange={(e) => setFileData({ ...fileData, fileName: e.target.value })}
+              onChange={(e) =>
+                setFileData({ ...fileData, fileName: e.target.value })
+              }
               className="mt-2"
               placeholder="Digite o nome do arquivo..."
               required
@@ -161,7 +172,9 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
             <Textarea
               id="description"
               value={fileData.description}
-              onChange={(e) => setFileData({ ...fileData, description: e.target.value })}
+              onChange={(e) =>
+                setFileData({ ...fileData, description: e.target.value })
+              }
               className="mt-2"
               placeholder="Descreva o arquivo..."
               required
