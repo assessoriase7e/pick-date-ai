@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { updateFile } from "@/actions/files/update";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { FileRecord } from "@prisma/client";
+import { fileSchema, FileFormValues } from "@/validators/file";
 import { toast } from "sonner";
 
 interface EditFileModalProps {
@@ -18,28 +21,34 @@ interface EditFileModalProps {
 
 export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fileData, setFileData] = useState<FileRecord | null>(null);
+
+  const form = useForm<FileFormValues>({
+    resolver: zodResolver(fileSchema),
+    defaultValues: {
+      fileName: "",
+      description: "",
+      fileUrl: "",
+      fileType: "",
+    },
+  });
+
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = form;
 
   useEffect(() => {
     if (file) {
-      setFileData(file);
+      reset(file);
     }
-  }, [file]);
+  }, [file, reset]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!fileData || !fileData.id) {
+  const onSubmit = async (data: FileFormValues) => {
+    if (!file || !file.id) {
       alert("ID do arquivo não encontrado");
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const result = await updateFile(fileData.id, {
-        description: fileData.description,
+      const result = await updateFile(file.id, {
+        description: data.description,
       });
 
       if (result.success) {
@@ -52,31 +61,13 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
     } catch (error) {
       console.error("Erro ao atualizar arquivo:", error);
       toast.error("Ocorreu um erro ao atualizar o arquivo");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
+    reset();
     onClose();
   };
-
-  // Se não houver dados do arquivo, não renderize o conteúdo do formulário
-  if (!fileData) {
-    return (
-      <ConfirmationDialog
-        open={isOpen}
-        onOpenChange={handleClose}
-        title="Editar Arquivo"
-        size="lg"
-        showFooter={false}
-      >
-        <p className="text-sm text-muted-foreground">
-          Carregando informações do arquivo...
-        </p>
-      </ConfirmationDialog>
-    );
-  }
 
   const customFooter = (
     <>
@@ -107,19 +98,19 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
         Atualize as informações do arquivo.
       </p>
 
-      <form id="edit-file-form" onSubmit={handleSubmit} className="space-y-6">
+      <form id="edit-file-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
           <div>
             <Label htmlFor="fileName">Nome do Arquivo</Label>
             <div className="mt-2 p-2 border rounded-md bg-muted">
-              {fileData.fileName}
+              {file?.fileName}
             </div>
           </div>
 
           <div>
             <Label htmlFor="fileType">Tipo</Label>
             <div className="mt-2 p-2 border rounded-md bg-muted uppercase">
-              {fileData.fileType}
+              {file?.fileType}
             </div>
           </div>
 
@@ -127,14 +118,11 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
             <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
-              value={fileData.description}
-              onChange={(e) =>
-                setFileData({ ...fileData, description: e.target.value })
-              }
+              {...register("description")}
               className="mt-2"
               placeholder="Descreva o arquivo..."
-              required
             />
+            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
           </div>
         </div>
       </form>

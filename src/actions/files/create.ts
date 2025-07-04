@@ -6,10 +6,7 @@ import { FileRecord } from "@prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function createFile(
-  data: Pick<
-    FileRecord,
-    "fileUrl" | "fileName" | "fileType" | "description"
-  >
+  data: Pick<FileRecord, "fileUrl" | "fileName" | "fileType" | "description">
 ) {
   try {
     const user = await currentUser();

@@ -12,6 +12,7 @@ interface FileRecord {
   description: string;
   fileType: string;
   createdAt: string;
+  fileUrl: string;
 }
 
 export const columns: ColumnDef<FileRecord>[] = [
@@ -80,6 +81,19 @@ export const columns: ColumnDef<FileRecord>[] = [
             locale: ptBR,
           })}
         </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Ações",
+    cell: ({ row }) => {
+      const file = row.original;
+
+      return (
+        <a href={file.fileUrl} download>
+          <Button variant="ghost">Download</Button>
+        </a>
       );
     },
   },

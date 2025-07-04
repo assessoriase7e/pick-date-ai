@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFile } from "@/actions/files/create";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { UploadthingUploader } from "@/components/uploadthing-uploader";
+import { fileSchema, FileFormValues } from "@/validators/file";
 import { X } from "lucide-react";
+
+import { toast } from "sonner";
 
 interface CreateFileDialogProps {
   isOpen: boolean;
@@ -18,79 +23,65 @@ interface CreateFileDialogProps {
 
 export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fileData, setFileData] = useState({
-    fileName: "",
-    description: "",
-    fileUrl: "",
-    fileType: "",
+  const [isUploading, setIsUploading] = useState(false);
+
+  const form = useForm<FileFormValues>({
+    resolver: zodResolver(fileSchema),
+    defaultValues: {
+      fileName: "",
+      description: "",
+      fileUrl: "",
+      fileType: "",
+    },
   });
 
-  const [isUploading, setIsUploading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = form;
+
+  const fileUrl = watch("fileUrl");
+  const fileType = watch("fileType");
 
   const handleUploadBegin = () => {
     setIsUploading(true);
   };
 
   const handleUploadComplete = (res: any) => {
-    setFileData({ ...fileData, ...res });
+    setValue("fileName", res.fileName);
+    setValue("fileUrl", res.fileUrl);
+    setValue("fileType", res.fileType);
     setIsUploading(false);
   };
 
   const handleRemoveFile = () => {
-    setFileData({
-      ...fileData,
-      fileUrl: "",
-      fileType: "",
-    });
+    setValue("fileUrl", "");
+    setValue("fileType", "");
   };
 
-  // Função para resetar o formulário
-  const resetForm = () => {
-    setFileData({
-      fileName: "",
-      description: "",
-      fileUrl: "",
-      fileType: "",
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!fileData.fileUrl) {
-      alert("Por favor, faça o upload de um arquivo");
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: FileFormValues) => {
     try {
-      const result = await createFile({
-        fileName: fileData.fileName,
-        description: fileData.description || "",
-        fileUrl: fileData.fileUrl,
-        fileType: fileData.fileType,
-      });
+      const result = await createFile(data);
 
       if (result.success) {
-        resetForm(); // Resetar o formulário
+        toast.success("Arquivo criado com sucesso!");
+        form.reset();
         onClose();
         router.refresh();
       } else {
-        alert("Erro ao criar arquivo: " + result.error);
+        toast.error("Erro ao criar arquivo: " + result.error);
       }
     } catch (error) {
       console.error("Erro ao criar arquivo:", error);
-      alert("Ocorreu um erro ao criar o arquivo");
-    } finally {
-      setIsSubmitting(false);
+      toast.error("Ocorreu um erro ao criar o arquivo");
     }
   };
 
-  // Resetar formulário ao fechar o modal
   const handleClose = () => {
-    resetForm();
+    form.reset();
     onClose();
   };
 
@@ -98,8 +89,8 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     <>
       <Button
         type="submit"
-        disabled={isSubmitting || !fileData.fileUrl}
-        onClick={handleSubmit}
+        disabled={isSubmitting || isUploading || !fileUrl}
+        form="create-file-form"
       >
         {isSubmitting ? "Criando..." : "Criar"}
       </Button>
@@ -116,19 +107,23 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
       showFooter={true}
       customFooter={customFooter}
     >
-      <div className="space-y-6 flex items-center justify-center h-full">
+      <form
+        id="create-file-form"
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-6"
+      >
         <div className="space-y-4">
           <div>
             <Label htmlFor="file">Arquivo</Label>
             <div className="mt-2">
               <div className="border rounded-md p-4">
-                {fileData.fileUrl ? (
+                {fileUrl ? (
                   <div className="relative">
                     <div className="rounded-lg overflow-hidden">
-                      {fileData.fileType.startsWith("image/") ? (
+                      {fileType.startsWith("image/") ? (
                         <img
-                          src={fileData.fileUrl}
-                          alt={fileData.fileName}
+                          src={fileUrl}
+                          alt={watch("fileName")}
                           className="w-full h-auto max-h-[200px] object-contain rounded-lg"
                         />
                       ) : (
@@ -158,6 +153,11 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                   </div>
                 )}
               </div>
+              {errors.fileUrl && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.fileUrl.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -165,33 +165,30 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
             <Label htmlFor="fileName">Nome do Arquivo</Label>
             <Input
               id="fileName"
-              value={fileData.fileName}
-              onChange={(e) =>
-                setFileData({ ...fileData, fileName: e.target.value })
-              }
+              {...register("fileName")}
               className="mt-2"
               placeholder="Digite o nome do arquivo..."
-              required
               disabled={isUploading}
             />
+            {errors.fileName && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.fileName.message}
+              </p>
+            )}
           </div>
 
           <div>
             <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
-              value={fileData.description}
-              onChange={(e) =>
-                setFileData({ ...fileData, description: e.target.value })
-              }
+              {...register("description")}
               className="mt-2"
               placeholder="Descreva o arquivo..."
-              required
               disabled={isUploading}
             />
           </div>
         </div>
-      </div>
+      </form>
     </ConfirmationDialog>
   );
 }

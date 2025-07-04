@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Download } from "lucide-react";
 import { CreateFileDialog } from "@/components/files/create-file-dialog";
 import { FilesDataTable } from "@/components/files/files-data-table";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import { EditFileModal } from "./edit-file-modal";
 import { DeleteFileModal } from "./delete-file-modal";
 import { deleteFile } from "@/actions/files/delete";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface FilesContentProps {
   data: FileRecord[];
@@ -22,11 +23,7 @@ interface FilesContentProps {
   currentPage: number;
 }
 
-export function FilesContent({
-  data,
-  totalPages,
-  currentPage,
-}: FilesContentProps) {
+export function FilesContent({ data, totalPages, currentPage }: FilesContentProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -80,17 +77,12 @@ export function FilesContent({
     {
       accessorKey: "fileName",
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Nome do Arquivo
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("fileName")}</div>
-      ),
+      cell: ({ row }) => <div className="font-medium">{row.getValue("fileName")}</div>,
     },
     {
       accessorKey: "description",
@@ -102,25 +94,17 @@ export function FilesContent({
     {
       accessorKey: "fileType",
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Tipo
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="uppercase">{row.getValue("fileType")}</div>
-      ),
+      cell: ({ row }) => <div className="uppercase">{row.getValue("fileType")}</div>,
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Data de Criação
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
@@ -135,12 +119,7 @@ export function FilesContent({
       header: "Ações",
       cell: ({ row }) => (
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => openEditModal(row.original)}
-            title="Editar arquivo"
-          >
+          <Button variant="outline" size="icon" onClick={() => openEditModal(row.original)} title="Editar arquivo">
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
@@ -152,6 +131,11 @@ export function FilesContent({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
+          <Link href={row.original.fileUrl} target="_blank">
+            <Button variant="outline" size="icon" title="Baixar arquivo">
+              <Download className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       ),
     },
@@ -162,9 +146,7 @@ export function FilesContent({
       <div className="flex items-center space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-2xl font-bold">Gerenciamento de Arquivos</h1>
-          <p className="text-muted-foreground">
-            Gerencie os arquivos que serão enviados
-          </p>
+          <p className="text-muted-foreground">Gerencie os arquivos que serão enviados</p>
         </div>
         <Button onClick={openDialog}>
           <Plus className="h-4 w-4 mr-2" />
@@ -173,13 +155,7 @@ export function FilesContent({
       </div>
 
       <CreateFileDialog isOpen={isDialogOpen} onClose={closeDialog} />
-      {selectedFile && (
-        <EditFileModal
-          isOpen={isEditModalOpen}
-          onClose={closeEditModal}
-          file={selectedFile}
-        />
-      )}
+      {selectedFile && <EditFileModal isOpen={isEditModalOpen} onClose={closeEditModal} file={selectedFile} />}
       {selectedFile && (
         <DeleteFileModal
           isOpen={isDeleteModalOpen}
@@ -190,12 +166,7 @@ export function FilesContent({
       )}
 
       <Suspense fallback={<div>Carregando arquivos...</div>}>
-        <FilesDataTable
-          data={data}
-          columns={columns}
-          totalPages={totalPages}
-          currentPage={currentPage}
-        />
+        <FilesDataTable data={data} columns={columns} totalPages={totalPages} currentPage={currentPage} />
       </Suspense>
     </div>
   );
