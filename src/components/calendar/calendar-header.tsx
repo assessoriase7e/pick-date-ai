@@ -4,8 +4,6 @@ import { ShareCalendarDrawer } from "./share-calendar-drawer";
 import { Calendar } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface CalendarHeaderProps {
   shareOpen: boolean;
@@ -45,10 +43,6 @@ export function CalendarHeader({
       <h1 className="lg:text-3xl mb-2 lg:mb-0 lg:mr-2 font-bold">Agendamento</h1>
 
       <div className="flex items-center gap-2">
-        <Button onClick={handleCreateCalendarClick} size="sm">
-          <Plus className="h-4 w-4 mr-1" /> Novo Calendário
-        </Button>
-
         {isMobile ? (
           <ShareCalendarDrawer open={shareOpen} onOpenChange={setShareOpen} calendarId={calendarId} />
         ) : (
