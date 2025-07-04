@@ -92,44 +92,57 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
   }
 
   const productId = typeof price.product === "string" ? price.product : price.product?.id;
+  
+  // Verificar se é uma assinatura de calendário adicional
+  if (productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+    // Criar registro de calendário adicional
+    await prisma.additionalCalendar.create({
+      data: {
+        userId,
+        active: true,
+        stripeSubscriptionId: subscription.id,
+      }
+    });
+  } else {
+    // Lógica existente para outras assinaturas
+    if (!productId) {
+      throw new Error("Invalid subscription data: missing product ID");
+    }
 
-  if (!productId) {
-    throw new Error("Invalid subscription data: missing product ID");
+    const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
+
+    if (!customerId) {
+      throw new Error("Invalid subscription data: missing customer ID");
+    }
+
+    await prisma.subscription.upsert({
+      where: { userId },
+      update: {
+        stripeSubscriptionId: subscription.id,
+        stripePriceId: price.id,
+        stripeProductId: productId,
+        status: subscription.status,
+        currentPeriodStart: new Date(item.current_period_start * 1000),
+        currentPeriodEnd: new Date(item.current_period_end * 1000),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      },
+      create: {
+        userId,
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscription.id,
+        stripePriceId: price.id,
+        stripeProductId: productId,
+        status: subscription.status,
+        currentPeriodStart: new Date(item.current_period_start * 1000),
+        currentPeriodEnd: new Date(item.current_period_end * 1000),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      },
+    });
   }
-
-  const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
-
-  if (!customerId) {
-    throw new Error("Invalid subscription data: missing customer ID");
-  }
-
-  await prisma.subscription.upsert({
-    where: { userId },
-    update: {
-      stripeSubscriptionId: subscription.id,
-      stripePriceId: price.id,
-      stripeProductId: productId,
-      status: subscription.status,
-      currentPeriodStart: new Date(item.current_period_start * 1000),
-      currentPeriodEnd: new Date(item.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-      trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-    },
-    create: {
-      userId,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscription.id,
-      stripePriceId: price.id,
-      stripeProductId: productId,
-      status: subscription.status,
-      currentPeriodStart: new Date(item.current_period_start * 1000),
-      currentPeriodEnd: new Date(item.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-      trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-    },
-  });
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -159,19 +172,35 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const deletedSubscription = await prisma.subscription.update({
-    where: { stripeSubscriptionId: subscription.id },
-    data: {
-      status: "canceled",
-    },
-    include: {
-      user: true
+  // Verificar se é uma assinatura de calendário adicional
+  const additionalCalendar = await prisma.additionalCalendar.findFirst({
+    where: {
+      stripeSubscriptionId: subscription.id,
+      active: true
     }
   });
 
-  // Invalidar cache do usuário
-  if (deletedSubscription.user) {
-    await invalidateSubscriptionCache(deletedSubscription.user.id);
+  if (additionalCalendar) {
+    // Desativar o calendário adicional
+    await prisma.additionalCalendar.update({
+      where: { id: additionalCalendar.id },
+      data: { active: false }
+    });
+  } else {
+    const deletedSubscription = await prisma.subscription.update({
+      where: { stripeSubscriptionId: subscription.id },
+      data: {
+        status: "canceled",
+      },
+      include: {
+        user: true
+      }
+    });
+
+    // Invalidar cache do usuário
+    if (deletedSubscription.user) {
+      await invalidateSubscriptionCache(deletedSubscription.user.id);
+    }
   }
 }
 

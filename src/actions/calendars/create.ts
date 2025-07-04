@@ -4,6 +4,34 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
+// Função para determinar o limite de calendários baseado no plano
+async function getCalendarLimit(subscription: any, userId: string): Promise<number> {
+  if (!subscription || subscription.status !== "active") {
+    return 3; // Plano base: 3 calendários
+  }
+
+  const { stripePriceId } = subscription;
+  
+  // Planos com IA não têm limite
+  if ([
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+  ].includes(stripePriceId)) {
+    return Infinity;
+  }
+  
+  // Buscar calendários adicionais ativos
+  const additionalCalendars = await prisma.additionalCalendar.count({
+    where: {
+      userId,
+      active: true
+    }
+  });
+  
+  return 3 + additionalCalendars; // 3 base + calendários adicionais
+}
+
 export async function createCalendar({
   name,
   collaboratorId,
@@ -44,7 +72,7 @@ export async function createCalendar({
     const activeCalendarsCount = user.calendars.length;
     
     // Verificar limite baseado no plano
-    const calendarLimit = getCalendarLimit(user.subscription);
+    const calendarLimit = await getCalendarLimit(user.subscription, userId);
     
     if (activeCalendarsCount >= calendarLimit) {
       return {
@@ -85,31 +113,4 @@ export async function createCalendar({
       error: "Falha ao criar calendário",
     };
   }
-}
-
-// Função para determinar o limite de calendários baseado no plano
-function getCalendarLimit(subscription: any): number {
-  if (!subscription || subscription.status !== "active") {
-    return 3; // Plano base: 3 calendários
-  }
-
-  const { stripePriceId } = subscription;
-  
-  // Planos com IA não têm limite
-  if ([
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-  ].includes(stripePriceId)) {
-    return Infinity;
-  }
-  
-  // Verificar se tem assinatura de calendários adicionais
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
-    // Aqui você pode implementar lógica para diferentes quantidades
-    // Por enquanto, vamos assumir que cada assinatura adiciona 10 calendários
-    return 13; // 3 base + 10 adicionais
-  }
-  
-  return 3; // Plano base padrão
 }

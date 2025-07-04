@@ -66,34 +66,44 @@ export async function getAICreditsLimit(
  */
 export async function getCalendarLimit(
   subscription: Subscription | null | undefined,
-  checkLifetime: boolean = true
+  checkLifetime: boolean = true,
+  userId?: string
 ): Promise<number> {
   // Verificar se é usuário lifetime primeiro
   if (checkLifetime && await isLifetimeUser()) {
     return Infinity;
   }
   
-  if (!subscription || subscription.status !== "active") {
-    return 3; // Plano base: 3 calendários
-  }
-
-  const { stripePriceId } = subscription;
+  // Plano base: 3 calendários
+  let baseLimit = 3;
   
-  // Planos com IA não têm limite
-  if ([
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-  ].includes(stripePriceId)) {
-    return Infinity;
-  }
-  
-  // Verificar se tem assinatura de calendários adicionais
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
-    return 13; // 3 base + 10 adicionais
+  if (subscription && subscription.status === "active") {
+    const { stripePriceId } = subscription;
+    
+    // Planos com IA não têm limite
+    if ([
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+    ].includes(stripePriceId)) {
+      return Infinity;
+    }
   }
   
-  return 3; // Plano base padrão
+  // Se não tiver userId, retorna apenas o limite base
+  if (!userId) {
+    return baseLimit;
+  }
+  
+  // Buscar calendários adicionais ativos
+  const additionalCalendars = await prisma.additionalCalendar.count({
+    where: {
+      userId,
+      active: true
+    }
+  });
+  
+  return baseLimit + additionalCalendars;
 }
 
 /**
@@ -120,12 +130,19 @@ export async function hasAIPlan(subscription: Subscription | null | undefined): 
  * @param subscription Objeto de assinatura do usuário
  * @returns true se o usuário tem assinatura de calendários adicionais
  */
-export async function hasAdditionalCalendars(subscription: Subscription | null | undefined): Promise<boolean> {
-  if (!subscription || subscription.status !== "active") {
+export async function hasAdditionalCalendars(userId: string): Promise<boolean> {
+  if (!userId) {
     return false;
   }
 
-  return subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!;
+  const count = await prisma.additionalCalendar.count({
+    where: {
+      userId,
+      active: true
+    }
+  });
+
+  return count > 0;
 }
 
 /**

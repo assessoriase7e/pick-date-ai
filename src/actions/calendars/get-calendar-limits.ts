@@ -13,7 +13,7 @@ interface CalendarLimitsData {
 }
 
 // Função para determinar o limite de calendários baseado no plano
-function getCalendarLimit(subscription: any): number {
+async function getCalendarLimit(subscription: any, userId: string): Promise<number> {
   if (!subscription || subscription.status !== "active") {
     return 3; // Plano base: 3 calendários
   }
@@ -29,12 +29,15 @@ function getCalendarLimit(subscription: any): number {
     return Infinity;
   }
   
-  // Verificar se tem assinatura de calendários adicionais
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
-    return 13; // 3 base + 10 adicionais
-  }
+  // Buscar calendários adicionais ativos
+  const additionalCalendars = await prisma.additionalCalendar.count({
+    where: {
+      userId,
+      active: true
+    }
+  });
   
-  return 3; // Plano base padrão
+  return 3 + additionalCalendars; // 3 base + calendários adicionais
 }
 
 export async function getCalendarLimits(): Promise<CalendarLimitsData> {
@@ -58,6 +61,9 @@ export async function getCalendarLimits(): Promise<CalendarLimitsData> {
         subscription: true,
         calendars: {
           where: { isActive: true }
+        },
+        additionalCalendars: {
+          where: { active: true }
         }
       },
     });
@@ -82,7 +88,7 @@ export async function getCalendarLimits(): Promise<CalendarLimitsData> {
       calendarLimit = Infinity;
       isAiPlan = true;
     } else {
-      calendarLimit = getCalendarLimit(user.subscription);
+      calendarLimit = await getCalendarLimit(user.subscription, userId);
       
       // Verificar se é plano AI
       isAiPlan = [
@@ -92,8 +98,7 @@ export async function getCalendarLimits(): Promise<CalendarLimitsData> {
       ].includes(user.subscription?.stripePriceId || '');
       
       // Verificar se tem calendários adicionais
-      hasAdditionalCalendars = 
-        user.subscription?.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!;
+      hasAdditionalCalendars = user.additionalCalendars.length > 0;
     }
 
     return {

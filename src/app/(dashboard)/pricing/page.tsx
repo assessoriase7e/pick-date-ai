@@ -82,12 +82,12 @@ const PLANS = [
 
 const ADDITIONAL_CALENDAR_PLAN = {
   id: "add-calendar",
-  name: "Calendários Adicionais",
-  description: "Adicione mais calendários ao seu plano base",
+  name: "Calendário Adicional",
+  description: "Adicione mais um calendário ao seu plano base",
   price: "R$ 10",
   period: "/mês",
   productId: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!,
-  features: ["+1 calendários extra", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
+  features: ["+1 calendário extra", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
 };
 
 const ADDITIONAL_AI_PLAN = {
