@@ -1,7 +1,7 @@
-import { isLifetimeUser } from "@/lib/lifetime-user";
 import { useSubscription } from "./use-subscription";
 import { useUser } from "@clerk/nextjs";
-import useSWR from "swr";
+import { useState, useEffect } from "react";
+import { getCalendarLimits } from "@/actions/calendars/get-calendar-limits";
 
 interface CalendarLimitsData {
   limit: number;
@@ -11,19 +11,34 @@ interface CalendarLimitsData {
   hasAdditionalCalendars: boolean;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export function useCalendarLimits() {
-  const { subscription, isSubscriptionActive } = useSubscription();
+  const { subscription } = useSubscription();
   const { user } = useUser();
+  const [data, setData] = useState<CalendarLimitsData | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, error, mutate } = useSWR<CalendarLimitsData>("/api/calendar/limits", fetcher, {
-    refreshInterval: 30000, // 30 segundos
-    revalidateOnFocus: false,
-  });
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const limits = await getCalendarLimits();
+      setData(limits);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Remover a função getCalendarLimit local e usar apenas os dados da API
-  // pois a verificação lifetime agora é feita no servidor
+  useEffect(() => {
+    fetchData();
+
+    // Configurar um intervalo para atualizar os dados a cada 30 segundos
+    const intervalId = setInterval(fetchData, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [user?.id, subscription?.id]);
 
   return {
     limit: data?.limit ?? 3, // fallback para plano base
@@ -31,8 +46,8 @@ export function useCalendarLimits() {
     canCreateMore: data?.canCreateMore ?? true,
     isAiPlan: data?.isAiPlan ?? false, // fallback para false
     hasAdditionalCalendars: data?.hasAdditionalCalendars ?? false, // fallback para false
-    isLoading: !error && !data,
+    isLoading,
     error,
-    refresh: mutate,
+    refresh: fetchData,
   };
 }

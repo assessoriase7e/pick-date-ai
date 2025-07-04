@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { isLifetimeUser } from "@/lib/lifetime-user";
+import { getAICreditsLimit } from "@/lib/subscription-limits";
 
 type GetAIUsageStatsResponse =
   | {
@@ -17,34 +18,7 @@ type GetAIUsageStatsResponse =
     }
   | { success: false; error: string };
 
-// Função para obter o limite de créditos baseado na assinatura
-const getAICreditsLimit = async (subscription: any, user?: any): Promise<number> => {
-  const isLifeTime = await isLifetimeUser();
-
-  if (user && isLifeTime) {
-    console.log("Usuário lifetime");
-    return Infinity; // Usuários lifetime têm créditos ilimitados
-  }
-
-  if (!subscription || subscription.status !== "active") {
-    return 0; // Sem assinatura = sem créditos
-  }
-
-  const { stripePriceId } = subscription;
-
-  // Verificar pelos IDs dos produtos de IA
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
-    return 100;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
-    return 200;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
-    return 300;
-  }
-
-  return 0; // Outros planos não têm créditos de IA
-};
+// Remover a função getAICreditsLimit local, agora importada de @/lib/subscription-limits
 
 export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
   const { userId } = await auth();
@@ -73,7 +47,7 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
     }
 
     const clerkUser = await currentUser();
-    const monthlyLimit = await getAICreditsLimit(user.subscription, clerkUser);
+    const monthlyLimit = await getAICreditsLimit(user.subscription);
 
     // Se for usuário lifetime, retornar valores especiais
     if (clerkUser && isLifetime) {

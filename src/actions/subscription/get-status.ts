@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { isLifetimeUser } from "@/lib/lifetime-user";
 import { getSubscriptionFromCache, setSubscriptionCache } from "@/utils/subscription-cache";
+import { getAICreditsLimit } from "@/lib/subscription-limits";
 
 interface SubscriptionData {
   subscription: {
@@ -30,29 +31,7 @@ interface SubscriptionData {
   };
 }
 
-async function getAICreditsLimit(subscription: any, user?: any): Promise<number> {
-  if (user && (await isLifetimeUser())) {
-    return Infinity;
-  }
-
-  if (!subscription || subscription.status !== "active") {
-    return 0;
-  }
-
-  const { stripePriceId } = subscription;
-
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
-    return 100;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
-    return 200;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
-    return 300;
-  }
-
-  return 0;
-}
+// Remover a função getAICreditsLimit local, agora importada de @/lib/subscription-limits
 
 export async function getSubscriptionStatus(): Promise<SubscriptionData> {
   try {
