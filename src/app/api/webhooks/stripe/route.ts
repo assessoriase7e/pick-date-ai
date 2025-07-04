@@ -92,9 +92,19 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
   }
 
   const productId = typeof price.product === "string" ? price.product : price.product?.id;
+  const priceId = price.id;
+  
+  // Debug logs para identificar o problema
+  console.log("Webhook - ProductId:", productId);
+  console.log("Webhook - PriceId:", priceId);
+  console.log("Webhook - Expected Calendar Product:", process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR);
   
   // Verificar se é uma assinatura de calendário adicional
-  if (productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+  // Comparar tanto productId quanto priceId
+  if (productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR || 
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+    console.log("Creating additional calendar for user:", userId);
+    
     // Criar registro de calendário adicional
     await prisma.additionalCalendar.create({
       data: {
@@ -103,6 +113,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
         stripeSubscriptionId: subscription.id,
       }
     });
+    
+    console.log("Additional calendar created successfully");
+    
+    // Invalidar cache do usuário
+    await invalidateSubscriptionCache(userId);
   } else {
     // Lógica existente para outras assinaturas
     if (!productId) {

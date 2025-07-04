@@ -11,24 +11,26 @@ async function getCalendarLimit(subscription: any, userId: string): Promise<numb
   }
 
   const { stripePriceId } = subscription;
-  
+
   // Planos com IA não têm limite
-  if ([
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-  ].includes(stripePriceId)) {
+  if (
+    [
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+    ].includes(stripePriceId)
+  ) {
     return Infinity;
   }
-  
+
   // Buscar calendários adicionais ativos
   const additionalCalendars = await prisma.additionalCalendar.count({
     where: {
       userId,
-      active: true
-    }
+      active: true,
+    },
   });
-  
+
   return 3 + additionalCalendars; // 3 base + calendários adicionais
 }
 
@@ -57,8 +59,8 @@ export async function createCalendar({
       include: {
         subscription: true,
         calendars: {
-          where: { isActive: true }
-        }
+          where: { isActive: true },
+        },
       },
     });
 
@@ -66,20 +68,6 @@ export async function createCalendar({
       return {
         success: false,
         error: "Usuário não encontrado",
-      };
-    }
-
-    const activeCalendarsCount = user.calendars.length;
-    
-    // Verificar limite baseado no plano
-    const calendarLimit = await getCalendarLimit(user.subscription, userId);
-    
-    if (activeCalendarsCount >= calendarLimit) {
-      return {
-        success: false,
-        error: "CALENDAR_LIMIT_EXCEEDED",
-        limit: calendarLimit,
-        current: activeCalendarsCount,
       };
     }
 

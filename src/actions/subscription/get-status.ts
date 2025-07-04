@@ -1,13 +1,14 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { isLifetimeUser } from "@/lib/lifetime-user";
-import { getSubscriptionFromCache, setSubscriptionCache } from "@/utils/subscription-cache";
+import { setSubscriptionCache } from "@/utils/subscription-cache";
 import { getAICreditsLimit } from "@/lib/subscription-limits";
+import { AdditionalCalendar } from "@prisma/client";
 
 interface SubscriptionData {
   subscription: {
@@ -29,6 +30,7 @@ interface SubscriptionData {
     limit: number;
     remaining: number;
   };
+  additionalCalendars?: AdditionalCalendar[];
 }
 
 // Remover a função getAICreditsLimit local, agora importada de @/lib/subscription-limits
@@ -41,21 +43,13 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
       throw new Error("Unauthorized");
     }
 
-    // Verificar cache primeiro
-    const cachedData = await getSubscriptionFromCache(userId);
-    if (cachedData) {
-      return cachedData;
-    }
-
-    console.log("Cache não encontrado, buscando dados frescos");
-
-    const clerkUser = await currentUser();
-    const isLifetime = clerkUser ? await isLifetimeUser() : false;
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
         subscription: true,
+        additionalCalendars: {
+          where: { active: true },
+        },
       },
     });
 
@@ -142,7 +136,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
     let result: SubscriptionData;
 
     // In the return statements, convert dates to strings
-    if (isLifetime) {
+    if (await isLifetimeUser()) {
       result = {
         subscription: user?.subscription
           ? {
@@ -161,6 +155,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
           limit: Infinity,
           remaining: Infinity,
         },
+        additionalCalendars: user.additionalCalendars,
       };
     } else {
       result = {
@@ -177,6 +172,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
         trialDaysRemaining,
         hasRemainingCredits,
         aiCreditsInfo,
+        additionalCalendars: user.additionalCalendars,
       };
     }
 

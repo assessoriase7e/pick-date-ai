@@ -17,6 +17,7 @@ export function SubscriptionSettings() {
     canAccessPremiumFeatures,
     createPortalSession,
     isLoading,
+    additionalCalendars,
   } = useSubscription();
   const router = useRouter();
 
@@ -106,6 +107,14 @@ export function SubscriptionSettings() {
                 {format(new Date(subscription.currentPeriodEnd), "dd/MM/yyyy", { locale: ptBR })}
               </span>
             </div>
+
+            {/* Adicionar esta seção para mostrar calendários adicionais */}
+            {additionalCalendars && additionalCalendars.length > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Calendários adicionais:</span>
+                <span>{additionalCalendars.length}</span>
+              </div>
+            )}
 
             {subscription.cancelAtPeriodEnd && (
               <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg">

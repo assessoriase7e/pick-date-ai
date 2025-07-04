@@ -6,17 +6,13 @@ import { getSubscriptionStatus } from "@/actions/subscription/get-status";
 import { createSubscription } from "@/actions/subscription/create-checkout";
 import { cancelSubscription } from "@/actions/subscription/cancel";
 import { createPortalSession } from "@/actions/subscription/portal";
+import { Subscription, AdditionalCalendar } from "@prisma/client";
 
 interface SubscriptionData {
-  subscription: {
-    id: string;
-    status: string;
-    stripePriceId: string;
-    stripeProductId: string;
+  subscription: (Pick<Subscription, 'id' | 'status' | 'stripePriceId' | 'stripeProductId' | 'cancelAtPeriodEnd'> & {
     currentPeriodEnd: string;
-    cancelAtPeriodEnd: boolean;
     trialEnd?: string;
-  } | null;
+  }) | null;
   isTrialActive: boolean;
   isSubscriptionActive: boolean;
   canAccessPremiumFeatures: boolean;
@@ -27,6 +23,7 @@ interface SubscriptionData {
     limit: number;
     remaining: number;
   };
+  additionalCalendars?: AdditionalCalendar[];
 }
 
 export function useSubscription() {
@@ -103,12 +100,13 @@ export function useSubscription() {
 
   return {
     subscription: data?.subscription,
-    isTrialActive: data?.isTrialActive ?? false,
-    isSubscriptionActive: data?.isSubscriptionActive ?? false,
-    canAccessPremiumFeatures: data?.canAccessPremiumFeatures ?? false,
-    trialDaysRemaining: data?.trialDaysRemaining ?? 0,
+    isTrialActive: data?.isTrialActive || false,
+    isSubscriptionActive: data?.isSubscriptionActive || false,
+    canAccessPremiumFeatures: data?.canAccessPremiumFeatures || false,
+    trialDaysRemaining: data?.trialDaysRemaining || 0,
     hasRemainingCredits: data?.hasRemainingCredits ?? true,
     aiCreditsInfo: data?.aiCreditsInfo,
+    additionalCalendars: data?.additionalCalendars || [],
     isLoading,
     error,
     refetch: fetchSubscriptionStatus,

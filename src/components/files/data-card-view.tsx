@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 interface DataCardViewProps {
   data: FileRecord[];
@@ -180,27 +181,14 @@ export function DataCardView({ data, pageSize = 8 }: DataCardViewProps) {
         />
       )}
 
-      <AlertDialog open={!!deletingFile} onOpenChange={() => setDeletingFile(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso excluirá permanentemente o arquivo{" "}
-              <span className="font-semibold">{deletingFile?.fileName}</span>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Excluindo..." : "Excluir"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmationDialog
+        isOpen={!!deletingFile}
+        onClose={() => setDeletingFile(null)}
+        onConfirm={handleConfirmDelete}
+        itemName={deletingFile?.fileName}
+        itemType="o arquivo"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { getCalendarLimits } from "./get-calendar-limits";
 
 export async function updateCalendar({
   id,
@@ -38,6 +39,17 @@ export async function updateCalendar({
         success: false,
         error: "Calendário não encontrado",
       };
+    }
+
+    // Se está tentando ativar um calendário, verificar limites
+    if (isActive === true && !existingCalendar.isActive) {
+      const limits = await getCalendarLimits();
+      if (!limits.canCreateMore) {
+        return {
+          success: false,
+          error: "Limite de calendários atingido. Cancele calendários adicionais ou faça upgrade do plano.",
+        };
+      }
     }
 
     const calendar = await prisma.calendar.update({

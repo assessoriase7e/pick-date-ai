@@ -13,7 +13,8 @@ export default function PaymentSuccessPage() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          router.push("/calendar");
+          // Mover a navegação para fora do setState
+          setTimeout(() => router.push("/calendar"), 0);
           return 0;
         }
         return prev - 1;

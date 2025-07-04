@@ -15,7 +15,12 @@ export async function cancelSubscription() {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { subscription: true },
+      include: { 
+        subscription: true,
+        additionalCalendars: {
+          where: { active: true }
+        }
+      },
     });
 
     if (!user || !user.subscription) {
@@ -24,10 +29,22 @@ export async function cancelSubscription() {
 
     const { subscription } = user;
 
-    // Cancelar no Stripe
+    // Cancelar assinatura principal no Stripe
     await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
+
+    // Cancelar todos os calendários adicionais
+    for (const additionalCalendar of user.additionalCalendars) {
+      if (additionalCalendar.stripeSubscriptionId) {
+        await stripe.subscriptions.cancel(additionalCalendar.stripeSubscriptionId);
+      }
+      
+      await prisma.additionalCalendar.update({
+        where: { id: additionalCalendar.id },
+        data: { active: false }
+      });
+    }
 
     // Atualizar no banco de dados
     await prisma.subscription.update({
@@ -42,7 +59,7 @@ export async function cancelSubscription() {
 
     return {
       success: true,
-      message: "Subscription cancelled successfully",
+      message: "Subscription and all additional services cancelled successfully",
     };
   } catch (error) {
     console.error("Error cancelling subscription:", error);
