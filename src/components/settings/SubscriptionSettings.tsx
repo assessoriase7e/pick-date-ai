@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CreditCard, Calendar, AlertTriangle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function SubscriptionSettings() {
   const {
@@ -17,6 +18,7 @@ export function SubscriptionSettings() {
     createPortalSession,
     isLoading
   } = useSubscription();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -54,16 +56,24 @@ export function SubscriptionSettings() {
 
   const getPlanName = (productId: string) => {
     switch (productId) {
-      case 'prod_SUzLvSOK0Lt1Y7':
+      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
         return 'Plano Base';
-      case 'prod_SUmpaC7TdpCQ1o':
+      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
         return '100 Atendimentos IA';
-      case 'prod_SUmrqvbECO2fGx':
+      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
         return '200 Atendimentos IA';
-      case 'prod_SUmsDte555npVd':
+      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
         return '300 Atendimentos IA';
       default:
         return 'Plano Desconhecido';
+    }
+  };
+
+  const handleManageSubscription = () => {
+    if (!subscription || subscription.status !== 'active') {
+      router.push('/pricing');
+    } else {
+      createPortalSession();
     }
   };
 
@@ -112,10 +122,10 @@ export function SubscriptionSettings() {
         
         <div className="pt-4 border-t">
           <Button
-            onClick={createPortalSession}
+            onClick={handleManageSubscription}
             className="w-full"
           >
-            Gerenciar Assinatura no Stripe
+            {!subscription || subscription.status !== 'active' ? 'Ver Planos Disponíveis' : 'Gerenciar Assinatura no Stripe'}
           </Button>
         </div>
       </CardContent>
