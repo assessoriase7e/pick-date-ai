@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { FileRecord } from "@prisma/client";
+import { toast } from "sonner";
 
 interface EditFileModalProps {
   isOpen: boolean;
@@ -42,14 +43,15 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
       });
 
       if (result.success) {
+        toast.success("Arquivo atualizado com sucesso!");
         onClose();
         router.refresh();
       } else {
-        alert("Erro ao atualizar arquivo: " + result.error);
+        toast.error("Erro ao atualizar arquivo: " + result.error);
       }
     } catch (error) {
       console.error("Erro ao atualizar arquivo:", error);
-      alert("Ocorreu um erro ao atualizar o arquivo");
+      toast.error("Ocorreu um erro ao atualizar o arquivo");
     } finally {
       setIsSubmitting(false);
     }
@@ -98,8 +100,8 @@ export function EditFileModal({ isOpen, onClose, file }: EditFileModalProps) {
       onOpenChange={handleClose}
       title="Editar Arquivo"
       size="lg"
-      showFooter={false}
       customFooter={customFooter}
+      showFooter={true}
     >
       <p className="text-sm text-muted-foreground mb-6">
         Atualize as informações do arquivo.

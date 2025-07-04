@@ -27,7 +27,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
   });
 
   const handleUploadComplete = (res: any) => {
-    setFileData(res);
+    setFileData({ ...fileData, ...res });
   };
 
   const handleRemoveFile = () => {

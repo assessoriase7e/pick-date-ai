@@ -1,6 +1,5 @@
 import { listFiles } from "@/actions/files/getMany";
 import { FilesContent } from "@/components/files/files-content";
-import { columns } from "@/components/files/columns";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +22,11 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
 
   return (
     <div className="space-y-4">
-      <FilesContent columns={columns} data={files} totalPages={totalPages} currentPage={currentPage} />
+      <FilesContent
+        data={files}
+        totalPages={totalPages}
+        currentPage={currentPage}
+      />
     </div>
   );
 }
