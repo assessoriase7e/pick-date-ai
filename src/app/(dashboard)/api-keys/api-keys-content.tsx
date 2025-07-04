@@ -31,6 +31,7 @@ import { createApiKey } from "@/actions/api-key/create";
 import { updateApiKey } from "@/actions/api-key/update";
 import { deleteApiKey } from "@/actions/api-key/delete";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 interface ApiKeyWithKey extends ApiKey {
   key: string;
@@ -392,33 +393,13 @@ export function ApiKeysContent({
 
       {/* Confirmação para Deletar */}
       {deletingApiKey && (
-        <AlertDialog
-          open={!!deletingApiKey}
-          onOpenChange={() => setDeletingApiKey(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação não pode ser desfeita. Isso excluirá permanentemente a
-                chave de API{" "}
-                <code className="font-mono bg-muted p-1 rounded">
-                  {deletingApiKey.key.substring(0, 7)}...
-                </code>
-                .
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDeleteApiKey}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeleteConfirmationDialog
+          isOpen={!!deletingApiKey}
+          onClose={() => setDeletingApiKey(null)}
+          onConfirm={handleDeleteApiKey}
+          description={`Esta ação não pode ser desfeita. Isso excluirá permanentemente a chave de API ${deletingApiKey?.key.substring(0, 7)}...`}
+          itemType="chave de API"
+        />
       )}
     </div>
   );

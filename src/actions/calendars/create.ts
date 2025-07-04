@@ -71,6 +71,17 @@ export async function createCalendar({
       };
     }
 
+    // VERIFICAÇÃO DE LIMITE - ADICIONAR ESTA PARTE
+    const currentActiveCalendars = user.calendars.length;
+    const calendarLimit = await getCalendarLimit(user.subscription, userId);
+
+    if (currentActiveCalendars >= calendarLimit) {
+      return {
+        success: false,
+        error: "CALENDAR_LIMIT_EXCEEDED",
+      };
+    }
+
     const calendar = await prisma.calendar.create({
       data: {
         name,
