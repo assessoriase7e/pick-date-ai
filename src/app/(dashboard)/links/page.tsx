@@ -4,6 +4,8 @@ import { LoaderCircle } from "lucide-react";
 import { listLinks } from "@/actions/links/getMany";
 import { currentUser } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 interface LinksPageProps {
   searchParams: Promise<{
     page?: string;
@@ -24,10 +26,17 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Links</h1>
-        <p className="text-muted-foreground">Gerencie os links cadastrados no sistema.</p>
+        <p className="text-muted-foreground">
+          Gerencie os links cadastrados no sistema.
+        </p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <LinksContent links={links} totalPages={totalPages} currentPage={page} userId={userId!} />
+        <LinksContent
+          links={links}
+          totalPages={totalPages}
+          currentPage={page}
+          userId={userId!}
+        />
       </Suspense>
     </div>
   );
