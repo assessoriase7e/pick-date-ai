@@ -20,7 +20,7 @@ import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 import { Calendar } from "@prisma/client";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { CalendarLimitModal } from "./calendar-limit-modal";
-import { DayDetailsModal } from "./day-details-modal";
+import { useCalendarStore } from "@/store/calendar-store";
 
 moment.locale("pt-br");
 
@@ -32,9 +32,6 @@ interface CalendarContentProps {
   selectedDay: Date | null;
   selectedDayAppointments: AppointmentFullData[];
   collaborators: CollaboratorFullData[];
-  allClients: Record<number, any[]>;
-  allServices: Record<number, any[]>;
-  allCollaborators: Record<number, any>;
 }
 
 export function CalendarContent({
@@ -44,21 +41,18 @@ export function CalendarContent({
   appointments,
   currentDate,
   selectedDay,
-  allClients,
-  allServices,
-  allCollaborators,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
   const [dayModalOpen, setDayModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { toast } = useToast();
   const { limit, current } = useCalendarLimits();
+  const { limitModalOpen, setLimitModalOpen } = useCalendarStore();
 
   const { activeCalendarId, activeDate, setCalendarId, goToPreviousMonth, goToNextMonth, goToToday } = useCalendarQuery(
     {
@@ -236,20 +230,6 @@ export function CalendarContent({
       />
 
       <CalendarLimitModal open={limitModalOpen} onOpenChange={setLimitModalOpen} currentCount={current} limit={limit} />
-
-      {selectedDate && activeCalendar && (
-        <DayDetailsModal
-          isOpen={dayModalOpen}
-          onClose={handleCloseDayModal}
-          date={selectedDate}
-          calendarId={activeCalendarId}
-          calendar={activeCalendar}
-          clients={allClients[activeCalendarId] || []}
-          services={allServices[activeCalendarId] || []}
-          collaborator={allCollaborators[activeCalendarId] || null}
-          appointments={appointments}
-        />
-      )}
     </div>
   );
 }

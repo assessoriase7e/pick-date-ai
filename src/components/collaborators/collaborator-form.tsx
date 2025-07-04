@@ -95,9 +95,22 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
     }
   }
 
-  // Função para verificar se o dia já está selecionado
+  // Check if day is already selected in another schedule
   const isDayAlreadySelected = (selectedDay: string, currentIndex: number) => {
     return fields.some((field, index) => index !== currentIndex && field.day === selectedDay);
+  };
+
+  // Get available days for selection
+  const getAvailableDays = (currentIndex: number) => {
+    const selectedDays = new Set<string>();
+
+    fields.forEach((field, index) => {
+      if (index !== currentIndex && field.day) {
+        selectedDays.add(field.day);
+      }
+    });
+
+    return daysOfWeek.filter((day) => !selectedDays.has(day));
   };
 
   return (
@@ -140,6 +153,7 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
                     <FormLabel>Dia da Semana</FormLabel>
                     <Select
                       onValueChange={(value) => {
+                        // Prevent selecting days that are already used
                         if (isDayAlreadySelected(value, index)) {
                           toast({
                             variant: "destructive",
@@ -151,6 +165,7 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
                         field.onChange(value);
                       }}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -158,8 +173,13 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        {/* Only show days that aren't selected in other schedules */}
                         {daysOfWeek.map((day) => (
-                          <SelectItem key={day} value={day} disabled={isDayAlreadySelected(day, index)}>
+                          <SelectItem
+                            key={day}
+                            value={day}
+                            disabled={day !== field.value && isDayAlreadySelected(day, index)}
+                          >
                             {day}
                           </SelectItem>
                         ))}
@@ -236,7 +256,7 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
             size="sm"
             onClick={() =>
               append({
-                day: "Segunda-feira",
+                day: getAvailableDays(-1)[0] || "Segunda-feira",
                 startTime: "09:00",
                 endTime: "18:00",
                 breakStart: "12:00",

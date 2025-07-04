@@ -10,6 +10,8 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import IsTableLoading from "../isTableLoading";
 import { Button } from "@/components/ui/button";
 import { Edit, Plus, Share2, Trash2 } from "lucide-react";
+import { useCalendarLimits } from "@/hooks/use-calendar-limits";
+import { useCalendarStore } from "@/store/calendar-store";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
@@ -39,7 +41,7 @@ export function CalendarTabs({
   goToNextMonth,
   goToToday,
   selectedDate,
-  openDayDetails, // Esta prop já existe na interface mas não estava sendo usada
+  openDayDetails,
   appointments,
   setOpen,
   setShareOpen,
@@ -47,6 +49,8 @@ export function CalendarTabs({
   const [showActionsModal, setShowActionsModal] = useState<boolean>(false);
   const [selectedCalendar, setSelectedCalendar] = useState<CalendarFullData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const { canCreateMore } = useCalendarLimits();
+  const { setLimitModalOpen } = useCalendarStore();
 
   const isMobile = useIsMobile();
   const currentCalendar = calendars.find((cal) => cal.id === calendarId);
@@ -54,6 +58,14 @@ export function CalendarTabs({
   const handleChangeCalendar = async (id: string) => {
     setLoading(true);
     setCalendarId(id);
+  };
+
+  const handleCreateCalendarClick = () => {
+    if (canCreateMore) {
+      setOpen(true);
+    } else {
+      setLimitModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -101,7 +113,7 @@ export function CalendarTabs({
           <div className="flex h-full">
             {/* Botões de ação na lateral esquerda */}
             <div className="flex flex-col gap-2 w-12">
-              <Button onClick={() => setOpen(true)} size="icon" className="flex-shrink-0" title="Novo Calendário">
+              <Button onClick={handleCreateCalendarClick} size="icon" className="flex-shrink-0" title="Novo Calendário">
                 <Plus className="h-4 w-4" />
               </Button>
               {currentCalendar && (
