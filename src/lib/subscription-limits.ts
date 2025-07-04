@@ -1,5 +1,6 @@
 "use server";
 
+import { prisma } from "@/lib/db";
 import { isLifetimeUser } from "./lifetime-user";
 import { Subscription } from "@prisma/client";
 
@@ -7,35 +8,54 @@ import { Subscription } from "@prisma/client";
  * Obtém o limite de créditos de IA baseado na assinatura do usuário
  * @param subscription Objeto de assinatura do usuário
  * @param checkLifetime Se true, verifica se o usuário é lifetime
+ * @param userId ID do usuário para verificar créditos adicionais
  * @returns Número de créditos permitidos (Infinity para usuários lifetime)
  */
 export async function getAICreditsLimit(
   subscription: Subscription | null | undefined,
-  checkLifetime: boolean = true
+  checkLifetime: boolean = true,
+  userId?: string
 ): Promise<number> {
   // Verificar se é usuário lifetime primeiro
   if (checkLifetime && await isLifetimeUser()) {
     return Infinity;
   }
 
-  if (!subscription || subscription.status !== "active") {
-    return 0; // Sem assinatura = sem créditos
+  let baseCredits = 0;
+  
+  if (subscription && subscription.status === "active") {
+    const { stripePriceId } = subscription;
+
+    // Verificar pelos IDs dos produtos de IA
+    if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
+      baseCredits = 100;
+    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
+      baseCredits = 200;
+    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
+      baseCredits = 300;
+    }
   }
 
-  const { stripePriceId } = subscription;
-
-  // Verificar pelos IDs dos produtos de IA
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
-    return 100;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
-    return 200;
-  }
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
-    return 300;
+  // Se não tiver userId, retorna apenas os créditos base
+  if (!userId) {
+    return baseCredits;
   }
 
-  return 0; // Outros planos não têm créditos de IA
+  // Buscar créditos adicionais ativos e não totalmente utilizados
+  const additionalCredits = await prisma.additionalAICredit.findMany({
+    where: {
+      userId,
+      active: true,
+      used: { lt: prisma.additionalAICredit.fields.quantity }
+    }
+  });
+
+  // Calcular total de créditos adicionais disponíveis
+  const totalAdditionalCredits = additionalCredits.reduce((total, credit) => {
+    return total + (credit.quantity - credit.used);
+  }, 0);
+
+  return baseCredits + totalAdditionalCredits;
 }
 
 /**
@@ -106,4 +126,17 @@ export async function hasAdditionalCalendars(subscription: Subscription | null |
   }
 
   return subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!;
+}
+
+/**
+ * Verifica se o usuário tem o pacote adicional de IA
+ * @param subscription Objeto de assinatura do usuário
+ * @returns true se o usuário tem o pacote adicional de IA
+ */
+export async function hasAdditionalAI(subscription: Subscription | null | undefined): Promise<boolean> {
+  if (!subscription || subscription.status !== "active") {
+    return false;
+  }
+
+  return subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!;
 }

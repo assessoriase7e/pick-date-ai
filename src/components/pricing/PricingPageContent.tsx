@@ -13,7 +13,7 @@ interface PricingPageContentProps {
 }
 
 export function PricingPageContent({ plans, additionalCalendarPlan, additionalAiPlan }: PricingPageContentProps) {
-  const { createSubscription } = useSubscription();
+  const { createSubscription, subscription } = useSubscription();
 
   const handleSubscribe = async (productId: string) => {
     try {
@@ -23,37 +23,43 @@ export function PricingPageContent({ plans, additionalCalendarPlan, additionalAi
     }
   };
 
-  const AdditionalCard = ({ plan }: { plan: any }) => (
-    <Card className="border-border hover:border-primary/50 transition-colors">
-      <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
-        <CardDescription className="text-sm">{plan.description}</CardDescription>
-        <div className="mt-4">
-          <span className="text-3xl font-bold">{plan.price}</span>
-          <span className="text-muted-foreground text-sm">{plan.period}</span>
-        </div>
-      </CardHeader>
+  const AdditionalCard = ({ plan }: { plan: any }) => {
+    // Verificar se o plano adicional já está ativo
+    const isCurrentPlan = subscription?.stripeProductId === plan.productId;
+    
+    return (
+      <Card className="border-border hover:border-primary/50 transition-colors">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+          <CardDescription className="text-sm">{plan.description}</CardDescription>
+          <div className="mt-4">
+            <span className="text-3xl font-bold">{plan.price}</span>
+            <span className="text-muted-foreground text-sm">{plan.period}</span>
+          </div>
+        </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col">
-        <ul className="space-y-2 flex-1 mb-6">
-          {plan.features.map((feature: string, index: number) => (
-            <li key={index} className="flex items-start gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
+        <CardContent className="flex-1 flex flex-col">
+          <ul className="space-y-2 flex-1 mb-6">
+            {plan.features.map((feature: string, index: number) => (
+              <li key={index} className="flex items-start gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
 
-        <Button
-          onClick={() => handleSubscribe(plan.productId)}
-          className="w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background"
-          size="lg"
-        >
-          Adicionar ao Plano
-        </Button>
-      </CardContent>
-    </Card>
-  );
+          <Button
+            onClick={() => handleSubscribe(plan.productId)}
+            disabled={isCurrentPlan}
+            className={`w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background ${isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""}`}
+            size="lg"
+          >
+            {isCurrentPlan ? "Plano Atual" : "Adicionar ao Plano"}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div>

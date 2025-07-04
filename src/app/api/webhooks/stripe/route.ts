@@ -252,6 +252,7 @@ async function handlePaymentSucceeded(invoice: any) {
       paymentIntentId = typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent.id;
     }
 
+    // Criar registro de pagamento
     await prisma.paymentHistory.create({
       data: {
         userId: subscription.userId,
@@ -263,6 +264,21 @@ async function handlePaymentSucceeded(invoice: any) {
         description: invoice.description || "Pagamento de assinatura",
       },
     });
+
+    // Verificar se é um pacote adicional de IA
+    if (subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!) {
+      // Criar um novo pacote adicional de IA
+      await prisma.additionalAICredit.create({
+        data: {
+          userId: subscription.userId,
+          quantity: 10,
+          used: 0,
+          active: true,
+          stripePaymentId: paymentIntentId,
+          stripeInvoiceId: invoice.id,
+        },
+      });
+    }
   }
 }
 
