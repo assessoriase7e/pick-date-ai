@@ -1,8 +1,8 @@
 "use client";
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
-import { DayScheduleGrid } from "./day-schedule-grid";
-import { AppointmentForm } from "../appointment/appointment-form";
-import { MobileDaySchedule } from "./mobile/mobile-day-schedule";
+import { DayScheduleGrid } from "../common/day-schedule-grid";
+import { AppointmentForm } from "../../appointment/appointment-form";
+import { MobileDaySchedule } from "../mobile/mobile-day-schedule";
 import { Client, Collaborator, Service } from "@prisma/client";
 
 interface DayModalContentProps {

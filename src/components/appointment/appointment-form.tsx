@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { SelectWithScroll } from "../calendar/select-with-scroll";
+import { SelectWithScroll } from "../calendar/common/select-with-scroll";
 import { AppointmentFormProps } from "@/validators/appointment";
 import { NumericFormat } from "react-number-format";
 import { useEffect, useState } from "react";

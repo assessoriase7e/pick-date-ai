@@ -4,21 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarFormValues, calendarSchema } from "@/validators/calendar";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, Copy, RefreshCw } from "lucide-react";
 import { Calendar } from "@prisma/client";
 import { SelectWithScroll } from "./select-with-scroll";
 import { CollaboratorFullData } from "@/types/collaborator";
-import { Switch } from "../ui/switch";
+import { Switch } from "../../ui/switch";
 import { toast } from "sonner";
 
 interface CalendarFormProps {
@@ -27,11 +19,7 @@ interface CalendarFormProps {
   collaborators: CollaboratorFullData[];
 }
 
-export function CalendarForm({
-  onSubmit,
-  calendar,
-  collaborators,
-}: CalendarFormProps) {
+export function CalendarForm({ onSubmit, calendar, collaborators }: CalendarFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CalendarFormValues>({
@@ -126,13 +114,7 @@ export function CalendarForm({
                     readOnly
                   />
                 </FormControl>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={generateAccessCode}
-                  title="Gerar código"
-                >
+                <Button type="button" variant="outline" size="icon" onClick={generateAccessCode} title="Gerar código">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Button
@@ -146,9 +128,7 @@ export function CalendarForm({
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <FormDescription>
-                Código de 6 dígitos para acesso ao calendário público
-              </FormDescription>
+              <FormDescription>Código de 6 dígitos para acesso ao calendário público</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -161,15 +141,10 @@ export function CalendarForm({
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
               <div className="space-y-0.5">
                 <FormLabel>Status da Agenda</FormLabel>
-                <FormDescription>
-                  Defina se esta agenda está ativa ou inativa
-                </FormDescription>
+                <FormDescription>Defina se esta agenda está ativa ou inativa</FormDescription>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
             </FormItem>
           )}

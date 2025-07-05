@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import { CalendarViewProps } from "../../../types/calendar";
-import { CalendarDayCell } from "../dayCell/calendar-day-cell";
+import { CalendarDayCell } from "../common/dayCell/calendar-day-cell";
 import { weekDays } from "@/mocked/calendar";
 import IsTableLoading from "../../isTableLoading";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

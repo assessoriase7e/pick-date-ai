@@ -5,7 +5,7 @@ import moment from "moment";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
-import { DayScheduleGrid } from "../day-schedule-grid";
+import { DayScheduleGrid } from "../common/day-schedule-grid";
 import { AppointmentForm } from "../../appointment/appointment-form";
 import { toast } from "sonner";
 import { Client, Collaborator, Service } from "@prisma/client";

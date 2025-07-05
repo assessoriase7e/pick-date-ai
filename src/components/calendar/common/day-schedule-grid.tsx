@@ -1,5 +1,5 @@
 import moment from "moment";
-import { AppointmentCard } from "../appointment/appointment-card";
+import { AppointmentCard } from "../../appointment/appointment-card";
 import { AppointmentFullData } from "@/types/calendar";
 import { cn } from "@/lib/utils";
 import { hoursOfDay } from "@/mocked/hoursOfDay";

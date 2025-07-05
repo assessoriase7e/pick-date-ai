@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { CalendarForm } from "./calendar-form";
+import { CalendarForm } from "../common/calendar-form";
 import { updateCalendar } from "@/actions/calendars/update";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -83,10 +83,7 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Criar Novo Calendário</DialogTitle>
           </DialogHeader>
-          <CalendarForm
-            onSubmit={handleCreateCalendar}
-            collaborators={collaborators}
-          />
+          <CalendarForm onSubmit={handleCreateCalendar} collaborators={collaborators} />
         </DialogContent>
       </Dialog>
 
@@ -96,11 +93,7 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Editar Calendário</DialogTitle>
           </DialogHeader>
-          <CalendarForm
-            onSubmit={handleEditCalendar}
-            calendar={selectedCalendar}
-            collaborators={collaborators}
-          />
+          <CalendarForm onSubmit={handleEditCalendar} calendar={selectedCalendar} collaborators={collaborators} />
         </DialogContent>
       </Dialog>
 
@@ -110,23 +103,14 @@ export function CalendarModals({
           <DialogHeader>
             <DialogTitle>Excluir Calendário</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir o calendário "
-              {selectedCalendar?.name}"? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir o calendário "{selectedCalendar?.name}"? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteOpen(false)}
-              type="button"
-            >
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} type="button">
               Cancelar
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteCalendar}
-              type="button"
-            >
+            <Button variant="destructive" onClick={handleDeleteCalendar} type="button">
               Excluir
             </Button>
           </DialogFooter>
@@ -173,9 +157,7 @@ export function CreateCalendarModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Criar Novo Calendário</DialogTitle>
-          <DialogDescription>
-            Preencha as informações para criar um novo calendário.
-          </DialogDescription>
+          <DialogDescription>Preencha as informações para criar um novo calendário.</DialogDescription>
         </DialogHeader>
 
         <CalendarForm onSubmit={handleSubmit} collaborators={collaborators} />
@@ -221,16 +203,10 @@ export function EditCalendarModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar Calendário</DialogTitle>
-          <DialogDescription>
-            Atualize as informações do calendário.
-          </DialogDescription>
+          <DialogDescription>Atualize as informações do calendário.</DialogDescription>
         </DialogHeader>
 
-        <CalendarForm
-          onSubmit={handleSubmit}
-          calendar={calendar}
-          collaborators={collaborators}
-        />
+        <CalendarForm onSubmit={handleSubmit} calendar={calendar} collaborators={collaborators} />
       </DialogContent>
     </Dialog>
   );

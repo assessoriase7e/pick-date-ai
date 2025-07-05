@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { useReverification } from "@clerk/nextjs";
+import { useReverification, useClerk } from "@clerk/nextjs";
 import { deleteAccount } from "@/actions/account/delete";
 import { useRouter } from "next/navigation";
 import { isReverificationCancelledError } from "@clerk/nextjs/errors";
@@ -14,12 +14,16 @@ export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onO
   const [countdown, setCountdown] = useState(10);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const { signOut } = useClerk();
 
   // A função que realmente deleta a conta
   const performDeleteAccount = async () => {
     const result = await deleteAccount();
 
     if (result.success) {
+      // Primeiro fazemos logout explicitamente
+      await signOut();
+      // Depois redirecionamos para a página de login
       router.push("/sign-in");
       return true;
     } else {
@@ -76,12 +80,7 @@ export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onO
   );
 
   return (
-    <ConfirmationDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Excluir conta"
-      customFooter={customFooter}
-    >
+    <ConfirmationDialog open={open} onOpenChange={onOpenChange} title="Excluir conta" customFooter={customFooter}>
       <p className="text-sm text-muted-foreground mb-6">
         Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.
       </p>

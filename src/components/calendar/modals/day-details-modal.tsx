@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { Client, Collaborator, Service } from "@prisma/client";
 import React from "react";
-import { DayScheduleGrid } from "./day-schedule-grid";
-import { AppointmentForm } from "../appointment/appointment-form";
+import { DayScheduleGrid } from "../common/day-schedule-grid";
+import { AppointmentForm } from "../../appointment/appointment-form";
 
 import { toast } from "sonner";
 import { updateAppointment } from "@/actions/appointments/update";

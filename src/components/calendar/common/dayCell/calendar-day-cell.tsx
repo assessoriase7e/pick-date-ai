@@ -1,4 +1,4 @@
-import { CalendarDay } from "../../../types/calendar";
+import { CalendarDay } from "../../../../types/calendar";
 import { AppointmentFullData } from "@/types/calendar";
 import moment from "moment";
 import { CalendarDayCellMobile } from "./calendar-day-cell-mobile";

@@ -1,6 +1,6 @@
 import { useRef, useMemo } from "react";
 import { CalendarViewProps } from "../../../types/calendar";
-import { CalendarDayCell } from "../dayCell/calendar-day-cell";
+import { CalendarDayCell } from "../common/dayCell/calendar-day-cell";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import moment from "moment";

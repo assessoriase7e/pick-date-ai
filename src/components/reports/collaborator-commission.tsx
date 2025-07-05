@@ -1,22 +1,9 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { SelectWithScroll } from "@/components/calendar/select-with-scroll";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SelectWithScroll } from "@/components/calendar/common/select-with-scroll";
 import { DateRange } from "react-day-picker";
 import { Collaborator } from "@prisma/client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DatePickerWithRange } from "../ui/date-picker-range";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CommissionMobileCard } from "./commission-mobile-card";
@@ -71,18 +58,14 @@ export function CollaboratorCommission({
 
   // Filtrar os dados de comissão com base no colaborador selecionado
   const filteredCommissionData = selectedCollaborator
-    ? commissionData.filter(
-        (item) => item.collaboratorId === selectedCollaborator
-      )
+    ? commissionData.filter((item) => item.collaboratorId === selectedCollaborator)
     : commissionData;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Comissão de Profissionais</CardTitle>
-        <CardDescription>
-          Visualize as comissões dos profissionais por período
-        </CardDescription>
+        <CardDescription>Visualize as comissões dos profissionais por período</CardDescription>
         <div className="flex flex-col gap-4 mt-4">
           <div className="w-full">
             <SelectWithScroll
@@ -93,11 +76,7 @@ export function CollaboratorCommission({
                 ...collaborators,
               ]}
               value={selectedCollaborator ?? ""}
-              onChange={(value) =>
-                handleCollaboratorChange(
-                  String(value) ? String(value) : undefined
-                )
-              }
+              onChange={(value) => handleCollaboratorChange(String(value) ? String(value) : undefined)}
               getOptionLabel={(option) => option?.name ?? "Sem nome"}
               getOptionValue={(option) => String(option.id)}
             />
@@ -125,9 +104,7 @@ export function CollaboratorCommission({
                 <TableHeader>
                   <TableRow>
                     <TableHead>Profissional</TableHead>
-                    <TableHead className="text-right">
-                      Total de Serviços
-                    </TableHead>
+                    <TableHead className="text-right">Total de Serviços</TableHead>
                     <TableHead className="text-right">Faturamento</TableHead>
                     <TableHead className="text-right">Comissão</TableHead>
                   </TableRow>
@@ -136,15 +113,9 @@ export function CollaboratorCommission({
                   {filteredCommissionData.map((item) => (
                     <TableRow key={item.collaboratorId}>
                       <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-right">
-                        {item.totalServices}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(item.totalRevenue)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(item.commission)}
-                      </TableCell>
+                      <TableCell className="text-right">{item.totalServices}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.totalRevenue)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.commission)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

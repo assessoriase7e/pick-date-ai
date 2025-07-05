@@ -7,8 +7,7 @@ import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
 import { deleteCalendar } from "@/actions/calendars/delete";
 import { CalendarHeader } from "./calendar-header";
-import { CalendarModals } from "./calendar-modals";
-import { EmptyCalendarState } from "./empty-calendar-state";
+import { CalendarModals } from "../modals/calendar-modals";
 import { CalendarTabs } from "./calendar-tabs";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { CalendarFormValues } from "@/validators/calendar";
@@ -20,7 +19,8 @@ import { Calendar } from "@prisma/client";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { useCalendarStore } from "@/store/calendar-store";
 // Adicionar esta importação
-import { DayDetailsModal } from "./day-details-modal";
+import { DayDetailsModal } from "../modals/day-details-modal";
+import { EmptyCalendarState } from "./empty-calendar-state";
 
 moment.locale("pt-br");
 
@@ -149,7 +149,9 @@ export function CalendarContent({
         //   description: "Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.",
         //   variant: "destructive",
         // });
-        toast.error("Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.");
+        toast.error(
+          "Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano."
+        );
         setLimitModalOpen(true);
       } else {
         // Substituir este bloco
@@ -265,14 +267,14 @@ export function CalendarContent({
         collaborators={collaborators}
         selectedCalendar={selectedCalendar}
       />
-      
+
       {/* Adicionar o DayDetailsModal aqui */}
       <DayDetailsModal
         isOpen={dayModalOpen}
         onClose={() => setDayModalOpen(false)}
         date={selectedDate}
         calendarId={activeCalendarId}
-        calendar={calendars.find(cal => cal.id === activeCalendarId)}
+        calendar={calendars.find((cal) => cal.id === activeCalendarId)}
         clients={allClients[activeCalendarId] || []}
         services={allServices[activeCalendarId] || []}
         collaborator={allCollaborators[activeCalendarId] || null}

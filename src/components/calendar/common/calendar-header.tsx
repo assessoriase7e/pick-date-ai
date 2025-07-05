@@ -1,6 +1,6 @@
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import { ShareCalendarModal } from "./share-calendar-modal";
-import { ShareCalendarDrawer } from "./share-calendar-drawer";
+import { ShareCalendarModal } from "../desktop/share-calendar-modal";
+import { ShareCalendarDrawer } from "../mobile/share-calendar-drawer";
 import { Calendar } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";

@@ -3,9 +3,9 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDay } from "../../types/calendar";
-import { MobileCalendarView } from "./mobile/mobile-calendar-view";
-import { DesktopCalendarView } from "./desktop/desktop-calendar-view";
+import { CalendarDay } from "../../../types/calendar";
+import { MobileCalendarView } from "../mobile/mobile-calendar-view";
+import { DesktopCalendarView } from "../desktop/desktop-calendar-view";
 
 interface CalendarGridProps {
   currentDate: Date;
