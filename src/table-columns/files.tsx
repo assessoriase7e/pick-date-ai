@@ -16,10 +16,7 @@ export const createFileColumns = ({ onEdit, onDelete }: FileActionsProps): Colum
   {
     accessorKey: "fileName",
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
         Nome do Arquivo
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
@@ -40,10 +37,7 @@ export const createFileColumns = ({ onEdit, onDelete }: FileActionsProps): Colum
   {
     accessorKey: "fileType",
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
         Tipo
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
@@ -56,10 +50,7 @@ export const createFileColumns = ({ onEdit, onDelete }: FileActionsProps): Colum
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
         Data de Criação
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>

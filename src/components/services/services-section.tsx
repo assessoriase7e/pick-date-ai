@@ -22,7 +22,7 @@ import {
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTable } from "@/components/ui/data-table";
-import { createServiceColumns } from "./services-columns";
+import { createServiceColumns } from "@/table-columns/services";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 interface ServicesSectionProps {
@@ -189,6 +189,17 @@ export function ServicesSection({
         searchPlaceholder="Buscar serviços..."
         pagination={pagination}
         onSearch={handleSearch}
+        // Adicionar estas propriedades para implementar a ordenação
+        initialSorting={[{ id: sortField, desc: sortDirection === "desc" }]}
+        onSortingChange={(sorting) => {
+          if (sorting.length > 0) {
+            setSortField(sorting[0].id as SortField);
+            setSortDirection(sorting[0].desc ? "desc" : "asc");
+          } else {
+            setSortField("name");
+            setSortDirection("asc");
+          }
+        }}
       />
 
       <ServiceModal

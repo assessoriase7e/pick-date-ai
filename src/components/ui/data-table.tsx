@@ -38,6 +38,9 @@ interface DataTableProps<TData> {
   selectedIds?: (string | number)[];
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
   getRowId?: (row: TData) => string | number;
+  // Novas props para ordenação
+  initialSorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
 }
 
 export function DataTable<TData>({
@@ -55,9 +58,11 @@ export function DataTable<TData>({
   selectedIds = [],
   onSelectionChange,
   getRowId,
+  initialSorting = [],
+  onSortingChange,
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [isPageChanging, setIsPageChanging] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -92,6 +97,13 @@ export function DataTable<TData>({
       setIsPageChanging(false);
     }
   }, [data]);
+
+  // Modificar o hook useEffect para chamar onSortingChange quando o sorting mudar
+  useEffect(() => {
+    if (onSortingChange) {
+      onSortingChange(sorting);
+    }
+  }, [sorting, onSortingChange]);
 
   const table = useReactTable({
     data,

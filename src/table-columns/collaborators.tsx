@@ -10,7 +10,11 @@ type CollaboratorActionsProps = {
   isDeleting: boolean;
 };
 
-export const createCollaboratorColumns = ({ onEdit, onDelete, isDeleting }: CollaboratorActionsProps): ColumnDef<CollaboratorFullData>[] => [
+export const createCollaboratorColumns = ({
+  onEdit,
+  onDelete,
+  isDeleting,
+}: CollaboratorActionsProps): ColumnDef<CollaboratorFullData>[] => [
   {
     id: "name",
     header: "Nome",
