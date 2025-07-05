@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { CollaboratorModal } from "./collaborator-modal";
 import { deleteCollaborator } from "@/actions/collaborators/delete-collaborator";
 import { toast } from "sonner";
@@ -12,9 +12,8 @@ import { CollaboratorServicesDialog } from "./collaborator-services-dialog";
 import { ServiceFullData } from "@/types/service";
 import { useDebounce } from "@/hooks/use-debounce";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import Link from "next/link";
 import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
+import { createCollaboratorColumns } from "@/table-columns/collaborators";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -139,56 +138,12 @@ export function CollaboratorsSection({
     setSearchTerm(value);
   };
 
-  // Definir as colunas da tabela
-  const columns: ColumnDef<CollaboratorFullData>[] = [
-    {
-      id: "name",
-      header: "Nome",
-      accessorKey: "name",
-      cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
-    },
-    {
-      id: "phone",
-      header: "Telefone",
-      accessorKey: "phone",
-      cell: ({ row }) => <div>{row.getValue("phone")}</div>,
-    },
-    {
-      id: "profession",
-      header: "Profissão",
-      accessorKey: "profession",
-      cell: ({ row }) => <div>{row.getValue("profession")}</div>,
-    },
-    {
-      id: "actions",
-      header: "Ações",
-      cell: ({ row }) => {
-        const collaborator = row.original;
-        return (
-          <div className="flex space-x-2">
-            <Button variant="outline" size="icon" asChild>
-              <Link href={`/collaborators/${collaborator.id}/services`}>
-                <FileText className="h-4 w-4" />
-              </Link>
-            </Button>
-
-            <Button variant="outline" size="icon" onClick={() => handleEdit(collaborator)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="text-destructive"
-              onClick={() => handleDelete(collaborator.id)}
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
+  // Criar as colunas da tabela
+  const columns = createCollaboratorColumns({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    isDeleting,
+  });
 
   return (
     <div className="space-y-4 relative">
