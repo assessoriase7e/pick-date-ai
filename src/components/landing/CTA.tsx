@@ -27,7 +27,7 @@ export function CTA() {
           </span>
         </div>
         <p className="text-primary-foreground/90 mb-6 font-medium">{CTA_TEXTS.trialHighlight}</p>
-        
+
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <SignedOut>
             <Link href="/sign-up">
