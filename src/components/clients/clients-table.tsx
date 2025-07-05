@@ -253,7 +253,11 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
         cancelText="Cancelar"
         onConfirm={() => {}}
       >
-        <ClientForm onSubmit={handleSaveClient} onCancel={() => setIsNewClientDialogOpen(false)} />
+        <ClientForm 
+          onSubmit={handleSaveClient} 
+          onCancel={() => setIsNewClientDialogOpen(false)}
+          isSaving={isSaving}
+        />
       </ConfirmationDialog>
 
       <ConfirmationDialog
@@ -269,6 +273,7 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
           initialData={clientToEdit}
           onSubmit={handleSaveClient}
           onCancel={() => setIsEditClientDialogOpen(false)}
+          isSaving={isSaving}
         />
       </ConfirmationDialog>
 

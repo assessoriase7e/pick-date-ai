@@ -15,9 +15,10 @@ interface ClientFormProps {
   onSuccess?: () => void;
   onSubmit?: (data: ClientFormValues) => Promise<void>;
   onCancel?: () => void;
+  isSaving?: boolean;
 }
 
-export default function ClientForm({ initialData, onSuccess, onSubmit, onCancel }: ClientFormProps) {
+export default function ClientForm({ initialData, onSuccess, onSubmit, onCancel, isSaving }: ClientFormProps) {
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -112,11 +113,12 @@ export default function ClientForm({ initialData, onSuccess, onSubmit, onCancel 
             type="button"
             variant="outline"
             onClick={onCancel}
+            disabled={isSaving}
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Salvando..." : "Salvar"}
+          <Button type="submit" disabled={isSaving || form.formState.isSubmitting}>
+            {isSaving ? "Salvando..." : form.formState.isSubmitting ? "Processando..." : "Salvar"}
           </Button>
         </div>
       </form>
