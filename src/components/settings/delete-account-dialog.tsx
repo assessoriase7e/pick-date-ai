@@ -8,6 +8,7 @@ import { deleteAccount } from "@/actions/account/delete";
 import { useRouter } from "next/navigation";
 import { isReverificationCancelledError } from "@clerk/nextjs/errors";
 import { CircleX } from "lucide-react";
+import { toast } from "sonner";
 
 export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [countdown, setCountdown] = useState(10);
@@ -54,10 +55,9 @@ export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onO
       onOpenChange(false); // Só fecha o diálogo se tudo deu certo
     } catch (error: any) {
       if (isReverificationCancelledError(error)) {
-        console.log("Usuário cancelou a verificação.");
+        return;
       } else {
-        console.error("Erro ao excluir conta:", error);
-        alert("Erro ao excluir conta: " + error.message);
+        toast.error("Erro ao excluir conta: " + error.message);
       }
     } finally {
       setIsDeleting(false);

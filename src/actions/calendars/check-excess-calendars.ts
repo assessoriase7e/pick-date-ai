@@ -32,8 +32,6 @@ export async function checkExcessCalendars(): Promise<ExcessCalendarsData> {
       },
     });
 
-    console.log(activeCalendars);
-
     const excessCount = Math.max(0, activeCalendars.length - limits.limit);
 
     return {

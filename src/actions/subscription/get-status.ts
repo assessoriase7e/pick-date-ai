@@ -178,7 +178,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
 
     // Salvar no cache
     await setSubscriptionCache(userId, result);
-    console.log("Dados de assinatura salvos no cache");
 
     return result;
   } catch (error) {

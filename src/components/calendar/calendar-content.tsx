@@ -2,7 +2,10 @@
 import moment from "moment";
 import "moment/locale/pt-br";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+// Remover esta importação
+// import { useToast } from "@/components/ui/use-toast";
+// Adicionar esta importação
+import { toast } from "sonner";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
 import { deleteCalendar } from "@/actions/calendars/delete";
@@ -50,7 +53,8 @@ export function CalendarContent({
   const [deactivationModalOpen, setDeactivationModalOpen] = useState(false);
   const [excessData, setExcessData] = useState<any>(null);
 
-  const { toast } = useToast();
+  // Remover esta linha
+  // const { toast } = useToast();
   const { limit, current } = useCalendarLimits();
   const { limitModalOpen, setLimitModalOpen } = useCalendarStore();
 
@@ -76,29 +80,35 @@ export function CalendarContent({
       });
 
       if (response.success) {
-        toast({
-          title: "Calendário criado com sucesso",
-          description: "O calendário foi criado com sucesso.",
-        });
+        // Substituir este bloco
+        // toast({
+        //   title: "Calendário criado com sucesso",
+        //   description: "O calendário foi criado com sucesso.",
+        // });
+        toast.success("O calendário foi criado com sucesso.");
         setOpen(false);
         revalidatePathAction("/calendar");
       } else if (response.error === "CALENDAR_LIMIT_EXCEEDED") {
         setLimitModalOpen(true);
         setOpen(false);
       } else {
-        toast({
-          title: "Erro ao criar calendário",
-          description: response.error || "Ocorreu um erro ao criar o calendário.",
-          variant: "destructive",
-        });
+        // Substituir este bloco
+        // toast({
+        //   title: "Erro ao criar calendário",
+        //   description: response.error || "Ocorreu um erro ao criar o calendário.",
+        //   variant: "destructive",
+        // });
+        toast.error(response.error || "Ocorreu um erro ao criar o calendário.");
       }
     } catch (error) {
       console.error("Erro ao criar calendário:", error);
-      toast({
-        title: "Erro ao criar calendário",
-        description: "Ocorreu um erro inesperado ao criar o calendário.",
-        variant: "destructive",
-      });
+      // Substituir este bloco
+      // toast({
+      //   title: "Erro ao criar calendário",
+      //   description: "Ocorreu um erro inesperado ao criar o calendário.",
+      //   variant: "destructive",
+      // });
+      toast.error("Ocorreu um erro inesperado ao criar o calendário.");
     }
   };
 
@@ -119,32 +129,39 @@ export function CalendarContent({
         setSelectedCalendar(null);
         await revalidatePathAction("/calendar");
 
-        toast({
-          title: "Sucesso",
-          description: "Calendário atualizado com sucesso",
-        });
+        // Substituir este bloco
+        // toast({
+        //   title: "Sucesso",
+        //   description: "Calendário atualizado com sucesso",
+        // });
+        toast.success("Calendário atualizado com sucesso");
       } else if (response.error === "CALENDAR_LIMIT_EXCEEDED") {
-        toast({
-          title: "Limite de calendários excedido",
-          description:
-            "Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.",
-          variant: "destructive",
-        });
+        // Substituir este bloco
+        // toast({
+        //   title: "Limite de calendários excedido",
+        //   description: "Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.",
+        //   variant: "destructive",
+        // });
+        toast.error("Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.");
         setLimitModalOpen(true);
       } else {
-        toast({
-          title: "Erro",
-          description: response.error || "Falha ao atualizar calendário",
-          variant: "destructive",
-        });
+        // Substituir este bloco
+        // toast({
+        //   title: "Erro",
+        //   description: response.error || "Falha ao atualizar calendário",
+        //   variant: "destructive",
+        // });
+        toast.error(response.error || "Falha ao atualizar calendário");
       }
     } catch (error) {
       console.error("Erro ao atualizar calendário:", error);
-      toast({
-        title: "Erro",
-        description: "Falha ao atualizar calendário",
-        variant: "destructive",
-      });
+      // Substituir este bloco
+      // toast({
+      //   title: "Erro",
+      //   description: "Falha ao atualizar calendário",
+      //   variant: "destructive",
+      // });
+      toast.error("Falha ao atualizar calendário");
     }
   };
 
@@ -167,17 +184,21 @@ export function CalendarContent({
       setDeleteOpen(false);
       setSelectedCalendar(null);
 
-      toast({
-        title: "Sucesso",
-        description: "Calendário e agendamentos futuros excluídos com sucesso",
-      });
+      // Substituir este bloco
+      // toast({
+      //   title: "Sucesso",
+      //   description: "Calendário e agendamentos futuros excluídos com sucesso",
+      // });
+      toast.success("Calendário e agendamentos futuros excluídos com sucesso");
     } catch (error) {
       console.error("Erro ao excluir calendário:", error);
-      toast({
-        title: "Erro",
-        description: "Falha ao excluir calendário",
-        variant: "destructive",
-      });
+      // Substituir este bloco
+      // toast({
+      //   title: "Erro",
+      //   description: "Falha ao excluir calendário",
+      //   variant: "destructive",
+      // });
+      toast.error("Falha ao excluir calendário");
     }
   };
 
