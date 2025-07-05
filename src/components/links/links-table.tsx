@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
-import { Pencil, Trash2, ExternalLink, LinkIcon } from "lucide-react";
+import { ExternalLink, LinkIcon, Pencil, Trash2 } from "lucide-react";
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
 import { deleteLink } from "@/actions/links/delete";
@@ -10,8 +10,8 @@ import { toast } from "sonner";
 import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
+import { createLinkColumns } from "@/table-columns/links";
 
 type LinksContentProps = {
   links: Link[];
@@ -91,49 +91,11 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  const columns: ColumnDef<Link>[] = [
-    {
-      header: "Título",
-      accessorKey: "title",
-    },
-    {
-      header: "URL",
-      accessorKey: "url",
-      cell: ({ row }) => (
-        <div className="flex items-center">
-          <span className="truncate max-w-[200px]">{row.original.url}</span>
-        </div>
-      ),
-    },
-    {
-      header: "Descrição",
-      accessorKey: "description",
-      cell: ({ row }) => truncateText(row.original.description, 30),
-    },
-    {
-      header: "Ações",
-      id: "actions",
-      cell: ({ row }) => (
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon" onClick={() => openExternalLink(row.original.url)} title="Abrir link">
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setEditingLink(row.original)} title="Editar link">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-destructive"
-            onClick={() => setDeletingLink(row.original)}
-            title="Excluir link"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const columns = createLinkColumns({
+    onEdit: setEditingLink,
+    onDelete: setDeletingLink,
+    onOpenExternal: openExternalLink,
+  });
 
   return (
     <div className="space-y-4">
