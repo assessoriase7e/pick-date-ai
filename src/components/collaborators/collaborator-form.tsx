@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { createCollaborator } from "@/actions/collaborators/create-collaborator";
 import { updateCollaborator } from "@/actions/collaborators/update-collaborator";
-import { useToast } from "@/components/ui/use-toast";
 import { collaboratorSchema } from "@/validators/collaborator";
 import { collabRoles } from "@/mocked/collabs";
 import { PatternFormat } from "react-number-format";
 import { Plus, X } from "lucide-react";
 import { FullCollaborator } from "@/types/calendar";
+import { toast } from "sonner";
 
 interface CollaboratorFormProps {
   initialData?: FullCollaborator;
@@ -26,7 +26,6 @@ const daysOfWeek = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-fei
 
 export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof collaboratorSchema>>({
     resolver: zodResolver(collaboratorSchema),
@@ -67,29 +66,18 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
       }
 
       if (result.success) {
-        toast({
-          title: initialData ? "Profissional atualizado" : "Profissional criado",
-          description: initialData
-            ? "O profissional foi atualizado com sucesso."
-            : "O profissional foi criado com sucesso.",
-        });
+        toast.success(
+          initialData ? "O profissional foi atualizado com sucesso." : "O profissional foi criado com sucesso."
+        );
 
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        toast({
-          variant: "destructive",
-          title: initialData ? "Erro ao atualizar profissional" : "Erro ao criar profissional",
-          description: result.error || "Ocorreu um erro ao processar a solicitação.",
-        });
+        toast.error(result.error || "Ocorreu um erro ao processar a solicitação.");
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: initialData ? "Erro ao atualizar profissional" : "Erro ao criar profissional",
-        description: "Ocorreu um erro ao processar a solicitação.",
-      });
+      toast.error("Ocorreu um erro ao processar a solicitação.");
     } finally {
       setIsLoading(false);
     }
@@ -155,11 +143,7 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
                       onValueChange={(value) => {
                         // Prevent selecting days that are already used
                         if (isDayAlreadySelected(value, index)) {
-                          toast({
-                            variant: "destructive",
-                            title: "Dia já selecionado",
-                            description: "Este dia da semana já está em uso em outro horário.",
-                          });
+                          toast.error("Este dia da semana já está em uso em outro horário.");
                           return;
                         }
                         field.onChange(value);

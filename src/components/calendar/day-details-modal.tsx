@@ -8,9 +8,12 @@ import React from "react";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { updateAppointment } from "@/actions/appointments/update";
 import { createAppointment } from "@/actions/appointments/create";
+// Importar o hook de assinatura
+import { useSubscription } from "@/hooks/use-subscription";
+import { Button } from "@/components/ui/button";
 
 interface DayDetailsModalProps {
   isOpen: boolean;
@@ -41,7 +44,9 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
 
-  const { toast } = useToast();
+  // Usar o hook de assinatura para verificar se o usuário tem um plano ativo
+  const { isSubscriptionActive, canAccessPremiumFeatures } = useSubscription();
+  const hasActiveSubscription = isSubscriptionActive || canAccessPremiumFeatures;
 
   const formattedDate = date ? moment(date).locale("pt-br").format("DD/MM/YYYY") : "";
   const dateKey = date ? moment(date).format("YYYY-MM-DD") : "";
@@ -49,6 +54,12 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   const filteredAppointments = dayAppointments.filter((apt) => apt.status !== "canceled");
 
   const handleHourClick = (hour: number) => {
+    // Verificar se o usuário tem um plano ativo antes de permitir a criação de agendamentos
+    if (!hasActiveSubscription) {
+      toast.error("Você precisa ter um plano ativo para criar agendamentos. Por favor, assine um plano.");
+      return;
+    }
+
     const endHour = (hour + 1) % 24;
     setSelectedHour(hour);
     setStartTime(`${hour.toString().padStart(2, "0")}:00`);
@@ -58,6 +69,12 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   };
 
   const handleEditAppointment = (appointment: AppointmentFullData) => {
+    // Verificar se o usuário tem um plano ativo antes de permitir a edição de agendamentos
+    if (!hasActiveSubscription) {
+      toast.error("Você precisa ter um plano ativo para editar agendamentos. Por favor, assine um plano.");
+      return;
+    }
+
     setSelectedHour(null);
     setStartTime(null);
     setEndTime(null);
@@ -99,32 +116,41 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   };
 
   const handleFormSubmit = async (appointmentData: any) => {
+    // Verificar novamente se o usuário tem um plano ativo antes de salvar o agendamento
+    if (!hasActiveSubscription) {
+      toast.error("Você precisa ter um plano ativo para salvar agendamentos. Por favor, assine um plano.");
+      return;
+    }
+
     try {
       const result = selectedAppointment
         ? await updateAppointment(selectedAppointment.id, appointmentData)
         : await createAppointment(appointmentData);
 
       if (!result.success) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: result.error || "Ocorreu um erro ao salvar o agendamento",
-        });
+        toast.error(result.error || "Ocorreu um erro ao salvar o agendamento");
         return;
       }
 
       handleFormSuccess();
     } catch (error) {
       console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o agendamento",
-      });
+      toast.error("Ocorreu um erro ao salvar o agendamento");
     }
   };
 
   if (!date) return null;
+
+  // Exibir mensagem de assinatura necessária quando o usuário não tem um plano ativo
+  const subscriptionMessage = !hasActiveSubscription && (
+    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+      <h3 className="text-xl font-semibold mb-2">Assinatura necessária</h3>
+      <p className="text-muted-foreground mb-4">Você precisa ter um plano ativo para criar ou editar agendamentos.</p>
+      <Button onClick={() => (window.location.href = "/pricing")} className="bg-primary text-white">
+        Ver planos disponíveis
+      </Button>
+    </div>
+  );
 
   const modalContent = (
     <div className="flex flex-col max-w-[95vw]">
@@ -153,7 +179,9 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
           </div>
 
           <div className="border rounded-lg p-4">
-            {showForm ? (
+            {!hasActiveSubscription ? (
+              subscriptionMessage
+            ) : showForm ? (
               <AppointmentForm
                 date={date}
                 appointment={selectedAppointment || undefined}

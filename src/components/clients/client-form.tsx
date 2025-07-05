@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useToast } from "@/components/ui/use-toast";
 import { saveClient } from "@/actions/clients/save-client";
 import { clientSchema, ClientFormValues } from "@/validators/client";
 import { PatternFormat } from "react-number-format";
 import { YearInputCalendar } from "@/components/ui/year-input-calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
+import { toast } from "sonner";
 
 interface ClientFormProps {
   initialData?: any;
@@ -18,8 +18,6 @@ interface ClientFormProps {
 }
 
 export default function ClientForm({ initialData, onSuccess }: ClientFormProps) {
-  const { toast } = useToast();
-
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -35,10 +33,7 @@ export default function ClientForm({ initialData, onSuccess }: ClientFormProps) 
     const result = await saveClient(data);
 
     if (result.success) {
-      toast({
-        title: "Sucesso",
-        description: "Cliente salvo com sucesso",
-      });
+      toast.success("Cliente salvo com sucesso");
 
       if (onSuccess) {
         onSuccess();
@@ -48,11 +43,7 @@ export default function ClientForm({ initialData, onSuccess }: ClientFormProps) 
 
       revalidatePathAction("/clients");
     } else {
-      toast({
-        title: "Erro",
-        description: result.error || "Erro ao salvar cliente",
-        variant: "destructive",
-      });
+      toast.error(result.error || "Erro ao salvar cliente");
     }
   };
 

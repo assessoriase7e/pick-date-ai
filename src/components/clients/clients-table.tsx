@@ -1,21 +1,9 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, FileText, Users, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import ClientForm from "./client-form";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -25,6 +13,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "../ui/input";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { toast } from "sonner";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -35,7 +24,6 @@ interface ClientsTableProps {
 }
 
 export default function ClientsTable({ clients, pagination = { totalPages: 1, currentPage: 1 } }: ClientsTableProps) {
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -101,17 +89,10 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     setIsDeleteDialogOpen(false);
 
     if (result.success) {
-      toast({
-        title: "Cliente excluído",
-        description: "O cliente foi excluído com sucesso.",
-      });
+      toast.success("O cliente foi excluído com sucesso.");
       router.refresh();
     } else {
-      toast({
-        title: "Erro",
-        description: result.error || "Erro ao excluir cliente",
-        variant: "destructive",
-      });
+      toast.error(result.error || "Erro ao excluir cliente");
     }
   };
 

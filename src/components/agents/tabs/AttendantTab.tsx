@@ -29,7 +29,7 @@ import {
   AttendantFormValues,
 } from "@/validators/attendant";
 import { saveAttendantPrompt } from "@/actions/agents/attendant/save-attendant-prompt";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 interface AttendantTabProps {
   onSave?: () => Promise<void>;
@@ -112,10 +112,7 @@ export function AttendantTab({
         speechStyle: speechStyleText,
       });
 
-      toast({
-        title: "Prompt salvo com sucesso!",
-        description: "O prompt foi salvo com sucesso!",
-      });
+      toast.success("O prompt foi salvo com sucesso!");
     } finally {
       if (setIsLoading) setIsLoading(false);
     }

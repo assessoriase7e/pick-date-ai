@@ -1,16 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { blackListSchema, BlackListFormValues } from "@/validators/blacklist";
 import { saveBlackList } from "@/actions/agents/blacklist/save-blacklist";
 import { PatternFormat } from "react-number-format";
@@ -23,20 +17,12 @@ interface BlackListTabProps {
   initialData?: BlackListFullProps;
 }
 
-export function BlackListTab({
-  isLoading,
-  setIsLoading,
-  initialData,
-}: BlackListTabProps) {
-  const { toast } = useToast();
-
+export function BlackListTab({ isLoading, setIsLoading, initialData }: BlackListTabProps) {
   const form = useForm<BlackListFormValues>({
     resolver: zodResolver(blackListSchema),
     defaultValues: {
       id: initialData?.id,
-      phones: initialData?.phones?.length
-        ? initialData.phones
-        : [{ number: "", name: "" }],
+      phones: initialData?.phones?.length ? initialData.phones : [{ number: "", name: "" }],
     },
   });
 
@@ -50,31 +36,18 @@ export function BlackListTab({
     try {
       const filteredData = {
         ...data,
-        phones: data.phones.filter(
-          (phone) => phone.number.trim() !== "" && phone.name.trim() !== ""
-        ),
+        phones: data.phones.filter((phone) => phone.number.trim() !== "" && phone.name.trim() !== ""),
       };
 
       const result = await saveBlackList(filteredData);
 
       if (result.success) {
-        toast({
-          title: "Sucesso",
-          description: "Lista negra salva com sucesso",
-        });
+        toast.success("Lista negra salva com sucesso");
       } else {
-        toast({
-          title: "Erro",
-          description: result.error || "Erro ao salvar lista negra",
-          variant: "destructive",
-        });
+        toast.error(result.error || "Erro ao salvar lista negra");
       }
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar a lista negra",
-        variant: "destructive",
-      });
+      toast.error("Ocorreu um erro ao salvar a lista negra");
     } finally {
       setIsLoading(false);
     }
@@ -122,18 +95,10 @@ export function BlackListTab({
                 )}
               />
 
-              <X
-                className="h-8 w-8 hover:text-red-500 transition cursor-pointer"
-                onClick={() => remove(index)}
-              />
+              <X className="h-8 w-8 hover:text-red-500 transition cursor-pointer" onClick={() => remove(index)} />
             </div>
           ))}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => append({ number: "", name: "" })}
-          >
+          <Button type="button" variant="outline" className="w-full" onClick={() => append({ number: "", name: "" })}>
             Adicionar Número
           </Button>
         </div>
