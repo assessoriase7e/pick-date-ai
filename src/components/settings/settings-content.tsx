@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { SubscriptionSettings } from "./SubscriptionSettings";
 import { AdditionalAISettings } from "./AdditionalAISettings";
@@ -7,7 +6,6 @@ import { AdditionalCalendarSettings } from "./AdditionalCalendarSettings";
 import { AccountDeletionCard } from "./AccountDeletionCard";
 import { CombinedProfileData } from "@/actions/profile/get";
 import { useSubscription } from "@/hooks/use-subscription";
-import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface SettingsContentProps {
@@ -19,8 +17,7 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
   const [isCancelCalendarsOpen, setIsCancelCalendarsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { subscription, isSubscriptionActive, cancelSubscription, createPortalSession } = useSubscription();
-  const { hasAdditionalCalendars } = useCalendarLimits();
+  const { cancelSubscription, createPortalSession } = useSubscription();
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
@@ -83,7 +80,6 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
         cancelText="Não, manter"
         onConfirm={handleCancelSubscription}
         variant="destructive"
-        loading={isLoading}
       />
 
       <ConfirmationDialog

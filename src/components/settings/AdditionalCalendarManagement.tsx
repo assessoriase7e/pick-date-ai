@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { listAdditionalCalendars, AdditionalCalendarData } from "@/actions/subscription/list-additional-calendars";
 import { cancelAdditionalCalendar } from "@/actions/subscription/cancel-additional-calendar";
 import { createCalendarCheckout } from "@/actions/subscription/create-calendar-checkout";
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 export function AdditionalCalendarManagement() {
   const [calendars, setCalendars] = useState<AdditionalCalendarData[]>([]);
@@ -162,14 +162,14 @@ export function AdditionalCalendarManagement() {
         </CardContent>
       </Card>
 
-      <DeleteConfirmationDialog
-        isOpen={!!calendarToCancel}
-        onClose={() => setCalendarToCancel(null)}
+      <ConfirmationDialog
+        open={!!calendarToCancel}
+        onOpenChange={() => setCalendarToCancel(null)}
         onConfirm={() => calendarToCancel && handleCancelCalendar(calendarToCancel)}
         title="Cancelar Calendário Adicional"
         description="Tem certeza que deseja cancelar este calendário adicional? Esta ação não pode ser desfeita. Atenção: Se você tiver mais calendários ativos do que o permitido após o cancelamento, alguns calendários serão automaticamente desativados."
         confirmText="Confirmar Cancelamento"
-        itemType="calendário adicional"
+        variant="destructive"
       />
     </>
   );
