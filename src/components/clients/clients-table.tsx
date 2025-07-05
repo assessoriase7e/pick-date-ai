@@ -12,8 +12,9 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "../ui/input";
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { toast } from "sonner";
+import { saveClient } from "@/actions/clients/save-client";
+import { ClientFormValues } from "@/validators/client";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -35,6 +36,7 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [phoneTerm, setPhoneTerm] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedPhoneTerm = useDebounce(phoneTerm, 500);
 
@@ -96,6 +98,19 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     }
   };
 
+  const handleSaveClient = async (data: ClientFormValues) => {
+    setIsSaving(true);
+    const result = await saveClient(data);
+    setIsSaving(false);
+
+    if (result.success) {
+      toast.success("Cliente salvo com sucesso");
+      handleClientFormSuccess();
+    } else {
+      toast.error(result.error || "Erro ao salvar cliente");
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR");
   };
@@ -104,16 +119,6 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     setIsNewClientDialogOpen(false);
     setIsEditClientDialogOpen(false);
     router.refresh();
-  };
-
-  // Função para navegar entre páginas
-  const navigateToPage = (pageNumber: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", pageNumber.toString());
-    const newUrl = `${pathname}?${params.toString()}`;
-
-    // Usar replace em vez de push para evitar problemas de navegação
-    router.push(newUrl, { scroll: false });
   };
 
   const columns: ColumnDef<Client>[] = [
@@ -244,33 +249,38 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
         open={isNewClientDialogOpen}
         onOpenChange={setIsNewClientDialogOpen}
         title="Novo Cliente"
-        confirmText=""
-        cancelText=""
-        showFooter={false}
+        confirmText="Salvar"
+        cancelText="Cancelar"
+        onConfirm={() => {}}
       >
-        <ClientForm onSuccess={handleClientFormSuccess} />
+        <ClientForm onSubmit={handleSaveClient} onCancel={() => setIsNewClientDialogOpen(false)} />
       </ConfirmationDialog>
 
       <ConfirmationDialog
         open={isEditClientDialogOpen}
         onOpenChange={setIsEditClientDialogOpen}
         title="Editar Cliente"
-        confirmText=""
-        cancelText=""
-        showFooter={false}
+        confirmText="Salvar"
+        cancelText="Cancelar"
         size="lg"
+        onConfirm={() => {}}
       >
-        <ClientForm initialData={clientToEdit} onSuccess={handleClientFormSuccess} />
+        <ClientForm
+          initialData={clientToEdit}
+          onSubmit={handleSaveClient}
+          onCancel={() => setIsEditClientDialogOpen(false)}
+        />
       </ConfirmationDialog>
 
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleConfirmDelete}
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
         title="Confirmar exclusão"
         description="Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita."
-        itemType="cliente"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? "Excluindo..." : "Excluir"}
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        variant="destructive"
       />
     </>
   );

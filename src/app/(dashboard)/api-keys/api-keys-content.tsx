@@ -5,20 +5,12 @@ import { Button } from "@/components/ui/button";
 import { ApiKeyModal } from "./api-key-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Plus, Pencil, Trash2, EyeOff, Copy, Eye } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -31,7 +23,7 @@ import { createApiKey } from "@/actions/api-key/create";
 import { updateApiKey } from "@/actions/api-key/update";
 import { deleteApiKey } from "@/actions/api-key/delete";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface ApiKeyWithKey extends ApiKey {
   key: string;
@@ -43,11 +35,7 @@ interface ApiKeysContentProps {
   currentPage: number;
 }
 
-export function ApiKeysContent({
-  apiKeys,
-  totalPages,
-  currentPage,
-}: ApiKeysContentProps) {
+export function ApiKeysContent({ apiKeys, totalPages, currentPage }: ApiKeysContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || "1");
@@ -56,10 +44,8 @@ export function ApiKeysContent({
   const [editingApiKey, setEditingApiKey] = useState<ApiKey | null>(null);
   const [deletingApiKey, setDeletingApiKey] = useState<ApiKey | null>(null);
   const [loading, setLoading] = useState(false);
-  const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<string | null>(
-    null
-  );
-  const [showKeyId, setShowKeyId] = useState<string | null>(null);
+  const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<string | null>(null);
+  const [showKeyId, setShowKeyId] = useState<number | null>(null);
 
   async function handleCreateApiKey(data: { description?: string }) {
     try {
@@ -154,20 +140,11 @@ export function ApiKeysContent({
               <AlertDialogTitle>Chave de API Criada!</AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div>
-                  Sua nova chave de API foi gerada. Copie-a e guarde-a em um
-                  local seguro.
-                  <strong className="block my-2">
-                    Você não poderá vê-la novamente.
-                  </strong>
+                  Sua nova chave de API foi gerada. Copie-a e guarde-a em um local seguro.
+                  <strong className="block my-2">Você não poderá vê-la novamente.</strong>
                   <div className="flex items-center gap-2 mt-2 p-2 border rounded bg-muted">
-                    <code className="flex-grow break-all">
-                      {newlyGeneratedKey}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => copyToClipboard(newlyGeneratedKey)}
-                    >
+                    <code className="flex-grow break-all">{newlyGeneratedKey}</code>
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(newlyGeneratedKey)}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
@@ -175,9 +152,7 @@ export function ApiKeysContent({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogAction onClick={handleAlertClose}>
-                Entendido
-              </AlertDialogAction>
+              <AlertDialogAction onClick={handleAlertClose}>Entendido</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -217,31 +192,17 @@ export function ApiKeysContent({
                     {showKeyId === apiKey.id ? (
                       <>
                         <code className="font-mono">{apiKey.key}</code>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowKeyId(null)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => setShowKeyId(null)}>
                           <EyeOff className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => copyToClipboard(apiKey.key)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(apiKey.key)}>
                           <Copy className="h-4 w-4" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <code className="font-mono">
-                          {apiKey.key.substring(0, 7)}...
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowKeyId(apiKey.id)}
-                        >
+                        <code className="font-mono">{apiKey.key.substring(0, 7)}...</code>
+                        <Button variant="ghost" size="icon" onClick={() => setShowKeyId(apiKey.id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </>
@@ -285,9 +246,7 @@ export function ApiKeysContent({
         {loading ? (
           <div className="text-center py-10">Carregando...</div>
         ) : apiKeys?.length === 0 ? (
-          <div className="text-center py-10">
-            Nenhuma chave de API encontrada.
-          </div>
+          <div className="text-center py-10">Nenhuma chave de API encontrada.</div>
         ) : (
           apiKeys?.map((apiKey) => (
             <div key={apiKey.id} className="rounded-lg border p-4 space-y-3">
@@ -298,52 +257,30 @@ export function ApiKeysContent({
                     {showKeyId === apiKey.id ? (
                       <>
                         <code className="font-mono text-sm">{apiKey.key}</code>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowKeyId(null)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => setShowKeyId(null)}>
                           <EyeOff className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => copyToClipboard(apiKey.key)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(apiKey.key)}>
                           <Copy className="h-4 w-4" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <code className="font-mono text-sm">
-                          {apiKey.key.substring(0, 7)}...
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowKeyId(apiKey.id)}
-                        >
+                        <code className="font-mono text-sm">{apiKey.key.substring(0, 7)}...</code>
+                        <Button variant="ghost" size="icon" onClick={() => setShowKeyId(apiKey.id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(
-                      new Date(apiKey.createdAt),
-                      "dd/MM/yyyy 'às' HH:mm",
-                      {
-                        locale: ptBR,
-                      }
-                    )}
+                    {format(new Date(apiKey.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setEditingApiKey(apiKey)}
-                  >
+                  <Button variant="outline" size="icon" onClick={() => setEditingApiKey(apiKey)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
@@ -393,12 +330,18 @@ export function ApiKeysContent({
 
       {/* Confirmação para Deletar */}
       {deletingApiKey && (
-        <DeleteConfirmationDialog
-          isOpen={!!deletingApiKey}
-          onClose={() => setDeletingApiKey(null)}
+        <ConfirmationDialog
+          open={!!deletingApiKey}
+          onOpenChange={() => setDeletingApiKey(null)}
+          title="Confirmar exclusão"
+          description={`Esta ação não pode ser desfeita. Isso excluirá permanentemente a chave de API ${deletingApiKey?.key.substring(
+            0,
+            7
+          )}...`}
+          confirmText="Excluir"
+          cancelText="Cancelar"
           onConfirm={handleDeleteApiKey}
-          description={`Esta ação não pode ser desfeita. Isso excluirá permanentemente a chave de API ${deletingApiKey?.key.substring(0, 7)}...`}
-          itemType="chave de API"
+          variant="destructive"
         />
       )}
     </div>

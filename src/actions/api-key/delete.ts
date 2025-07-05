@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function deleteApiKey(id: string) {
+export async function deleteApiKey(id: number) {
   try {
     await prisma.apiKey.delete({
       where: { id },

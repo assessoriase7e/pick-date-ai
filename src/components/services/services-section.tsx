@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ServiceModal } from "./service-modal";
-import { DeleteServiceModal } from "./delete-service-modal";
 import { deleteService } from "@/actions/services/delete-service";
 import { Collaborator, Service } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
@@ -24,6 +23,7 @@ import { revalidatePathAction } from "@/actions/revalidate-path";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTable } from "@/components/ui/data-table";
 import { createServiceColumns } from "./services-columns";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 interface ServicesSectionProps {
   services: ServiceFullData[];
@@ -199,12 +199,15 @@ export function ServicesSection({
       />
 
       {deletingService && (
-        <DeleteServiceModal
-          isOpen={!!deletingService}
-          onClose={() => setDeletingService(null)}
+        <ConfirmationDialog
+          open={!!deletingService}
+          onOpenChange={() => setDeletingService(null)}
+          title="Confirmar exclusão"
+          description={`Tem certeza que deseja excluir o serviço ${deletingService.name}? Esta ação não pode ser desfeita.`}
+          confirmText={isLoading ? "Excluindo..." : "Excluir"}
+          cancelText="Cancelar"
           onConfirm={() => handleDelete(deletingService.id)}
-          serviceName={deletingService.name}
-          isLoading={isLoading}
+          variant="destructive"
         />
       )}
 

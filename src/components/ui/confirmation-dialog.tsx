@@ -1,24 +1,29 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+"use client";
+
+import * as React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface ConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description?: string | ReactNode;
+  description?: string;
   confirmText?: string;
   cancelText?: string;
-  onConfirm?: () => void | Promise<void>;
-  onCancel?: () => void;
+  onConfirm: () => void;
   variant?: "default" | "destructive";
-  loading?: boolean;
-  // Novas props para suporte a formulários
-  children?: ReactNode;
+  size?: "sm" | "md" | "lg";
   showFooter?: boolean;
-  customFooter?: ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  children?: React.ReactNode;
 }
 
 export function ConfirmationDialog({
@@ -29,80 +34,52 @@ export function ConfirmationDialog({
   confirmText = "Confirmar",
   cancelText = "Cancelar",
   onConfirm,
-  onCancel,
   variant = "default",
-  loading = false,
-  children,
+  size = "sm",
   showFooter = true,
-  customFooter,
-  size = "md",
+  children,
 }: ConfirmationDialogProps) {
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else {
-      onOpenChange(false);
-    }
-  };
-
-  const handleConfirm = async () => {
-    if (onConfirm) {
-      await onConfirm();
-    }
+  const handleConfirm = () => {
+    onConfirm();
+    onOpenChange(false);
   };
 
   const sizeClasses = {
     sm: "sm:max-w-md",
     md: "sm:max-w-lg",
-    lg: "sm:max-w-xl",
-    xl: "sm:max-w-2xl",
+    lg: "sm:max-w-2xl",
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size], "h-min max-h-svh lg:max-h-[95svh]  flex flex-col ")}>
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className={cn(sizeClasses[size])}>
+        <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-
-        {/* Conteúdo principal com scroll se necessário */}
-        <div className="flex-1 overflow-y-auto">
-          {children
-            ? children
-            : description && (
-                <div className="py-4">
-                  {typeof description === "string" ? (
-                    <p className="text-sm text-muted-foreground">{description}</p>
-                  ) : (
-                    description
-                  )}
-                </div>
-              )}
-        </div>
-
-        {/* Footer customizável */}
+        
+        {children && (
+          <div className="py-4">
+            {children}
+          </div>
+        )}
+        
         {showFooter && (
-          <DialogFooter className="flex-shrink-0">
-            {customFooter ? (
-              customFooter
-            ) : (
-              <>
-                {cancelText && (
-                  <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                    {cancelText}
-                  </Button>
-                )}
-                {onConfirm && (
-                  <Button
-                    variant={variant === "destructive" ? "destructive" : "default"}
-                    onClick={handleConfirm}
-                    disabled={loading}
-                  >
-                    {loading ? "Carregando..." : confirmText}
-                  </Button>
-                )}
-              </>
+          <DialogFooter>
+            {cancelText && (
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                {cancelText}
+              </Button>
             )}
+            <Button
+              variant={variant}
+              onClick={handleConfirm}
+            >
+              {confirmText}
+            </Button>
           </DialogFooter>
         )}
       </DialogContent>

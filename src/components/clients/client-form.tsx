@@ -5,19 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { saveClient } from "@/actions/clients/save-client";
 import { clientSchema, ClientFormValues } from "@/validators/client";
 import { PatternFormat } from "react-number-format";
 import { YearInputCalendar } from "@/components/ui/year-input-calendar";
 import { revalidatePathAction } from "@/actions/revalidate-path";
-import { toast } from "sonner";
 
 interface ClientFormProps {
   initialData?: any;
   onSuccess?: () => void;
+  onSubmit?: (data: ClientFormValues) => Promise<void>;
+  onCancel?: () => void;
 }
 
-export default function ClientForm({ initialData, onSuccess }: ClientFormProps) {
+export default function ClientForm({ initialData, onSuccess, onSubmit, onCancel }: ClientFormProps) {
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -29,27 +29,15 @@ export default function ClientForm({ initialData, onSuccess }: ClientFormProps) 
     },
   });
 
-  const onSubmit = async (data: ClientFormValues) => {
-    const result = await saveClient(data);
-
-    if (result.success) {
-      toast.success("Cliente salvo com sucesso");
-
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        revalidatePathAction("/clients");
-      }
-
-      revalidatePathAction("/clients");
-    } else {
-      toast.error(result.error || "Erro ao salvar cliente");
+  const handleSubmit = async (data: ClientFormValues) => {
+    if (onSubmit) {
+      await onSubmit(data);
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="fullName"
@@ -123,13 +111,7 @@ export default function ClientForm({ initialData, onSuccess }: ClientFormProps) 
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              if (onSuccess) {
-                onSuccess();
-              } else {
-                revalidatePathAction("/clients");
-              }
-            }}
+            onClick={onCancel}
           >
             Cancelar
           </Button>

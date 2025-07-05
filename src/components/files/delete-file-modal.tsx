@@ -1,6 +1,6 @@
 "use client";
 
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface DeleteFileModalProps {
   isOpen: boolean;
@@ -16,12 +16,15 @@ export function DeleteFileModal({
   fileName,
 }: DeleteFileModalProps) {
   return (
-    <DeleteConfirmationDialog
-      isOpen={isOpen}
-      onClose={onClose}
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Confirmar exclusão"
+      description={`Tem certeza que deseja excluir o arquivo ${fileName}? Esta ação não pode ser desfeita.`}
+      confirmText="Excluir"
+      cancelText="Cancelar"
       onConfirm={onConfirm}
-      itemName={fileName}
-      itemType="arquivo"
+      variant="destructive"
     />
   );
 }

@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function updateApiKey(id: string, data: { description?: string }) {
+export async function updateApiKey(id: number, data: { description?: string }) {
   try {
     const apiKey = await prisma.apiKey.update({
       where: { id },

@@ -1,6 +1,6 @@
 "use client";
 
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface DeleteLinkModalProps {
   isOpen: boolean;
@@ -9,19 +9,17 @@ interface DeleteLinkModalProps {
   linkTitle: string;
 }
 
-export function DeleteLinkModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  linkTitle,
-}: DeleteLinkModalProps) {
+export function DeleteLinkModal({ isOpen, onClose, onConfirm, linkTitle }: DeleteLinkModalProps) {
   return (
-    <DeleteConfirmationDialog
-      isOpen={isOpen}
-      onClose={onClose}
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Confirmar exclusão"
+      description={`Tem certeza que deseja excluir o link ${linkTitle}? Esta ação não pode ser desfeita.`}
+      confirmText="Excluir"
+      cancelText="Cancelar"
       onConfirm={onConfirm}
-      itemName={linkTitle}
-      itemType="o link"
+      variant="destructive"
     />
   );
 }

@@ -3,15 +3,15 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CalendarGrid } from "./calendar-grid";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { MobileCalendarSelector } from "../mobile/mobile-calendar-selector";
-import { CalendarActionsModal } from "../modals/calendar-actions-modal";
+import { CalendarUnifiedModal } from "../modals/calendar-unified-modal";
 import { DesktopCalendarTabs } from "../desktop/desktop-calendar-tabs";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import IsTableLoading from "../../isTableLoading";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus, Share2, Trash2 } from "lucide-react";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { useCalendarStore } from "@/store/calendar-store";
+import { Edit, Plus, Share2, Trash2 } from "lucide-react";
 
 interface CalendarTabsProps {
   calendars: CalendarFullData[];
@@ -165,12 +165,22 @@ export function CalendarTabs({
         )}
       </Tabs>
 
-      <CalendarActionsModal
+      {/* Substituir CalendarActionsModal pelo CalendarUnifiedModal */}
+      <CalendarUnifiedModal
+        type="actions"
         open={showActionsModal}
         onOpenChange={setShowActionsModal}
-        calendar={selectedCalendar}
-        onEdit={openEditModal}
-        onDelete={openDeleteModal}
+        calendar={selectedCalendar!}
+        onEdit={() => {
+          if (selectedCalendar) {
+            openEditModal(selectedCalendar);
+          }
+        }}
+        onDelete={() => {
+          if (selectedCalendar) {
+            openDeleteModal(selectedCalendar);
+          }
+        }}
       />
     </div>
   );

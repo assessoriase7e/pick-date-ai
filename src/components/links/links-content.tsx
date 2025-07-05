@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LinkModal } from "./link-modal";
-import { DeleteLinkModal } from "./delete-link-modal";
 import { Pencil, Trash2, ExternalLink, LinkIcon } from "lucide-react";
 import { createLink } from "@/actions/links/create";
 import { updateLink } from "@/actions/links/update";
@@ -12,6 +11,7 @@ import { truncateText } from "@/lib/utils";
 import { Link } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 type LinksContentProps = {
   links: Link[];
@@ -220,11 +220,15 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
       )}
 
       {deletingLink && (
-        <DeleteLinkModal
-          isOpen={!!deletingLink}
-          onClose={() => setDeletingLink(null)}
+        <ConfirmationDialog
+          open={!!deletingLink}
+          onOpenChange={() => setDeletingLink(null)}
+          title="Confirmar exclusão"
+          description={`Tem certeza que deseja excluir o link ${deletingLink.title}? Esta ação não pode ser desfeita.`}
+          confirmText={isLoading ? "Excluindo..." : "Excluir"}
+          cancelText="Cancelar"
           onConfirm={handleDeleteLink}
-          linkTitle={deletingLink.title}
+          variant="destructive"
         />
       )}
     </div>
