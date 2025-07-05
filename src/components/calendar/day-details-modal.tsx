@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import moment from "moment";
-import { Dialog, DialogContent, DialogDescription, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { DayScheduleGrid } from "./day-schedule-grid";
@@ -173,11 +173,14 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] h-[90vh]">
         <DialogHeader className="flex-row items-center justify-between pr-10">
-          <DialogDescription className="p-3 px-4 bg-primary rounded-lg text-foreground">
+          {/* Adicionar DialogTitle para acessibilidade */}
+          <DialogTitle className="sr-only">Detalhes do Dia - {formattedDate}</DialogTitle>
+          {/* Substituir DialogDescription por uma div */}
+          <div className="p-3 px-4 bg-primary rounded-lg text-foreground">
             <h2 className="text-sm font-medium text-center">
               {collaborator?.name} | {collaborator?.profession} | {formattedDate}
             </h2>
-          </DialogDescription>
+          </div>
         </DialogHeader>
         {modalContent}
       </DialogContent>

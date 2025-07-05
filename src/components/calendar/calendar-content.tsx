@@ -2,9 +2,6 @@
 import moment from "moment";
 import "moment/locale/pt-br";
 import { useState } from "react";
-// Remover esta importação
-// import { useToast } from "@/components/ui/use-toast";
-// Adicionar esta importação
 import { toast } from "sonner";
 import { createCalendar } from "@/actions/calendars/create";
 import { updateCalendar } from "@/actions/calendars/update";
@@ -22,6 +19,8 @@ import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 import { Calendar } from "@prisma/client";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { useCalendarStore } from "@/store/calendar-store";
+// Adicionar esta importação
+import { DayDetailsModal } from "./day-details-modal";
 
 moment.locale("pt-br");
 
@@ -33,6 +32,10 @@ interface CalendarContentProps {
   selectedDay: Date | null;
   selectedDayAppointments: AppointmentFullData[];
   collaborators: CollaboratorFullData[];
+  // Adicionar estas propriedades
+  allClients: Record<number, any[]>;
+  allServices: Record<number, any[]>;
+  allCollaborators: Record<number, any>;
 }
 
 export function CalendarContent({
@@ -42,6 +45,10 @@ export function CalendarContent({
   appointments,
   currentDate,
   selectedDay,
+  // Adicionar estas propriedades
+  allClients,
+  allServices,
+  allCollaborators,
 }: CalendarContentProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -257,6 +264,19 @@ export function CalendarContent({
         handleDeleteCalendar={handleDeleteCalendar}
         collaborators={collaborators}
         selectedCalendar={selectedCalendar}
+      />
+      
+      {/* Adicionar o DayDetailsModal aqui */}
+      <DayDetailsModal
+        isOpen={dayModalOpen}
+        onClose={() => setDayModalOpen(false)}
+        date={selectedDate}
+        calendarId={activeCalendarId}
+        calendar={calendars.find(cal => cal.id === activeCalendarId)}
+        clients={allClients[activeCalendarId] || []}
+        services={allServices[activeCalendarId] || []}
+        collaborator={allCollaborators[activeCalendarId] || null}
+        appointments={appointments}
       />
     </div>
   );

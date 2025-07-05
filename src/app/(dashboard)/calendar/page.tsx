@@ -101,6 +101,10 @@ export default async function CalendarPage({
       selectedDay={selectedDayDate}
       selectedDayAppointments={selectedDayAppointments}
       collaborators={collaborators}
+      // Adicionar estas propriedades
+      allClients={allClients}
+      allServices={allServices}
+      allCollaborators={allCollaborators}
     />
   );
 }

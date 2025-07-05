@@ -51,8 +51,8 @@ export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onO
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     try {
-      await enhancedDeleteAccount(); // Isso força reautenticação antes de executar
-      onOpenChange(false); // Só fecha o diálogo se tudo deu certo
+      await enhancedDeleteAccount();
+      onOpenChange(false);
     } catch (error: any) {
       if (isReverificationCancelledError(error)) {
         return;
