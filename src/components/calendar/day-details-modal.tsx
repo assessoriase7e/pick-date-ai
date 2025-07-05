@@ -8,6 +8,10 @@ import React from "react";
 import { DayScheduleGrid } from "./day-schedule-grid";
 import { AppointmentForm } from "../appointment/appointment-form";
 
+import { useToast } from "@/components/ui/use-toast";
+import { updateAppointment } from "@/actions/appointments/update";
+import { createAppointment } from "@/actions/appointments/create";
+
 interface DayDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,6 +40,8 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
+
+  const { toast } = useToast();
 
   const formattedDate = date ? moment(date).locale("pt-br").format("DD/MM/YYYY") : "";
   const dateKey = date ? moment(date).format("YYYY-MM-DD") : "";
@@ -92,12 +98,36 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
     onClose();
   };
 
+  const handleFormSubmit = async (appointmentData: any) => {
+    try {
+      const result = selectedAppointment
+        ? await updateAppointment(selectedAppointment.id, appointmentData)
+        : await createAppointment(appointmentData);
+
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: result.error || "Ocorreu um erro ao salvar o agendamento",
+        });
+        return;
+      }
+
+      handleFormSuccess();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar o agendamento",
+      });
+    }
+  };
+
   if (!date) return null;
 
-  // Conteúdo responsivo usando apenas Tailwind
   const modalContent = (
     <div className="flex flex-col max-w-[95vw]">
-      {/* Conteúdo para dispositivos móveis (md:hidden) */}
       <div className="md:hidden flex-1 overflow-hidden">
         <div className="border rounded-lg h-[80svh] overflow-auto w-full">
           <DayScheduleGrid
@@ -109,7 +139,6 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
         </div>
       </div>
 
-      {/* Conteúdo para desktop (hidden md:block) */}
       <div className="hidden md:block flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border rounded-lg overflow-hidden">
@@ -151,25 +180,21 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
     </div>
   );
 
-  // Componentes responsivos usando apenas Tailwind
   return (
-    <>
-      {/* Dialog para desktop (hidden md:block) */}
-      <div className="hidden md:block">
-        <Dialog open={isOpen} onOpenChange={handleClose}>
-          <DialogContent className="w-full max-w-6xl">
-            <DialogHeader className="flex-row items-center justify-between pr-10">
-              <DialogTitle className="sr-only">Detalhes do Dia - {formattedDate}</DialogTitle>
-              <div className="p-3 px-4 bg-primary rounded-lg text-foreground">
-                <h2 className="text-sm font-medium text-center">
-                  {collaborator?.name} | {collaborator?.profession} | {formattedDate}
-                </h2>
-              </div>
-            </DialogHeader>
-            {modalContent}
-          </DialogContent>
-        </Dialog>
-      </div>
-    </>
+    <div className="hidden md:block">
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="w-full max-w-6xl">
+          <DialogHeader className="flex-row items-center justify-between pr-10">
+            <DialogTitle className="sr-only">Detalhes do Dia - {formattedDate}</DialogTitle>
+            <div className="p-3 px-4 bg-primary rounded-lg text-foreground">
+              <h2 className="text-sm font-medium text-center">
+                {collaborator?.name} | {collaborator?.profession} | {formattedDate}
+              </h2>
+            </div>
+          </DialogHeader>
+          {modalContent}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 });

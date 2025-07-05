@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { checkUserSubscriptionAccess } from "@/lib/subscription-guard";
+import { STRIPE_PRODUCTS } from "@/lib/stripe";
 
 export async function createAppointment({
   clientId,
@@ -76,6 +77,21 @@ export async function createAppointment({
       }
 
       userId = authResult.userId;
+      
+      // Verificar se o usuário tem plano básico pendente
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { subscription: true },
+      });
+
+      if (user?.subscription?.stripeProductId === STRIPE_PRODUCTS.BASE_PLAN && 
+          user?.subscription?.status !== "active" && 
+          user?.subscription?.status !== "trialing") {
+        return {
+          success: false,
+          error: "Você possui um plano básico pendente de assinatura. Atualize seu plano para criar agendamentos.",
+        };
+      }
     }
 
     let actualClientId = clientId ?? null;

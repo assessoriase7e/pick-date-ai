@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Appointment } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { checkUserSubscriptionAccess } from "@/lib/subscription-guard";
+import { STRIPE_PRODUCTS } from "@/lib/stripe";
 
 export async function updateAppointment(
   id: number,
@@ -63,6 +64,21 @@ export async function updateAppointment(
       }
 
       userId = authResult.userId;
+
+      // Verificar se o usuário tem plano básico pendente
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { subscription: true },
+      });
+
+      if (user?.subscription?.stripeProductId === STRIPE_PRODUCTS.BASE_PLAN && 
+          user?.subscription?.status !== "active" && 
+          user?.subscription?.status !== "trialing") {
+        return {
+          success: false,
+          error: "Você possui um plano básico pendente de assinatura. Atualize seu plano para editar agendamentos.",
+        };
+      }
 
       // Segurança extra: garantir que o agendamento pertence ao usuário autenticado
       if (currentAppointment.userId !== userId) {

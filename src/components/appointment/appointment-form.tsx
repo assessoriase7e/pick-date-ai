@@ -140,15 +140,7 @@ export function AppointmentForm({
       finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
       collaboratorId: appointment?.collaboratorId || calendar.collaboratorId,
     });
-  }, [
-    appointment,
-    appointment?.startTime,
-    appointment?.endTime,
-    initialStartTime,
-    initialEndTime,
-    calendar.id,
-    calendar.collaboratorId,
-  ]);
+  }, [appointment]);
 
   const onSubmit = async (values: FormValues) => {
     try {
