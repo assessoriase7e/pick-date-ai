@@ -3,12 +3,24 @@
 import { useState, useEffect } from "react";
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  // Função para detectar dispositivo móvel pelo User-Agent
+  const isMobileDevice = () => {
+    if (typeof window === "undefined") return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  // Inicializa com base no User-Agent para dispositivos móveis se a query for relacionada a largura
+  const isWidthQuery = query.includes("width");
+  const initialValue = isWidthQuery ? isMobileDevice() : false;
+  
+  const [matches, setMatches] = useState(initialValue);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const media = window.matchMedia(query);
 
-    // Definir o valor inicial
+    // Atualiza com o valor real do matchMedia
     setMatches(media.matches);
 
     // Callback para quando o valor mudar
