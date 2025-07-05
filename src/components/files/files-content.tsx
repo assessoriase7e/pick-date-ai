@@ -1,21 +1,17 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CreateFileDialog } from "@/components/files/create-file-dialog";
 import { FilesDataTable } from "@/components/files/files-data-table";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { FileRecord } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { ArrowUpDown } from "lucide-react";
 import { EditFileModal } from "./edit-file-modal";
 import { DeleteFileModal } from "./delete-file-modal";
 import { deleteFile } from "@/actions/files/delete";
 import { toast } from "sonner";
-import Link from "next/link";
+import { createFileColumns } from "@/table-columns/files";
 
 interface FilesContentProps {
   data: FileRecord[];
@@ -73,73 +69,10 @@ export function FilesContent({ data, totalPages, currentPage }: FilesContentProp
     }
   };
 
-  const columns: ColumnDef<FileRecord>[] = [
-    {
-      accessorKey: "fileName",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Nome do Arquivo
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div className="font-medium">{row.getValue("fileName")}</div>,
-    },
-    {
-      accessorKey: "description",
-      header: "Descrição",
-      cell: ({ row }) => {
-        return <div>{row.getValue("description")}</div>;
-      },
-    },
-    {
-      accessorKey: "fileType",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Tipo
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div className="uppercase">{row.getValue("fileType")}</div>,
-    },
-    {
-      accessorKey: "createdAt",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Data de Criação
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) =>
-        format(new Date(row.getValue("createdAt")), "dd/MM/yyyy 'às' HH:mm", {
-          locale: ptBR,
-        }),
-    },
-    {
-      id: "actions",
-      header: "Ações",
-      cell: ({ row }) => (
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon" onClick={() => openEditModal(row.original)} title="Editar arquivo">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-destructive"
-            onClick={() => openDeleteModal(row.original)}
-            title="Excluir arquivo"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          <Link href={row.original.fileUrl} target="_blank">
-            <Button variant="outline" size="icon" title="Baixar arquivo">
-              <Download className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      ),
-    },
-  ];
+  const columns = createFileColumns({
+    onEdit: openEditModal,
+    onDelete: openDeleteModal,
+  });
 
   return (
     <div className="space-y-6">
