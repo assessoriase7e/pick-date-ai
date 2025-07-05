@@ -6,7 +6,8 @@ import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { isLifetimeUser } from "@/lib/lifetime-user";
-import { getSubscriptionFromCache, setSubscriptionCache } from "@/utils/subscription-cache";
+// Remover a importação das funções de cache
+// import { getSubscriptionFromCache, setSubscriptionCache } from "@/utils/subscription-cache";
 import { getAICreditsLimit } from "@/lib/subscription-limits";
 import { AdditionalCalendar } from "@prisma/client";
 
@@ -43,12 +44,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
       throw new Error("Unauthorized");
     }
 
-    // Verificar cache primeiro
-    const cachedData = await getSubscriptionFromCache(userId);
-    if (cachedData) {
-      return cachedData;
-    }
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -58,6 +53,8 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
         },
       },
     });
+
+    console.log(user);
 
     if (!user) {
       throw new Error("User not found");
@@ -86,7 +83,10 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
         remaining: Infinity,
       };
       hasRemainingCredits = true;
-    } else if (subscription) {
+    }
+
+    // Verificar assinatura mesmo se estiver em período de teste
+    if (subscription) {
       try {
         const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
 
@@ -110,6 +110,10 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
 
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
 
+        // Se tiver assinatura ativa, priorizar isso sobre o período de teste
+        if (isSubscriptionActive) {
+          canAccessPremiumFeatures = true;
+        }
         const aiLimit = await getAICreditsLimit(subscription);
         if (aiLimit > 0) {
           const startOfCurrentMonth = startOfMonth(now);
@@ -189,9 +193,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData> {
         additionalCalendars: user.additionalCalendars,
       };
     }
-
-    // Salvar no cache
-    await setSubscriptionCache(userId, result);
 
     return result;
   } catch (error) {

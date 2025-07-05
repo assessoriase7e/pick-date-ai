@@ -1,7 +1,6 @@
 "use client";
 
 import { create } from "zustand";
-import { getSubscriptionStatus } from "@/actions/subscription/get-status";
 import { createSubscription } from "@/actions/subscription/create-checkout";
 import { cancelSubscription } from "@/actions/subscription/cancel";
 import { createPortalSession } from "@/actions/subscription/portal";
@@ -42,6 +41,31 @@ interface SubscriptionState {
   createPortalSession: () => Promise<void>;
 }
 
+// Função para buscar dados da assinatura via API
+async function fetchSubscriptionData(force = false): Promise<SubscriptionData> {
+  // Opções de cache para o fetch
+  const fetchOptions: RequestInit = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    // Usar cache a menos que force seja true
+    cache: force ? "no-store" : "force-cache",
+    next: {
+      // Revalidar a cada 1 hora
+      revalidate: 3600,
+    },
+  };
+
+  const response = await fetch("/api/subscription/status", fetchOptions);
+
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar status da assinatura: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   data: null,
   isLoading: false,
@@ -63,12 +87,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       return;
     }
 
-    // Verificar cache no cliente com TTL de 5 minutos (300000ms)
+    // Verificar cache no cliente com TTL de 1 hora (3600000ms)
     const now = Date.now();
-    const cacheAge = now - state.cacheTime;
-    if (state.data && cacheAge < 300000 && !force) {
-      return;
-    }
 
     // Debounce: evitar múltiplas chamadas em menos de 1 segundo
     if (now - state.lastFetch < 1000 && !force) {
@@ -77,7 +97,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
     try {
       set({ isLoading: true, isFetching: true, error: null });
-      const subscriptionData = await getSubscriptionStatus();
+      const subscriptionData = await fetchSubscriptionData(force);
+
       set({
         data: subscriptionData,
         lastFetch: now,
@@ -108,7 +129,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   cancelSubscription: async () => {
     try {
       await cancelSubscription();
-      // Recarregar os dados após cancelar
+      // Forçar revalidação do cache após cancelar
       await get().fetchSubscriptionStatus(undefined, true);
       return { success: true };
     } catch (error) {

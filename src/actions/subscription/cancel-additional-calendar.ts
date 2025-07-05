@@ -3,8 +3,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { invalidateSubscriptionCache } from "@/utils/subscription-cache";
 import { revalidatePath } from "next/cache";
+import { revalidateSubscriptionCache } from "./revalidate-cache";
 
 export async function cancelAdditionalCalendar(additionalCalendarId: number) {
   try {
@@ -42,7 +42,7 @@ export async function cancelAdditionalCalendar(additionalCalendarId: number) {
     const hasExcess = await checkCalendarExcess(userId);
 
     // Invalidar cache
-    await invalidateSubscriptionCache(userId);
+    await revalidateSubscriptionCache();
     revalidatePath("/settings");
     revalidatePath("/calendar");
 

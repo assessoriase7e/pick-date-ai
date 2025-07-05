@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { redirect } from "next/navigation";
 
+import { revalidateSubscriptionCache } from "./revalidate-cache";
+
 export async function createSubscription(priceId: string) {
   try {
     const { userId } = await auth();
@@ -33,12 +35,15 @@ export async function createSubscription(priceId: string) {
     // Verificar se o usuário está tentando contratar créditos adicionais sem ter um plano IA
     if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
       // Verificar se o usuário tem um plano de IA ativo
-      if (!user.subscription || user.subscription.status !== "active" || 
-          ![
-            process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
-            process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
-            process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300
-          ].includes(user.subscription.stripePriceId)) {
+      if (
+        !user.subscription ||
+        user.subscription.status !== "active" ||
+        ![
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300,
+        ].includes(user.subscription.stripePriceId)
+      ) {
         throw new Error("É necessário ter um plano de IA ativo para contratar créditos adicionais");
       }
     }
@@ -69,6 +74,9 @@ export async function createSubscription(priceId: string) {
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
       metadata: { userId },
     });
+
+    // Revalidar o cache da assinatura
+    await revalidateSubscriptionCache();
 
     if (session.url) {
       redirect(session.url);

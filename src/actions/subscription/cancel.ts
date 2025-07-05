@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { invalidateSubscriptionCache } from "@/utils/subscription-cache";
+import { revalidateSubscriptionCache } from "./revalidate-cache";
 
 export async function cancelSubscription() {
   try {
@@ -15,11 +15,11 @@ export async function cancelSubscription() {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { 
+      include: {
         subscription: true,
         additionalCalendars: {
-          where: { active: true }
-        }
+          where: { active: true },
+        },
       },
     });
 
@@ -39,10 +39,10 @@ export async function cancelSubscription() {
       if (additionalCalendar.stripeSubscriptionId) {
         await stripe.subscriptions.cancel(additionalCalendar.stripeSubscriptionId);
       }
-      
+
       await prisma.additionalCalendar.update({
         where: { id: additionalCalendar.id },
-        data: { active: false }
+        data: { active: false },
       });
     }
 
@@ -54,8 +54,8 @@ export async function cancelSubscription() {
       },
     });
 
-    // Invalidar cache
-    await invalidateSubscriptionCache(userId);
+    // Dentro da função, após cancelar a assinatura
+    await revalidateSubscriptionCache();
 
     return {
       success: true,

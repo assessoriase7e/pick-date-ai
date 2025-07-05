@@ -10,15 +10,8 @@ import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function SubscriptionSettings() {
-  const {
-    subscription,
-    isTrialActive,
-    isSubscriptionActive,
-    canAccessPremiumFeatures,
-    createPortalSession,
-    isLoading,
-    additionalCalendars,
-  } = useSubscription();
+  const { subscription, isTrialActive, isSubscriptionActive, createPortalSession, isLoading, additionalCalendars } =
+    useSubscription();
   const router = useRouter();
 
   if (isLoading) {
@@ -33,6 +26,11 @@ export function SubscriptionSettings() {
   }
 
   const getStatusBadge = () => {
+    // Verificar diretamente se a assinatura está ativa
+    if (isSubscriptionActive) {
+      return <Badge variant="default">Ativa</Badge>;
+    }
+
     if (isTrialActive) {
       return <Badge variant="secondary">Período de Teste</Badge>;
     }
@@ -93,7 +91,7 @@ export function SubscriptionSettings() {
           {getStatusBadge()}
         </div>
 
-        {subscription && (
+        {subscription && isSubscriptionActive && (
           <>
             <div className="flex items-center justify-between">
               <span className="font-medium">Plano:</span>
@@ -130,9 +128,7 @@ export function SubscriptionSettings() {
 
         <div className="pt-4 border-t">
           <Button onClick={handleManageSubscription} className="w-full">
-            {!subscription || subscription.status !== "active"
-              ? "Ver Planos Disponíveis"
-              : "Gerenciar Assinatura no Stripe"}
+            {!isSubscriptionActive ? "Ver Planos Disponíveis" : "Gerenciar Assinatura no Stripe"}
           </Button>
         </div>
       </CardContent>

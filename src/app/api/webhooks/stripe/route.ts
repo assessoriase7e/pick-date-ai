@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
-import { invalidateSubscriptionCache } from "@/utils/subscription-cache";
+import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-cache";
 
 // Enum para tipos de eventos do webhook
 enum StripeWebhookEvent {
@@ -121,7 +121,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
     console.log("Additional calendar created successfully");
 
     // Invalidar cache do usuário
-    await invalidateSubscriptionCache(userId);
+    await revalidateSubscriptionCache();
   } else {
     // Lógica existente para outras assinaturas
     if (!productId) {
@@ -186,7 +186,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   // Invalidar cache do usuário
   if (updatedSubscription.user) {
-    await invalidateSubscriptionCache(updatedSubscription.user.id);
+    await revalidateSubscriptionCache();
   }
 }
 
@@ -224,7 +224,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
       // Invalidar cache do usuário
       if (deletedSubscription.user) {
-        await invalidateSubscriptionCache(deletedSubscription.user.id);
+        await revalidateSubscriptionCache();
       }
     } else {
       console.log(`Subscription ${subscription.id} not found in database, skipping update`);

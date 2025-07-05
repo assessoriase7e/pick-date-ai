@@ -25,12 +25,18 @@ interface SubscriptionStatusResponse {
 
 // Remover a função getAICreditsLimit local, agora importada de @/lib/subscription-limits
 
+// Modificar apenas o cabeçalho da função GET
 export async function GET() {
+  // Configurar cabeçalhos para cache
+  const headers = {
+    "Cache-Control": "max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+  };
+
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers });
     }
 
     // Buscar usuário do Clerk para verificar metadados
@@ -159,24 +165,28 @@ export async function GET() {
     };
 
     // Para usuários lifetime, sempre retornar como ativo
+    // Modificar os retornos para incluir os headers de cache
     if (isLifetime) {
-      return NextResponse.json({
-        subscription: user?.subscription || null,
-        isTrialActive: false,
-        isSubscriptionActive: true,
-        canAccessPremiumFeatures: true,
-        hasRemainingCredits: true,
-        aiCreditsInfo: {
-          used: 0, // Pode manter o uso real se quiser
-          limit: Infinity,
-          remaining: Infinity,
+      return NextResponse.json(
+        {
+          subscription: user?.subscription || null,
+          isTrialActive: false,
+          isSubscriptionActive: true,
+          canAccessPremiumFeatures: true,
+          hasRemainingCredits: true,
+          aiCreditsInfo: {
+            used: 0,
+            limit: Infinity,
+            remaining: Infinity,
+          },
         },
-      });
+        { headers }
+      );
     }
 
-    return NextResponse.json(response);
+    return NextResponse.json(response, { headers });
   } catch (error) {
     console.error("Erro ao buscar status da assinatura:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500, headers });
   }
 }
