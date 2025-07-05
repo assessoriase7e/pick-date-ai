@@ -2,7 +2,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { getCalendarLimits } from "./get-calendar-limits";
+
+// Função para gerar código de acesso aleatório
+function generateAccessCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 // Função para determinar o limite de calendários baseado no plano
 async function getCalendarLimit(subscription: any, userId: string): Promise<number> {
@@ -41,7 +46,7 @@ export async function createCalendar({
 }: {
   name: string;
   collaboratorId?: number;
-  accessCode?: string | null;
+  accessCode?: string;
 }) {
   try {
     const { userId } = await auth();
@@ -49,7 +54,7 @@ export async function createCalendar({
     if (!userId) {
       return {
         success: false,
-        error: "Não autorizado",
+        error: "UNAUTHORIZED",
       };
     }
 
@@ -75,6 +80,15 @@ export async function createCalendar({
     const currentActiveCalendars = user.calendars.length;
     const calendarLimit = await getCalendarLimit(user.subscription, userId);
 
+    // Verificar limites antes de criar
+    const limits = await getCalendarLimits();
+    if (!limits.canCreateMore) {
+      return {
+        success: false,
+        error: "CALENDAR_LIMIT_EXCEEDED",
+      };
+    }
+
     if (currentActiveCalendars >= calendarLimit) {
       return {
         success: false,
@@ -85,13 +99,12 @@ export async function createCalendar({
     const calendar = await prisma.calendar.create({
       data: {
         name,
-        userId,
         collaboratorId,
-        accessCode,
+        accessCode: accessCode || generateAccessCode(),
+        userId,
+        isActive: true,
       },
     });
-
-    revalidatePath("/calendar");
 
     return {
       success: true,

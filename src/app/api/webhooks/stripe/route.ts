@@ -93,29 +93,33 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
 
   const productId = typeof price.product === "string" ? price.product : price.product?.id;
   const priceId = price.id;
-  
+
   // Debug logs para identificar o problema
   console.log("Webhook - ProductId:", productId);
   console.log("Webhook - PriceId:", priceId);
   console.log("Webhook - Expected Calendar Product:", process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR);
-  
+
   // Verificar se é uma assinatura de calendário adicional
   // Comparar tanto productId quanto priceId
-  if (productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR || 
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+  if (
+    productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR
+  ) {
     console.log("Creating additional calendar for user:", userId);
-    
-    // Criar registro de calendário adicional
+
+    // Criar registro de calendário adicional com os campos obrigatórios
     await prisma.additionalCalendar.create({
       data: {
         userId,
         active: true,
         stripeSubscriptionId: subscription.id,
-      }
+        currentPeriodEnd: new Date(item.current_period_end * 1000),
+        expiresAt: new Date(item.current_period_end * 1000),
+      },
     });
-    
+
     console.log("Additional calendar created successfully");
-    
+
     // Invalidar cache do usuário
     await invalidateSubscriptionCache(userId);
   } else {
@@ -176,8 +180,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     include: {
-      user: true
-    }
+      user: true,
+    },
   });
 
   // Invalidar cache do usuário
@@ -191,30 +195,39 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const additionalCalendar = await prisma.additionalCalendar.findFirst({
     where: {
       stripeSubscriptionId: subscription.id,
-      active: true
-    }
+      active: true,
+    },
   });
 
   if (additionalCalendar) {
     // Desativar o calendário adicional
     await prisma.additionalCalendar.update({
       where: { id: additionalCalendar.id },
-      data: { active: false }
+      data: { active: false },
     });
   } else {
-    const deletedSubscription = await prisma.subscription.update({
+    // Check if subscription exists before trying to update it
+    const existingSubscription = await prisma.subscription.findFirst({
       where: { stripeSubscriptionId: subscription.id },
-      data: {
-        status: "canceled",
-      },
-      include: {
-        user: true
-      }
     });
 
-    // Invalidar cache do usuário
-    if (deletedSubscription.user) {
-      await invalidateSubscriptionCache(deletedSubscription.user.id);
+    if (existingSubscription) {
+      const deletedSubscription = await prisma.subscription.update({
+        where: { stripeSubscriptionId: subscription.id },
+        data: {
+          status: "canceled",
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      // Invalidar cache do usuário
+      if (deletedSubscription.user) {
+        await invalidateSubscriptionCache(deletedSubscription.user.id);
+      }
+    } else {
+      console.log(`Subscription ${subscription.id} not found in database, skipping update`);
     }
   }
 }
@@ -225,8 +238,8 @@ async function checkAndHandleCalendarLimits(userId: string, subscription: Stripe
     include: {
       subscription: true,
       calendars: {
-        where: { isActive: true }
-      }
+        where: { isActive: true },
+      },
     },
   });
 
@@ -235,22 +248,11 @@ async function checkAndHandleCalendarLimits(userId: string, subscription: Stripe
   const currentActiveCalendars = user.calendars.length;
   const newLimit = getCalendarLimit(user.subscription);
 
-  // Se excedeu o limite, desativar calendários mais antigos
+  // Não desativar automaticamente, apenas registrar que há excesso
   if (currentActiveCalendars > newLimit) {
-    const calendarsToDeactivate = user.calendars
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-      .slice(newLimit);
-
-    await prisma.calendar.updateMany({
-      where: {
-        id: {
-          in: calendarsToDeactivate.map(c => c.id)
-        }
-      },
-      data: {
-        isActive: false
-      }
-    });
+    // Registrar que o usuário tem calendários em excesso
+    // Isso será verificado na próxima vez que o usuário acessar a aplicação
+    console.log(`User ${userId} has ${currentActiveCalendars} calendars, exceeding limit of ${newLimit}`);
   }
 }
 
@@ -260,19 +262,21 @@ function getCalendarLimit(subscription: any): number {
   }
 
   const { stripePriceId } = subscription;
-  
-  if ([
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-  ].includes(stripePriceId)) {
+
+  if (
+    [
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+    ].includes(stripePriceId)
+  ) {
     return Infinity;
   }
-  
+
   if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
     return 13;
   }
-  
+
   return 3;
 }
 

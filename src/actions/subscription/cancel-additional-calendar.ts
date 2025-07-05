@@ -38,8 +38,8 @@ export async function cancelAdditionalCalendar(additionalCalendarId: number) {
       data: { active: false },
     });
 
-    // Verificar se precisa desativar calendários devido ao novo limite
-    await checkAndDeactivateExcessCalendars(userId);
+    // Verificar se excede o limite e redirecionar para gerenciamento de calendários
+    const hasExcess = await checkCalendarExcess(userId);
 
     // Invalidar cache
     await invalidateSubscriptionCache(userId);
@@ -49,6 +49,7 @@ export async function cancelAdditionalCalendar(additionalCalendarId: number) {
     return {
       success: true,
       message: "Calendário adicional cancelado com sucesso",
+      hasExcess,
     };
   } catch (error) {
     console.error("Error cancelling additional calendar:", error);
@@ -56,7 +57,35 @@ export async function cancelAdditionalCalendar(additionalCalendarId: number) {
   }
 }
 
-// Função para desativar calendários em excesso
+// Nova função para verificar excesso de calendários sem desativar
+async function checkCalendarExcess(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      subscription: true,
+      calendars: {
+        where: { isActive: true },
+      },
+      additionalCalendars: {
+        where: { active: true },
+      },
+    },
+  });
+
+  if (!user) return false;
+
+  // Calcular limite
+  const baseLimit = 3;
+  const additionalCalendarsCount = user.additionalCalendars.length;
+  const newLimit = baseLimit + additionalCalendarsCount;
+
+  const activeCalendars = user.calendars;
+  const excessCount = activeCalendars.length - newLimit;
+
+  return excessCount > 0;
+}
+
+// Remover a função checkAndDeactivateExcessCalendars que desativava automaticamente
 async function checkAndDeactivateExcessCalendars(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },

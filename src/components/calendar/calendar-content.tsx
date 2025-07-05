@@ -1,5 +1,4 @@
 "use client";
-
 import moment from "moment";
 import "moment/locale/pt-br";
 import { useState } from "react";
@@ -19,7 +18,6 @@ import { CollaboratorFullData } from "@/types/collaborator";
 import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 import { Calendar } from "@prisma/client";
 import { useCalendarLimits } from "@/hooks/use-calendar-limits";
-import { CalendarLimitModal } from "./calendar-limit-modal";
 import { useCalendarStore } from "@/store/calendar-store";
 
 moment.locale("pt-br");
@@ -49,6 +47,8 @@ export function CalendarContent({
   const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
   const [dayModalOpen, setDayModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [deactivationModalOpen, setDeactivationModalOpen] = useState(false);
+  const [excessData, setExcessData] = useState<any>(null);
 
   const { toast } = useToast();
   const { limit, current } = useCalendarLimits();
@@ -62,16 +62,9 @@ export function CalendarContent({
     }
   );
 
-  const activeCalendar = calendars.find((cal) => cal.id === activeCalendarId);
-
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
     setDayModalOpen(true);
-  };
-
-  const handleCloseDayModal = () => {
-    setDayModalOpen(false);
-    setSelectedDate(null);
   };
 
   const handleCreateCalendar = async (values: CalendarFormValues) => {
@@ -113,7 +106,7 @@ export function CalendarContent({
     if (!selectedCalendar) return;
 
     try {
-      await updateCalendar({
+      const response = await updateCalendar({
         id: selectedCalendar.id,
         name: values?.name || "",
         collaboratorId: values.collaboratorId,
@@ -121,14 +114,30 @@ export function CalendarContent({
         accessCode: values.accessCode,
       });
 
-      setEditOpen(false);
-      setSelectedCalendar(null);
-      await revalidatePathAction("/calendar");
+      if (response.success) {
+        setEditOpen(false);
+        setSelectedCalendar(null);
+        await revalidatePathAction("/calendar");
 
-      toast({
-        title: "Sucesso",
-        description: "Calendário atualizado com sucesso",
-      });
+        toast({
+          title: "Sucesso",
+          description: "Calendário atualizado com sucesso",
+        });
+      } else if (response.error === "CALENDAR_LIMIT_EXCEEDED") {
+        toast({
+          title: "Limite de calendários excedido",
+          description:
+            "Você atingiu o limite de calendários ativos. Desative outros calendários ou faça upgrade do plano.",
+          variant: "destructive",
+        });
+        setLimitModalOpen(true);
+      } else {
+        toast({
+          title: "Erro",
+          description: response.error || "Falha ao atualizar calendário",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Erro ao atualizar calendário:", error);
       toast({
@@ -228,8 +237,6 @@ export function CalendarContent({
         collaborators={collaborators}
         selectedCalendar={selectedCalendar}
       />
-
-      <CalendarLimitModal open={limitModalOpen} onOpenChange={setLimitModalOpen} currentCount={current} limit={limit} />
     </div>
   );
 }

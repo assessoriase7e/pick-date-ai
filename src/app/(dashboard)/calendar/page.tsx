@@ -9,6 +9,8 @@ import moment from "moment";
 import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
 import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
 import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
+import { checkExcessCalendars } from "@/actions/calendars/check-excess-calendars";
+import { redirect } from "next/navigation";
 
 export default async function CalendarPage({
   searchParams,
@@ -19,6 +21,12 @@ export default async function CalendarPage({
     selectedDay?: string;
   }>;
 }) {
+  // Verificar se há excesso de calendários e redirecionar para a página de gerenciamento
+  const excessData = await checkExcessCalendars();
+  if (excessData.hasExcess) {
+    redirect("/manage-calendars");
+  }
+
   const sParams = await searchParams;
 
   const [response, collaboratorsResponse] = await Promise.all([listCalendars(), getCollaborators({ limit: 100 })]);

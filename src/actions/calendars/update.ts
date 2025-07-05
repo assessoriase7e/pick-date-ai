@@ -42,16 +42,18 @@ export async function updateCalendar({
     }
 
     // Se está tentando ativar um calendário, verificar limites
+    // Sempre permitir desativar calendários
     if (isActive === true && !existingCalendar.isActive) {
       const limits = await getCalendarLimits();
       if (!limits.canCreateMore) {
         return {
           success: false,
-          error: "Limite de calendários atingido. Cancele calendários adicionais ou faça upgrade do plano.",
+          error: "CALENDAR_LIMIT_EXCEEDED",
         };
       }
     }
 
+    // Sempre permitir desativar calendários (isActive === false)
     const calendar = await prisma.calendar.update({
       where: {
         id,

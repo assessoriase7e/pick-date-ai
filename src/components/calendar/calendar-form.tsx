@@ -39,7 +39,7 @@ export function CalendarForm({
     defaultValues: calendar
       ? {
           name: calendar?.name || "",
-          collaboratorId: calendar.collaboratorId!,
+          collaboratorId: calendar.collaboratorId || null,
           isActive: calendar?.isActive ?? true,
           accessCode: calendar?.accessCode || "",
         }

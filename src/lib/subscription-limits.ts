@@ -17,12 +17,12 @@ export async function getAICreditsLimit(
   userId?: string
 ): Promise<number> {
   // Verificar se é usuário lifetime primeiro
-  if (checkLifetime && await isLifetimeUser()) {
+  if (checkLifetime && (await isLifetimeUser())) {
     return Infinity;
   }
 
   let baseCredits = 0;
-  
+
   if (subscription && subscription.status === "active") {
     const { stripePriceId } = subscription;
 
@@ -46,8 +46,8 @@ export async function getAICreditsLimit(
     where: {
       userId,
       active: true,
-      used: { lt: prisma.additionalAICredit.fields.quantity }
-    }
+      used: { lt: prisma.additionalAICredit.fields.quantity },
+    },
   });
 
   // Calcular total de créditos adicionais disponíveis
@@ -70,39 +70,41 @@ export async function getCalendarLimit(
   userId?: string
 ): Promise<number> {
   // Verificar se é usuário lifetime primeiro
-  if (checkLifetime && await isLifetimeUser()) {
+  if (checkLifetime && (await isLifetimeUser())) {
     return Infinity;
   }
-  
+
   // Plano base: 3 calendários
   let baseLimit = 3;
-  
+
   if (subscription && subscription.status === "active") {
     const { stripePriceId } = subscription;
-    
+
     // Planos com IA não têm limite
-    if ([
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-    ].includes(stripePriceId)) {
+    if (
+      [
+        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+      ].includes(stripePriceId)
+    ) {
       return Infinity;
     }
   }
-  
+
   // Se não tiver userId, retorna apenas o limite base
   if (!userId) {
     return baseLimit;
   }
-  
+
   // Buscar calendários adicionais ativos
   const additionalCalendars = await prisma.additionalCalendar.count({
     where: {
       userId,
-      active: true
-    }
+      active: true,
+    },
   });
-  
+
   return baseLimit + additionalCalendars;
 }
 
@@ -117,7 +119,7 @@ export async function hasAIPlan(subscription: Subscription | null | undefined): 
   }
 
   const { stripePriceId } = subscription;
-  
+
   return [
     process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
     process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
@@ -138,8 +140,8 @@ export async function hasAdditionalCalendars(userId: string): Promise<boolean> {
   const count = await prisma.additionalCalendar.count({
     where: {
       userId,
-      active: true
-    }
+      active: true,
+    },
   });
 
   return count > 0;
