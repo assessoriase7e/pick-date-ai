@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, FileText, Users, Phone } from "lucide-react";
-import Link from "next/link";
+import { FileText, Users, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -9,12 +8,12 @@ import ClientForm from "./client-form";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Client } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { saveClient } from "@/actions/clients/save-client";
 import { ClientFormValues } from "@/validators/client";
+import { createClientColumns } from "@/table-columns/clients";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -121,47 +120,11 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     router.refresh();
   };
 
-  const columns: ColumnDef<Client>[] = [
-    {
-      accessorKey: "fullName",
-      header: "Nome",
-    },
-    {
-      accessorKey: "phone",
-      header: "Telefone",
-    },
-    {
-      accessorKey: "birthDate",
-      header: "Data de Nascimento",
-      cell: ({ row }) => {
-        const date = row.original.birthDate;
-        return date ? formatDate(date) : "-";
-      },
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        const client = row.original;
-        return (
-          <div className="flex space-x-2">
-            <Link href={`/clients/${client.id}/services`}>
-              <Button variant="outline" size="icon">
-                <FileText className="h-4 w-4" />
-              </Button>
-            </Link>
-
-            <Button variant="outline" size="icon" onClick={() => handleEditClick(client)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-
-            <Button variant="outline" size="icon" onClick={() => handleDeleteClick(client.id)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
+  const columns = createClientColumns({
+    onEdit: handleEditClick,
+    onDelete: handleDeleteClick,
+    formatDate,
+  });
 
   const headerContent = (
     <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:max-w-xs">
@@ -253,11 +216,7 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
         cancelText="Cancelar"
         onConfirm={() => {}}
       >
-        <ClientForm 
-          onSubmit={handleSaveClient} 
-          onCancel={() => setIsNewClientDialogOpen(false)}
-          isSaving={isSaving}
-        />
+        <ClientForm onSubmit={handleSaveClient} onCancel={() => setIsNewClientDialogOpen(false)} isSaving={isSaving} />
       </ConfirmationDialog>
 
       <ConfirmationDialog
