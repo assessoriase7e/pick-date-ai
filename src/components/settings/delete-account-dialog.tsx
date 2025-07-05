@@ -80,7 +80,6 @@ export function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onO
       open={open}
       onOpenChange={onOpenChange}
       title="Excluir conta"
-      showFooter={false}
       customFooter={customFooter}
     >
       <p className="text-sm text-muted-foreground mb-6">

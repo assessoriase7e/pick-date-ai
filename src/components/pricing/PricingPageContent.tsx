@@ -27,6 +27,41 @@ export function PricingPageContent({ plans, additionalCalendarPlan, additionalAi
     // Verificar se o plano adicional já está ativo
     const isCurrentPlan = subscription?.stripeProductId === plan.productId;
     
+    // Verificar se o usuário pode assinar este plano adicional
+    const canSubscribe = () => {
+      // Se não tem assinatura ativa, não pode assinar nenhum adicional
+      if (!subscription || subscription.status !== "active") {
+        return false;
+      }
+      
+      // Para calendários adicionais, qualquer plano base ativo é suficiente
+      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+        return true;
+      }
+      
+      // Para créditos adicionais de IA, precisa ter um plano de IA
+      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
+        return [
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
+          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300
+        ].includes(subscription.stripePriceId);
+      }
+      
+      return false;
+    };
+    
+    const buttonDisabled = isCurrentPlan || !canSubscribe();
+    const buttonText = isCurrentPlan ? "Plano Atual" : 
+                    !subscription || subscription.status !== "active" ? "Assine um Plano Primeiro" :
+                    plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10 && 
+                    ![
+                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
+                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
+                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300
+                    ].includes(subscription.stripePriceId) ? "Requer Plano de IA" :
+                    "Adicionar ao Plano";
+    
     return (
       <Card className="border-border hover:border-primary/50 transition-colors">
         <CardHeader className="text-center pb-4">
@@ -50,11 +85,11 @@ export function PricingPageContent({ plans, additionalCalendarPlan, additionalAi
 
           <Button
             onClick={() => handleSubscribe(plan.productId)}
-            disabled={isCurrentPlan}
-            className={`w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background ${isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={buttonDisabled}
+            className={`w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background ${buttonDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
             size="lg"
           >
-            {isCurrentPlan ? "Plano Atual" : "Adicionar ao Plano"}
+            {buttonText}
           </Button>
         </CardContent>
       </Card>
