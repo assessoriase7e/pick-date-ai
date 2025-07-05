@@ -46,7 +46,7 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
       router.push("/payment/pending");
       return;
     }
-  }, [subscription?.status]);
+  }, [subscription?.status, canAccessPremiumFeatures, requiresPremium, router, user, isLoading]);
 
   // Mostrar loading enquanto verifica
   if (isLoading) {
