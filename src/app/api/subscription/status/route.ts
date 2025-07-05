@@ -65,7 +65,15 @@ export async function GET() {
     let hasRemainingCredits = true;
     let aiCreditsInfo = undefined;
 
-    if (subscription) {
+    // Se estiver em período de teste, definir créditos de IA como infinitos
+    if (isTrialActive) {
+      aiCreditsInfo = {
+        used: 0,
+        limit: Infinity,
+        remaining: Infinity,
+      };
+      hasRemainingCredits = true;
+    } else if (subscription) {
       try {
         const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
 

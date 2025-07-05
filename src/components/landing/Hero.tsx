@@ -7,7 +7,7 @@ import Orb from "../ui/orb-animation";
 const HERO_TEXTS = {
   title: "Pick Date AI",
   description: "Revolucione seu agendamento com inteligência artificial.",
-  freeTrialText: "3 dias grátis para testar!",
+  freeTrialText: "3 dias grátis SEM LIMITES para testar!",
   buttons: {
     startFree: "Teste 3 Dias Grátis",
     seeFeatures: "Recursos",
@@ -39,7 +39,7 @@ export function Hero() {
               {HERO_TEXTS.title}
             </h1>
             <p className="text-lg leading-8 text-foreground max-w-2xl mx-auto">{HERO_TEXTS.description}</p>
-            <div className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-2 rounded-full text-lg font-semibold inline-block mb-4">
+            <div className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-3 rounded-full text-lg font-semibold inline-block mb-4 animate-pulse">
               {HERO_TEXTS.freeTrialText}
             </div>
 

@@ -21,6 +21,24 @@ export async function getAICreditsLimit(
     return Infinity;
   }
 
+  // Verificar se o usuário está em período de teste
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user) {
+      const trialEndDate = new Date(user.createdAt);
+      trialEndDate.setDate(trialEndDate.getDate() + 3);
+      const now = new Date();
+      const isTrialActive = now < trialEndDate;
+
+      if (isTrialActive) {
+        return Infinity; // Créditos ilimitados durante o período de teste
+      }
+    }
+  }
+
   let baseCredits = 0;
 
   if (subscription && subscription.status === "active") {
@@ -72,6 +90,24 @@ export async function getCalendarLimit(
   // Verificar se é usuário lifetime primeiro
   if (checkLifetime && (await isLifetimeUser())) {
     return Infinity;
+  }
+
+  // Verificar se o usuário está em período de teste
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user) {
+      const trialEndDate = new Date(user.createdAt);
+      trialEndDate.setDate(trialEndDate.getDate() + 3);
+      const now = new Date();
+      const isTrialActive = now < trialEndDate;
+
+      if (isTrialActive) {
+        return 20; // Limite de 20 calendários durante o período de teste
+      }
+    }
   }
 
   // Plano base: 3 calendários

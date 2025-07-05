@@ -8,10 +8,12 @@ import { createPortalSession } from "@/actions/subscription/portal";
 import { Subscription, AdditionalCalendar } from "@prisma/client";
 
 interface SubscriptionData {
-  subscription: (Pick<Subscription, 'id' | 'status' | 'stripePriceId' | 'stripeProductId' | 'cancelAtPeriodEnd'> & {
-    currentPeriodEnd: string;
-    trialEnd?: string;
-  }) | null;
+  subscription:
+    | (Pick<Subscription, "id" | "status" | "stripePriceId" | "stripeProductId" | "cancelAtPeriodEnd"> & {
+        currentPeriodEnd: string;
+        trialEnd?: string;
+      })
+    | null;
   isTrialActive: boolean;
   isSubscriptionActive: boolean;
   canAccessPremiumFeatures: boolean;
@@ -32,7 +34,7 @@ interface SubscriptionState {
   lastFetch: number;
   cacheTime: number;
   isFetching: boolean;
-  
+
   // Ações
   fetchSubscriptionStatus: (userId?: string, force?: boolean) => Promise<void>;
   createSubscription: (priceId: string) => Promise<void>;
@@ -55,7 +57,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     }
 
     const state = get();
-    
+
     // Se já estiver buscando, não faz nada
     if (state.isFetching) {
       return;
@@ -76,19 +78,19 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     try {
       set({ isLoading: true, isFetching: true, error: null });
       const subscriptionData = await getSubscriptionStatus();
-      set({ 
-        data: subscriptionData, 
+      set({
+        data: subscriptionData,
         lastFetch: now,
         cacheTime: now,
         isLoading: false,
-        isFetching: false
+        isFetching: false,
       });
     } catch (err) {
       console.error("Erro ao buscar status da assinatura:", err);
-      set({ 
-        error: err as Error, 
+      set({
+        error: err as Error,
         isLoading: false,
-        isFetching: false
+        isFetching: false,
       });
     }
   },

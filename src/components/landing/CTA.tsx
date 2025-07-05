@@ -6,7 +6,8 @@ import Link from "next/link";
 const CTA_TEXTS = {
   title: "Pronto para revolucionar seus agendamentos?",
   subtitle: "Junte-se a centenas de empresas que já transformaram seu atendimento com Pick Date AI",
-  freeTrialText: "Teste grátis por 3 dias - sem compromisso!",
+  freeTrialText: "Teste grátis por 3 dias SEM LIMITES - sem compromisso!",
+  trialHighlight: "Acesso completo a todos os recursos durante o período de teste",
   buttons: {
     startTrial: "Teste 3 Dias Grátis",
     learnMore: "Saber Mais",
@@ -20,11 +21,13 @@ export function CTA() {
       <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">{CTA_TEXTS.title}</h2>
         <p className="mt-6 text-lg leading-8 text-primary-foreground/80">{CTA_TEXTS.subtitle}</p>
-        <div className="mt-4 mb-6">
-          <span className="bg-white/20 text-primary-foreground px-6 py-3 rounded-full text-lg font-semibold inline-block">
+        <div className="mt-4 mb-2">
+          <span className="bg-white/20 text-primary-foreground px-6 py-3 rounded-full text-lg font-semibold inline-block animate-pulse">
             {CTA_TEXTS.freeTrialText}
           </span>
         </div>
+        <p className="text-primary-foreground/90 mb-6 font-medium">{CTA_TEXTS.trialHighlight}</p>
+        
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <SignedOut>
             <Link href="/sign-up">

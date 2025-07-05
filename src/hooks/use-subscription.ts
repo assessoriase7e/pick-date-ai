@@ -13,7 +13,7 @@ export function useSubscription() {
     fetchSubscriptionStatus,
     createSubscription,
     cancelSubscription,
-    createPortalSession
+    createPortalSession,
   } = useSubscriptionStore();
 
   useEffect(() => {

@@ -6,7 +6,8 @@ import { MovingBorderButton } from "../ui/moving-border";
 const PRICING_TEXTS = {
   title: "Planos Simples e Transparentes",
   subtitle: "Escolha o plano ideal para o seu negócio",
-  freeTrialText: "🎉 Todos os planos incluem 3 dias grátis para testar!",
+  freeTrialText: "🎉 Todos os planos incluem 3 dias grátis SEM LIMITES para testar!",
+  trialHighlight: "Durante o período de teste, você terá acesso a TODOS os recursos sem limitações (exceto calendários limitados a 20)",
   basicFeatures: [
     "Múltiplos calendários",
     "Múltiplos colaboradores",
@@ -126,9 +127,12 @@ export function Pricing() {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{PRICING_TEXTS.title}</h2>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">{PRICING_TEXTS.subtitle}</p>
           <div className="mt-4">
-            <span className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-2 rounded-full text-lg font-semibold inline-block">
+            <span className="bg-gradient-to-r from-secondary to-primary text-white px-6 py-2 rounded-full text-lg font-semibold inline-block animate-pulse">
               {PRICING_TEXTS.freeTrialText}
             </span>
+          </div>
+          <div className="mt-4 p-4 bg-secondary/10 border border-secondary/30 rounded-lg">
+            <p className="text-md font-medium">{PRICING_TEXTS.trialHighlight}</p>
           </div>
         </div>
 
