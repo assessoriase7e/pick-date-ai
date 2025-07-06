@@ -109,13 +109,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         const activeStatuses = ["active", "trialing", "past_due"];
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
 
-        // Se a assinatura estiver ativa, priorizar ela sobre o trial
-        if (isSubscriptionActive) {
-          canAccessPremiumFeatures = true;
-          isTrialActive = false;
-          trialDaysRemaining = 0;
-        }
-
         // Verificar créditos de IA
         const aiLimit = await getAICreditsLimit(subscription);
         if (aiLimit > 0) {
@@ -144,10 +137,19 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
             remaining: remainingCredits,
           };
 
-          // A assinatura só é considerada ativa se tiver status ativo E créditos restantes (para planos de IA)
+          // CORREÇÃO: A assinatura só é considerada ativa se tiver status ativo E créditos restantes (APENAS para planos de IA)
+          // Para planos básicos (aiLimit = 0), manter isSubscriptionActive baseado apenas no status
           if (aiLimit > 0) {
             isSubscriptionActive = isSubscriptionActive && hasRemainingCredits;
           }
+          // Para planos básicos, isSubscriptionActive já está correto baseado no status do Stripe
+        }
+
+        // Se a assinatura estiver ativa, priorizar ela sobre o trial
+        if (isSubscriptionActive) {
+          canAccessPremiumFeatures = true;
+          isTrialActive = false;
+          trialDaysRemaining = 0;
         }
 
         canAccessPremiumFeatures = isTrialActive || isSubscriptionActive;

@@ -6,6 +6,7 @@ import { getSubscriptionStatus } from "@/actions/subscription/get-subscription-s
 import { createSubscription as createSubscriptionAction } from "@/actions/subscription/create-subscription";
 import { cancelSubscription as cancelSubscriptionAction } from "@/actions/subscription/cancel-subscription";
 import { createPortalSession as createPortalSessionAction } from "@/actions/subscription/create-portal-session";
+import { cancelBasePlan as cancelBasePlanAction } from "@/actions/subscription/cancel-base-plan";
 
 interface SubscriptionStore {
   data: SubscriptionData | null;
@@ -40,6 +41,13 @@ export const createSubscription = async (priceId: string) => {
 
 export const cancelSubscription = async () => {
   const result = await cancelSubscriptionAction();
+  // Refresh subscription data after cancellation
+  useSubscription.getState().fetchSubscription();
+  return result;
+};
+
+export const cancelBasePlan = async () => {
+  const result = await cancelBasePlanAction();
   // Refresh subscription data after cancellation
   useSubscription.getState().fetchSubscription();
   return result;

@@ -8,8 +8,10 @@ import { ptBR } from "date-fns/locale";
 import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createPortalSession } from "@/store/subscription-store";
+import { createPortalSession, cancelSubscription } from "@/store/subscription-store";
 import { SubscriptionData } from "@/types/subscription";
+import { cancelBasePlan } from "@/actions/subscription/cancel-base-plan";
+import { ConfirmationDialog } from "../ui/confirmation-dialog";
 
 interface SubscriptionSettingsProps {
   subscriptionData: SubscriptionData;
@@ -18,12 +20,16 @@ interface SubscriptionSettingsProps {
 export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCancelBasePlanOpen, setIsCancelBasePlanOpen] = useState(false);
+  const [isCancelSubscriptionOpen, setIsCancelSubscriptionOpen] = useState(false);
 
   // Extrair os valores do data
   const subscription = subscriptionData?.subscription;
   const isTrialActive = subscriptionData?.isTrialActive || false;
   const isSubscriptionActive = subscriptionData?.isSubscriptionActive || false;
   const additionalCalendars = subscriptionData?.additionalCalendars || [];
+
+  console.log(isSubscriptionActive);
 
   // Não precisamos mais do useEffect para buscar dados, pois agora recebemos via props
 
@@ -89,7 +95,7 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
   };
 
   const handleManageSubscription = async () => {
-    if (!subscription || subscription.status !== "active") {
+    if (!subscription || (subscription.status !== "active" && !isSubscriptionActive)) {
       router.push("/pricing");
     } else {
       setIsLoading(true);
@@ -103,6 +109,31 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
     }
   };
 
+  const handleCancelSubscription = async () => {
+    setIsLoading(true);
+    try {
+      await cancelSubscription();
+      setIsCancelSubscriptionOpen(false);
+    } catch (error) {
+      console.error("Erro ao cancelar assinatura:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelBasePlan = async () => {
+    setIsLoading(true);
+    try {
+      await cancelBasePlan();
+      setIsCancelBasePlanOpen(false);
+    } catch (error) {
+      console.error("Erro ao cancelar plano base:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isBasePlan = subscription?.stripeProductId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC;
   return (
     <Card>
       <CardHeader>
@@ -133,7 +164,6 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
               </span>
             </div>
 
-            {/* Adicionar esta seção para mostrar calendários adicionais */}
             {additionalCalendars && additionalCalendars.length > 0 && (
               <div className="flex items-center justify-between">
                 <span className="font-medium">Calendários adicionais:</span>
@@ -153,12 +183,52 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
           </>
         )}
 
-        <div className="pt-4 border-t">
-          <Button onClick={handleManageSubscription} className="w-full mb-2">
-            {!isSubscriptionActive ? "Ver Planos Disponíveis" : "Gerenciar Assinatura no Stripe"}
+        <div className="pt-4 border-t space-y-2">
+          <Button onClick={handleManageSubscription} className="w-full">
+            {subscription.status !== "active" ? "Ver Planos Disponíveis" : "Gerenciar Assinatura"}
           </Button>
+
+          {/* Botão específico para cancelar apenas plano base (mantendo calendários adicionais) */}
+          {isBasePlan &&
+            subscription &&
+            (isSubscriptionActive || subscription.status === "active") &&
+            !subscription?.cancelAtPeriodEnd &&
+            additionalCalendars.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setIsCancelBasePlanOpen(true)}
+                className="w-full"
+                disabled={isLoading}
+              >
+                Cancelar Apenas Plano Base
+              </Button>
+            )}
         </div>
       </CardContent>
+
+      {/* Dialog de confirmação para cancelamento geral */}
+      <ConfirmationDialog
+        open={isCancelSubscriptionOpen}
+        onOpenChange={setIsCancelSubscriptionOpen}
+        title="Cancelar Assinatura"
+        description="Tem certeza que deseja cancelar sua assinatura? Você perderá acesso aos recursos premium no final do período atual. Todos os calendários adicionais também serão cancelados."
+        confirmText="Sim, cancelar assinatura"
+        cancelText="Não, manter"
+        onConfirm={handleCancelSubscription}
+        variant="destructive"
+      />
+
+      {/* Dialog de confirmação para cancelamento do plano base */}
+      <ConfirmationDialog
+        open={isCancelBasePlanOpen}
+        onOpenChange={setIsCancelBasePlanOpen}
+        title="Cancelar Plano Base"
+        description="Tem certeza que deseja cancelar apenas o plano base? Seus calendários adicionais permanecerão ativos. O plano base será cancelado no final do período atual."
+        confirmText="Sim, cancelar plano base"
+        cancelText="Não, manter"
+        onConfirm={handleCancelBasePlan}
+        variant="destructive"
+      />
     </Card>
   );
 }
