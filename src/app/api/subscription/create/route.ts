@@ -1,15 +1,12 @@
+import { createSubscription } from "@/actions/subscription/create-subscription";
 import { NextRequest, NextResponse } from "next/server";
-import { createSubscription } from "@/services/subscription-service";
 
 export async function POST(request: NextRequest) {
   try {
     const { priceId } = await request.json();
-    
+
     if (!priceId) {
-      return NextResponse.json(
-        { error: "Price ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Price ID is required" }, { status: 400 });
     }
 
     const result = await createSubscription(priceId);

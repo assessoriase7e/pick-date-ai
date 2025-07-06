@@ -1,5 +1,5 @@
+import { cancelSubscription } from "@/actions/subscription/cancel-subscription";
 import { NextResponse } from "next/server";
-import { cancelSubscription } from "@/services/subscription-service";
 
 export async function POST() {
   try {

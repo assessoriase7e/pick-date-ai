@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
-import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-cache";
 import { PlanType } from "@/types/subscription";
 
 // Enum para tipos de eventos do webhook
@@ -157,7 +156,6 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
   }
 
   // Invalidar cache
-  await revalidateSubscriptionCache();
 }
 
 // Função auxiliar para obter informações do produto
@@ -224,8 +222,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   });
-
-  await revalidateSubscriptionCache();
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -254,8 +250,6 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       });
     }
   }
-
-  await revalidateSubscriptionCache();
 }
 
 async function handlePaymentSucceeded(invoice: any) {

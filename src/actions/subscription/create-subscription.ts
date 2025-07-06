@@ -1,70 +1,67 @@
 "use server";
-
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-import { revalidateSubscriptionCache } from "./revalidate-cache";
-
-export async function createSubscription(priceId: string) {
+/**
+ * Cria uma nova assinatura
+ */
+export async function createSubscription(priceId: string): Promise<{ success: boolean; url?: string }> {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
+    const user = await currentUser();
+    if (!user?.id) {
       throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       include: { subscription: true },
     });
 
-    if (!user) {
+    if (!dbUser) {
       throw new Error("User not found");
     }
 
-    // Verificar se o usuário está tentando assinar calendários extras sem ter um plano base
+    // Verificações para produtos adicionais
     if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
-      // Verificar se o usuário tem uma assinatura ativa
-      if (!user.subscription || user.subscription.status !== "active") {
+      if (!dbUser.subscription || dbUser.subscription.status !== "active") {
         throw new Error("É necessário ter um plano base ativo para assinar calendários extras");
       }
     }
 
-    // Verificar se o usuário está tentando contratar créditos adicionais sem ter um plano IA
     if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
-      // Verificar se o usuário tem um plano de IA ativo
       if (
-        !user.subscription ||
-        user.subscription.status !== "active" ||
+        !dbUser.subscription ||
+        dbUser.subscription.status !== "active" ||
         ![
           process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
           process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
           process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300,
-        ].includes(user.subscription.stripePriceId)
+        ].includes(dbUser.subscription.stripePriceId)
       ) {
         throw new Error("É necessário ter um plano de IA ativo para contratar créditos adicionais");
       }
     }
 
-    let customerId = user.subscription?.stripeCustomerId;
-
+    // Obter ou criar customer ID
+    let customerId = dbUser.subscription?.stripeCustomerId;
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { userId },
+        email: dbUser.email,
+        metadata: { userId: user.id },
       });
       customerId = customer.id;
 
-      if (user.subscription) {
+      if (dbUser.subscription) {
         await prisma.subscription.update({
-          where: { id: user.subscription.id },
+          where: { id: dbUser.subscription.id },
           data: { stripeCustomerId: customerId },
         });
       }
     }
 
+    // Criar sessão de checkout
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
@@ -72,17 +69,13 @@ export async function createSubscription(priceId: string) {
       mode: "subscription",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
-      metadata: { userId },
+      metadata: { userId: user.id },
     });
 
-    // Revalidar o cache da assinatura
-    await revalidateSubscriptionCache();
+    // Revalidar o cache
+    revalidatePath("/api/subscription/status");
 
-    if (session.url) {
-      redirect(session.url);
-    }
-
-    return { success: true };
+    return { success: true, url: session.url || undefined };
   } catch (error) {
     console.error("Erro ao criar checkout:", error);
     throw error;

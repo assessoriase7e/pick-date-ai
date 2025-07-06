@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
 import { LoaderCircle } from "lucide-react";
 import { getProfile } from "@/actions/profile/get";
-import { getSubscriptionStatus } from "@/services/subscription-service";
+import { getSubscriptionStatus } from "@/actions/subscription/get-subscription-status";
 
 export const dynamic = "force-dynamic";
 

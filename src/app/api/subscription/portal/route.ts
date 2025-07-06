@@ -1,5 +1,5 @@
+import { createPortalSession } from "@/actions/subscription/create-portal-session";
 import { NextResponse } from "next/server";
-import { createPortalSession } from "@/services/subscription-service";
 
 export async function POST() {
   try {

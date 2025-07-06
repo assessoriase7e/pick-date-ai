@@ -5,7 +5,6 @@ import { stripe } from "@/lib/stripe";
 import { isLifetimeUser } from "@/lib/lifetime-user";
 import { getAICreditsLimit } from "@/lib/subscription-limits";
 import { startOfMonth, endOfMonth } from "date-fns";
-import { revalidatePath } from "next/cache";
 import { SubscriptionData, SubscriptionStatus } from "@/types/subscription";
 
 /**
@@ -56,7 +55,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
           remaining: Infinity,
         },
         additionalCalendars: dbUser.additionalCalendars.map((cal) => ({
-          id: cal.id.toString(), // Converter para string
+          id: cal.id.toString(),
           active: cal.active,
           expiresAt: cal.expiresAt.toISOString(),
         })),
@@ -67,8 +66,8 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
     const trialEndDate = new Date(dbUser.createdAt);
     trialEndDate.setDate(trialEndDate.getDate() + 3);
     const now = new Date();
-    let isTrialActive = now < trialEndDate; // Usar let em vez de const
-    let trialDaysRemaining = isTrialActive // Usar let em vez de const
+    let isTrialActive = now < trialEndDate;
+    let trialDaysRemaining = isTrialActive
       ? Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
@@ -178,7 +177,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
       hasRemainingCredits,
       aiCreditsInfo,
       additionalCalendars: dbUser.additionalCalendars.map((cal) => ({
-        id: cal.id.toString(), // Converter para string
+        id: cal.id.toString(),
         active: cal.active,
         expiresAt: cal.expiresAt.toISOString(),
       })),
@@ -186,174 +185,5 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
   } catch (err) {
     console.error("Erro ao buscar status da assinatura:", err);
     return null;
-  }
-}
-
-/**
- * Cria uma nova assinatura
- */
-export async function createSubscription(priceId: string): Promise<{ success: boolean; url?: string }> {
-  try {
-    const user = await currentUser();
-    if (!user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { subscription: true },
-    });
-
-    if (!dbUser) {
-      throw new Error("User not found");
-    }
-
-    // Verificações para produtos adicionais
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
-      if (!dbUser.subscription || dbUser.subscription.status !== "active") {
-        throw new Error("É necessário ter um plano base ativo para assinar calendários extras");
-      }
-    }
-
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
-      if (
-        !dbUser.subscription ||
-        dbUser.subscription.status !== "active" ||
-        ![
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300,
-        ].includes(dbUser.subscription.stripePriceId)
-      ) {
-        throw new Error("É necessário ter um plano de IA ativo para contratar créditos adicionais");
-      }
-    }
-
-    // Obter ou criar customer ID
-    let customerId = dbUser.subscription?.stripeCustomerId;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: dbUser.email,
-        metadata: { userId: user.id },
-      });
-      customerId = customer.id;
-
-      if (dbUser.subscription) {
-        await prisma.subscription.update({
-          where: { id: dbUser.subscription.id },
-          data: { stripeCustomerId: customerId },
-        });
-      }
-    }
-
-    // Criar sessão de checkout
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      mode: "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
-      metadata: { userId: user.id },
-    });
-
-    // Revalidar o cache
-    revalidatePath("/api/subscription/status");
-
-    return { success: true, url: session.url || undefined };
-  } catch (error) {
-    console.error("Erro ao criar checkout:", error);
-    throw error;
-  }
-}
-
-/**
- * Cancela a assinatura do usuário
- */
-export async function cancelSubscription(): Promise<{ success: boolean; message?: string }> {
-  try {
-    const user = await currentUser();
-    if (!user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: {
-        subscription: true,
-        additionalCalendars: {
-          where: { active: true },
-        },
-      },
-    });
-
-    if (!dbUser || !dbUser.subscription) {
-      throw new Error("Subscription not found");
-    }
-
-    // Cancelar assinatura principal
-    await stripe.subscriptions.update(dbUser.subscription.stripeSubscriptionId, {
-      cancel_at_period_end: true,
-    });
-
-    // Cancelar calendários adicionais
-    for (const additionalCalendar of dbUser.additionalCalendars) {
-      if (additionalCalendar.stripeSubscriptionId) {
-        await stripe.subscriptions.cancel(additionalCalendar.stripeSubscriptionId);
-      }
-
-      await prisma.additionalCalendar.update({
-        where: { id: additionalCalendar.id },
-        data: { active: false },
-      });
-    }
-
-    // Atualizar no banco
-    await prisma.subscription.update({
-      where: { id: dbUser.subscription.id },
-      data: { cancelAtPeriodEnd: true },
-    });
-
-    // Revalidar cache
-    revalidatePath("/api/subscription/status");
-
-    return {
-      success: true,
-      message: "Subscription and all additional services cancelled successfully",
-    };
-  } catch (error) {
-    console.error("Error cancelling subscription:", error);
-    throw error;
-  }
-}
-
-/**
- * Cria uma sessão do portal de faturamento do Stripe
- */
-export async function createPortalSession(): Promise<{ success: boolean; url?: string }> {
-  try {
-    const user = await currentUser();
-    if (!user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { subscription: true },
-    });
-
-    if (!dbUser?.subscription?.stripeCustomerId) {
-      throw new Error("No customer found");
-    }
-
-    const session = await stripe.billingPortal.sessions.create({
-      customer: dbUser.subscription.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings`,
-    });
-
-    return { success: true, url: session.url || undefined };
-  } catch (error) {
-    console.error("Erro ao criar sessão do portal:", error);
-    throw error;
   }
 }

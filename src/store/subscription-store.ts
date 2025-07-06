@@ -2,75 +2,53 @@
 
 import { create } from "zustand";
 import { SubscriptionData } from "@/types/subscription";
+import { getSubscriptionStatus } from "@/actions/subscription/get-subscription-status";
+import { createSubscription as createSubscriptionAction } from "@/actions/subscription/create-subscription";
+import { cancelSubscription as cancelSubscriptionAction } from "@/actions/subscription/cancel-subscription";
+import { createPortalSession as createPortalSessionAction } from "@/actions/subscription/create-portal-session";
 
-interface SubscriptionState {
+interface SubscriptionStore {
   data: SubscriptionData | null;
   isLoading: boolean;
-  error: Error | null;
+  error: string | null;
   fetchSubscription: () => Promise<void>;
 }
 
-export const useSubscription = create<SubscriptionState>((set) => ({
+export const useSubscription = create<SubscriptionStore>((set, get) => ({
   data: null,
   isLoading: false,
   error: null,
   fetchSubscription: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch("/api/subscription/status");
-      if (!response.ok) throw new Error("Falha ao buscar dados da assinatura");
-      const data = await response.json();
-      set({ data, isLoading: false, error: null });
-    } catch (err) {
-      set({ error: err instanceof Error ? err : new Error(String(err)), isLoading: false });
+      const data = await getSubscriptionStatus();
+      set({ data, isLoading: false });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : "Unknown error", isLoading: false });
     }
   },
 }));
 
-// Funções de ação que chamam as APIs
-export async function createSubscription(priceId: string): Promise<void> {
-  const response = await fetch("/api/subscription/create", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ priceId }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Falha ao criar assinatura");
+// Export the action functions for use in components
+export const createSubscription = async (priceId: string) => {
+  const result = await createSubscriptionAction(priceId);
+  if (result.url) {
+    window.location.href = result.url;
   }
+  return result;
+};
 
-  const data = await response.json();
-  if (data.url) {
-    window.location.href = data.url;
+export const cancelSubscription = async () => {
+  const result = await cancelSubscriptionAction();
+  // Refresh subscription data after cancellation
+  useSubscription.getState().fetchSubscription();
+  return result;
+};
+
+export const createPortalSession = async () => {
+  const result = await createPortalSessionAction();
+  if (result.url) {
+    window.location.href = result.url;
   }
-}
-
-export async function cancelSubscription(): Promise<{ success: boolean; message?: string }> {
-  const response = await fetch("/api/subscription/cancel", {
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Falha ao cancelar assinatura");
-  }
-
-  return response.json();
-}
-
-export async function createPortalSession(): Promise<void> {
-  const response = await fetch("/api/subscription/portal", {
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Falha ao criar sessão do portal");
-  }
-
-  const data = await response.json();
-  if (data.url) {
-    window.location.href = data.url;
-  }
-}
+  return result;
+};

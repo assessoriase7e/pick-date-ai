@@ -1,20 +1,21 @@
 "use server";
-
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { revalidateSubscriptionCache } from "./revalidate-cache";
+import { revalidatePath } from "next/cache";
 
-export async function cancelSubscription() {
+/**
+ * Cancela a assinatura do usuário
+ */
+export async function cancelSubscription(): Promise<{ success: boolean; message?: string }> {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
+    const user = await currentUser();
+    if (!user?.id) {
       throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       include: {
         subscription: true,
         additionalCalendars: {
@@ -23,19 +24,17 @@ export async function cancelSubscription() {
       },
     });
 
-    if (!user || !user.subscription) {
+    if (!dbUser || !dbUser.subscription) {
       throw new Error("Subscription not found");
     }
 
-    const { subscription } = user;
-
-    // Cancelar assinatura principal no Stripe
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    // Cancelar assinatura principal
+    await stripe.subscriptions.update(dbUser.subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
 
-    // Cancelar todos os calendários adicionais
-    for (const additionalCalendar of user.additionalCalendars) {
+    // Cancelar calendários adicionais
+    for (const additionalCalendar of dbUser.additionalCalendars) {
       if (additionalCalendar.stripeSubscriptionId) {
         await stripe.subscriptions.cancel(additionalCalendar.stripeSubscriptionId);
       }
@@ -46,16 +45,14 @@ export async function cancelSubscription() {
       });
     }
 
-    // Atualizar no banco de dados
+    // Atualizar no banco
     await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: {
-        cancelAtPeriodEnd: true,
-      },
+      where: { id: dbUser.subscription.id },
+      data: { cancelAtPeriodEnd: true },
     });
 
-    // Dentro da função, após cancelar a assinatura
-    await revalidateSubscriptionCache();
+    // Revalidar cache
+    revalidatePath("/api/subscription/status");
 
     return {
       success: true,
