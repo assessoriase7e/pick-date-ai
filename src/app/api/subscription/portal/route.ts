@@ -1,0 +1,15 @@
+import { NextResponse } from "next/server";
+import { createPortalSession } from "@/services/subscription-service";
+
+export async function POST() {
+  try {
+    const result = await createPortalSession();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error creating portal session:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

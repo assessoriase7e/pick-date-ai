@@ -142,7 +142,6 @@ export const createColumns = (enableSelection: boolean = false): ColumnDef<Appoi
             <Checkbox
               checked={isSelected}
               onCheckedChange={(value) => {
-                console.log("Checkbox clicked:", row.id, value);
                 row.toggleSelected(!!value);
               }}
               aria-label="Selecionar linha"

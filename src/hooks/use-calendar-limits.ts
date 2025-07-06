@@ -1,4 +1,6 @@
-import { useSubscription } from "./use-subscription";
+"use client";
+
+import { useSubscription } from "@/store/subscription-store";
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { getCalendarLimits } from "@/actions/calendars/get-calendar-limits";
@@ -12,7 +14,7 @@ interface CalendarLimitsData {
 }
 
 export function useCalendarLimits() {
-  const { subscription } = useSubscription();
+  const { fetchSubscription } = useSubscription();
   const { user } = useUser();
   const [data, setData] = useState<CalendarLimitsData | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -32,20 +34,24 @@ export function useCalendarLimits() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (user?.id) {
+      fetchData();
+      fetchSubscription(); // Buscar dados da assinatura
+      const intervalId = setInterval(() => {
+        fetchData();
+        fetchSubscription(); // Atualizar dados da assinatura periodicamente
+      }, 30000);
 
-    // Configurar um intervalo para atualizar os dados a cada 30 segundos
-    const intervalId = setInterval(fetchData, 30000);
-
-    return () => clearInterval(intervalId);
-  }, [user?.id, subscription?.id]);
+      return () => clearInterval(intervalId);
+    }
+  }, [user?.id, fetchSubscription]);
 
   return {
-    limit: data?.limit ?? 3, // fallback para plano base
+    limit: data?.limit ?? 3,
     current: data?.current ?? 0,
     canCreateMore: data?.canCreateMore ?? true,
-    isAiPlan: data?.isAiPlan ?? false, // fallback para false
-    hasAdditionalCalendars: data?.hasAdditionalCalendars ?? false, // fallback para false
+    isAiPlan: data?.isAiPlan ?? false,
+    hasAdditionalCalendars: data?.hasAdditionalCalendars ?? false,
     isLoading,
     error,
     refresh: fetchData,

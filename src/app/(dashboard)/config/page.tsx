@@ -2,10 +2,13 @@ import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
 import { LoaderCircle } from "lucide-react";
 import { getProfile } from "@/actions/profile/get";
+import { getSubscriptionStatus } from "@/services/subscription-service";
+
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const { data } = await getProfile();
+  const subscriptionData = await getSubscriptionStatus();
 
   return (
     <div className="space-y-6">
@@ -14,7 +17,7 @@ export default async function SettingsPage() {
         <p className="text-muted-foreground">Gerencie as configurações da sua conta.</p>
       </div>
       <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-        <SettingsContent combinedProfile={data} />
+        <SettingsContent combinedProfile={data} subscriptionData={subscriptionData} />
       </Suspense>
     </div>
   );

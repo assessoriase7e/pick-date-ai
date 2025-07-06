@@ -1,58 +1,69 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { useSubscription } from "@/hooks/use-subscription";
-import { useUser } from "@clerk/nextjs";
-
-const RESTRICTED_PATHS = ["/files", "/ai-usage", "/links", "/questions", "/agents"];
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useSubscription } from "@/store/subscription-store";
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
 }
 
-export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
-  const pathname = usePathname();
+const PREMIUM_PATHS = ["/files", "/ai-usage", "/links", "/questions", "/agents"];
+
+export default function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const router = useRouter();
-  const { user } = useUser();
-  const { subscription, canAccessPremiumFeatures, isLoading } = useSubscription();
-  const hasRedirected = useRef(false);
-
-  // Memoizar se a rota requer premium
-  const requiresPremium = useMemo(() => {
-    return RESTRICTED_PATHS.some((path) => pathname.startsWith(path));
-  }, [pathname]);
+  const pathname = usePathname();
+  const { data, isLoading, fetchSubscription } = useSubscription();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Reset redirect flag when pathname changes
-    hasRedirected.current = false;
-  }, [pathname]);
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   useEffect(() => {
-    if (!user || isLoading || hasRedirected.current) return;
-
-    if (!requiresPremium) return;
-
-    // Se não pode acessar recursos premium, redirecionar para pricing
-    if (!canAccessPremiumFeatures) {
-      hasRedirected.current = true;
-      router.push("/pricing");
-      return;
+    if (!isLoading) {
+      setIsChecking(false);
     }
+  }, [isLoading]);
 
-    // Se tem assinatura mas está inativa (não se aplica a lifetime users)
-    if (subscription && !canAccessPremiumFeatures && !["active", "trialing"].includes(subscription.status)) {
-      hasRedirected.current = true;
-      router.push("/payment/pending");
-      return;
+  useEffect(() => {
+    if (!isChecking && data) {
+      const isPremiumPath = PREMIUM_PATHS.some(path => pathname.startsWith(path));
+      
+      if (isPremiumPath && !data.canAccessPremiumFeatures) {
+        // Se a assinatura existe mas está inativa, redirecionar para pending
+        if (data.subscription && !data.isSubscriptionActive) {
+          router.push("/payment/pending");
+        } else {
+          // Caso contrário, redirecionar para pricing
+          router.push("/pricing");
+        }
+      }
     }
-  }, [subscription?.status, canAccessPremiumFeatures, requiresPremium, router, user, isLoading]);
+  }, [isChecking, data, pathname, router]);
 
   // Mostrar loading enquanto verifica
-  if (isLoading) {
+  if (isChecking) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Se não conseguiu carregar os dados, mostrar erro
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Erro ao verificar status da assinatura</p>
+          <button 
+            onClick={() => fetchSubscription()}
+            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
     );
   }

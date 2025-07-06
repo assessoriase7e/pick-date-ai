@@ -1,18 +1,17 @@
 "use client";
 
-import { useSubscription } from "@/hooks/use-subscription";
-import { Crown } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Crown } from "lucide-react";
+import { useSubscription } from "@/store/subscription-store";
 
-interface SubscriptionStatusProps {
-  className?: string;
-}
-
-export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
-  const { isTrialActive, isSubscriptionActive, trialDaysRemaining, isLoading } = useSubscription();
+export default function SubscriptionStatus() {
   const router = useRouter();
+  const { data, isLoading, fetchSubscription } = useSubscription();
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   const handleClick = () => {
     router.push("/pricing");
@@ -20,52 +19,61 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
 
   if (isLoading) {
     return (
-      <div
-        className={cn("w-10 h-10 rounded-full bg-muted animate-pulse flex items-center justify-center", className)}
-      />
+      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 animate-pulse">
+        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+      </div>
     );
   }
 
-  const getTooltipText = () => {
-    if (isSubscriptionActive) {
-      return "Assinatura Ativa - Clique para ver planos";
-    }
-    if (isTrialActive) {
-      return `${trialDaysRemaining} dia${trialDaysRemaining !== 1 ? "s" : ""} restante${
-        trialDaysRemaining !== 1 ? "s" : ""
-      } do período de teste - Clique para ver planos`;
-    }
-    return "Sem assinatura ativa - Clique para ver planos";
-  };
+  if (!data) {
+    return (
+      <button
+        onClick={handleClick}
+        className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+        title="Erro ao carregar status da assinatura"
+      >
+        <span className="text-red-600 text-sm font-bold">!</span>
+      </button>
+    );
+  }
 
-  const getContent = () => {
-    if (isSubscriptionActive) {
-      return <Crown className="h-5 w-5 text-primary" />;
+  // Usuário com acesso premium (assinatura ativa ou trial)
+  if (data.canAccessPremiumFeatures) {
+    if (data.isSubscriptionActive) {
+      return (
+        <button
+          onClick={handleClick}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 hover:bg-yellow-200 transition-colors"
+          title="Assinatura ativa"
+        >
+          <Crown className="w-4 h-4 text-yellow-600" />
+        </button>
+      );
     }
-    if (isTrialActive) {
-      return <span className="text-sm font-bold text-primary leading-none ml-[2px]">{trialDaysRemaining}</span>;
-    }
-    return <span className="text-xs font-bold text-muted-foreground">!</span>;
-  };
 
+    if (data.isTrialActive) {
+      return (
+        <button
+          onClick={handleClick}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors"
+          title={`Trial: ${data.trialDaysRemaining} dias restantes`}
+        >
+          <span className="text-blue-600 text-xs font-bold">
+            {data.trialDaysRemaining}
+          </span>
+        </button>
+      );
+    }
+  }
+
+  // Usuário sem acesso premium
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>
-          <div
-            onClick={handleClick}
-            className={cn(
-              "min-w-8 h-8 rounded-full flex items-center justify-center cursor-pointer border-2 border-foreground hover:bg-accent transition-colors",
-              className
-            )}
-          >
-            {getContent()}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="bg-background border border-border">
-          {getTooltipText()}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <button
+      onClick={handleClick}
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+      title="Sem assinatura ativa"
+    >
+      <span className="text-red-600 text-sm font-bold">!</span>
+    </button>
   );
 }

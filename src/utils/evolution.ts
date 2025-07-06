@@ -15,7 +15,6 @@ export const evolution = () => {
         number,
       });
     } catch (error) {
-      console.log(error);
       throw new Error("Error when send message via evolution");
     }
   };

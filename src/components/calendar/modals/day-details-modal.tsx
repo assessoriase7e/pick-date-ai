@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
@@ -11,8 +11,7 @@ import { AppointmentForm } from "../../appointment/appointment-form";
 import { toast } from "sonner";
 import { updateAppointment } from "@/actions/appointments/update";
 import { createAppointment } from "@/actions/appointments/create";
-// Importar o hook de assinatura
-import { useSubscription } from "@/hooks/use-subscription";
+import { useSubscription } from "@/store/subscription-store";
 import { Button } from "@/components/ui/button";
 
 interface DayDetailsModalProps {
@@ -44,9 +43,18 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
 
-  // Usar o hook de assinatura para verificar se o usuário tem um plano ativo
-  const { isSubscriptionActive, canAccessPremiumFeatures } = useSubscription();
-  const hasActiveSubscription = isSubscriptionActive || canAccessPremiumFeatures;
+  // Usar o hook do Zustand store
+  const { data: subscriptionData, isLoading, fetchSubscription } = useSubscription();
+
+  // Buscar dados da assinatura ao montar o componente
+  useEffect(() => {
+    if (!subscriptionData) {
+      fetchSubscription();
+    }
+  }, [subscriptionData, fetchSubscription]);
+
+  const hasActiveSubscription =
+    subscriptionData?.isSubscriptionActive || subscriptionData?.canAccessPremiumFeatures || false;
 
   const formattedDate = date ? moment(date).locale("pt-br").format("DD/MM/YYYY") : "";
   const dateKey = date ? moment(date).format("YYYY-MM-DD") : "";
@@ -140,6 +148,15 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   };
 
   if (!date) return null;
+
+  // Exibir mensagem de carregamento enquanto os dados da assinatura estão sendo buscados
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <p>Carregando informações da assinatura...</p>
+      </div>
+    );
+  }
 
   // Exibir mensagem de assinatura necessária quando o usuário não tem um plano ativo
   const subscriptionMessage = !hasActiveSubscription && (

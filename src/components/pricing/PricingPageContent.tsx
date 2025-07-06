@@ -3,17 +3,24 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { useSubscription } from "@/hooks/use-subscription";
+import { createSubscription } from "@/store/subscription-store";
 import { PricingCards } from "@/components/pricing/PricingCards";
+import { SubscriptionData, Plan } from "@/types/subscription";
 
 interface PricingPageContentProps {
-  plans: any[];
+  plans: Plan[];
   additionalCalendarPlan: any;
   additionalAiPlan: any;
+  subscriptionData: SubscriptionData | null;
 }
 
-export function PricingPageContent({ plans, additionalCalendarPlan, additionalAiPlan }: PricingPageContentProps) {
-  const { createSubscription, subscription } = useSubscription();
+export function PricingPageContent({ 
+  plans, 
+  additionalCalendarPlan, 
+  additionalAiPlan,
+  subscriptionData 
+}: PricingPageContentProps) {
+  const subscription = subscriptionData?.subscription;
 
   const handleSubscribe = async (productId: string) => {
     try {
@@ -98,7 +105,7 @@ export function PricingPageContent({ plans, additionalCalendarPlan, additionalAi
 
   return (
     <div>
-      <PricingCards plans={plans} />
+      <PricingCards plans={plans} subscription={subscription} />
 
       {/* Seção de Produtos Adicionais */}
       <div className="max-w-4xl mx-auto">

@@ -1,7 +1,7 @@
 import type React from "react";
 import { DockMenu } from "@/components/dock-menu";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SubscriptionGuard } from "@/components/SubscriptionGuard";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

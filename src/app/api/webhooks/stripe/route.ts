@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-cache";
+import { PlanType } from "@/types/subscription";
 
 // Enum para tipos de eventos do webhook
 enum StripeWebhookEvent {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        return;
     }
 
     return NextResponse.json({ received: true });
@@ -94,20 +95,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
   const productId = typeof price.product === "string" ? price.product : price.product?.id;
   const priceId = price.id;
 
-  // Debug logs para identificar o problema
-  console.log("Webhook - ProductId:", productId);
-  console.log("Webhook - PriceId:", priceId);
-  console.log("Webhook - Expected Calendar Product:", process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR);
-
   // Verificar se é uma assinatura de calendário adicional
-  // Comparar tanto productId quanto priceId
   if (
     productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR ||
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR
   ) {
-    console.log("Creating additional calendar for user:", userId);
-
-    // Criar registro de calendário adicional com os campos obrigatórios
     await prisma.additionalCalendar.create({
       data: {
         userId,
@@ -117,13 +109,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
         expiresAt: new Date(item.current_period_end * 1000),
       },
     });
-
-    console.log("Additional calendar created successfully");
-
-    // Invalidar cache do usuário
-    await revalidateSubscriptionCache();
   } else {
-    // Lógica existente para outras assinaturas
     if (!productId) {
       throw new Error("Invalid subscription data: missing product ID");
     }
@@ -134,12 +120,17 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
       throw new Error("Invalid subscription data: missing customer ID");
     }
 
+    // Obter informações do produto e determinar o tipo de plano
+    const { planName, planType } = await getProductInfo(productId);
+
     await prisma.subscription.upsert({
       where: { userId },
       update: {
         stripeSubscriptionId: subscription.id,
         stripePriceId: price.id,
         stripeProductId: productId,
+        planName,
+        planType,
         status: subscription.status,
         currentPeriodStart: new Date(item.current_period_start * 1000),
         currentPeriodEnd: new Date(item.current_period_end * 1000),
@@ -153,6 +144,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
         stripeSubscriptionId: subscription.id,
         stripePriceId: price.id,
         stripeProductId: productId,
+        planName,
+        planType,
         status: subscription.status,
         currentPeriodStart: new Date(item.current_period_start * 1000),
         currentPeriodEnd: new Date(item.current_period_end * 1000),
@@ -161,6 +154,57 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
         trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
       },
     });
+  }
+
+  // Invalidar cache
+  await revalidateSubscriptionCache();
+}
+
+// Função auxiliar para obter informações do produto
+async function getProductInfo(productId: string): Promise<{ planName: string; planType: PlanType }> {
+  try {
+    const product = await stripe.products.retrieve(productId);
+    const planName = product.name || getPlanNameFallback(productId);
+    const planType = getPlanType(productId);
+    return { planName, planType };
+  } catch (error) {
+    console.error("Error fetching product from Stripe:", error);
+    return {
+      planName: getPlanNameFallback(productId),
+      planType: getPlanType(productId),
+    };
+  }
+}
+
+// Função auxiliar para obter o nome do plano (fallback)
+function getPlanNameFallback(productId: string): string {
+  switch (productId) {
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
+      return "Plano Base";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
+      return "100 Atendimentos IA";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
+      return "200 Atendimentos IA";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
+      return "300 Atendimentos IA";
+    default:
+      return "Plano Desconhecido";
+  }
+}
+
+// Função auxiliar para determinar o tipo de plano
+function getPlanType(productId: string): PlanType {
+  switch (productId) {
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
+      return "basic";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
+      return "ai100";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
+      return "ai200";
+    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
+      return "ai300";
+    default:
+      return "basic";
   }
 }
 
@@ -171,7 +215,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     throw new Error("Invalid subscription data: missing item");
   }
 
-  const updatedSubscription = await prisma.subscription.update({
+  await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
     data: {
       status: subscription.status,
@@ -179,15 +223,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       currentPeriodEnd: new Date(item.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
-    include: {
-      user: true,
-    },
   });
 
-  // Invalidar cache do usuário
-  if (updatedSubscription.user) {
-    await revalidateSubscriptionCache();
-  }
+  await revalidateSubscriptionCache();
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -200,90 +238,28 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   });
 
   if (additionalCalendar) {
-    // Desativar o calendário adicional
     await prisma.additionalCalendar.update({
       where: { id: additionalCalendar.id },
       data: { active: false },
     });
   } else {
-    // Check if subscription exists before trying to update it
     const existingSubscription = await prisma.subscription.findFirst({
       where: { stripeSubscriptionId: subscription.id },
     });
 
     if (existingSubscription) {
-      const deletedSubscription = await prisma.subscription.update({
+      await prisma.subscription.update({
         where: { stripeSubscriptionId: subscription.id },
-        data: {
-          status: "canceled",
-        },
-        include: {
-          user: true,
-        },
+        data: { status: "canceled" },
       });
-
-      // Invalidar cache do usuário
-      if (deletedSubscription.user) {
-        await revalidateSubscriptionCache();
-      }
-    } else {
-      console.log(`Subscription ${subscription.id} not found in database, skipping update`);
     }
   }
-}
 
-async function checkAndHandleCalendarLimits(userId: string, subscription: Stripe.Subscription) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      subscription: true,
-      calendars: {
-        where: { isActive: true },
-      },
-    },
-  });
-
-  if (!user) return;
-
-  const currentActiveCalendars = user.calendars.length;
-  const newLimit = getCalendarLimit(user.subscription);
-
-  // Não desativar automaticamente, apenas registrar que há excesso
-  if (currentActiveCalendars > newLimit) {
-    // Registrar que o usuário tem calendários em excesso
-    // Isso será verificado na próxima vez que o usuário acessar a aplicação
-    console.log(`User ${userId} has ${currentActiveCalendars} calendars, exceeding limit of ${newLimit}`);
-  }
-}
-
-function getCalendarLimit(subscription: any): number {
-  if (!subscription || subscription.status !== "active") {
-    return 3;
-  }
-
-  const { stripePriceId } = subscription;
-
-  if (
-    [
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
-    ].includes(stripePriceId)
-  ) {
-    return Infinity;
-  }
-
-  if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!) {
-    return 13;
-  }
-
-  return 3;
+  await revalidateSubscriptionCache();
 }
 
 async function handlePaymentSucceeded(invoice: any) {
-  // Correção: verificar se subscription existe e não é null
   if (!invoice.subscription) {
-    console.log("Invoice without subscription, skipping payment history creation");
     return;
   }
 
@@ -294,13 +270,11 @@ async function handlePaymentSucceeded(invoice: any) {
   });
 
   if (subscription) {
-    // Correção: verificar se payment_intent existe e não é null
     let paymentIntentId = "unknown";
     if (invoice.payment_intent) {
       paymentIntentId = typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent.id;
     }
 
-    // Criar registro de pagamento
     await prisma.paymentHistory.create({
       data: {
         userId: subscription.userId,
@@ -315,7 +289,6 @@ async function handlePaymentSucceeded(invoice: any) {
 
     // Verificar se é um pacote adicional de IA
     if (subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!) {
-      // Criar um novo pacote adicional de IA
       await prisma.additionalAICredit.create({
         data: {
           userId: subscription.userId,
@@ -331,9 +304,7 @@ async function handlePaymentSucceeded(invoice: any) {
 }
 
 async function handlePaymentFailed(invoice: any) {
-  // Correção: verificar se subscription existe e não é null
   if (!invoice.subscription) {
-    console.log("Invoice without subscription, skipping payment history creation");
     return;
   }
 
@@ -344,7 +315,6 @@ async function handlePaymentFailed(invoice: any) {
   });
 
   if (subscription) {
-    // Correção: verificar se payment_intent existe e não é null
     let paymentIntentId = "failed";
     if (invoice.payment_intent) {
       paymentIntentId = typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent.id;

@@ -1,6 +1,5 @@
 "use client";
 
-import { useSubscription } from "@/hooks/use-subscription";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +7,25 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { createPortalSession } from "@/store/subscription-store";
+import { SubscriptionData } from "@/types/subscription";
 
-export function SubscriptionSettings() {
-  const { subscription, isTrialActive, isSubscriptionActive, createPortalSession, isLoading, additionalCalendars } =
-    useSubscription();
+interface SubscriptionSettingsProps {
+  subscriptionData: SubscriptionData;
+}
+
+export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsProps) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Extrair os valores do data
+  const subscription = subscriptionData?.subscription;
+  const isTrialActive = subscriptionData?.isTrialActive || false;
+  const isSubscriptionActive = subscriptionData?.isSubscriptionActive || false;
+  const additionalCalendars = subscriptionData?.additionalCalendars || [];
+
+  // Não precisamos mais do useEffect para buscar dados, pois agora recebemos via props
 
   if (isLoading) {
     return (
@@ -26,7 +39,12 @@ export function SubscriptionSettings() {
   }
 
   const getStatusBadge = () => {
-    // Verificar diretamente se a assinatura está ativa
+    // Verificar diretamente o status da assinatura primeiro
+    if (subscription && subscription.status === "active") {
+      return <Badge variant="default">Ativa</Badge>;
+    }
+
+    // Verificar a flag isSubscriptionActive como fallback
     if (isSubscriptionActive) {
       return <Badge variant="default">Ativa</Badge>;
     }
@@ -63,16 +81,25 @@ export function SubscriptionSettings() {
         return "200 Atendimentos IA";
       case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
         return "300 Atendimentos IA";
+      case "prod_SV7hWdNkIunsco": // Adicionar o ID específico
+        return "Plano Base"; // Ou o nome correto do plano
       default:
         return "Plano Desconhecido";
     }
   };
 
-  const handleManageSubscription = () => {
+  const handleManageSubscription = async () => {
     if (!subscription || subscription.status !== "active") {
       router.push("/pricing");
     } else {
-      createPortalSession();
+      setIsLoading(true);
+      try {
+        await createPortalSession();
+      } catch (error) {
+        console.error("Erro ao criar sessão do portal:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -91,11 +118,11 @@ export function SubscriptionSettings() {
           {getStatusBadge()}
         </div>
 
-        {subscription && isSubscriptionActive && (
+        {subscription && (isSubscriptionActive || subscription.status === "active") && (
           <>
             <div className="flex items-center justify-between">
               <span className="font-medium">Plano:</span>
-              <span>{getPlanName(subscription.stripeProductId)}</span>
+              <span>{subscription.planName || getPlanName(subscription.stripeProductId)}</span>
             </div>
 
             <div className="flex items-center justify-between">
@@ -127,7 +154,7 @@ export function SubscriptionSettings() {
         )}
 
         <div className="pt-4 border-t">
-          <Button onClick={handleManageSubscription} className="w-full">
+          <Button onClick={handleManageSubscription} className="w-full mb-2">
             {!isSubscriptionActive ? "Ver Planos Disponíveis" : "Gerenciar Assinatura no Stripe"}
           </Button>
         </div>

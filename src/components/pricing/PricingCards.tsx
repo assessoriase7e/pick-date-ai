@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { useSubscription } from "@/hooks/use-subscription";
+import { createSubscription } from "@/store/subscription-store";
 
 interface Plan {
   id: string;
@@ -20,11 +20,19 @@ interface Plan {
 
 interface PricingCardsProps {
   plans: Plan[];
+  subscription: {
+    id: string;
+    status: string;
+    stripePriceId: string;
+    stripeProductId: string;
+    cancelAtPeriodEnd: boolean;
+    planName: string;
+    currentPeriodEnd: string;
+    trialEnd?: string;
+  } | null;
 }
 
-export function PricingCards({ plans }: PricingCardsProps) {
-  const { createSubscription, subscription } = useSubscription();
-
+export function PricingCards({ plans, subscription }: PricingCardsProps) {
   const handleSubscribe = async (productId: string) => {
     try {
       await createSubscription(productId);
@@ -44,7 +52,7 @@ export function PricingCards({ plans }: PricingCardsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {plans.map((plan) => {
             const isCurrentPlan = subscription?.stripeProductId === plan.productId;
-            
+
             return (
               <Card
                 key={plan.id}

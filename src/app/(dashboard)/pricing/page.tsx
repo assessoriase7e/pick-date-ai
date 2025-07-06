@@ -1,5 +1,6 @@
-import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 import { PricingPageContent } from "@/components/pricing/PricingPageContent";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
+import { getSubscriptionStatus } from "@/services/subscription-service";
 
 // IDs dos produtos do Stripe vindos das variáveis de ambiente
 const STRIPE_PRODUCT_IDS = {
@@ -17,6 +18,7 @@ const PLANS = [
     price: "R$ 60",
     period: "/mês",
     productId: STRIPE_PRODUCT_IDS.basic,
+    planType: "basic" as const,
     features: [
       "Agendamento manual",
       "3 Calendários",
@@ -34,6 +36,7 @@ const PLANS = [
     price: "R$ 190",
     period: "/mês",
     productId: STRIPE_PRODUCT_IDS.ai100,
+    planType: "ai100" as const,
     features: [
       "100 atendimentos mensais",
       "Reset a cada 24 horas",
@@ -50,6 +53,7 @@ const PLANS = [
     price: "R$ 329",
     period: "/mês",
     productId: STRIPE_PRODUCT_IDS.ai200,
+    planType: "ai200" as const,
     features: [
       "200 atendimentos mensais",
       "Reset a cada 24 horas",
@@ -68,6 +72,7 @@ const PLANS = [
     price: "R$ 467",
     period: "/mês",
     productId: STRIPE_PRODUCT_IDS.ai300,
+    planType: "ai300" as const,
     features: [
       "300 atendimentos mensais",
       "Reset a cada 24 horas",
@@ -100,13 +105,17 @@ const ADDITIONAL_AI_PLAN = {
   features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  // Obter dados da assinatura usando o novo serviço
+  const subscriptionData = await getSubscriptionStatus();
+
   return (
     <SubscriptionGuard>
       <PricingPageContent
         plans={PLANS}
         additionalCalendarPlan={ADDITIONAL_CALENDAR_PLAN}
         additionalAiPlan={ADDITIONAL_AI_PLAN}
+        subscriptionData={subscriptionData}
       />
     </SubscriptionGuard>
   );

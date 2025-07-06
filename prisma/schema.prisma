@@ -454,6 +454,8 @@ model Subscription {
   stripeSubscriptionId  String   @unique
   stripePriceId         String
   stripeProductId       String
+  planName              String
+  planType              String   // "basic", "ai100", "ai200", "ai300"
   status                String   // active, canceled, incomplete, past_due, etc.
   currentPeriodStart    DateTime
   currentPeriodEnd      DateTime

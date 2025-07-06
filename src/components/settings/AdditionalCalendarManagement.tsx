@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,43 +8,28 @@ import { Calendar, Trash2, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { listAdditionalCalendars, AdditionalCalendarData } from "@/actions/subscription/list-additional-calendars";
-import { cancelAdditionalCalendar } from "@/actions/subscription/cancel-additional-calendar";
-import { createCalendarCheckout } from "@/actions/subscription/create-calendar-checkout";
+import { AdditionalCalendarInfo } from "@/types/subscription";
+import { createPortalSession } from "@/store/subscription-store";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
-export function AdditionalCalendarManagement() {
-  const [calendars, setCalendars] = useState<AdditionalCalendarData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [cancelingId, setCancelingId] = useState<number | null>(null);
-  const [calendarToCancel, setCalendarToCancel] = useState<number | null>(null);
+interface AdditionalCalendarManagementProps {
+  additionalCalendars: AdditionalCalendarInfo[];
+}
 
-  const loadCalendars = async () => {
-    try {
-      setIsLoading(true);
-      const data = await listAdditionalCalendars();
-      setCalendars(data);
-    } catch (error) {
-      console.error("Error loading calendars:", error);
-      toast.error("Erro ao carregar calendários adicionais");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export function AdditionalCalendarManagement({ additionalCalendars }: AdditionalCalendarManagementProps) {
+  const [calendars, setCalendars] = useState<AdditionalCalendarInfo[]>(additionalCalendars);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [calendarToCancel, setCalendarToCancel] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadCalendars();
-  }, []);
-
-  const handleCancelCalendar = async (calendarId: number) => {
+  const handleCancelCalendar = async (calendarId: string) => {
     try {
       setCancelingId(calendarId);
-      await cancelAdditionalCalendar(calendarId);
-      toast.success("Calendário adicional cancelado com sucesso");
-      await loadCalendars();
+      // Redirect to Stripe portal for calendar management
+      await createPortalSession();
+      toast.success("Redirecionando para o portal de gerenciamento");
     } catch (error) {
-      console.error("Error cancelling calendar:", error);
-      toast.error("Erro ao cancelar calendário adicional");
+      console.error("Error managing calendar:", error);
+      toast.error("Erro ao acessar portal de gerenciamento");
     } finally {
       setCancelingId(null);
       setCalendarToCancel(null);
@@ -53,124 +38,98 @@ export function AdditionalCalendarManagement() {
 
   const handleAddCalendar = async () => {
     try {
-      await createCalendarCheckout();
+      await createPortalSession();
     } catch (error) {
-      console.error("Error creating checkout:", error);
-      toast.error("Erro ao criar checkout");
+      console.error("Error creating portal session:", error);
+      toast.error("Erro ao acessar portal");
     }
   };
 
-  const activeCalendars = calendars.filter((cal) => cal.active);
-  const hasActiveCalendars = activeCalendars.length > 0;
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Calendários Adicionais</CardTitle>
-          <CardDescription>Carregando informações...</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Calendários Adicionais
-          </CardTitle>
-          <CardDescription>
-            Gerencie seus calendários extras. Cada calendário adicional custa R$ 19,90/mês.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {hasActiveCalendars ? (
-            <>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data de Compra</TableHead>
-                      <TableHead>Situação</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {activeCalendars.map((calendar) => (
-                      <TableRow key={calendar.id}>
-                        <TableCell>
-                          <Badge variant={calendar.active ? "default" : "secondary"}>
-                            {calendar.active ? "Ativo" : "Inativo"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{format(new Date(calendar.purchaseDate), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
-                        <TableCell>
-                          {calendar.cancelAtPeriodEnd ? (
-                            <Badge variant="destructive">Cancelamento Agendado</Badge>
-                          ) : (
-                            <Badge variant="default">Ativo</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {!calendar.cancelAtPeriodEnd && (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => setCalendarToCancel(calendar.id)}
-                              disabled={cancelingId === calendar.id}
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              {cancelingId === calendar.id ? "Cancelando..." : "Cancelar"}
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-medium">Importante:</p>
-                  <p>
-                    Ao cancelar um calendário adicional, se você tiver mais calendários ativos do que o permitido,
-                    alguns serão automaticamente desativados.
-                  </p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="p-6 text-center">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhum calendário adicional</h3>
-              <p className="text-muted-foreground mb-4">Você não possui calendários adicionais ativos.</p>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center pt-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              {activeCalendars.length} calendário(s) adicional(is) ativo(s)
-            </div>
-            <Button onClick={handleAddCalendar}>Adicionar Calendário</Button>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Calendários Adicionais
+        </CardTitle>
+        <CardDescription>Gerencie seus calendários adicionais</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {calendars.length === 0 ? (
+          <div className="text-center py-8">
+            <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground mb-4">
+              Você não possui calendários adicionais ativos.
+            </p>
+            <Button onClick={handleAddCalendar} variant="outline">
+              Adicionar Calendário
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Expira em</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {calendars.map((calendar) => (
+                  <TableRow key={calendar.id}>
+                    <TableCell className="font-medium">#{calendar.id}</TableCell>
+                    <TableCell>
+                      <Badge variant={calendar.active ? "default" : "secondary"}>
+                        {calendar.active ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(calendar.expiresAt), "dd/MM/yyyy", { locale: ptBR })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {calendar.active && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCalendarToCancel(calendar.id)}
+                          disabled={cancelingId === calendar.id}
+                        >
+                          {cancelingId === calendar.id ? (
+                            "Processando..."
+                          ) : (
+                            <>
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Gerenciar
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="flex justify-end">
+              <Button onClick={handleAddCalendar} variant="outline">
+                Adicionar Calendário
+              </Button>
+            </div>
+          </>
+        )}
+      </CardContent>
 
       <ConfirmationDialog
         open={!!calendarToCancel}
-        onOpenChange={() => setCalendarToCancel(null)}
+        onOpenChange={(open) => !open && setCalendarToCancel(null)}
+        title="Gerenciar Calendário"
+        description="Você será redirecionado para o portal do Stripe para gerenciar este calendário adicional."
+        confirmText="Continuar"
+        cancelText="Cancelar"
         onConfirm={() => calendarToCancel && handleCancelCalendar(calendarToCancel)}
-        title="Cancelar Calendário Adicional"
-        description="Tem certeza que deseja cancelar este calendário adicional? Esta ação não pode ser desfeita. Atenção: Se você tiver mais calendários ativos do que o permitido após o cancelamento, alguns calendários serão automaticamente desativados."
-        confirmText="Confirmar Cancelamento"
-        variant="destructive"
+        variant="default"
       />
-    </>
+    </Card>
   );
 }

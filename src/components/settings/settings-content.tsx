@@ -2,22 +2,22 @@
 import { useState } from "react";
 import { SubscriptionSettings } from "./SubscriptionSettings";
 import { AdditionalAISettings } from "./AdditionalAISettings";
-import { AdditionalCalendarSettings } from "./AdditionalCalendarSettings";
 import { AccountDeletionCard } from "./AccountDeletionCard";
 import { CombinedProfileData } from "@/actions/profile/get";
-import { useSubscription } from "@/hooks/use-subscription";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { cancelSubscription, createPortalSession } from "@/store/subscription-store";
+import { AdditionalCalendarManagement } from "./AdditionalCalendarManagement";
+import { SubscriptionData } from "@/types/subscription";
 
 interface SettingsContentProps {
   combinedProfile: CombinedProfileData | null;
+  subscriptionData: SubscriptionData | null;
 }
 
-export function SettingsContent({ combinedProfile }: SettingsContentProps) {
+export function SettingsContent({ combinedProfile, subscriptionData }: SettingsContentProps) {
   const [isCancelSubscriptionOpen, setIsCancelSubscriptionOpen] = useState(false);
   const [isCancelCalendarsOpen, setIsCancelCalendarsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const { cancelSubscription, createPortalSession } = useSubscription();
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
@@ -36,13 +36,24 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
     setIsCancelCalendarsOpen(false);
   };
 
+  // Se não há dados de assinatura, mostrar estado de loading ou erro
+  if (!subscriptionData) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Carregando dados da assinatura...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Seção de Assinatura Principal */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Assinatura Principal</h2>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
-          <SubscriptionSettings />
+          <SubscriptionSettings subscriptionData={subscriptionData} />
         </div>
       </div>
 
@@ -50,7 +61,7 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
       <div>
         <h2 className="text-xl font-semibold mb-4">Pacotes Adicionais de IA</h2>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
-          <AdditionalAISettings />
+          <AdditionalAISettings subscriptionData={subscriptionData} />
         </div>
       </div>
 
@@ -58,7 +69,7 @@ export function SettingsContent({ combinedProfile }: SettingsContentProps) {
       <div>
         <h2 className="text-xl font-semibold mb-4">Calendários Adicionais</h2>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
-          <AdditionalCalendarSettings />
+          <AdditionalCalendarManagement additionalCalendars={subscriptionData.additionalCalendars} />
         </div>
       </div>
 
