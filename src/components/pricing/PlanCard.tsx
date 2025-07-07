@@ -2,55 +2,75 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import { Plan } from "@/types/subscription";
-import { Subscription } from "@prisma/client";
+import { Plan, AddonPlan, AnyPlan, SubscriptionInfo } from "@/types/subscription";
+import { usePlanLogic } from "@/hooks/use-plan-logic";
 
 interface PlanCardProps {
-  plan: Plan;
-  subscription?: Subscription | null;
-  onSubscribe?: (productId: string) => void;
+  plan: AnyPlan;
+  subscription?: SubscriptionInfo | null;
+  onSubscribe?: (priceId: string) => void;
   showButton?: boolean;
-  buttonText?: string;
   isLandingPage?: boolean;
+  variant?: "default" | "addon";
 }
 
-export function PlanCard({ 
-  plan, 
-  subscription, 
-  onSubscribe, 
-  showButton = true, 
-  buttonText, 
-  isLandingPage = false 
+export function PlanCard({
+  plan,
+  subscription,
+  onSubscribe,
+  showButton = true,
+  isLandingPage = false,
+  variant = "default",
 }: PlanCardProps) {
-  // Verificar se é o plano atual (apenas para tela de preços)
-  const isCurrentPlan = !isLandingPage && subscription?.stripePriceId === plan.productId;
+  const { isCurrentPlan, getButtonText, isButtonDisabled } = usePlanLogic({ subscription });
   
+  const isAddon = variant === "addon" || plan.planType === "addon";
+  const isRecommended = "recommended" in plan && plan.recommended;
+  const discount = "discount" in plan ? plan.discount : undefined;
+  
+  const currentPlan = isCurrentPlan(plan.priceId);
+  const buttonText = getButtonText(plan, isAddon);
+  const buttonDisabled = isButtonDisabled(plan, isAddon);
+
   const handleClick = () => {
-    if (onSubscribe && !isCurrentPlan) {
-      onSubscribe(plan.productId);
+    if (onSubscribe && !currentPlan && !buttonDisabled) {
+      onSubscribe(plan.priceId);
     }
   };
 
   return (
     <Card
-      className={`relative flex flex-col h-full ${
-        plan.recommended ? "border-primary ring-2 ring-primary/20 scale-105" : "border-border"
+      className={`relative flex flex-col h-full transition-all duration-200 ${
+        isRecommended 
+          ? "border-primary ring-2 ring-primary/20 scale-105" 
+          : "border-border hover:border-primary/50"
+      } ${
+        isAddon ? "bg-muted/30" : ""
       }`}
     >
-      {plan.recommended && (
+      {isRecommended && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
+          <Badge variant="default" className="bg-primary text-primary-foreground">
             Recomendado
-          </span>
+          </Badge>
         </div>
       )}
 
-      {plan.discount && !plan.recommended && (
+      {discount && !isRecommended && (
         <div className="absolute -top-3 right-4">
-          <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-            {plan.discount}
-          </span>
+          <Badge variant="secondary" className="bg-green-500 text-white">
+            {discount}
+          </Badge>
+        </div>
+      )}
+
+      {isAddon && (
+        <div className="absolute -top-3 left-4">
+          <Badge variant="outline" className="bg-background">
+            Add-on
+          </Badge>
         </div>
       )}
 
@@ -66,14 +86,14 @@ export function PlanCard({
             {plan.price}
           </span>
           <span className="text-muted-foreground text-sm">{plan.period}</span>
-          {plan.discount && (
-            <div className="text-green-500 text-sm font-medium mt-1">{plan.discount}</div>
+          {discount && (
+            <div className="text-green-500 text-sm font-medium mt-1">{discount}</div>
           )}
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col">
-        <ul className={`space-y-2 flex-1 mb-6 ${isLandingPage ? 'text-sm' : 'text-sm'}`}>
+        <ul className={`space-y-2 flex-1 mb-6 ${isLandingPage ? "text-sm" : "text-sm"}`}>
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2">
               <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -85,18 +105,17 @@ export function PlanCard({
         {showButton && (
           <Button
             onClick={handleClick}
-            disabled={isCurrentPlan}
+            disabled={buttonDisabled}
             className={`w-full ${
-              plan.recommended
+              isRecommended
                 ? "bg-primary hover:bg-primary/90"
                 : "bg-accent hover:bg-accent/90 text-foreground dark:text-background"
-            } ${isCurrentPlan ? "opacity-50 cursor-not-allowed" : ""}`}
+            } ${
+              buttonDisabled ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             size="lg"
           >
-            {isCurrentPlan 
-              ? "Plano Atual" 
-              : buttonText || (isLandingPage ? "Teste 3 Dias Grátis" : "Assinar Plano")
-            }
+            {currentPlan ? "Plano Atual" : buttonText}
           </Button>
         )}
       </CardContent>

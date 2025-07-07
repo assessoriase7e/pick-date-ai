@@ -1,12 +1,13 @@
-// Renomear para refletir que são priceIds
 export const STRIPE_PRICE_IDS = {
   basic: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!,
   ai100: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
   ai200: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
   ai300: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
+  addCalendar: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR!,
+  addAi: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_AI!,
 };
 
-// E atualizar os PLANS para usar priceId:
+// Remover 'as const' para permitir mutabilidade
 export const PLANS = [
   {
     id: "basic",
@@ -14,7 +15,7 @@ export const PLANS = [
     description: "Agendamento simples sem IA",
     price: "R$ 60",
     period: "/mês",
-    priceId: STRIPE_PRICE_IDS.basic, // ← Mudar de productId para priceId
+    priceId: STRIPE_PRICE_IDS.basic,
     planType: "basic" as const,
     features: [
       "Agendamento manual",
@@ -32,7 +33,7 @@ export const PLANS = [
     description: "Ideal para pequenos negócios",
     price: "R$ 190",
     period: "/mês",
-    productId: STRIPE_PRICE_IDS.ai100,
+    priceId: STRIPE_PRICE_IDS.ai100,
     planType: "ai100" as const,
     features: [
       "100 atendimentos mensais",
@@ -49,7 +50,7 @@ export const PLANS = [
     description: "Para negócios em crescimento",
     price: "R$ 329",
     period: "/mês",
-    productId: STRIPE_PRICE_IDS.ai200,
+    priceId: STRIPE_PRICE_IDS.ai200,
     planType: "ai200" as const,
     features: [
       "200 atendimentos mensais",
@@ -68,7 +69,7 @@ export const PLANS = [
     description: "Para negócios estabelecidos",
     price: "R$ 467",
     period: "/mês",
-    productId: STRIPE_PRICE_IDS.ai300,
+    priceId: STRIPE_PRICE_IDS.ai300,
     planType: "ai300" as const,
     features: [
       "300 atendimentos mensais",
@@ -80,59 +81,70 @@ export const PLANS = [
     ],
     discount: "15% Off",
   },
-];
+]; // Remover 'as const'
 
-export const ADDITIONAL_CALENDAR_PLAN = {
-  id: "add-calendar",
-  name: "Calendário Adicional",
-  description: "Adicione mais um calendário ao seu plano base",
-  price: "R$ 10",
-  period: "/mês",
-  productId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR!,
-  features: ["+1 calendário extra", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
-};
-
-export const ADDITIONAL_AI_PLAN = {
-  id: "add-ai",
-  name: "Atendimentos Adicionais",
-  description: "Adicione mais atendimentos IA ao seu plano",
-  price: "R$ 25",
-  period: "/mês",
-  productId: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
-  features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
-};
+export const ADDITIONAL_PLANS = [
+  {
+    id: "add-calendar",
+    name: "Calendário Adicional",
+    description: "Adicione mais um calendário ao seu plano base",
+    price: "R$ 10",
+    period: "/mês",
+    priceId: STRIPE_PRICE_IDS.addCalendar,
+    planType: "addon" as const,
+    features: ["+1 calendário extra", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
+    addonType: "calendar" as const,
+    requiresBasePlan: true,
+  },
+  {
+    id: "add-ai",
+    name: "Atendimentos Adicionais",
+    description: "Adicione mais atendimentos IA ao seu plano",
+    price: "R$ 25",
+    period: " (Único)",
+    priceId: STRIPE_PRICE_IDS.addAi,
+    planType: "addon" as const,
+    features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
+    addonType: "ai" as const,
+    requiresAiPlan: true,
+  },
+]; // Remover 'as const'
 
 export const PRICING_TEXTS = {
   title: "Escolha o plano ideal para seu negócio",
   subtitle: "Comece com 7 dias grátis em qualquer plano. Cancele quando quiser.",
   freeTrialText: "🎉 7 dias grátis para testar!",
   trialHighlight: "💡 Teste todas as funcionalidades sem compromisso durante o período gratuito",
+  additionalPlansTitle: "Produtos Adicionais",
+  additionalPlansSubtitle: "Expanda seu plano com recursos extras",
+
+  // Adicionar propriedades que a landing page espera
   plans: PLANS,
-  includedFeatures: [
-    "Agendamento inteligente com IA",
-    "Integração com WhatsApp",
-    "Calendários ilimitados",
-    "Cadastro automático de clientes",
-    "Histórico completo de conversas",
-    "Relatórios detalhados",
-    "Suporte prioritário",
-    "Atualizações automáticas",
-    "Backup automático dos dados",
-  ],
   addons: [
     {
       name: "Calendário Adicional",
-      price: "R$ 10",
-      period: "/mês",
       description: "Adicione mais um calendário ao seu plano base",
+      price: "R$ 10",
+      period: "/Mês",
       comingSoon: false,
     },
     {
       name: "Atendimentos Adicionais",
+      description: "Adicione mais atendimentos IA caso necessário para terminar o mês",
       price: "R$ 25",
-      period: "/mês",
-      description: "Adicione mais atendimentos IA ao seu plano",
+      period: "(Único)",
       comingSoon: false,
     },
+  ],
+  includedFeatures: [
+    "Agendamento inteligente com IA",
+    "Integração com WhatsApp",
+    "Calendários ilimitados",
+    "Histórico completo de atendimentos",
+    "Relatórios detalhados",
+    "Suporte prioritário",
+    "Backup automático",
+    "Personalização avançada",
+    "API para integrações",
   ],
 };

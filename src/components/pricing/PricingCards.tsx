@@ -2,12 +2,12 @@
 
 import { createSubscription } from "@/store/subscription-store";
 import { Subscription } from "@prisma/client";
-import { Plan } from "@/types/subscription";
+import { SubscriptionInfo, Plan } from "@/types/subscription";
 import { PlanCard } from "./PlanCard";
 
 interface PricingCardsProps {
   plans: Plan[];
-  subscription: Subscription | null;
+  subscription: SubscriptionInfo | Subscription | null;
 }
 
 export function PricingCards({ plans, subscription }: PricingCardsProps) {

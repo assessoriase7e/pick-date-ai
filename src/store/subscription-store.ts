@@ -32,7 +32,40 @@ export const useSubscription = create<SubscriptionStore>((set, get) => ({
 }));
 
 // Export the action functions for use in components
+// Adicionar nova função para pagamentos únicos
+export const createOneTimePayment = async (priceId: string) => {
+  console.log(priceId);
+
+  try {
+    const response = await fetch("/api/payment/create-checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ priceId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Erro ao criar pagamento");
+    }
+
+    const result = await response.json();
+    if (result.url) {
+      window.location.href = result.url;
+    }
+    return result;
+  } catch (error) {
+    console.error("Erro ao criar pagamento único:", error);
+    throw error;
+  }
+};
+
 export const createSubscription = async (priceId: string) => {
+  // Verificar se é um produto de pagamento único
+  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_AI) {
+    return createOneTimePayment(priceId);
+  }
   const result = await createSubscriptionAction(priceId);
   if (result.url) {
     window.location.href = result.url;

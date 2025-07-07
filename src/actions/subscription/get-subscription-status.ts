@@ -23,6 +23,11 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         additionalCalendars: {
           where: { active: true },
         },
+        additionalAICredits: {
+          where: {
+            used: { lt: prisma.additionalAICredit.fields.quantity },
+          },
+        },
       },
     });
 
@@ -35,13 +40,21 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         subscription: dbUser?.subscription
           ? {
               id: dbUser.subscription.id,
+              userId: dbUser.subscription.userId,
+              stripeCustomerId: dbUser.subscription.stripeCustomerId,
+              stripeSubscriptionId: dbUser.subscription.stripeSubscriptionId,
               status: dbUser.subscription.status as SubscriptionStatus,
               stripePriceId: dbUser.subscription.stripePriceId,
               stripeProductId: dbUser.subscription.stripeProductId,
               planType: (dbUser.subscription.planType || "basic") as any,
               planName: dbUser.subscription.planName,
               cancelAtPeriodEnd: dbUser.subscription.cancelAtPeriodEnd,
-              currentPeriodEnd: dbUser.subscription.currentPeriodEnd.toISOString(),
+              currentPeriodStart: dbUser.subscription.currentPeriodStart,
+              currentPeriodEnd: dbUser.subscription.currentPeriodEnd,
+              trialStart: dbUser.subscription.trialStart,
+              trialEnd: dbUser.subscription.trialEnd,
+              createdAt: dbUser.subscription.createdAt,
+              updatedAt: dbUser.subscription.updatedAt,
             }
           : null,
         isTrialActive: false,
@@ -59,6 +72,14 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
           active: cal.active,
           expiresAt: cal.expiresAt.toISOString(),
         })),
+        additionalAICredits:
+          dbUser.additionalAICredits?.map((credit) => ({
+            id: credit.id.toString(),
+            quantity: credit.quantity,
+            used: credit.used,
+            remaining: credit.quantity - credit.used,
+            expiresAt: credit.expiresAt?.toISOString(),
+          })) || [],
       };
     }
 
@@ -162,14 +183,21 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
       subscription: subscription
         ? {
             id: subscription.id,
+            userId: subscription.userId,
+            stripeCustomerId: subscription.stripeCustomerId,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
             status: subscription.status as SubscriptionStatus,
             stripePriceId: subscription.stripePriceId,
             stripeProductId: subscription.stripeProductId,
             planType: (subscription.planType || "basic") as any,
             planName: subscription.planName,
             cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-            currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-            trialEnd: trialEndDate.toISOString(),
+            currentPeriodStart: subscription.currentPeriodStart,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            trialStart: subscription.trialStart,
+            trialEnd: subscription.trialEnd,
+            createdAt: subscription.createdAt,
+            updatedAt: subscription.updatedAt,
           }
         : null,
       isTrialActive,
@@ -183,6 +211,14 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         active: cal.active,
         expiresAt: cal.expiresAt.toISOString(),
       })),
+      additionalAICredits:
+        dbUser.additionalAICredits?.map((credit) => ({
+          id: credit.id.toString(),
+          quantity: credit.quantity,
+          used: credit.used,
+          remaining: credit.quantity - credit.used,
+          expiresAt: credit.expiresAt?.toISOString(), // Adicionar este campo
+        })) || [],
     };
   } catch (err) {
     console.error("Erro ao buscar status da assinatura:", err);

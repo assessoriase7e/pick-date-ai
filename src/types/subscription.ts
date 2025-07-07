@@ -1,6 +1,5 @@
-import { AdditionalCalendar } from "@prisma/client";
-
-export type PlanType = "basic" | "ai100" | "ai200" | "ai300";
+export type PlanType = "basic" | "ai100" | "ai200" | "ai300" | "addon";
+export type AddonType = "calendar" | "ai";
 
 export type SubscriptionStatus =
   | "active"
@@ -11,23 +10,25 @@ export type SubscriptionStatus =
   | "trialing"
   | "unpaid";
 
+import { Subscription } from "@prisma/client";
+
 export interface SubscriptionInfo {
   id: string;
-  status: SubscriptionStatus;
+  userId: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
   stripePriceId: string;
   stripeProductId: string;
-  planType: PlanType;
   planName: string;
+  planType: string;
+  status: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
-  currentPeriodEnd: string;
-  trialEnd?: string;
-}
-
-export interface AdditionalCalendarInfo {
-  id: string;
-  active: boolean;
-  purchaseDate: string;
-  expiresAt: string;
+  trialStart?: Date;
+  trialEnd?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SubscriptionData {
@@ -42,19 +43,50 @@ export interface SubscriptionData {
     limit: number;
     remaining: number;
   };
-  additionalCalendars: AdditionalCalendarInfo[];
+  additionalCalendars: {
+    id: string;
+    active: boolean;
+    expiresAt: string;
+  }[];
+  additionalAICredits: {
+    id: string;
+    quantity: number;
+    used: number;
+    remaining: number;
+    expiresAt?: string;
+  }[];
 }
 
-export interface Plan {
+export interface BasePlan {
   id: string;
   name: string;
   description: string;
   price: string;
   period: string;
-  productId: string;
-  planType: PlanType;
+  priceId: string;
   features: string[];
+  planType: PlanType;
+}
+
+export interface Plan extends BasePlan {
+  planType: Exclude<PlanType, "addon">;
   isBasic?: boolean;
   recommended?: boolean;
   discount?: string;
 }
+
+export interface AddonPlan extends BasePlan {
+  planType: "addon";
+  addonType: AddonType;
+  requiresBasePlan?: boolean;
+  requiresAiPlan?: boolean;
+}
+
+export type AnyPlan = Plan | AddonPlan;
+
+export type SubscriptionWithRelations = Subscription & {
+  user?: {
+    id: string;
+    email: string;
+  };
+};
