@@ -19,8 +19,6 @@ export function SettingsContent({ combinedProfile, subscriptionData }: SettingsC
   const [isCancelCalendarsOpen, setIsCancelCalendarsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(subscriptionData)
-
   const handleCancelSubscription = async () => {
     setIsLoading(true);
     try {

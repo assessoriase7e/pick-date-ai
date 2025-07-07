@@ -3,10 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Plus, AlertTriangle } from "lucide-react";
+import { Brain, Plus, AlertTriangle, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createPortalSession } from "@/store/subscription-store";
 import { SubscriptionData } from "@/types/subscription";
+import { useState } from "react";
 
 interface AdditionalAISettingsProps {
   subscriptionData: SubscriptionData;
@@ -14,6 +15,7 @@ interface AdditionalAISettingsProps {
 
 export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsProps) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Verificar se o usuário tem pacotes adicionais de IA
   const hasAdditionalAI =
@@ -23,7 +25,22 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
     if (!subscriptionData.isSubscriptionActive) {
       router.push("/pricing");
     } else {
-      await createPortalSession();
+      setIsLoading(true);
+      try {
+        await createPortalSession();
+      } catch (error) {
+        console.error("Erro ao criar sessão do portal:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleAddAIPackage = async () => {
+    if (!subscriptionData.isSubscriptionActive) {
+      router.push("/pricing");
+    } else {
+      router.push("/pricing#additional-ai");
     }
   };
 
@@ -79,19 +96,47 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
           </>
         )}
       </CardContent>
-      <CardFooter>
-        <Button onClick={handleManageAIPackages} className="w-full" variant={hasAdditionalAI ? "outline" : "default"}>
-          {hasAdditionalAI ? (
-            "Gerenciar Pacotes"
-          ) : subscriptionData.isSubscriptionActive ? (
-            <>
+      <CardFooter className="space-y-2">
+        {hasAdditionalAI ? (
+          <>
+            {/* Botão principal para gerenciar via Stripe */}
+            <Button 
+              onClick={handleManageAIPackages} 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              {isLoading ? "Carregando..." : "Gerenciar via Stripe"}
+            </Button>
+            
+            {/* Botão secundário para adicionar mais pacotes */}
+            <Button 
+              onClick={handleAddAIPackage} 
+              variant="outline" 
+              className="w-full"
+              disabled={isLoading}
+            >
               <Plus className="h-4 w-4 mr-2" />
-              Adicionar Pacote de IA
-            </>
-          ) : (
-            "Ver Planos"
-          )}
-        </Button>
+              Adicionar Mais Pacotes
+            </Button>
+          </>
+        ) : (
+          <Button 
+            onClick={handleAddAIPackage} 
+            className="w-full" 
+            variant="default"
+            disabled={isLoading}
+          >
+            {subscriptionData.isSubscriptionActive ? (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Pacote de IA
+              </>
+            ) : (
+              "Ver Planos"
+            )}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

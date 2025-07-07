@@ -2,123 +2,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
 import { MovingBorderButton } from "../ui/moving-border";
+import { PlanCard } from "../pricing/PlanCard";
+import { Plan } from "@/types/subscription";
+import { PRICING_TEXTS } from "@/constants/pricing";
 
-const PRICING_TEXTS = {
-  title: "Planos Simples e Transparentes",
-  subtitle: "Escolha o plano ideal para o seu negócio",
-  freeTrialText: "🎉 Todos os planos incluem 3 dias grátis SEM LIMITES para testar!",
-  trialHighlight: "Durante o período de teste, você terá acesso a TODOS os recursos sem limitações (exceto calendários limitados a 20)",
-  basicFeatures: [
-    "Múltiplos calendários",
-    "Múltiplos colaboradores",
-    "Serviços ilimitados",
-    "Lembrete de agendamento",
-    "Calendário compartilhado",
-    "Edição de agendamento",
-    "Cadastro de clientes",
-    "Histórico de clientes",
-    "Histórico do profissional",
-  ],
-  includedFeatures: [
-    "Múltiplos calendários",
-    "Múltiplos colaboradores",
-    "Serviços ilimitados",
-    "Lembrete de agendamento",
-    "Perguntas e Respostas via IA",
-    "Calendário compartilhado",
-    "Envio de arquivos via IA",
-    "Envio de links via IA",
-    "IA com regras customizadas",
-    "Atendimento humanizado",
-    "Operação IA 24/7",
-    "Atendimento IA via Whatsapp",
-    "Relatório completo",
-    "Impressão de comandas",
-    "Edição de agendamento",
-    "Cadastro de clientes",
-    "Histórico de clientes",
-    "Histórico do profissional",
-    "Black List atendimento IA",
-  ],
-  plans: [
-    {
-      name: "Agenda Base",
-      description: "Agendamento simples sem IA",
-      price: "R$ 60",
-      period: "/mês",
-      features: [
-        "Agendamento manual",
-        "3 Calendários",
-        "Cadastro de clientes manual",
-        "Histórico de serviços",
-        "Suporte via email",
-        "Demais funções básicas",
-      ],
-      buttonText: "Teste 3 Dias Grátis",
-      isBasic: true,
-    },
-    {
-      name: "IA 100",
-      description: "Ideal para pequenos negócios",
-      price: "R$ 190",
-      period: "/mês",
-      features: [
-        "100 atendimentos mensais",
-        "3 Calendários inicias",
-        ,
-        "Reset a cada 24 horas",
-        "Suporte via Whatsapp",
-      ],
-      buttonText: "Teste 3 Dias Grátis",
-    },
-    {
-      name: "IA 200",
-      description: "Para negócios em crescimento",
-      price: "R$ 329",
-      period: "/mês",
-      features: ["200 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Teste 3 Dias Grátis",
-      recommended: true,
-      discount: "10% Off",
-    },
-    {
-      name: "IA 300",
-      description: "Para negócios estabelecidos",
-      price: "R$ 467",
-      period: "/mês",
-      features: ["300 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Teste 3 Dias Grátis",
-      discount: "15% Off",
-    },
-  ],
-  addons: [
-    {
-      name: "Atendimentos Adicionais",
-      price: "R$ 25",
-      period: "/10 atendimentos",
-      description: "Adicione mais atendimentos IA conforme necessário",
-    },
-    {
-      name: "Calendário Adicional",
-      price: "R$ 10",
-      period: "/1 Agenda",
-      description: "Adicione mais agendas conforme necessário",
-    },
-    {
-      name: "SDR (Prospecção de clientes)",
-      price: "Em breve",
-      period: "",
-      description: "Prospecção de clientes que já não consomem a mais de 30 dias, 3 meses e 6 meses",
-      comingSoon: true,
-    },
-  ],
-  dashboardButtonText: "Começar",
+// Converter os planos do PRICING_TEXTS para o formato Plan
+const convertToPlans = (plans: any[]): Plan[] => {
+  return plans.map((plan) => ({
+    id: plan.name.toLowerCase().replace(/\s+/g, "-"),
+    name: plan.name,
+    description: plan.description,
+    price: plan.price,
+    period: plan.period,
+    productId: "", // Não usado na landing page
+    planType: plan.isBasic ? "basic" : "ai100", // Valor padrão
+    features: plan.features,
+    isBasic: plan.isBasic,
+    recommended: plan.recommended,
+    discount: plan.discount,
+  }));
 };
 
 export function Pricing() {
   // Separar planos básicos dos planos com IA
   const basicPlan = PRICING_TEXTS.plans.find((plan) => plan.isBasic);
   const aiPlans = PRICING_TEXTS.plans.filter((plan) => !plan.isBasic);
+
+  const convertedBasicPlan = basicPlan ? convertToPlans([basicPlan])[0] : null;
+  const convertedAiPlans = convertToPlans(aiPlans);
 
   return (
     <section>
@@ -152,65 +63,12 @@ export function Pricing() {
         {/* Planos com IA */}
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 h-full gap-5">
-            <Card className="flex justify-between relative">
-              <CardHeader className="flex-row justify-center">
-                <CardTitle className="text-2xl mt-5">{basicPlan.name}</CardTitle>
-                <CardDescription className="text-xs">{basicPlan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{basicPlan.price}</span>
-                  <span className="text-muted-foreground">{basicPlan.period}</span>
-                </div>
-              </CardHeader>
+            {/* Plano Básico */}
+            {convertedBasicPlan && <PlanCard plan={convertedBasicPlan} showButton={false} isLandingPage={true} />}
 
-              <CardContent className="flex-1 flex justify-center">
-                <div className="mb-4 p-3 rounded-lg">
-                  <ul className="space-y-1 text-sm">
-                    {basicPlan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            {aiPlans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`flex flex-col justify-between relative ${plan.recommended ? "border-primary" : ""}`}
-              >
-                {plan.recommended && (
-                  <span className="absolute top-3 right-3 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground z-10">
-                    Recomendado
-                  </span>
-                )}
-                {plan.discount && !plan.recommended && (
-                  <span className="absolute top-3 right-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white z-10">
-                    {plan.discount}
-                  </span>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-2xl mt-5">{plan.name}</CardTitle>
-                  <CardDescription className="text-xs">{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                  {plan.discount && <span className="text-sm text-green-500">{plan.discount}</span>}
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <ul className="space-y-3 text-sm">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+            {/* Planos com IA */}
+            {convertedAiPlans.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} showButton={false} isLandingPage={true} />
             ))}
           </div>
         </div>

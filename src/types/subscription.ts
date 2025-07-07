@@ -26,6 +26,7 @@ export interface SubscriptionInfo {
 export interface AdditionalCalendarInfo {
   id: string;
   active: boolean;
+  purchaseDate: string;
   expiresAt: string;
 }
 

@@ -1,47 +1,52 @@
 "use client";
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Trash2, AlertTriangle } from "lucide-react";
+import { Calendar, Plus, Settings, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { AdditionalCalendarInfo } from "@/types/subscription";
-import { createPortalSession } from "@/store/subscription-store";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { createPortalSession, createSubscription } from "@/store/subscription-store";
+import { useRouter } from "next/navigation";
 
 interface AdditionalCalendarManagementProps {
   additionalCalendars: AdditionalCalendarInfo[];
 }
 
 export function AdditionalCalendarManagement({ additionalCalendars }: AdditionalCalendarManagementProps) {
+  const router = useRouter();
   const [calendars, setCalendars] = useState<AdditionalCalendarInfo[]>(additionalCalendars);
-  const [cancelingId, setCancelingId] = useState<string | null>(null);
-  const [calendarToCancel, setCalendarToCancel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleCancelCalendar = async (calendarId: string) => {
+  const hasActiveCalendars = calendars.some((calendar) => calendar.active);
+
+  const handleManageCalendars = async () => {
+    setIsLoading(true);
     try {
-      setCancelingId(calendarId);
-      // Redirect to Stripe portal for calendar management
       await createPortalSession();
       toast.success("Redirecionando para o portal de gerenciamento");
     } catch (error) {
-      console.error("Error managing calendar:", error);
+      console.error("Error managing calendars:", error);
       toast.error("Erro ao acessar portal de gerenciamento");
     } finally {
-      setCancelingId(null);
-      setCalendarToCancel(null);
+      setIsLoading(false);
     }
   };
 
   const handleAddCalendar = async () => {
+    setIsLoading(true);
     try {
-      await createPortalSession();
+      // Redirecionar diretamente para o checkout do Stripe
+      await createSubscription(process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!);
+      toast.success("Redirecionando para o checkout");
     } catch (error) {
-      console.error("Error creating portal session:", error);
-      toast.error("Erro ao acessar portal");
+      console.error("Error creating subscription:", error);
+      toast.error("Erro ao criar assinatura");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,12 +63,7 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
         {calendars.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground mb-4">
-              Você não possui calendários adicionais ativos.
-            </p>
-            <Button onClick={handleAddCalendar} variant="outline">
-              Adicionar Calendário
-            </Button>
+            <p className="text-sm text-muted-foreground mb-4">Você não possui calendários adicionais ativos.</p>
           </div>
         ) : (
           <>
@@ -72,8 +72,8 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Data de Compra</TableHead>
                   <TableHead>Expira em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -85,51 +85,51 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
                         {calendar.active ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(calendar.expiresAt), "dd/MM/yyyy", { locale: ptBR })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {calendar.active && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCalendarToCancel(calendar.id)}
-                          disabled={cancelingId === calendar.id}
-                        >
-                          {cancelingId === calendar.id ? (
-                            "Processando..."
-                          ) : (
-                            <>
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Gerenciar
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </TableCell>
+                    <TableCell>{format(new Date(calendar.purchaseDate), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                    <TableCell>{format(new Date(calendar.expiresAt), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            <div className="flex justify-end">
-              <Button onClick={handleAddCalendar} variant="outline">
-                Adicionar Calendário
-              </Button>
-            </div>
+
+            {hasActiveCalendars && (
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium">Gerenciamento via Stripe</p>
+                    <p>
+                      Use o portal do Stripe para cancelar, alterar ou ver detalhes dos seus calendários adicionais.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </CardContent>
+      <CardFooter className="space-y-2">
+        {hasActiveCalendars ? (
+          <>
+            {/* Botão principal para gerenciar via Stripe */}
+            <Button onClick={handleManageCalendars} className="w-full" disabled={isLoading}>
+              <Settings className="h-4 w-4 mr-2" />
+              {isLoading ? "Carregando..." : "Gerenciar via Stripe"}
+            </Button>
 
-      <ConfirmationDialog
-        open={!!calendarToCancel}
-        onOpenChange={(open) => !open && setCalendarToCancel(null)}
-        title="Gerenciar Calendário"
-        description="Você será redirecionado para o portal do Stripe para gerenciar este calendário adicional."
-        confirmText="Continuar"
-        cancelText="Cancelar"
-        onConfirm={() => calendarToCancel && handleCancelCalendar(calendarToCancel)}
-        variant="default"
-      />
+            {/* Botão secundário para adicionar mais calendários */}
+            <Button onClick={handleAddCalendar} variant="outline" className="w-full" disabled={isLoading}>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Mais Calendários
+            </Button>
+          </>
+        ) : (
+          <Button onClick={handleAddCalendar} className="w-full" variant="default" disabled={isLoading}>
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Calendário
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 }

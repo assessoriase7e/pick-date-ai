@@ -29,8 +29,6 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
   const isSubscriptionActive = subscriptionData?.isSubscriptionActive || false;
   const additionalCalendars = subscriptionData?.additionalCalendars || [];
 
-  console.log(isSubscriptionActive);
-
   // Não precisamos mais do useEffect para buscar dados, pois agora recebemos via props
 
   if (isLoading) {
