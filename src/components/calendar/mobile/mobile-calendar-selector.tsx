@@ -59,7 +59,9 @@ export function MobileCalendarSelector({
               >
                 <span className="flex items-center justify-between w-full">
                   <span>
-                    {calendar?.name ? `${calendar.name} | ${calendar.collaborator?.name}` : calendar.collaborator?.name}
+                    {calendar?.name
+                      ? `${calendar?.name} | ${calendar.collaborator?.name}`
+                      : calendar.collaborator?.name}
                   </span>
                 </span>
               </SelectItem>

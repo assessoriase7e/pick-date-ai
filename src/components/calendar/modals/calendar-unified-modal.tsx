@@ -26,7 +26,7 @@ export function CalendarUnifiedModal(props: CalendarUnifiedModalProps) {
                 <Edit className="h-5 w-5" />
                 Ações do Calendário
               </DialogTitle>
-              <DialogDescription>Escolha uma ação para o calendário "{props.calendar.name}"</DialogDescription>
+              <DialogDescription>Escolha uma ação para o calendário "{props.calendar?.name}"</DialogDescription>
             </DialogHeader>
 
             <div className="flex flex-col gap-3 py-4">

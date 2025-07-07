@@ -100,7 +100,7 @@ export function DesktopCalendarView({
                   {selectedCalendar
                     ? `${
                         selectedCalendar?.name
-                          ? `${selectedCalendar.name} | ${selectedCalendar.collaborator.name}`
+                          ? `${selectedcalendar?.name} | ${selectedCalendar.collaborator.name}`
                           : `${selectedCalendar.collaborator.name}`
                       } `
                     : "Selecione um calendário"}
@@ -109,7 +109,9 @@ export function DesktopCalendarView({
               <SelectContent className="max-h-[300px] overflow-y-auto">
                 {calendars.map((calendar) => (
                   <SelectItem key={calendar.id} value={String(calendar.id)}>
-                    {calendar.name ? `${calendar.name} | ${calendar.collaborator?.name}` : calendar.collaborator?.name}
+                    {calendar?.name
+                      ? `${calendar?.name} | ${calendar.collaborator?.name}`
+                      : calendar.collaborator?.name}
                   </SelectItem>
                 ))}
               </SelectContent>

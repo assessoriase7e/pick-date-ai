@@ -18,16 +18,14 @@ interface ManageCalendarsClientProps {
   currentLimit: number;
 }
 
-export function ManageCalendarsClient({ 
-  calendars, 
-  excessCount, 
+export function ManageCalendarsClient({
+  calendars,
+  excessCount,
   preSelectedCalendarIds,
-  currentLimit
+  currentLimit,
 }: ManageCalendarsClientProps) {
   const router = useRouter();
-  const [selectedCalendars, setSelectedCalendars] = useState<Set<number>>(
-    new Set(preSelectedCalendarIds)
-  );
+  const [selectedCalendars, setSelectedCalendars] = useState<Set<number>>(new Set(preSelectedCalendarIds));
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggleCalendar = (calendarId: number) => {
@@ -54,7 +52,7 @@ export function ManageCalendarsClient({
         if (calendar) {
           return updateCalendar({
             id: calendarId,
-            name: calendar.name || "",
+            name: calendar?.name || "",
             collaboratorId: calendar.collaboratorId || undefined,
             isActive: false,
           });
@@ -91,8 +89,8 @@ export function ManageCalendarsClient({
           <div>
             <h1 className="text-2xl font-bold">Limite de Calendários Excedido</h1>
             <p className="text-muted-foreground">
-              Você precisa desativar pelo menos {excessCount} calendário(s) para continuar.
-              Seu limite atual é de {currentLimit} calendários ativos.
+              Você precisa desativar pelo menos {excessCount} calendário(s) para continuar. Seu limite atual é de{" "}
+              {currentLimit} calendários ativos.
             </p>
           </div>
         </div>
@@ -114,7 +112,7 @@ export function ManageCalendarsClient({
             {activeCalendars.map((calendar) => (
               <div key={calendar.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
-                  <h3 className="font-medium">{calendar.name}</h3>
+                  <h3 className="font-medium">{calendar?.name}</h3>
                   <p className="text-sm text-muted-foreground">
                     Criado em: {new Date(calendar.createdAt).toLocaleDateString("pt-BR")}
                   </p>

@@ -71,7 +71,7 @@ export function CalendarModals({
 
   useEffect(() => {
     if (selectedCalendar && editOpen) {
-      editForm.reset({ name: selectedCalendar.name });
+      editForm.reset({ name: selectedcalendar?.name });
     }
   }, [selectedCalendar, editOpen, editForm]);
 
