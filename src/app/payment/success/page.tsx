@@ -14,7 +14,7 @@ export default function PaymentSuccessPage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           // Mover a navegação para fora do setState
-          setTimeout(() => router.push("/calendar"), 0);
+          setTimeout(() => router.push("/config"), 0);
           return 0;
         }
         return prev - 1;
@@ -39,7 +39,7 @@ export default function PaymentSuccessPage() {
           </p>
           <div className="text-3xl font-bold text-primary">{countdown}s</div>
           <button
-            onClick={() => router.push("/calendar")}
+            onClick={() => router.push("/config")}
             className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
           >
             Ir para o Calendário Agora
