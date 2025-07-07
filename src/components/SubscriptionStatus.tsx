@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Bot } from "lucide-react";
+import { Calendar, Bot, Star } from "lucide-react";
 import { useSubscription } from "@/store/subscription-store";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -35,6 +35,26 @@ export default function SubscriptionStatus() {
         title="Erro ao carregar status da assinatura"
       >
         <span className="text-red-600 text-sm font-bold">!</span>
+      </Button>
+    );
+  }
+  
+  // Verificar se é usuário lifetime
+  // Usuários lifetime têm isSubscriptionActive = true, mas podem não ter um objeto subscription
+  const isLifetimeUser = data.isSubscriptionActive && !data.subscription;
+
+  // Se for usuário lifetime, mostrar ícone especial
+  if (isLifetimeUser) {
+    return (
+      <Button
+        onClick={handleClick}
+        className={cn(
+          "flex items-center justify-center w-8 h-8 rounded-full transition-colors",
+          "bg-background hover:bg-yellow-100 border-[1px] border-yellow-400"
+        )}
+        title="Acesso vitalício"
+      >
+        <Star className="w-4 h-4 text-yellow-500" />
       </Button>
     );
   }

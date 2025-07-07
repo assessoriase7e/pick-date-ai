@@ -20,7 +20,7 @@ export async function checkExcessCalendars(): Promise<ExcessCalendarsData> {
     if (!userId) {
       throw new Error("Unauthorized");
     }
-    
+
     // Verificar se é usuário lifetime
     const isLifetime = await isLifetimeUser();
     if (isLifetime) {
@@ -33,7 +33,7 @@ export async function checkExcessCalendars(): Promise<ExcessCalendarsData> {
     }
 
     const limits = await getCalendarLimits();
-    
+
     // Verificar se o limite é infinito (planos com IA)
     if (limits.limit === Infinity) {
       return {

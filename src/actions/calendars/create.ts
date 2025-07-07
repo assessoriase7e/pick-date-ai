@@ -16,7 +16,7 @@ async function getCalendarLimit(subscription: any, userId: string): Promise<numb
   if (await isLifetimeUser()) {
     return Infinity;
   }
-  
+
   if (!subscription || subscription.status !== "active") {
     return 3; // Plano base: 3 calendários
   }
