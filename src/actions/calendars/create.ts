@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { getCalendarLimits } from "./get-calendar-limits";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 // Função para gerar código de acesso aleatório
 function generateAccessCode(): string {
@@ -11,6 +12,11 @@ function generateAccessCode(): string {
 
 // Função para determinar o limite de calendários baseado no plano
 async function getCalendarLimit(subscription: any, userId: string): Promise<number> {
+  // Verificar se é usuário lifetime primeiro
+  if (await isLifetimeUser()) {
+    return Infinity;
+  }
+  
   if (!subscription || subscription.status !== "active") {
     return 3; // Plano base: 3 calendários
   }

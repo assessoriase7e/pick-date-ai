@@ -34,8 +34,6 @@ export const useSubscription = create<SubscriptionStore>((set, get) => ({
 // Export the action functions for use in components
 // Adicionar nova função para pagamentos únicos
 export const createOneTimePayment = async (priceId: string) => {
-  console.log(priceId);
-
   try {
     const response = await fetch("/api/payment/create-checkout", {
       method: "POST",

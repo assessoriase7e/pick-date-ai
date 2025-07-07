@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { getCalendarLimits } from "./get-calendar-limits";
 import { Calendar } from "@prisma/client";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 export interface ExcessCalendarsData {
   hasExcess: boolean;
@@ -19,8 +20,29 @@ export async function checkExcessCalendars(): Promise<ExcessCalendarsData> {
     if (!userId) {
       throw new Error("Unauthorized");
     }
+    
+    // Verificar se é usuário lifetime
+    const isLifetime = await isLifetimeUser();
+    if (isLifetime) {
+      return {
+        hasExcess: false,
+        excessCount: 0,
+        activeCalendars: [],
+        currentLimit: Infinity,
+      };
+    }
 
     const limits = await getCalendarLimits();
+    
+    // Verificar se o limite é infinito (planos com IA)
+    if (limits.limit === Infinity) {
+      return {
+        hasExcess: false,
+        excessCount: 0,
+        activeCalendars: [],
+        currentLimit: Infinity,
+      };
+    }
 
     const activeCalendars = await prisma.calendar.findMany({
       where: {

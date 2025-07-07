@@ -10,8 +10,6 @@ export default async function SettingsPage() {
   const { data } = await getProfile();
   const subscriptionData = await getSubscriptionStatus();
 
-  console.log(subscriptionData);
-
   return (
     <div className="space-y-6">
       <div>

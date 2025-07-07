@@ -90,11 +90,10 @@ export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.Payment
 
     // Verificar se já existe um registro para este pagamento
     const existingPayment = await prisma.paymentHistory.findUnique({
-      where: { stripePaymentId: paymentIntent.id }
+      where: { stripePaymentId: paymentIntent.id },
     });
 
     if (existingPayment) {
-      console.log(`Pagamento ${paymentIntent.id} já foi processado anteriormente.`);
       return;
     }
 
@@ -141,11 +140,10 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
 
       // Verificar se já existe um registro para este pagamento
       const existingPayment = await prisma.paymentHistory.findUnique({
-        where: { stripePaymentId: pi.id }
+        where: { stripePaymentId: pi.id },
       });
 
       if (existingPayment) {
-        console.log(`Pagamento ${pi.id} já foi processado anteriormente.`);
         return;
       }
 
