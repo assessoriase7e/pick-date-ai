@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { PlanType } from "@/types/subscription";
+import { deactivateAllAIAgents } from "@/lib/agent-utils";
 
 // Enum para tipos de eventos do webhook
 enum StripeWebhookEvent {
@@ -213,9 +214,38 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     throw new Error("Invalid subscription data: missing item");
   }
 
+  // Buscar a assinatura atual no banco
+  const existingSubscription = await prisma.subscription.findFirst({
+    where: { stripeSubscriptionId: subscription.id },
+  });
+
+  if (!existingSubscription) {
+    console.error("Assinatura não encontrada no banco de dados");
+    return;
+  }
+
+  const newPriceId = item.price.id;
+  const oldPriceId = existingSubscription.stripePriceId;
+
+  // Verificar se houve mudança de plano IA para plano base
+  const wasAIPlan = [
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
+    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+  ].includes(oldPriceId);
+
+  const isNowBasicPlan = newPriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC!;
+
+  // Se mudou de plano IA para plano base, desativar agentes
+  if (wasAIPlan && isNowBasicPlan) {
+    await deactivateAllAIAgents(existingSubscription.userId);
+  }
+
+  // Atualizar a assinatura no banco
   await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
     data: {
+      stripePriceId: newPriceId,
       status: subscription.status,
       currentPeriodStart: new Date(item.current_period_start * 1000),
       currentPeriodEnd: new Date(item.current_period_end * 1000),

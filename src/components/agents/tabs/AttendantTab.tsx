@@ -45,9 +45,11 @@ interface AttendantTabProps {
     rules: string;
     suportPhone: string | null;
   };
+  hasAIPlan?: boolean;
 }
 
 export function AttendantTab({
+  hasAIPlan = false,
   onSave,
   isLoading,
   setIsLoading,
