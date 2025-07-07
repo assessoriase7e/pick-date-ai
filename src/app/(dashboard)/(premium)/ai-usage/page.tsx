@@ -33,7 +33,9 @@ export default async function AIUsagePage({ searchParams }: { searchParams: Prom
     uniqueAttendances: 0, 
     totalAttendances: 0,
     monthlyLimit: 0,
-    remainingCredits: 0
+    remainingCredits: 0,
+    additionalCredits: [],
+    totalAdditionalCredits: 0
   };
   const history = historyResult.success ? historyResult.data : [];
   const pagination = historyResult.success ? historyResult.pagination : { totalPages: 1, currentPage: 1 };

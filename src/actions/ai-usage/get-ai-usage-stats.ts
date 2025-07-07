@@ -14,6 +14,14 @@ type GetAIUsageStatsResponse =
         totalAttendances: number;
         monthlyLimit: number;
         remainingCredits: number;
+        additionalCredits: {
+          id: number;
+          quantity: number;
+          used: number;
+          remaining: number;
+          // expiresAt removido
+        }[];
+        totalAdditionalCredits: number;
       };
     }
   | { success: false; error: string };
@@ -36,6 +44,12 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
       where: { id: userId },
       include: {
         subscription: true,
+        additionalAICredits: {
+          where: {
+            active: true,
+            used: { lt: prisma.additionalAICredit.fields.quantity },
+          },
+        },
       },
     });
 
@@ -48,6 +62,13 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
 
     const clerkUser = await currentUser();
     const monthlyLimit = await getAICreditsLimit(user.subscription);
+
+    // Calcular total de créditos adicionais
+    const additionalCredits = user.additionalAICredits || [];
+    const totalAdditionalCredits = additionalCredits.reduce(
+      (total, credit) => total + (credit.quantity - credit.used),
+      0
+    );
 
     // Se for usuário lifetime, retornar valores especiais
     if (clerkUser && isLifetime) {
@@ -86,6 +107,8 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
           totalAttendances,
           monthlyLimit: Infinity,
           remainingCredits: Infinity,
+          additionalCredits: [],
+          totalAdditionalCredits: 0,
         },
       };
     }
@@ -119,8 +142,11 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
       },
     });
 
-    // Calcular créditos restantes
-    const remainingCredits = Math.max(0, monthlyLimit - uniqueAttendances);
+    // Calcular créditos restantes do plano base
+    const baseRemainingCredits = Math.max(0, monthlyLimit - uniqueAttendances);
+
+    // Calcular créditos restantes totais (plano base + adicionais)
+    const remainingCredits = baseRemainingCredits + totalAdditionalCredits;
 
     return {
       success: true,
@@ -129,6 +155,13 @@ export async function getAIUsageStats(): Promise<GetAIUsageStatsResponse> {
         totalAttendances,
         monthlyLimit,
         remainingCredits,
+        additionalCredits: additionalCredits.map((credit) => ({
+          id: credit.id,
+          quantity: credit.quantity,
+          used: credit.used,
+          remaining: credit.quantity - credit.used,
+        })),
+        totalAdditionalCredits,
       },
     };
   } catch (error) {
