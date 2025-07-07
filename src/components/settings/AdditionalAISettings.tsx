@@ -18,8 +18,7 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
   const [isLoading, setIsLoading] = useState(false);
 
   // Verificar se o usuário tem pacotes adicionais de IA
-  const hasAdditionalAI =
-    subscriptionData.subscription?.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10;
+  const hasAdditionalAI = subscriptionData.subscription?.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300;
 
   const handleManageAIPackages = async () => {
     if (!subscriptionData.isSubscriptionActive) {
@@ -88,9 +87,7 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
             ) : (
               <div className="text-center py-4">
                 <Brain className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Você não possui pacotes adicionais de IA ativos.
-                </p>
+                <p className="text-sm text-muted-foreground mb-4">Você não possui pacotes adicionais de IA ativos.</p>
               </div>
             )}
           </>
@@ -100,33 +97,19 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
         {hasAdditionalAI ? (
           <>
             {/* Botão principal para gerenciar via Stripe */}
-            <Button 
-              onClick={handleManageAIPackages} 
-              className="w-full" 
-              disabled={isLoading}
-            >
+            <Button onClick={handleManageAIPackages} className="w-full" disabled={isLoading}>
               <Settings className="h-4 w-4 mr-2" />
               {isLoading ? "Carregando..." : "Gerenciar via Stripe"}
             </Button>
-            
+
             {/* Botão secundário para adicionar mais pacotes */}
-            <Button 
-              onClick={handleAddAIPackage} 
-              variant="outline" 
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button onClick={handleAddAIPackage} variant="outline" className="w-full" disabled={isLoading}>
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Mais Pacotes
             </Button>
           </>
         ) : (
-          <Button 
-            onClick={handleAddAIPackage} 
-            className="w-full" 
-            variant="default"
-            disabled={isLoading}
-          >
+          <Button onClick={handleAddAIPackage} className="w-full" variant="default" disabled={isLoading}>
             {subscriptionData.isSubscriptionActive ? (
               <>
                 <Plus className="h-4 w-4 mr-2" />

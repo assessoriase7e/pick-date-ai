@@ -26,8 +26,8 @@ export async function cancelBasePlan(): Promise<{ success: boolean; message?: st
     }
 
     // Verificar se é um plano base
-    const isBasePlan = dbUser.subscription.stripeProductId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC;
-    
+    const isBasePlan = dbUser.subscription.stripeProductId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC;
+
     if (!isBasePlan) {
       throw new Error("Esta função é apenas para cancelamento de planos base");
     }

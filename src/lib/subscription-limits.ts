@@ -45,11 +45,11 @@ export async function getAICreditsLimit(
     const { stripePriceId } = subscription;
 
     // Verificar pelos IDs dos produtos de IA
-    if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!) {
+    if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!) {
       baseCredits = 100;
-    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!) {
+    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!) {
       baseCredits = 200;
-    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!) {
+    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!) {
       baseCredits = 300;
     }
   }
@@ -119,9 +119,9 @@ export async function getCalendarLimit(
     // Planos com IA não têm limite
     if (
       [
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-        process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
+        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
+        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
       ].includes(stripePriceId)
     ) {
       return Infinity;
@@ -157,9 +157,9 @@ export async function hasAIPlan(subscription: Subscription | null | undefined): 
   const { stripePriceId } = subscription;
 
   return [
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
   ].includes(stripePriceId);
 }
 
@@ -193,5 +193,5 @@ export async function hasAdditionalAI(subscription: Subscription | null | undefi
     return false;
   }
 
-  return subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!;
+  return subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!;
 }

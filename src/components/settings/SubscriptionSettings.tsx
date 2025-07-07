@@ -77,13 +77,13 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
 
   const getPlanName = (productId: string) => {
     switch (productId) {
-      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
+      case process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC:
         return "Plano Base";
-      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
+      case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100:
         return "100 Atendimentos IA";
-      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
+      case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200:
         return "200 Atendimentos IA";
-      case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
+      case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300:
         return "300 Atendimentos IA";
       case "prod_SV7hWdNkIunsco": // Adicionar o ID específico
         return "Plano Base"; // Ou o nome correto do plano
@@ -131,7 +131,7 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
     }
   };
 
-  const isBasePlan = subscription?.stripeProductId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC;
+  const isBasePlan = subscription?.stripeProductId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC;
   return (
     <Card>
       <CardHeader>

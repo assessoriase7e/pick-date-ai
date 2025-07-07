@@ -24,20 +24,20 @@ export async function createSubscription(priceId: string): Promise<{ success: bo
     }
 
     // Verificações para produtos adicionais
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR) {
       if (!dbUser.subscription || dbUser.subscription.status !== "active") {
         throw new Error("É necessário ter um plano base ativo para assinar calendários extras");
       }
     }
 
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300) {
       if (
         !dbUser.subscription ||
         dbUser.subscription.status !== "active" ||
         ![
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300,
         ].includes(dbUser.subscription.stripePriceId)
       ) {
         throw new Error("É necessário ter um plano de IA ativo para contratar créditos adicionais");

@@ -1,123 +1,12 @@
-export const STRIPE_PRODUCT_IDS = {
-  basic: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC!,
-  ai100: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-  ai200: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-  ai300: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+// Renomear para refletir que são priceIds
+export const STRIPE_PRICE_IDS = {
+  basic: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!,
+  ai100: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
+  ai200: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
+  ai300: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
 };
 
-export const PRICING_TEXTS = {
-  title: "Planos Simples e Transparentes",
-  subtitle: "Escolha o plano ideal para o seu negócio",
-  freeTrialText: "🎉 Todos os planos incluem 3 dias grátis SEM LIMITES para testar!",
-  trialHighlight:
-    "Durante o período de teste, você terá acesso a TODOS os recursos sem limitações (exceto calendários limitados a 20)",
-  basicFeatures: [
-    "Múltiplos calendários",
-    "Múltiplos colaboradores",
-    "Serviços ilimitados",
-    "Lembrete de agendamento",
-    "Calendário compartilhado",
-    "Edição de agendamento",
-    "Cadastro de clientes",
-    "Histórico de clientes",
-    "Histórico do profissional",
-  ],
-  includedFeatures: [
-    "Múltiplos calendários",
-    "Múltiplos colaboradores",
-    "Serviços ilimitados",
-    "Lembrete de agendamento",
-    "Perguntas e Respostas via IA",
-    "Calendário compartilhado",
-    "Envio de arquivos via IA",
-    "Envio de links via IA",
-    "IA com regras customizadas",
-    "Atendimento humanizado",
-    "Operação IA 24/7",
-    "Atendimento IA via Whatsapp",
-    "Relatório completo",
-    "Impressão de comandas",
-    "Edição de agendamento",
-    "Cadastro de clientes",
-    "Histórico de clientes",
-    "Histórico do profissional",
-    "Black List atendimento IA",
-  ],
-  plans: [
-    {
-      name: "Agenda Base",
-      description: "Agendamento simples sem IA",
-      price: "R$ 60",
-      period: "/mês",
-      features: [
-        "Agendamento manual",
-        "3 Calendários",
-        "Cadastro de clientes manual",
-        "Histórico de serviços",
-        "Suporte via email",
-        "Demais funções básicas",
-      ],
-      buttonText: "Teste 3 Dias Grátis",
-      isBasic: true,
-    },
-    {
-      name: "IA 100",
-      description: "Ideal para pequenos negócios",
-      price: "R$ 190",
-      period: "/mês",
-      features: [
-        "100 atendimentos mensais",
-        "3 Calendários inicias",
-        ,
-        "Reset a cada 24 horas",
-        "Suporte via Whatsapp",
-      ],
-      buttonText: "Teste 3 Dias Grátis",
-    },
-    {
-      name: "IA 200",
-      description: "Para negócios em crescimento",
-      price: "R$ 329",
-      period: "/mês",
-      features: ["200 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Teste 3 Dias Grátis",
-      recommended: true,
-      discount: "10% Off",
-    },
-    {
-      name: "IA 300",
-      description: "Para negócios estabelecidos",
-      price: "R$ 467",
-      period: "/mês",
-      features: ["300 atendimentos mensais", "3 Calendários inicias", "Reset a cada 24 horas", "Suporte via Whatsapp"],
-      buttonText: "Teste 3 Dias Grátis",
-      discount: "15% Off",
-    },
-  ],
-  addons: [
-    {
-      name: "Atendimentos Adicionais",
-      price: "R$ 25",
-      period: "/10 atendimentos",
-      description: "Adicione mais atendimentos IA conforme necessário",
-    },
-    {
-      name: "Calendário Adicional",
-      price: "R$ 10",
-      period: "/1 Agenda",
-      description: "Adicione mais agendas conforme necessário",
-    },
-    {
-      name: "SDR (Prospecção de clientes)",
-      price: "Em breve",
-      period: "",
-      description: "Prospecção de clientes que já não consomem a mais de 30 dias, 3 meses e 6 meses",
-      comingSoon: true,
-    },
-  ],
-  dashboardButtonText: "Começar",
-};
-
+// E atualizar os PLANS para usar priceId:
 export const PLANS = [
   {
     id: "basic",
@@ -125,7 +14,7 @@ export const PLANS = [
     description: "Agendamento simples sem IA",
     price: "R$ 60",
     period: "/mês",
-    productId: STRIPE_PRODUCT_IDS.basic,
+    priceId: STRIPE_PRICE_IDS.basic, // ← Mudar de productId para priceId
     planType: "basic" as const,
     features: [
       "Agendamento manual",
@@ -143,7 +32,7 @@ export const PLANS = [
     description: "Ideal para pequenos negócios",
     price: "R$ 190",
     period: "/mês",
-    productId: STRIPE_PRODUCT_IDS.ai100,
+    productId: STRIPE_PRICE_IDS.ai100,
     planType: "ai100" as const,
     features: [
       "100 atendimentos mensais",
@@ -160,7 +49,7 @@ export const PLANS = [
     description: "Para negócios em crescimento",
     price: "R$ 329",
     period: "/mês",
-    productId: STRIPE_PRODUCT_IDS.ai200,
+    productId: STRIPE_PRICE_IDS.ai200,
     planType: "ai200" as const,
     features: [
       "200 atendimentos mensais",
@@ -179,7 +68,7 @@ export const PLANS = [
     description: "Para negócios estabelecidos",
     price: "R$ 467",
     period: "/mês",
-    productId: STRIPE_PRODUCT_IDS.ai300,
+    productId: STRIPE_PRICE_IDS.ai300,
     planType: "ai300" as const,
     features: [
       "300 atendimentos mensais",
@@ -199,7 +88,7 @@ export const ADDITIONAL_CALENDAR_PLAN = {
   description: "Adicione mais um calendário ao seu plano base",
   price: "R$ 10",
   period: "/mês",
-  productId: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!,
+  productId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR!,
   features: ["+1 calendário extra", "Compatível com plano base", "Faturamento separado", "Cancele quando quiser"],
 };
 
@@ -209,6 +98,41 @@ export const ADDITIONAL_AI_PLAN = {
   description: "Adicione mais atendimentos IA ao seu plano",
   price: "R$ 25",
   period: "/mês",
-  productId: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!,
+  productId: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
   features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
+};
+
+export const PRICING_TEXTS = {
+  title: "Escolha o plano ideal para seu negócio",
+  subtitle: "Comece com 7 dias grátis em qualquer plano. Cancele quando quiser.",
+  freeTrialText: "🎉 7 dias grátis para testar!",
+  trialHighlight: "💡 Teste todas as funcionalidades sem compromisso durante o período gratuito",
+  plans: PLANS,
+  includedFeatures: [
+    "Agendamento inteligente com IA",
+    "Integração com WhatsApp",
+    "Calendários ilimitados",
+    "Cadastro automático de clientes",
+    "Histórico completo de conversas",
+    "Relatórios detalhados",
+    "Suporte prioritário",
+    "Atualizações automáticas",
+    "Backup automático dos dados",
+  ],
+  addons: [
+    {
+      name: "Calendário Adicional",
+      price: "R$ 10",
+      period: "/mês",
+      description: "Adicione mais um calendário ao seu plano base",
+      comingSoon: false,
+    },
+    {
+      name: "Atendimentos Adicionais",
+      price: "R$ 25",
+      period: "/mês",
+      description: "Adicione mais atendimentos IA ao seu plano",
+      comingSoon: false,
+    },
+  ],
 };

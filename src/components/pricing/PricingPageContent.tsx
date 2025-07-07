@@ -14,11 +14,11 @@ interface PricingPageContentProps {
   subscriptionData: SubscriptionData | null;
 }
 
-export function PricingPageContent({ 
-  plans, 
-  additionalCalendarPlan, 
+export function PricingPageContent({
+  plans,
+  additionalCalendarPlan,
   additionalAiPlan,
-  subscriptionData 
+  subscriptionData,
 }: PricingPageContentProps) {
   const subscription = subscriptionData?.subscription;
 
@@ -33,42 +33,45 @@ export function PricingPageContent({
   const AdditionalCard = ({ plan }: { plan: any }) => {
     // Verificar se o plano adicional já está ativo
     const isCurrentPlan = subscription?.stripeProductId === plan.productId;
-    
+
     // Verificar se o usuário pode assinar este plano adicional
     const canSubscribe = () => {
       // Se não tem assinatura ativa, não pode assinar nenhum adicional
       if (!subscription || subscription.status !== "active") {
         return false;
       }
-      
+
       // Para calendários adicionais, qualquer plano base ativo é suficiente
-      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR) {
+      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR) {
         return true;
       }
-      
+
       // Para créditos adicionais de IA, precisa ter um plano de IA
-      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10) {
+      if (plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300) {
         return [
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
-          process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300,
         ].includes(subscription.stripePriceId);
       }
-      
+
       return false;
     };
-    
+
     const buttonDisabled = isCurrentPlan || !canSubscribe();
-    const buttonText = isCurrentPlan ? "Plano Atual" : 
-                    !subscription || subscription.status !== "active" ? "Assine um Plano Primeiro" :
-                    plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10 && 
-                    ![
-                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100,
-                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200,
-                      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300
-                    ].includes(subscription.stripePriceId) ? "Requer Plano de IA" :
-                    "Adicionar ao Plano";
-    
+    const buttonText = isCurrentPlan
+      ? "Plano Atual"
+      : !subscription || subscription.status !== "active"
+      ? "Assine um Plano Primeiro"
+      : plan.productId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300 &&
+        ![
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300,
+        ].includes(subscription.stripePriceId)
+      ? "Requer Plano de IA"
+      : "Adicionar ao Plano";
+
     return (
       <Card className="border-border hover:border-primary/50 transition-colors">
         <CardHeader className="text-center pb-4">
@@ -93,7 +96,9 @@ export function PricingPageContent({
           <Button
             onClick={() => handleSubscribe(plan.productId)}
             disabled={buttonDisabled}
-            className={`w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background ${buttonDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`w-full bg-accent hover:bg-accent/90 text-foreground dark:text-background ${
+              buttonDisabled ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             size="lg"
           >
             {buttonText}

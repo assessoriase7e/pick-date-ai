@@ -25,8 +25,6 @@ export async function deactivateAllAIAgents(userId: string): Promise<void> {
       where: { userId },
       data: { isActive: false },
     });
-
-    console.log(`Agentes de IA desativados para o usuário: ${userId}`);
   } catch (error) {
     console.error("Erro ao desativar agentes de IA:", error);
     throw error;

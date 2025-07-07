@@ -20,9 +20,9 @@ async function getCalendarLimit(subscription: any, userId: string): Promise<numb
   // Planos com IA não têm limite
   if (
     [
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-      process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
     ].includes(stripePriceId)
   ) {
     return Infinity;

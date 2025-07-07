@@ -23,6 +23,7 @@ export const useSubscription = create<SubscriptionStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await getSubscriptionStatus();
+
       set({ data, isLoading: false });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : "Unknown error", isLoading: false });

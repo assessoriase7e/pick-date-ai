@@ -40,7 +40,7 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
     setIsLoading(true);
     try {
       // Redirecionar diretamente para o checkout do Stripe
-      await createSubscription(process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR!);
+      await createSubscription(process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR!);
       toast.success("Redirecionando para o checkout");
     } catch (error) {
       console.error("Error creating subscription:", error);

@@ -97,8 +97,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
 
   // Verificar se é uma assinatura de calendário adicional
   if (
-    productId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR ||
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_CALENDAR
+    productId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR
   ) {
     await prisma.additionalCalendar.create({
       data: {
@@ -121,7 +121,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
     }
 
     // Obter informações do produto e determinar o tipo de plano
-    const { planName, planType } = await getProductInfo(productId);
+    const { planName, planType } = await getProductInfo(productId, priceId);
 
     await prisma.subscription.upsert({
       where: { userId },
@@ -160,17 +160,17 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, user
 }
 
 // Função auxiliar para obter informações do produto
-async function getProductInfo(productId: string): Promise<{ planName: string; planType: PlanType }> {
+async function getProductInfo(productId: string, priceId: string): Promise<{ planName: string; planType: PlanType }> {
   try {
     const product = await stripe.products.retrieve(productId);
-    const planName = product.name || getPlanNameFallback(productId);
-    const planType = getPlanType(productId);
+    const planName = product.name || getPlanNameFallback(priceId);
+    const planType = getPlanType(priceId);
     return { planName, planType };
   } catch (error) {
     console.error("Error fetching product from Stripe:", error);
     return {
-      planName: getPlanNameFallback(productId),
-      planType: getPlanType(productId),
+      planName: getPlanNameFallback(priceId),
+      planType: getPlanType(priceId),
     };
   }
 }
@@ -178,13 +178,13 @@ async function getProductInfo(productId: string): Promise<{ planName: string; pl
 // Função auxiliar para obter o nome do plano (fallback)
 function getPlanNameFallback(productId: string): string {
   switch (productId) {
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC:
       return "Plano Base";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100:
       return "100 Atendimentos IA";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200:
       return "200 Atendimentos IA";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300:
       return "300 Atendimentos IA";
     default:
       return "Plano Desconhecido";
@@ -192,15 +192,15 @@ function getPlanNameFallback(productId: string): string {
 }
 
 // Função auxiliar para determinar o tipo de plano
-function getPlanType(productId: string): PlanType {
-  switch (productId) {
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC:
+function getPlanType(priceId: string): PlanType {
+  switch (priceId) {
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC:
       return "basic";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100:
       return "ai100";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200:
       return "ai200";
-    case process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300:
+    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300:
       return "ai300";
     default:
       return "basic";
@@ -229,12 +229,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   // Verificar se houve mudança de plano IA para plano base
   const wasAIPlan = [
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRODUCT_AI_300!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
   ].includes(oldPriceId);
 
-  const isNowBasicPlan = newPriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_BASIC!;
+  const isNowBasicPlan = newPriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!;
 
   // Se mudou de plano IA para plano base, desativar agentes
   if (wasAIPlan && isNowBasicPlan) {
@@ -312,7 +312,7 @@ async function handlePaymentSucceeded(invoice: any) {
     });
 
     // Verificar se é um pacote adicional de IA
-    if (subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ADD_10!) {
+    if (subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!) {
       await prisma.additionalAICredit.create({
         data: {
           userId: subscription.userId,

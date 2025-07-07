@@ -1,10 +1,10 @@
+import { PRICING_TEXTS } from "@/constants/pricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
 import { MovingBorderButton } from "../ui/moving-border";
 import { PlanCard } from "../pricing/PlanCard";
 import { Plan } from "@/types/subscription";
-import { PRICING_TEXTS } from "@/constants/pricing";
 
 // Converter os planos do PRICING_TEXTS para o formato Plan
 const convertToPlans = (plans: any[]): Plan[] => {
