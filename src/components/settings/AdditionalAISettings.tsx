@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, Plus, AlertTriangle, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createPortalSession } from "@/store/subscription-store";
+import { createPortalSession, createOneTimePayment } from "@/store/subscription-store";
 import { SubscriptionData } from "@/types/subscription";
 import { useState } from "react";
 
@@ -18,16 +18,16 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
   const [isLoading, setIsLoading] = useState(false);
 
   // Verificar se o usuário tem pacotes adicionais de IA
-  const hasAdditionalAI = subscriptionData.additionalAICredits && 
+  const hasAdditionalAI =
+    subscriptionData.additionalAICredits &&
     subscriptionData.additionalAICredits.length > 0 &&
-    subscriptionData.additionalAICredits.some(credit => credit.remaining > 0);
+    subscriptionData.additionalAICredits.some((credit) => credit.remaining > 0);
 
   // Verificar se a assinatura está ativa baseado no status da assinatura
   const isSubscriptionActive = subscriptionData.subscription?.status === "active";
 
-  const totalAdditionalCredits = subscriptionData.additionalAICredits?.reduce(
-    (total, credit) => total + credit.remaining, 0
-  ) || 0;
+  const totalAdditionalCredits =
+    subscriptionData.additionalAICredits?.reduce((total, credit) => total + credit.remaining, 0) || 0;
   const handleManageAIPackages = async () => {
     if (!isSubscriptionActive) {
       router.push("/pricing");
@@ -47,7 +47,15 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
     if (!isSubscriptionActive) {
       router.push("/pricing");
     } else {
-      router.push("/pricing#additional-ai");
+      // Redirecionar diretamente para o checkout
+      setIsLoading(true);
+      try {
+        await createOneTimePayment(process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_AI!);
+      } catch (error) {
+        console.error("Erro ao criar pagamento:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -74,20 +82,19 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
             </div>
             {subscriptionData.additionalAICredits?.map((credit) => (
               <div key={credit.id} className="text-sm text-muted-foreground border rounded p-2">
-                <p>Pacote: {credit.remaining} de {credit.quantity} créditos restantes</p>
-                <p>Expira em: {new Date(credit.expiresAt).toLocaleDateString('pt-BR')}</p>
+                <p>
+                  Pacote: {credit.remaining} de {credit.quantity} créditos restantes
+                </p>
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-4">
             <Brain className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground mb-4">
-              Você não possui pacotes adicionais de IA ativos.
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Você não possui pacotes adicionais de IA ativos.</p>
           </div>
         )}
-        
+
         {/* Mostrar aviso de assinatura necessária apenas se não houver assinatura ativa */}
         {!isSubscriptionActive && (
           <div className="p-3 bg-yellow-50 rounded-lg mt-3">
@@ -101,7 +108,7 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
           </div>
         )}
       </CardContent>
-      <CardFooter className="space-y-2">
+      <CardFooter className="flex-col gap-5">
         {hasAdditionalAI ? (
           <>
             {/* Botão principal para gerenciar via Stripe */}
@@ -111,7 +118,12 @@ export function AdditionalAISettings({ subscriptionData }: AdditionalAISettingsP
             </Button>
 
             {/* Botão secundário para adicionar mais pacotes */}
-            <Button onClick={handleAddAIPackage} variant="outline" className="w-full" disabled={isLoading || !isSubscriptionActive}>
+            <Button
+              onClick={handleAddAIPackage}
+              variant="outline"
+              className="w-full"
+              disabled={isLoading || !isSubscriptionActive}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Mais Pacotes
             </Button>

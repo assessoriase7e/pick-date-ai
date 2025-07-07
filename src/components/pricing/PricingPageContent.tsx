@@ -32,18 +32,18 @@ export function PricingPageContent({
       {/* Planos Principais */}
       <PricingCards plans={plans} subscription={subscription} />
 
-      {/* Produtos Adicionais */}
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-semibold mb-2">
+      {/* Planos Adicionais */}
+      <div className="container mx-auto px-4 py-8" id="additional-plans">
+        <div className="mx-auto max-w-2xl text-center mb-12">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             {PRICING_TEXTS.additionalPlansTitle}
-          </h3>
-          <p className="text-muted-foreground">
+          </h2>
+          <p className="text-lg leading-8 text-muted-foreground mb-6">
             {PRICING_TEXTS.additionalPlansSubtitle}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {additionalPlans.map((plan) => (
             <PlanCard
               key={plan.id}
@@ -53,6 +53,13 @@ export function PricingPageContent({
               variant="addon"
             />
           ))}
+        </div>
+        
+        {/* Adicionar nota sobre validade dos créditos */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            {PRICING_TEXTS.aiCreditsNote}
+          </p>
         </div>
       </div>
     </div>

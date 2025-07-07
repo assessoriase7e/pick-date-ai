@@ -118,7 +118,7 @@ export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.Payment
         used: 0,
         active: true,
         stripePaymentId: paymentIntent.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+        // Removida a expiração dos créditos
       },
     });
   }
@@ -169,7 +169,7 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
           used: 0,
           active: true,
           stripePaymentId: pi.id,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+          // Removida a expiração dos créditos
         },
       });
     }

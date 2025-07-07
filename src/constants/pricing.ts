@@ -104,7 +104,13 @@ export const ADDITIONAL_PLANS = [
     period: " (Único)",
     priceId: STRIPE_PRICE_IDS.addAi,
     planType: "addon" as const,
-    features: ["+10 atendimentos IA", "Compatível com planos IA", "Faturamento separado", "Cancele quando quiser"],
+    features: [
+      "+10 atendimentos IA", 
+      "Compatível com planos IA", 
+      "Faturamento separado", 
+      "Sem data de expiração",
+      "Créditos permanentes"
+    ],
     addonType: "ai" as const,
     requiresAiPlan: true,
   },
@@ -117,6 +123,7 @@ export const PRICING_TEXTS = {
   trialHighlight: "💡 Teste todas as funcionalidades sem compromisso durante o período gratuito",
   additionalPlansTitle: "Produtos Adicionais",
   additionalPlansSubtitle: "Expanda seu plano com recursos extras",
+  aiCreditsNote: "Os créditos adicionais de IA não expiram e ficam disponíveis até serem utilizados.",
 
   // Adicionar propriedades que a landing page espera
   plans: PLANS,
@@ -134,6 +141,7 @@ export const PRICING_TEXTS = {
       price: "R$ 25",
       period: "(Único)",
       comingSoon: false,
+      note: "Os créditos adicionais de IA não expiram e ficam disponíveis até serem utilizados."
     },
   ],
   includedFeatures: [
