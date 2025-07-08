@@ -22,19 +22,8 @@ export async function POST(req: NextRequest) {
 
     // Validar body da requisição
     const body = await req.json();
-    const parseResult = validateContactSchema.safeParse(body);
 
-    if (!parseResult.success) {
-      return NextResponse.json(
-        {
-          error: "Dados inválidos",
-          details: parseResult.error.errors,
-        },
-        { status: 400 }
-      );
-    }
-
-    const { instanceName, contactPhone, fromMe } = parseResult.data;
+    const { instanceName, contactPhone, fromMe } = body;
 
     // Buscar usuário pela instância
     const userId = await getUserByInstanceName(instanceName);
