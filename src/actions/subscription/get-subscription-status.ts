@@ -78,7 +78,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
             quantity: credit.quantity,
             used: credit.used,
             remaining: credit.quantity - credit.used,
-            expiresAt: credit.expiresAt?.toISOString(),
           })) || [],
       };
     }
@@ -217,7 +216,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
           quantity: credit.quantity,
           used: credit.used,
           remaining: credit.quantity - credit.used,
-          expiresAt: credit.expiresAt?.toISOString(), // Adicionar este campo
         })) || [],
     };
   } catch (err) {
