@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { getAICreditsLimit } from "@/lib/subscription-limits";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 interface ContactValidationResult {
@@ -148,6 +149,14 @@ async function getValidationState(userId: string, contactPhone: string): Promise
  */
 async function checkAICredits(userId: string): Promise<boolean> {
   try {
+    // Verificar se é usuário lifetime primeiro
+    const isLifetime = await isLifetimeUser();
+    if (isLifetime) {
+      // Para usuários lifetime, verificar se não ultrapassou 5000 atendimentos no mês
+      const monthlyUsage = await getMonthlyUsage(userId);
+      return monthlyUsage < 5000;
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -161,9 +170,6 @@ async function checkAICredits(userId: string): Promise<boolean> {
     if (!user) return false;
 
     const monthlyLimit = await getAICreditsLimit(user.subscription, true, userId);
-
-    // Early return para usuários lifetime
-    if (monthlyLimit === Infinity) return true;
 
     const [monthlyUsage, additionalCredits] = await Promise.all([
       getMonthlyUsage(userId),
