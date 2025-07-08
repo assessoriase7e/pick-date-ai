@@ -1,8 +1,6 @@
 "use client";
-
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Menu, SquareChartGantt } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
@@ -15,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { DockDropdownMenu, useDropdownMenuItems } from "./dock-dropdown-menu";
 import { useRouter } from "next/navigation";
 import SubscriptionStatus from "./SubscriptionStatus";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "./ui/drawer";
 
 export function DockMenu() {
   const { user } = useUser();
@@ -49,26 +48,24 @@ export function DockMenu() {
   };
 
   const MobileMenu = () => (
-    <Sheet>
-      <div className="w-full border-b border-border">
-        <SheetTrigger asChild>
-          <Button size="icon" className="md:hidden m-4 z-50">
-            <Menu />
-            <span className="sr-only">Menu</span>
-          </Button>
-        </SheetTrigger>
-      </div>
+    <Drawer>
+      <DrawerTrigger asChild className="absolute bottom-5 right-5 w-12 h-12">
+        <Button size="icon" className="md:hidden z-50 rounded-full">
+          <Menu />
+          <span className="sr-only">Menu</span>
+        </Button>
+      </DrawerTrigger>
 
-      <SheetContent side="left" className="w-full">
-        <SheetHeader className="flex justify-center items-center py-4">
+      <DrawerContent className="w-full">
+        <DrawerHeader className="flex justify-center items-center py-4">
           <Logo className="h-12 w-12" />
-        </SheetHeader>
+        </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto py-6 px-4">
           {routes.map((item) => (
             <Link key={item.href} href={item.href}>
               <Button variant={item.isActive ? "default" : "ghost"} className="w-full justify-start mb-2">
-                <item.icon className="h-5 w-5 mr-2" />
+                <item.icon className="h-50 w-5 mr-2" />
                 <span>{item.label}</span>
               </Button>
             </Link>
@@ -81,8 +78,8 @@ export function DockMenu() {
             <span>Assinatura</span>
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 
   const DesktopDock = () => (
