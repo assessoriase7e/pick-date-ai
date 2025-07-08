@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { getAICreditsLimit } from "@/lib/subscription-limits";
-import { isLifetimeUser } from "@/lib/lifetime-user";
+import { clerkClient } from "@clerk/nextjs/server";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 interface ContactValidationResult {
@@ -149,9 +149,12 @@ async function getValidationState(userId: string, contactPhone: string): Promise
  */
 async function checkAICredits(userId: string): Promise<boolean> {
   try {
-    // Verificar se é usuário lifetime primeiro
-    const isLifetime = await isLifetimeUser();
-    if (isLifetime) {
+    // Verificar se é usuário lifetime usando clerkClient
+    const clerk = await clerkClient();
+    const clerkUser = await clerk.users.getUser(userId);
+    const privateMetadata = clerkUser.privateMetadata as any;
+    
+    if (privateMetadata?.lifetime === true) {
       // Para usuários lifetime, verificar se não ultrapassou 5000 atendimentos no mês
       const monthlyUsage = await getMonthlyUsage(userId);
       return monthlyUsage < 5000;
