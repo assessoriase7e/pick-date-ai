@@ -183,7 +183,7 @@ export function SubscriptionSettings({ subscriptionData }: SubscriptionSettingsP
 
         <div className="pt-4 border-t space-y-2">
           <Button onClick={handleManageSubscription} className="w-full">
-            {subscription.status !== "active" ? "Ver Planos Disponíveis" : "Gerenciar Assinatura"}
+            {!subscription || subscription.status !== "active" ? "Ver Planos Disponíveis" : "Gerenciar Assinatura"}
           </Button>
 
           {/* Botão específico para cancelar apenas plano base (mantendo calendários adicionais) */}
