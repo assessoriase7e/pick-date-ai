@@ -1,15 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { FileText, Users, Phone } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Users } from "lucide-react";
+import { useState, useRef } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import ClientForm from "./client-form";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Client } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
-import { useDebounce } from "@/hooks/use-debounce";
-import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { saveClient } from "@/actions/clients/save-client";
 import { ClientFormValues } from "@/validators/client";
@@ -34,43 +32,8 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [phoneTerm, setPhoneTerm] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const debouncedPhoneTerm = useDebounce(phoneTerm, 500);
-
-  useEffect(() => {
-    const search = searchParams.get("search");
-    const phone = searchParams.get("phone");
-    if (search) {
-      setSearchTerm(search);
-    }
-    if (phone) {
-      setPhoneTerm(phone);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (debouncedSearchTerm !== undefined || debouncedPhoneTerm !== undefined) {
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (debouncedSearchTerm) {
-        params.set("search", debouncedSearchTerm);
-      } else {
-        params.delete("search");
-      }
-
-      if (debouncedPhoneTerm) {
-        params.set("phone", debouncedPhoneTerm);
-      } else {
-        params.delete("phone");
-      }
-
-      params.set("page", "1");
-      router.push(`${pathname}?${params.toString()}`);
-    }
-  }, [debouncedSearchTerm, debouncedPhoneTerm]);
+  const selectedRowsRef = useRef<any[]>([]);
 
   const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
@@ -127,91 +90,52 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     formatDate,
   });
 
-  const headerContent = (
+  // Botão de criação que será passado para o DataTable
+  const createButton = (
     <SubscriptionBlocker
       buttonText="Novo Cliente"
       modalDescription="Para adicionar novos clientes, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
     >
-      <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:max-w-xs">
+      <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:w-min">
         <Users className="mr-2 h-4 w-4" />
         Novo Cliente
       </Button>
     </SubscriptionBlocker>
   );
 
-  // Função para executar busca manual
-  const handleSearch = () => {
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "fullName", title: "Nome", prismaField: "fullName" },
+    { id: "phone", title: "Telefone", prismaField: "phone" },
+  ];
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
-
-    if (searchTerm) {
-      params.set("search", searchTerm);
-    } else {
-      params.delete("search");
-    }
-
-    if (phoneTerm) {
-      params.set("phone", phoneTerm);
-    } else {
-      params.delete("phone");
-    }
-
-    params.set("page", "1");
+    params.set("page", String(page));
     router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
     <>
-      {/* Campos de busca personalizados */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-2 w-full">
-        <div className="flex flex-col lg:flex-row gap-2 w-full">
-          <div className="flex">
-            <div className="h-9 w-14 flex items-center justify-center border rounded-md rounded-r-none">
-              <FileText className="h-4 w-4" />
-            </div>
-            <Input
-              placeholder="Buscar por nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="lg:max-w-sm rounded-l-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
-              }}
-            />
-          </div>
-
-          <div className="flex">
-            <div className="h-9 w-14 flex items-center justify-center border rounded-md rounded-r-none">
-              <Phone className="h-4 w-4" />
-            </div>
-
-            <Input
-              placeholder="Buscar por telefone..."
-              value={phoneTerm}
-              onChange={(e) => setPhoneTerm(e.target.value)}
-              className="lg:max-w-sm rounded-l-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
-              }}
-            />
-          </div>
-        </div>
-        {headerContent}
-      </div>
-
       <DataTable
         columns={columns}
         data={clients}
-        sortableColumns={["fullName", "phone", "birthDate"]}
-        headerContent={null}
-        enableSearch={false}
-        pagination={pagination}
-        onSearch={(value) => {
-          setSearchTerm(value);
-        }}
+        enableSorting={true}
+        enableFiltering={true}
+        filterPlaceholder="Buscar clientes..."
+        enableRowSelection={false}
+        initialSorting={[{ id: "fullName", desc: false }]}
+        emptyMessage="Nenhum cliente encontrado."
+        syncWithQueryParams={true}
+        selectedRowsRef={selectedRowsRef}
+        totalPages={pagination.totalPages}
+        currentPage={pagination.currentPage}
+        onPageChange={handlePageChange}
+        createButton={createButton}
+        enableColumnFilter={true}
+        filterableColumns={filterableColumns}
       />
 
       <ConfirmationDialog

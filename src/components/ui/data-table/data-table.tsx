@@ -25,7 +25,6 @@ export interface DataTableProps<TData, TValue> {
   enableFiltering?: boolean;
   enableColumnVisibility?: boolean;
   enableRowSelection?: boolean;
-  filterColumn?: string;
   filterPlaceholder?: string;
   onRowSelectionChange?: (selection: RowSelectionState) => void;
   onSortingChange?: (sorting: SortingState) => void;
@@ -55,7 +54,6 @@ export function DataTable<TData, TValue>({
   enableFiltering = true,
   enableColumnVisibility = true,
   enableRowSelection = true,
-  filterColumn,
   filterPlaceholder = "Filtro...",
   onRowSelectionChange,
   onSortingChange,

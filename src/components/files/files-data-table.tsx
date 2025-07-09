@@ -78,7 +78,6 @@ export function FilesDataTable({
       currentPage={currentPage}
       onPageChange={handlePageChange}
       createButton={createButton}
-      // Novas propriedades para filtro por coluna
       enableColumnFilter={true}
       filterableColumns={filterableColumns}
     />

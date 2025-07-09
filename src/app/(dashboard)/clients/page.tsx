@@ -7,13 +7,14 @@ interface ClientsPageProps {
     page?: string;
     search?: string;
     phone?: string;
-    sortField?: string;
-    sortDirection?: string;
+    sort?: string;
+    dir?: string;
+    filterColumn?: string;
   }>;
 }
 
 export default async function ClientsPage({ searchParams }: ClientsPageProps) {
-  const { page, search, phone, sortField, sortDirection } = await searchParams;
+  const { page, search, phone, sort, dir, filterColumn } = await searchParams;
   const pageParam = Number(page) || 1;
 
   const where: any = {};
@@ -32,12 +33,10 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
     };
   }
 
-  const sort = sortField
+  const sortOptions = sort
     ? {
-        field: sortField,
-        direction: (sortDirection === "desc" ? "desc" : "asc") as
-          | "desc"
-          | "asc",
+        field: sort,
+        direction: (dir === "desc" ? "desc" : "asc") as "desc" | "asc",
       }
     : undefined;
 
@@ -45,7 +44,8 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
     page: pageParam,
     limit: 20,
     where,
-    sort,
+    sort: sortOptions,
+    filterColumn: filterColumn || "all",
   });
 
   const clients = clientsResult.success ? clientsResult.data : [];

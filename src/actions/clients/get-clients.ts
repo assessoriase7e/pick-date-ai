@@ -22,6 +22,7 @@ type GetClientsProps = {
   page?: number;
   limit?: number;
   sort?: SortOptions;
+  filterColumn?: string;
 };
 
 export async function getClients({
@@ -29,6 +30,7 @@ export async function getClients({
   limit = 1000,
   sort,
   where,
+  filterColumn = "all",
 }: GetClientsProps = {}): Promise<GetClientsResponse> {
   const { userId } = await auth();
   if (!userId) {
@@ -50,22 +52,43 @@ export async function getClients({
     }
 
     // Construir a query where
-    const finalWhere: Prisma.ClientWhereInput = { ...where, userId };
+    const finalWhere: Prisma.ClientWhereInput = { userId };
 
-    // Se tiver query de nome com contains
+    // Se tiver query de busca
     if (where?.fullName && typeof where.fullName === "string") {
-      finalWhere.fullName = {
-        contains: where.fullName,
-        mode: "insensitive",
-      };
-    }
-
-    // Se tiver query de telefone com contains
-    if (where?.phone && typeof where.phone === "string") {
-      finalWhere.phone = {
-        contains: where.phone,
-        mode: "insensitive",
-      };
+      const searchTerm = where.fullName;
+      
+      // Aplicar filtro baseado na coluna selecionada ou em todas
+      if (filterColumn === "all") {
+        finalWhere.OR = [
+          {
+            fullName: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+          {
+            phone: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+        ];
+      } else if (filterColumn === "fullName") {
+        finalWhere.fullName = {
+          contains: searchTerm,
+          mode: "insensitive",
+        };
+      } else if (filterColumn === "phone") {
+        finalWhere.phone = {
+          contains: searchTerm,
+          mode: "insensitive",
+        };
+      }
+    } else {
+      // Manter os filtros específicos se não houver busca geral
+      if (where?.fullName) finalWhere.fullName = where.fullName;
+      if (where?.phone) finalWhere.phone = where.phone;
     }
 
     const [clients, total] = await Promise.all([
