@@ -13,11 +13,8 @@ interface CollaboratorsPageProps {
   }>;
 }
 
-export default async function CollaboratorsPage({
-  searchParams,
-}: CollaboratorsPageProps) {
-  const { page, search, service, sortField, sortDirection } =
-    await searchParams;
+export default async function CollaboratorsPage({ searchParams }: CollaboratorsPageProps) {
+  const { page, search, service, sortField, sortDirection } = await searchParams;
   const pageParam = Number(page) || 1;
 
   const where: any = {};
@@ -29,9 +26,7 @@ export default async function CollaboratorsPage({
   const sort = sortField
     ? {
         field: sortField,
-        direction: (sortDirection === "desc" ? "desc" : "asc") as
-          | "desc"
-          | "asc",
+        direction: (sortDirection === "desc" ? "desc" : "asc") as "desc" | "asc",
       }
     : undefined;
 
@@ -41,10 +36,7 @@ export default async function CollaboratorsPage({
       limit: 10,
       where,
       sort,
-      serviceId:
-        Number(service) && Number(service) !== null
-          ? Number(service)
-          : undefined,
+      serviceId: Number(service) && Number(service) !== null ? Number(service) : undefined,
     }),
     getServices({
       limit: 100,
@@ -61,27 +53,18 @@ export default async function CollaboratorsPage({
   const services = servicesResult.success ? servicesResult.data : [];
 
   return (
-    <div className="container">
-      <div>
-        <h1 className="text-3xl font-bold">Profissionais</h1>
-        <p className="text-muted-foreground">
-          Gerencie os profissionais cadastrados no sistema.
-        </p>
-      </div>
-
-      <div className="space-y-8 mt-6">
-        <CollaboratorsSection
-          collaborators={collabsResult.success ? collabsResult.data : []}
-          services={services}
-          pagination={pagination}
-          initialFilters={{
-            searchTerm: search || "",
-            serviceFilter: service || "all",
-            sortField: (sortField as any) || "name",
-            sortDirection: (sortDirection as any) || "asc",
-          }}
-        />
-      </div>
+    <div className="space-y-8 mt-6">
+      <CollaboratorsSection
+        collaborators={collabsResult.success ? collabsResult.data : []}
+        services={services}
+        pagination={pagination}
+        initialFilters={{
+          searchTerm: search || "",
+          serviceFilter: service || "all",
+          sortField: (sortField as any) || "name",
+          sortDirection: (sortDirection as any) || "asc",
+        }}
+      />
     </div>
   );
 }

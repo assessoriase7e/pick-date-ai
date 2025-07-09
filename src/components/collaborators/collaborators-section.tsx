@@ -5,7 +5,7 @@ import { PlusCircle } from "lucide-react";
 import { CollaboratorModal } from "./collaborator-modal";
 import { deleteCollaborator } from "@/actions/collaborators/delete-collaborator";
 import { toast } from "sonner";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Service } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { CollaboratorServicesDialog } from "./collaborator-services-dialog";
@@ -15,6 +15,7 @@ import { revalidatePathAction } from "@/actions/revalidate-path";
 import { DataTable } from "@/components/ui/data-table";
 import { createCollaboratorColumns } from "@/table-columns/collaborators";
 import { SubscriptionBlocker } from "@/components/subscription-blocker";
+import { useRef } from "react";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -41,12 +42,14 @@ export function CollaboratorsSection({
 }: CollaboratorsSectionProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCollaborator, setSelectedCollaborator] = useState<CollaboratorFullData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isServicesDialogOpen, setIsServicesDialogOpen] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [isPageChanging, setIsPageChanging] = useState(false);
+  const selectedRowsRef = useRef<any[]>([]);
 
   const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || "");
   const [serviceFilter, setServiceFilter] = useState(initialFilters?.serviceFilter || "all");
@@ -128,6 +131,7 @@ export function CollaboratorsSection({
       setIsDeleting(false);
     }
   };
+
   // Efeito para detectar quando a página foi totalmente carregada
   useEffect(() => {
     if (isPageChanging) {
@@ -135,9 +139,24 @@ export function CollaboratorsSection({
     }
   }, [collaborators]);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
+  // Função para lidar com a mudança de seleção de linhas
+  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
+    const selectedIds = Object.keys(selection).filter((id) => selection[id]);
+    // Você pode adicionar lógica adicional aqui se necessário
   };
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    updateUrl(page);
+  };
+
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "name", title: "Nome", prismaField: "name" },
+    { id: "phone", title: "Telefone", prismaField: "phone" },
+    { id: "profession", title: "Profissão", prismaField: "profession" },
+  ];
 
   // Criar as colunas da tabela
   const columns = createCollaboratorColumns({
@@ -146,28 +165,45 @@ export function CollaboratorsSection({
     isDeleting,
   });
 
+  // Botão de criação que será passado para o DataTable
+  const createButton = (
+    <SubscriptionBlocker
+      buttonText="Novo Profissional"
+      modalDescription="Para adicionar novos profissionais, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+    >
+      <Button onClick={() => setIsModalOpen(true)} className="w-full lg:w-min">
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Novo Profissional
+      </Button>
+    </SubscriptionBlocker>
+  );
+
   return (
     <div className="space-y-4 relative">
+      <div className="flex flex-col lg:!flex-row items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Gerenciamento de Profissionais</h1>
+          <p className="text-muted-foreground">Gerencie os profissionais cadastrados</p>
+        </div>
+      </div>
       <DataTable
         columns={columns}
         data={collaborators}
-        sortableColumns={["name", "phone", "profession"]}
-        enableSearch={true}
-        searchPlaceholder="Buscar profissionais..."
-        pagination={pagination}
-        onSearch={handleSearch}
-        isloading={isPageChanging}
-        headerContent={
-          <SubscriptionBlocker
-            buttonText="Novo Profissional"
-            modalDescription="Para adicionar novos profissionais, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
-          >
-            <Button onClick={() => setIsModalOpen(true)} className="w-full lg:w-min">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Profissional
-            </Button>
-          </SubscriptionBlocker>
-        }
+        enableSorting={true}
+        enableFiltering={true}
+        filterPlaceholder="Buscar profissionais..."
+        enableRowSelection={true}
+        onRowSelectionChange={handleRowSelectionChange}
+        initialSorting={[{ id: sortField, desc: sortDirection === "desc" }]}
+        emptyMessage="Nenhum profissional encontrado."
+        syncWithQueryParams={true}
+        selectedRowsRef={selectedRowsRef}
+        totalPages={pagination.totalPages}
+        currentPage={pagination.currentPage}
+        onPageChange={handlePageChange}
+        createButton={createButton}
+        enableColumnFilter={true}
+        filterableColumns={filterableColumns}
       />
 
       <CollaboratorModal
