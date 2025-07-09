@@ -23,7 +23,8 @@ export async function listFiles(
   limit: number = 10,
   search?: string,
   sortField: string = "createdAt",
-  sortDirection: "asc" | "desc" = "desc"
+  sortDirection: "asc" | "desc" = "desc",
+  filterColumn: string = "all"
 ): Promise<ListFilesSuccess | ListFilesError> {
   try {
     const skip = (page - 1) * limit;
@@ -33,33 +34,48 @@ export async function listFiles(
       return { success: false, error: "Usuário não autenticado" };
     }
 
-    const whereClause: Prisma.FileRecordWhereInput = {
+    let whereClause: Prisma.FileRecordWhereInput = {
       userId: user.id,
-      ...(search
-        ? {
-            OR: [
-              {
-                fileName: {
-                  contains: search,
-                  mode: "insensitive" as Prisma.QueryMode,
-                },
-              },
-              {
-                description: {
-                  contains: search,
-                  mode: "insensitive" as Prisma.QueryMode,
-                },
-              },
-              {
-                fileType: {
-                  contains: search,
-                  mode: "insensitive" as Prisma.QueryMode,
-                },
-              },
-            ],
-          }
-        : {}),
     };
+
+    // Aplicar filtro de busca baseado na coluna selecionada
+    if (search) {
+      if (filterColumn === "all" || !filterColumn) {
+        // Busca em todos os campos
+        whereClause = {
+          ...whereClause,
+          OR: [
+            {
+              fileName: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+            {
+              fileType: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+          ],
+        };
+      } else {
+        // Busca em um campo específico
+        whereClause = {
+          ...whereClause,
+          [filterColumn]: {
+            contains: search,
+            mode: "insensitive" as Prisma.QueryMode,
+          },
+        };
+      }
+    }
 
     // Configurar ordenação dinâmica
     const orderBy: any = {};

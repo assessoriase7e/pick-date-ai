@@ -4,7 +4,7 @@ import { FileRecord } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -53,6 +53,14 @@ export function FilesDataTable({
     </Button>
   ) : undefined;
 
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "fileName", title: "Nome do Arquivo", prismaField: "fileName" },
+    { id: "description", title: "Descrição", prismaField: "description" },
+    { id: "fileType", title: "Tipo", prismaField: "fileType" },
+  ];
+
   return (
     <DataTable
       columns={columns}
@@ -70,6 +78,9 @@ export function FilesDataTable({
       currentPage={currentPage}
       onPageChange={handlePageChange}
       createButton={createButton}
+      // Novas propriedades para filtro por coluna
+      enableColumnFilter={true}
+      filterableColumns={filterableColumns}
     />
   );
 }

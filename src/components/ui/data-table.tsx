@@ -12,10 +12,17 @@ import {
   RowSelectionState,
   Row,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Columns } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./button";
 import { Input } from "./input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "./dropdown-menu";
 
 // Componentes Table básicos
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -93,6 +100,12 @@ interface DataTableProps<TData, TValue> {
   currentPage?: number;
   onPageChange?: (page: number) => void;
   createButton?: React.ReactNode;
+  enableColumnFilter?: boolean;
+  filterableColumns?: Array<{
+    id: string;
+    title: string;
+    prismaField?: string; // Campo correspondente no Prisma
+  }>;
 }
 
 export function DataTable<TData, TValue>({
@@ -117,6 +130,8 @@ export function DataTable<TData, TValue>({
   currentPage = 1,
   onPageChange,
   createButton,
+  enableColumnFilter = false,
+  filterableColumns = [],
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const pathname = usePathname();
@@ -151,28 +166,60 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>(initialState.sorting || initialSorting);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(initialRowSelection);
-  
+
   // Estado local para o valor do input de pesquisa
   const [searchValue, setSearchValue] = React.useState<string>(
-    syncWithQueryParams ? (searchParams.get("search") || "") : ""
+    syncWithQueryParams ? searchParams.get("search") || "" : ""
   );
 
-  // Função para atualizar a URL com o termo de pesquisa
+  // Estado para a coluna de filtro selecionada
+  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<string>(
+    syncWithQueryParams
+      ? searchParams.get("filterColumn") || filterableColumns[0]?.id || ""
+      : filterableColumns[0]?.id || ""
+  );
+
+  // Função para atualizar a URL com o termo de pesquisa e a coluna de filtro
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
-    
+
     if (syncWithQueryParams) {
       const params = new URLSearchParams(searchParams);
-      
+
       if (value) {
         params.set("search", value);
+        // Adicionar a coluna de filtro aos parâmetros
+        if (enableColumnFilter && selectedFilterColumn) {
+          params.set("filterColumn", selectedFilterColumn);
+        }
       } else {
         params.delete("search");
+        // Se não houver termo de pesquisa, remover também a coluna de filtro
+        if (!enableColumnFilter) {
+          params.delete("filterColumn");
+        }
       }
-      
+
       // Resetar para a primeira página ao pesquisar
       params.delete("page");
-      
+
+      // Atualizar a URL com os novos parâmetros
+      const newUrl = `${pathname}?${params.toString()}`;
+      router.push(newUrl, { scroll: false });
+    }
+  };
+
+  // Função para atualizar a coluna de filtro
+  const handleFilterColumnChange = (columnId: string) => {
+    setSelectedFilterColumn(columnId);
+
+    if (syncWithQueryParams && searchValue) {
+      const params = new URLSearchParams(searchParams);
+      params.set("filterColumn", columnId);
+
+      // Resetar para a primeira página ao mudar o filtro
+      params.delete("page");
+
       // Atualizar a URL com os novos parâmetros
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl, { scroll: false });
@@ -199,14 +246,19 @@ export function DataTable<TData, TValue>({
     router.push(newUrl, { scroll: false });
   }, [sorting, searchParams, pathname, router, syncWithQueryParams]);
 
-  // Atualizar o valor do input quando as query params mudarem
+  // Atualizar o valor do input e a coluna de filtro quando as query params mudarem
   React.useEffect(() => {
     if (syncWithQueryParams) {
       const params = new URLSearchParams(searchParams);
       const searchValue = params.get("search") || "";
       setSearchValue(searchValue);
+
+      if (enableColumnFilter) {
+        const filterColumn = params.get("filterColumn") || filterableColumns[0]?.id || "";
+        setSelectedFilterColumn(filterColumn);
+      }
     }
-  }, [searchParams, syncWithQueryParams]);
+  }, [searchParams, syncWithQueryParams, enableColumnFilter, filterableColumns]);
 
   const table = useReactTable({
     data,
@@ -215,6 +267,11 @@ export function DataTable<TData, TValue>({
       const newSorting = typeof updater === "function" ? updater(sorting) : updater;
       setSorting(newSorting);
       onSortingChange?.(newSorting);
+    },
+    onRowSelectionChange: (updater) => {
+      const newRowSelection = typeof updater === "function" ? updater(rowSelection) : updater;
+      setRowSelection(newRowSelection);
+      onRowSelectionChange?.(newRowSelection);
     },
     getCoreRowModel: getCoreRowModel(),
     ...(enableSorting && { getSortedRowModel: getSortedRowModel() }),
@@ -243,6 +300,10 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  // Encontrar o título da coluna de filtro selecionada
+  const selectedFilterColumnTitle =
+    filterableColumns.find((col) => col.id === selectedFilterColumn)?.title || "Todos os campos";
+
   return (
     <div className={`w-full space-y-4 ${className || ""}`}>
       {/* Header com filtros e controles */}
@@ -250,58 +311,42 @@ export function DataTable<TData, TValue>({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 w-full">
             {enableFiltering && syncWithQueryParams && (
-              <Input
-                placeholder={filterPlaceholder}
-                value={searchValue}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                className="w-full lg:max-w-lg px-3 py-2 border border-input rounded-md text-sm"
-              />
-            )}
-          </div>
+              <div className="flex w-full lg:max-w-lg">
+                <Input
+                  placeholder={filterPlaceholder}
+                  value={searchValue}
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  className={`w-full px-3 py-2 border border-input text-sm ${
+                    enableColumnFilter ? "rounded-l-none" : ""
+                  }`}
+                />
 
-          <div className="flex items-center space-x-2">
-            {createButton && createButton}
-            
-            {enableColumnVisibility && (
-              <div className="relative">
-                <Button
-                  className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => {
-                    const dropdown = document.getElementById("column-visibility-dropdown");
-                    if (dropdown) {
-                      dropdown.classList.toggle("hidden");
-                    }
-                  }}
-                >
-                  <Columns className="h-4 w-4" />
-                </Button>
-                <div
-                  id="column-visibility-dropdown"
-                  className="absolute right-0 z-50 mt-1 w-48 bg-popover border border-border rounded-md shadow-lg hidden"
-                >
-                  <div className="p-1">
-                    {table
-                      .getAllColumns()
-                      .filter((column) => column.getCanHide())
-                      .map((column) => (
-                        <label
-                          key={column.id}
-                          className="flex items-center space-x-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={column.getIsVisible()}
-                            onChange={(e) => column.toggleVisibility(e.target.checked)}
-                            className="rounded border-border"
-                          />
-                          <span className="capitalize">{column.id}</span>
-                        </label>
-                      ))}
-                  </div>
-                </div>
+                {enableColumnFilter && filterableColumns.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="rounded-r-none border-r-0 px-3 focus-visible:ring-0 focus-visible:ring-offset-0 ml-2"
+                      >
+                        <Filter className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuRadioGroup value={selectedFilterColumn} onValueChange={handleFilterColumnChange}>
+                        {filterableColumns.map((column) => (
+                          <DropdownMenuRadioItem key={column.id} value={column.id}>
+                            {column.title}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             )}
           </div>
+
+          <div className="flex items-center space-x-2">{createButton && createButton}</div>
         </div>
       )}
 

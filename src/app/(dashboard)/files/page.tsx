@@ -10,6 +10,7 @@ interface FilesPageProps {
     search?: string;
     sort?: string;
     dir?: string;
+    filterColumn?: string;
   }>;
 }
 
@@ -19,14 +20,13 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
   const search = sParams.search;
   const sortField = sParams.sort || "createdAt";
   const sortDirection = (sParams.dir || "desc") as "asc" | "desc";
+  const filterColumn = sParams.filterColumn || "all";
 
   // Buscar arquivos no servidor
-  const filesResult = await listFiles(page, 10, search, sortField, sortDirection);
+  const filesResult = await listFiles(page, 10, search, sortField, sortDirection, filterColumn);
   const files = filesResult.success ? filesResult.data.files : [];
   const totalPages = filesResult.success ? filesResult.data.totalPages : 1;
   const currentPage = filesResult.success ? filesResult.data.currentPage : 1;
-
-  console.log(search);
 
   // Buscar clientes iniciais para o modal de envio
   const clientsResult = await searchClients("", 1, 50);
