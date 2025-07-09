@@ -33,8 +33,14 @@ export function UploadthingUploader({
       onClientUploadComplete={(res) => {
         if (res && res.length > 0) {
           const file = res[0];
+          // Verifique se todos os campos necessários estão presentes
+          console.log("Resposta do upload:", file);
+          
+          // Limpar a URL removendo espaços e caracteres de backtick
+          const cleanUrl = file.ufsUrl.trim().replace(/`/g, '');
+          
           onUploadComplete({
-            fileUrl: file.ufsUrl,
+            fileUrl: cleanUrl,
             fileName: file.name,
             fileType: file.name.split(".").pop() || "",
           });

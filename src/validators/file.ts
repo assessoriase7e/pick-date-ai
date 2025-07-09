@@ -5,6 +5,7 @@ export const fileSchema = z.object({
   description: z.string().default(""),
   fileUrl: z.string().min(1, "O upload do arquivo é obrigatório."),
   fileType: z.string(),
+  userId: z.string().optional(),
 });
 
 export type FileFormValues = z.infer<typeof fileSchema>;

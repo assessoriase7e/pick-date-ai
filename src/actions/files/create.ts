@@ -1,13 +1,10 @@
 "use server";
-
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { FileRecord } from "@prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
+import { FileFormValues } from "@/validators/file";
 
-export async function createFile(
-  data: Pick<FileRecord, "fileUrl" | "fileName" | "fileType" | "description">
-) {
+export async function createFile(data: FileFormValues) {
   try {
     const user = await currentUser();
 
@@ -15,12 +12,13 @@ export async function createFile(
       return { success: false, error: "Usuário não autenticado" };
     }
 
+    data.userId = user.id;
+
     const file = await prisma.fileRecord.create({
-      data: {
-        ...data,
-        userId: user.id,
-      },
+      data,
     });
+
+    console.log(file);
 
     revalidatePath("/files");
     return { success: true, data: file };

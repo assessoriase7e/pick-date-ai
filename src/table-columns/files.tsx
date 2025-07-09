@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FileRecord } from "@prisma/client";
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type FileActionsProps = {
   onEdit: (file: FileRecord) => void;
@@ -13,6 +14,25 @@ type FileActionsProps = {
 };
 
 export const createFileColumns = ({ onEdit, onDelete }: FileActionsProps): ColumnDef<FileRecord>[] => [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Selecionar todos"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Selecionar linha"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "fileName",
     header: ({ column }) => (

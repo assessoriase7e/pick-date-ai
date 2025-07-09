@@ -1,11 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFile } from "@/actions/files/create";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,12 +25,6 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
 
   const form = useForm<FileFormValues>({
     resolver: zodResolver(fileSchema),
-    defaultValues: {
-      fileName: "",
-      description: "",
-      fileUrl: "",
-      fileType: "",
-    },
   });
 
   const {
@@ -40,7 +32,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = form;
 
   const fileUrl = watch("fileUrl");
@@ -85,18 +77,6 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
     onClose();
   };
 
-  const customFooter = (
-    <>
-      <Button
-        type="submit"
-        disabled={isSubmitting || isUploading || !fileUrl}
-        form="create-file-form"
-      >
-        {isSubmitting ? "Criando..." : "Criar"}
-      </Button>
-    </>
-  );
-
   return (
     <ConfirmationDialog
       open={isOpen}
@@ -105,13 +85,10 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
       description="Faça o upload de um arquivo para o sistema."
       size="lg"
       showFooter={true}
-      customFooter={customFooter}
+      onConfirm={isUploading ? undefined : handleSubmit(onSubmit)}
+      confirmText={isUploading ? "Aguarde..." : "Confirmar"}
     >
-      <form
-        id="create-file-form"
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6"
-      >
+      <form id="create-file-form" className="space-y-6">
         <div className="space-y-4">
           <div>
             <Label htmlFor="file">Arquivo</Label>
@@ -128,9 +105,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                         />
                       ) : (
                         <div className=" p-4 rounded-lg flex items-center justify-center">
-                          <span className="text-muted-foreground">
-                            Arquivo carregado
-                          </span>
+                          <span className="text-muted-foreground">Arquivo carregado</span>
                         </div>
                       )}
                     </div>
@@ -153,11 +128,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
                   </div>
                 )}
               </div>
-              {errors.fileUrl && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.fileUrl.message}
-                </p>
-              )}
+              {errors.fileUrl && <p className="text-red-500 text-sm mt-1">{errors.fileUrl.message}</p>}
             </div>
           </div>
 
@@ -170,11 +141,7 @@ export function CreateFileDialog({ isOpen, onClose }: CreateFileDialogProps) {
               placeholder="Digite o nome do arquivo..."
               disabled={isUploading}
             />
-            {errors.fileName && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.fileName.message}
-              </p>
-            )}
+            {errors.fileName && <p className="text-red-500 text-sm mt-1">{errors.fileName.message}</p>}
           </div>
 
           <div>

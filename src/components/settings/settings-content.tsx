@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { SubscriptionSettings } from "./SubscriptionSettings";
-import { AdditionalAISettings } from "./AdditionalAISettings";
 import { AccountDeletionCard } from "./AccountDeletionCard";
 import { CombinedProfileData } from "@/actions/profile/get";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -54,14 +53,6 @@ export function SettingsContent({ combinedProfile, subscriptionData }: SettingsC
         <h2 className="text-xl font-semibold mb-4">Assinatura Principal</h2>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
           <SubscriptionSettings subscriptionData={subscriptionData} />
-        </div>
-      </div>
-
-      {/* Seção de Pacotes Adicionais de IA */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Pacotes Adicionais de IA</h2>
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
-          <AdditionalAISettings subscriptionData={subscriptionData} />
         </div>
       </div>
 

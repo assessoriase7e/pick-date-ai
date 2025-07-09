@@ -76,10 +76,8 @@ export function DataTable<TData>({
   useEffect(() => {
     if (enableSelection && getRowId) {
       const newRowSelection: RowSelectionState = {};
-      // Usar um Set para melhorar a performance da busca
       const selectedIdsSet = new Set(selectedIds.map((id) => String(id)));
 
-      // Atribuir diretamente os índices das linhas que correspondem aos IDs selecionados
       data.forEach((row, index) => {
         const rowId = String(getRowId(row));
         if (selectedIdsSet.has(rowId)) {
@@ -87,9 +85,15 @@ export function DataTable<TData>({
         }
       });
 
-      setRowSelection(newRowSelection);
+      const hasChanged =
+        Object.keys(newRowSelection).length !== Object.keys(rowSelection).length ||
+        Object.keys(newRowSelection).some((key) => newRowSelection[key] !== rowSelection[key]);
+
+      if (hasChanged) {
+        setRowSelection(newRowSelection);
+      }
     }
-  }, [selectedIds, data, enableSelection, getRowId]);
+  }, [selectedIds, data, enableSelection, getRowId, rowSelection]);
 
   // Desativa o loading quando o componente é remontado (dados atualizados)
   useEffect(() => {
