@@ -2,8 +2,6 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { triggerProfileRagUpdate } from "../agents/rag/trigger-profile-rag-update";
-import { saveRedisKey } from "../agents/redis-key";
 import { auth } from "@clerk/nextjs/server";
 
 async function createProfile(userId: string, profileData: any) {
@@ -84,19 +82,6 @@ export async function updateProfile(data: any) {
           },
         });
       }
-    }
-
-    await triggerProfileRagUpdate(userId);
-
-    if (data.whatsapp && data.companyName) {
-      const redisKey = `${data.whatsapp}_${data.companyName}`
-        .toLowerCase()
-        .replace(/\s+/g, "_");
-
-      await saveRedisKey({
-        userId,
-        key: redisKey,
-      });
     }
 
     revalidatePath("/profile");

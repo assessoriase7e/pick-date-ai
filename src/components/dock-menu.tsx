@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
 import { Separator } from "./ui/separator";
-import { useSidebarRoutes } from "@/mocked/sidebar";
+import { useSidebarRoutes } from "@/constants/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { Dock, DockIcon } from "./magicui/dock";
 import Link from "next/link";
@@ -37,7 +37,7 @@ export function DockMenu() {
   }
 
   // Páginas que devem ficar no dropdown de configurações
-  const configDropdownPaths = ["/config", "/profile", "/links", "/agents", "/files", "/questions"];
+  const configDropdownPaths = ["/config", "/profile", "/links", "/files"];
   const configDropdownItems = useDropdownMenuItems(routes, configDropdownPaths);
 
   // Páginas que ficam diretamente na dock

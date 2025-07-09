@@ -1,6 +1,5 @@
 import {
   LucideIcon,
-  Bot,
   Calendar,
   Link,
   Scissors,
@@ -11,8 +10,6 @@ import {
   File,
   Bolt,
   ListCollapse,
-  Brain,
-  LucideFileQuestion,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -82,25 +79,6 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       isActive: pathname === "/links",
     },
     {
-      label: "Perguntas",
-      icon: LucideFileQuestion,
-      href: "/questions",
-      isActive: pathname === "/questions",
-    },
-    {
-      label: "Agentes",
-      icon: Bot,
-      href: "/agents",
-      isActive: pathname === "/agents",
-    },
-    {
-      label: "Uso da IA",
-      icon: Brain,
-      href: "/ai-usage",
-      color: "text-purple-500",
-      isActive: pathname === "/ai-usage",
-    },
-    {
       label: "Relatórios",
       icon: BarChart3,
       href: "/reports",
@@ -119,12 +97,6 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       label: "Configurações",
       isActive: pathname === "/config",
     },
-    // {
-    //   href: "/api-keys",
-    //   icon: KeyRound,
-    //   label: "API Keys",
-    //   isActive: pathname.startsWith("/api-keys"),
-    // },
   ];
 
   return { routes };
