@@ -47,7 +47,7 @@ export function FilesDataTable({
 
   // Botão de criação que será passado para o DataTable
   const createButton = onCreateClick ? (
-    <Button onClick={onCreateClick}>
+    <Button onClick={onCreateClick} className="w-full lg:w-min">
       <Plus className="h-4 w-4 mr-2" />
       Novo Arquivo
     </Button>

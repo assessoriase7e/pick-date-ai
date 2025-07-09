@@ -23,6 +23,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "./dropdown-menu";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card";
 
 // Componentes Table básicos
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -76,6 +77,20 @@ const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<
   )
 );
 TableCell.displayName = "TableCell";
+
+// Hook para detectar se o dispositivo é mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  return isMobile;
+}
 
 // Interface para o componente DataTable reutilizável
 interface DataTableProps<TData, TValue> {
@@ -136,6 +151,7 @@ export function DataTable<TData, TValue>({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
 
   // Inicializar estados com valores das query params se syncWithQueryParams estiver ativado
   const getInitialStateFromQueryParams = () => {
@@ -304,12 +320,73 @@ export function DataTable<TData, TValue>({
   const selectedFilterColumnTitle =
     filterableColumns.find((col) => col.id === selectedFilterColumn)?.title || "Todos os campos";
 
+  // Renderização de cards para mobile
+  const renderMobileCards = () => {
+    if (data.length === 0) {
+      return <div className="text-center text-sm text-muted-foreground py-6">{emptyMessage}</div>;
+    }
+
+    return (
+      <div className="grid gap-4 grid-cols-1">
+        {table.getRowModel().rows.map((row) => {
+          const isSelected = row.getIsSelected();
+          return (
+            <Card
+              key={row.id}
+              className={`flex flex-col ${isSelected ? "border-primary" : ""}`}
+              data-state={isSelected && "selected"}
+            >
+              <CardHeader>
+                <CardTitle className="text-base font-semibold">
+                  {/* Usar a primeira coluna como título do card */}
+                  {flexRender(row.getVisibleCells()[0].column.columnDef.cell, row.getVisibleCells()[0].getContext())}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {row
+                  .getVisibleCells()
+                  .slice(1)
+                  .map((cell, index) => {
+                    // Pular a primeira coluna, pois já está no título
+                    if (index === 0) return null;
+
+                    const headerContent = flexRender(cell.column.columnDef.header, { ...cell.getContext(), table });
+
+                    return (
+                      <div key={cell.id} className="grid grid-cols-2 gap-1">
+                        <div className="text-sm font-medium text-muted-foreground">
+                          {typeof headerContent === "string" ? headerContent : cell.column.id}
+                        </div>
+                        <div className="text-sm">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
+                      </div>
+                    );
+                  })}
+              </CardContent>
+              {enableRowSelection && (
+                <CardFooter className="pt-2 border-t">
+                  <div className="flex justify-between items-center w-full">
+                    <div className="text-xs text-muted-foreground">
+                      {isSelected ? "Selecionado" : "Toque para selecionar"}
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => row.toggleSelected(!isSelected)}>
+                      {isSelected ? "Desmarcar" : "Selecionar"}
+                    </Button>
+                  </div>
+                </CardFooter>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className={`w-full space-y-4 ${className || ""}`}>
       {/* Header com filtros e controles */}
       {(enableFiltering || enableColumnVisibility || createButton) && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 w-full">
+        <div className="flex flex-col lg:!flex-row gap-2 items-center">
+          <div className="space-x-2 w-full">
             {enableFiltering && syncWithQueryParams && (
               <div className="flex w-full lg:max-w-lg">
                 <Input
@@ -346,43 +423,47 @@ export function DataTable<TData, TValue>({
             )}
           </div>
 
-          <div className="flex items-center space-x-2">{createButton && createButton}</div>
+          {createButton && createButton}
         </div>
       )}
 
-      {/* Tabela */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+      {/* Tabela para desktop ou Cards para mobile */}
+      {isMobile ? (
+        renderMobileCards()
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    {emptyMessage}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Footer com seleção e paginação */}
       <div className="flex items-center justify-between space-x-2">

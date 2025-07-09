@@ -78,15 +78,15 @@ export function FilesPageContent({ files, totalPages, currentPage, initialClient
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="lg:space-y-6">
+      <div className="flex flex-col lg:!flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">Gerenciamento de Arquivos</h1>
           <p className="text-muted-foreground">Gerencie os arquivos que serão enviados</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mb-2 w-full lg:w-min">
           {selectedFileIds.length > 0 && (
-            <Button onClick={handleSendFiles} variant="outline">
+            <Button onClick={handleSendFiles} variant="outline" className="w-full">
               <Send className="h-4 w-4 mr-2" />
               Enviar Selecionados ({selectedFileIds.length})
             </Button>
