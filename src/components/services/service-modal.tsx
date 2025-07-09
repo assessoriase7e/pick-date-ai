@@ -15,7 +15,14 @@ export function ServiceModal({ isOpen, onClose, initialData, collaborators }: Se
   const description = initialData ? "Edite as informações do serviço." : "Adicione um novo serviço ao sistema.";
 
   return (
-    <ConfirmationDialog open={isOpen} onOpenChange={onClose} title={title} size="lg" showFooter={false}>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title={title}
+      size="lg"
+      showFooter={false}
+      onConfirm={() => {}}
+    >
       <p className="text-sm text-muted-foreground mb-6">{description}</p>
 
       <ServiceForm initialData={initialData} onSuccess={onClose} collaborators={collaborators} />

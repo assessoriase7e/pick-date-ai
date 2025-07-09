@@ -19,7 +19,7 @@ interface ConfirmationDialogProps {
   description?: string;
   confirmText?: string;
   cancelText?: string;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   variant?: "default" | "destructive";
   size?: "sm" | "md" | "lg";
   showFooter?: boolean;
@@ -40,7 +40,7 @@ export function ConfirmationDialog({
   children,
 }: ConfirmationDialogProps) {
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm && onConfirm();
     onOpenChange(false);
   };
 
@@ -52,32 +52,22 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size])}>
+      <DialogContent className={cn(sizeClasses[size], "max-h-[80svh] overflow-y-auto")}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        
-        {children && (
-          <div className="py-4">
-            {children}
-          </div>
-        )}
-        
+
+        {children && <div className="py-4">{children}</div>}
+
         {showFooter && (
           <DialogFooter>
             {cancelText && (
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
                 {cancelText}
               </Button>
             )}
-            <Button
-              variant={variant}
-              onClick={handleConfirm}
-            >
+            <Button variant={variant} onClick={handleConfirm}>
               {confirmText}
             </Button>
           </DialogFooter>
