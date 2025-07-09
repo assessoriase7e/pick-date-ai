@@ -3,8 +3,6 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { isLifetimeUser } from "@/lib/lifetime-user";
-import { getAICreditsLimit } from "@/lib/subscription-limits";
-import { startOfMonth, endOfMonth } from "date-fns";
 import { SubscriptionData, SubscriptionStatus } from "@/types/subscription";
 
 /**
@@ -23,11 +21,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         additionalCalendars: {
           where: { active: true },
         },
-        additionalAICredits: {
-          where: {
-            used: { lt: prisma.additionalAICredit.fields.quantity },
-          },
-        },
       },
     });
 
@@ -35,6 +28,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
 
     // Verificar se é usuário lifetime
     const isLifetime = await isLifetimeUser();
+
     if (isLifetime) {
       return {
         subscription: dbUser?.subscription
@@ -61,24 +55,11 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         isSubscriptionActive: true,
         canAccessPremiumFeatures: true,
         trialDaysRemaining: 0,
-        hasRemainingCredits: true,
-        aiCreditsInfo: {
-          used: 0,
-          limit: Infinity,
-          remaining: Infinity,
-        },
         additionalCalendars: dbUser.additionalCalendars.map((cal) => ({
           id: cal.id.toString(),
           active: cal.active,
           expiresAt: cal.expiresAt.toISOString(),
         })),
-        additionalAICredits:
-          dbUser.additionalAICredits?.map((credit) => ({
-            id: credit.id.toString(),
-            quantity: credit.quantity,
-            used: credit.used,
-            remaining: credit.quantity - credit.used,
-          })) || [],
       };
     }
 
@@ -94,17 +75,8 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
     let subscription = dbUser.subscription;
     let isSubscriptionActive = false;
     let canAccessPremiumFeatures = isTrialActive;
-    let hasRemainingCredits = true;
-    let aiCreditsInfo = undefined;
 
-    // Se estiver em período de teste, definir créditos de IA como infinitos
-    if (isTrialActive) {
-      aiCreditsInfo = {
-        used: 0,
-        limit: Infinity,
-        remaining: Infinity,
-      };
-    } else if (subscription) {
+    if (subscription) {
       try {
         // Verificar assinatura no Stripe
         const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
@@ -128,42 +100,6 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
         // Status ativos conforme documentação do Stripe
         const activeStatuses = ["active", "trialing", "past_due"];
         isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
-
-        // Verificar créditos de IA
-        const aiLimit = await getAICreditsLimit(subscription);
-        if (aiLimit > 0) {
-          const startOfCurrentMonth = startOfMonth(now);
-          const endOfCurrentMonth = endOfMonth(now);
-
-          // Buscar uso de IA do mês atual
-          const aiUsageResult = await prisma.aIUsage.groupBy({
-            by: ["clientPhone"],
-            where: {
-              userId: user.id,
-              date: {
-                gte: startOfCurrentMonth,
-                lte: endOfCurrentMonth,
-              },
-            },
-          });
-
-          const usedCredits = aiUsageResult.length;
-          const remainingCredits = Math.max(0, aiLimit - usedCredits);
-          hasRemainingCredits = remainingCredits > 0;
-
-          aiCreditsInfo = {
-            used: usedCredits,
-            limit: aiLimit,
-            remaining: remainingCredits,
-          };
-
-          // CORREÇÃO: A assinatura só é considerada ativa se tiver status ativo E créditos restantes (APENAS para planos de IA)
-          // Para planos básicos (aiLimit = 0), manter isSubscriptionActive baseado apenas no status
-          if (aiLimit > 0) {
-            isSubscriptionActive = isSubscriptionActive && hasRemainingCredits;
-          }
-          // Para planos básicos, isSubscriptionActive já está correto baseado no status do Stripe
-        }
 
         // Se a assinatura estiver ativa, priorizar ela sobre o trial
         if (isSubscriptionActive) {
@@ -203,20 +139,11 @@ export async function getSubscriptionStatus(): Promise<SubscriptionData | null> 
       isSubscriptionActive,
       canAccessPremiumFeatures,
       trialDaysRemaining,
-      hasRemainingCredits,
-      aiCreditsInfo,
       additionalCalendars: dbUser.additionalCalendars.map((cal) => ({
         id: cal.id.toString(),
         active: cal.active,
         expiresAt: cal.expiresAt.toISOString(),
       })),
-      additionalAICredits:
-        dbUser.additionalAICredits?.map((credit) => ({
-          id: credit.id.toString(),
-          quantity: credit.quantity,
-          used: credit.used,
-          remaining: credit.quantity - credit.used,
-        })) || [],
     };
   } catch (err) {
     console.error("Erro ao buscar status da assinatura:", err);
