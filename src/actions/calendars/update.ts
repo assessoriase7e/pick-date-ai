@@ -12,7 +12,7 @@ export async function updateCalendar({
   accessCode,
 }: {
   id: number;
-  name: string;
+  name?: string;
   collaboratorId?: number;
   isActive?: boolean;
   accessCode?: string | null;

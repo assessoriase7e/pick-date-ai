@@ -50,7 +50,7 @@ export async function createCalendar({
   collaboratorId,
   accessCode,
 }: {
-  name: string;
+  name?: string;
   collaboratorId?: number;
   accessCode?: string;
 }) {
