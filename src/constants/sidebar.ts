@@ -8,8 +8,8 @@ import {
   SquareUser,
   BarChart3,
   File,
-  Bolt,
   ListCollapse,
+  Wrench,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -93,7 +93,7 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
     },
     {
       href: "/config",
-      icon: Bolt,
+      icon: Wrench,
       label: "Configurações",
       isActive: pathname === "/config",
     },

@@ -1,6 +1,6 @@
 "use client";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Menu, SquareChartGantt } from "lucide-react";
+import { Bolt, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
@@ -117,7 +117,7 @@ export function DockMenu() {
         {/* Dropdown Menu para Configurações */}
         <DockIcon>
           <DockDropdownMenu
-            triggerIcon={SquareChartGantt}
+            triggerIcon={Bolt}
             triggerTooltip="Outros"
             items={configDropdownItems}
             groupLabel="Outras Opções"
