@@ -78,7 +78,7 @@ export function FilesPageContent({ files, totalPages, currentPage, initialClient
   });
 
   return (
-    <div className="lg:space-y-6">
+    <div className="lg:space-y-6 pb-20 lg:pb-0">
       <div className="flex flex-col lg:!flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">Gerenciamento de Arquivos</h1>
