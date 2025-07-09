@@ -26,6 +26,7 @@ type NotificationFormValues = z.infer<typeof notificationSchema>;
 interface SendNotificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedAppointmentIds?: (string | number)[];
 }
 
 const defaultMessage = `Olá {{nome_cliente}}! 👋
@@ -43,7 +44,7 @@ const variables = [
   { label: "Data", value: "{{data}}", icon: CalendarIcon },
 ];
 
-export function SendNotificationModal({ open, onOpenChange }: SendNotificationModalProps) {
+export function SendNotificationModal({ open, onOpenChange, selectedAppointmentIds = [] }: SendNotificationModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [draggedVariable, setDraggedVariable] = useState<string | null>(null);
 
@@ -107,16 +108,21 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
   const onSubmit = async (values: NotificationFormValues) => {
     setIsLoading(true);
     try {
-      const result = await sendAppointmentNotifications({
-        date: values.date,
-        message: values.message,
-      });
+      // Se temos IDs selecionados, enviamos apenas para esses agendamentos
+      const result =
+        selectedAppointmentIds.length > 0
+          ? await sendAppointmentNotifications({
+              appointmentIds: selectedAppointmentIds.map((id) => Number(id)),
+              message: values.message,
+            })
+          : await sendAppointmentNotifications({
+              date: values.date,
+              message: values.message,
+            });
 
       if (result.success) {
         toast.success(`Avisos enviados com sucesso para ${result.count} agendamentos!`);
         onOpenChange(false);
-        // Não resetamos o form aqui para manter a mensagem salva
-        // form.reset();
       } else {
         toast.error(result.error || "Erro ao enviar avisos");
       }
@@ -127,51 +133,46 @@ export function SendNotificationModal({ open, onOpenChange }: SendNotificationMo
     }
   };
 
-  const customFooter = (
-    <>
-      <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-        Cancelar
-      </Button>
-      <Button type="submit" disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
-        {isLoading ? "Enviando..." : "Enviar Avisos"}
-      </Button>
-    </>
-  );
-
   return (
     <ConfirmationDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Emitir Aviso de Agendamento"
+      title={
+        selectedAppointmentIds.length > 0
+          ? `Enviar aviso para ${selectedAppointmentIds.length} agendamento(s)`
+          : "Emitir Aviso de Agendamento"
+      }
       size="lg"
       showFooter={true}
-      customFooter={customFooter}
+      onConfirm={form.handleSubmit(onSubmit)}
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <Label>Selecione a data</Label>
-          <div className="border rounded-md p-3 w-full flex flex-col items-center justify-center">
-            <Calendar
-              mode="single"
-              selected={form.watch("date")}
-              onSelect={(date) => date && form.setValue("date", date)}
-              locale={ptBR}
-              className="mx-auto"
-            />
+        {selectedAppointmentIds.length === 0 && (
+          <div className="space-y-2">
+            <Label>Selecione a data</Label>
+            <div className="border rounded-md p-3 w-full flex flex-col items-center justify-center">
+              <Calendar
+                mode="single"
+                selected={form.watch("date")}
+                onSelect={(date) => date && form.setValue("date", date)}
+                locale={ptBR}
+                className="mx-auto"
+              />
+            </div>
+            {form.formState.errors.date && (
+              <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
+            )}
           </div>
-          {form.formState.errors.date && (
-            <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
-          )}
-        </div>
+        )}
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label>Mensagem personalizada</Label>
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon" 
-              onClick={resetToDefaultMessage} 
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={resetToDefaultMessage}
               title="Restaurar mensagem padrão"
             >
               <RefreshCw className="h-4 w-4" />

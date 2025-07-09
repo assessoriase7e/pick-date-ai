@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ColumnDef, SortingState } from "@tanstack/react-table";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { ColumnDef, RowSelectionState, SortingState } from "@tanstack/react-table";
 import { AppointmentDetails } from "./appointment-details";
 import { SendNotificationModal } from "./send-notification-modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +24,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Checkbox } from "../ui/checkbox";
 import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface AppointmentsDataTableProps {
@@ -44,6 +43,7 @@ export function AppointmentsDataTable({
   pagination,
 }: AppointmentsDataTableProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { printSelectedAppointments, isPrinting } = useBatchPrint();
 
@@ -54,7 +54,7 @@ export function AppointmentsDataTable({
   const [isLoading, setIsLoading] = useState(false);
 
   // Estados para seleção múltipla
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   // Recuperar parâmetros da URL
   const initialSearch = searchParams.get("search") || "";
@@ -68,8 +68,10 @@ export function AppointmentsDataTable({
   const [sorting, setSorting] = useState<SortingState>([{ id: "startTime", desc: timeFilter === "past" }]);
 
   // Função para lidar com seleção de itens
-  const handleSelectionChange = (newSelectedIds: (string | number)[]) => {
-    setSelectedIds(newSelectedIds.map((id) => Number(id)));
+  const handleSelectionChange = (newSelection: RowSelectionState) => {
+    // Converter o objeto RowSelectionState para um array de IDs
+    const selectedIds = Object.keys(newSelection).filter((id) => newSelection[id]);
+    setSelectedIds(selectedIds);
   };
 
   const clearSelections = () => {
@@ -78,48 +80,9 @@ export function AppointmentsDataTable({
 
   const handlePrintSelected = async () => {
     if (selectedIds.length === 0) return;
-    await printSelectedAppointments(selectedIds);
+    await printSelectedAppointments(selectedIds.map((id) => Number(id)));
     clearSelections();
   };
-
-  // Criar colunas com funcionalidade de seleção personalizada
-  const columnsWithSelection = [
-    {
-      id: "select",
-      header: () => (
-        <Checkbox
-          checked={selectedIds.length > 0 && selectedIds.length === appointments.length}
-          onCheckedChange={(value) => {
-            if (value) {
-              setSelectedIds(appointments.map((a) => a.id));
-            } else {
-              setSelectedIds([]);
-            }
-          }}
-          aria-label="Selecionar todos"
-        />
-      ),
-      cell: ({ row }) => {
-        const appointment = row.original;
-        const isSelected = selectedIds.includes(appointment.id);
-
-        return (
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={(value) => {
-              if (value) {
-                setSelectedIds([...selectedIds, appointment.id]);
-              } else {
-                setSelectedIds(selectedIds.filter((id) => id !== appointment.id));
-              }
-            }}
-            aria-label="Selecionar linha"
-          />
-        );
-      },
-    },
-    ...createColumns(false), // Usar as colunas base sem a coluna de seleção
-  ];
 
   // Efeito para desativar o loading quando o componente for recarregado
   useEffect(() => {
@@ -148,6 +111,11 @@ export function AppointmentsDataTable({
 
   // Função para verificar instância e abrir modal
   const handleNotificationClick = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("Selecione pelo menos um agendamento para enviar aviso");
+      return;
+    }
+
     try {
       const result = await checkConnectedInstances();
 
@@ -195,8 +163,15 @@ export function AppointmentsDataTable({
       params.set("page", page);
     }
 
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    const newUrl = `${pathname}?${params.toString()}`;
     router.push(newUrl, { scroll: false });
+  };
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   // Função para lidar com a busca
@@ -232,6 +207,15 @@ export function AppointmentsDataTable({
     setSorting([{ id: "startTime", desc: timeFilter === "past" }]);
   }, [timeFilter]);
 
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "client.fullName", title: "Cliente", prismaField: "client.fullName" },
+    { id: "collaborator.name", title: "Profissional", prismaField: "collaborator.name" },
+    { id: "service.name", title: "Serviço", prismaField: "service.name" },
+  ];
+
+  // Botões de ação para o cabeçalho da tabela
   const headerContent = (
     <div className="flex flex-col lg:flex-row gap-2 w-full md:w-auto">
       <div className="flex gap-2">
@@ -246,21 +230,22 @@ export function AppointmentsDataTable({
               <Printer className="h-4 w-4" />
               {isPrinting ? "Gerando PDF..." : `Imprimir (${selectedIds.length})`}
             </Button>
+
+            <SubscriptionBlocker
+              buttonText={`Enviar aviso (${selectedIds.length})`}
+              modalDescription="Para enviar avisos aos clientes, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+            >
+              <Button
+                onClick={handleNotificationClick}
+                className="flex items-center gap-2 w-full md:w-min"
+                variant="outline"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Enviar aviso ({selectedIds.length})
+              </Button>
+            </SubscriptionBlocker>
           </>
         )}
-        <SubscriptionBlocker
-          buttonText="Emitir aviso"
-          modalDescription="Para enviar avisos aos clientes, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
-        >
-          <Button
-            onClick={handleNotificationClick}
-            className="flex items-center gap-2 w-full md:w-min text-primary"
-            variant="outline"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Emitir aviso
-          </Button>
-        </SubscriptionBlocker>
       </div>
 
       <Toggle
@@ -290,7 +275,7 @@ export function AppointmentsDataTable({
           <SelectValue placeholder="Filtrar por profissional" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Profissional</SelectItem>
+          <SelectItem value="all">Todos os profissionais</SelectItem>
           {collaborators.map((collaborator) => (
             <SelectItem key={collaborator.id} value={String(collaborator.id)}>
               {collaborator.name}
@@ -304,19 +289,20 @@ export function AppointmentsDataTable({
   return (
     <div className="space-y-4">
       <DataTable
-        columns={columnsWithSelection}
+        columns={createColumns(false)}
         data={appointments}
-        sortableColumns={["client.fullName", "collaborator.name", "startTime"]}
-        pagination={pagination}
-        onSearch={handleSearch}
-        searchPlaceholder="Buscar por cliente, profissional ou serviço..."
-        setIsLoading={setIsLoading}
-        isloading={isLoading}
-        enableSelection={true}
-        selectedIds={selectedIds}
-        onSelectionChange={handleSelectionChange}
-        getRowId={(row) => row.id}
-        headerContent={headerContent}
+        enableSorting={true}
+        enableFiltering={true}
+        enableRowSelection={true}
+        onRowSelectionChange={handleSelectionChange}
+        initialSorting={[{ id: "startTime", desc: timeFilter === "past" }]}
+        emptyMessage="Nenhum agendamento encontrado."
+        syncWithQueryParams={true}
+        totalPages={pagination.totalPages}
+        currentPage={pagination.currentPage}
+        onPageChange={handlePageChange}
+        enableColumnFilter={true}
+        filterableColumns={filterableColumns}
       />
 
       <AppointmentDetails appointment={selectedAppointment} isOpen={isDetailsOpen} onClose={closeDetails} />

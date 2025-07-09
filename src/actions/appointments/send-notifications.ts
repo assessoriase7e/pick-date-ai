@@ -1,179 +1,89 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import moment from "moment";
-import { evolution } from "@/utils/evolution";
+import { sendWhatsAppMessage } from "../evolution/send-whatsapp-message";
 
-interface SendNotificationParams {
-  date: Date;
+type SendNotificationParams = {
+  date?: Date;
   message: string;
-  instanceName?: string; // Nome da instância Evolution API
-}
+  appointmentIds?: number[];
+};
 
-interface SendNotificationResponse {
-  success: boolean;
-  count?: number;
-  error?: string;
-  failedNotifications?: string[];
-}
-
-export async function sendAppointmentNotifications({
-  date,
-  message,
-  instanceName,
-}: SendNotificationParams): Promise<SendNotificationResponse> {
+export async function sendAppointmentNotifications(params: SendNotificationParams) {
   try {
-    const { id: userId } = await currentUser();
+    const { userId } = await auth();
     if (!userId) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
-
-    // Verificar se há uma instância Evolution configurada
-    let evolutionInstance;
-    if (instanceName) {
-      evolutionInstance = await prisma.evolutionInstance.findFirst({
-        where: {
-          name: instanceName,
-          userId,
-        },
-      });
-    } else {
-      // Buscar a primeira instância ativa do usuário
-      evolutionInstance = await prisma.evolutionInstance.findFirst({
-        where: {
-          userId,
-          status: "open", // Apenas instâncias conectadas
-        },
-      });
-    }
-
-    if (!evolutionInstance) {
       return {
         success: false,
-        error: "Nenhuma instância do WhatsApp encontrada ou conectada. Configure uma instância na seção Agentes.",
+        error: "Não autorizado",
       };
     }
 
-    // Buscar agendamentos do dia selecionado (exceto cancelados)
-    const startDate = moment(date).startOf("day").toDate();
-    const endDate = moment(date).endOf("day").toDate();
+    const { date, message, appointmentIds } = params;
 
-    const appointments = await prisma.appointment.findMany({
-      where: {
-        userId,
-        startTime: {
-          gte: startDate,
-          lte: endDate,
-        },
-        status: {
-          not: "cancelled", // Excluir cancelados
-        },
-      },
-      include: {
-        client: {
-          select: {
-            id: true,
-            fullName: true,
-            phone: true,
+    // Buscar agendamentos com base nos parâmetros fornecidos
+    const appointments = appointmentIds
+      ? await prisma.appointment.findMany({
+          where: {
+            userId,
+            id: { in: appointmentIds },
+            status: "scheduled",
           },
-        },
-        service: {
-          select: {
-            name: true,
+          include: {
+            client: true,
           },
-        },
-        collaborator: {
-          select: {
-            name: true,
+        })
+      : await prisma.appointment.findMany({
+          where: {
+            userId,
+            startTime: {
+              gte: date ? new Date(date) : new Date(),
+              lt: date
+                ? new Date(new Date(date).setHours(23, 59, 59, 999))
+                : new Date(new Date().setHours(23, 59, 59, 999)),
+            },
+            status: "scheduled",
           },
-        },
-      },
-    });
+          include: {
+            client: true,
+          },
+        });
 
     if (appointments.length === 0) {
       return {
         success: false,
         error: "Nenhum agendamento encontrado para a data selecionada",
+        count: 0,
       };
     }
 
-    // Processar mensagens personalizadas
-    const processedNotifications = appointments.map((appointment) => {
-      let personalizedMessage = message;
-
-      // Substituir variáveis
-      personalizedMessage = personalizedMessage.replace(/{{nome_cliente}}/g, appointment.client?.fullName || "Cliente");
-
-      personalizedMessage = personalizedMessage.replace(
-        /{{data}}/g,
-        format(appointment.startTime, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
-          locale: ptBR,
-        })
-      );
-
-      return {
-        appointmentId: appointment.id,
-        clientName: appointment.client?.fullName || "Cliente",
-        clientPhone: appointment.client?.phone,
-        message: personalizedMessage,
-        appointmentDate: appointment.startTime,
-      };
-    });
-
-    // Enviar notificações via Evolution API
-    const evolutionApi = evolution();
-    const failedNotifications: string[] = [];
+    // Enviar mensagens para cada agendamento
     let successCount = 0;
 
-    for (const notification of processedNotifications) {
-      if (!notification.clientPhone) {
-        console.warn(`Cliente ${notification.clientName} não possui telefone cadastrado`);
-        failedNotifications.push(`${notification.clientName} (sem telefone)`);
-        continue;
-      }
+    for (const appointment of appointments) {
+      if (!appointment.client?.phone) continue;
 
-      try {
-        // Formatar número para o padrão internacional (remover caracteres especiais)
-        const formattedPhone = notification.clientPhone.replace(/\D/g, "");
+      // Substituir variáveis na mensagem
+      const formattedDate = format(new Date(appointment.startTime), "dd/MM/yyyy 'às' HH:mm", {
+        locale: ptBR,
+      });
 
-        // Adicionar código do país se não estiver presente (assumindo Brasil +55)
-        const phoneNumber = formattedPhone.startsWith("55") ? formattedPhone : `55${formattedPhone}`;
+      const personalizedMessage = message
+        .replace(/{{nome_cliente}}/g, appointment.client.fullName)
+        .replace(/{{data}}/g, formattedDate);
 
-        await evolutionApi.sendMessage({
-          instance: evolutionInstance.name,
-          text: notification.message,
-          number: phoneNumber,
-        });
+      // Enviar mensagem via WhatsApp
+      const result = await sendWhatsAppMessage({
+        to: appointment.client.phone,
+        message: personalizedMessage,
+      });
 
+      if (result.success) {
         successCount++;
-
-        // Pequeno delay entre mensagens para evitar rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(`Erro ao enviar notificação para ${notification.clientName}:`, error);
-        failedNotifications.push(`${notification.clientName} (${notification.clientPhone})`);
       }
-    }
-
-    // Retornar resultado
-    if (successCount === 0) {
-      return {
-        success: false,
-        error: "Nenhuma notificação foi enviada com sucesso",
-        failedNotifications,
-      };
-    }
-
-    if (failedNotifications.length > 0) {
-      return {
-        success: true,
-        count: successCount,
-        error: `${successCount} notificações enviadas, ${failedNotifications.length} falharam`,
-        failedNotifications,
-      };
     }
 
     return {
@@ -184,7 +94,8 @@ export async function sendAppointmentNotifications({
     console.error("Erro ao enviar notificações:", error);
     return {
       success: false,
-      error: "Erro interno do servidor",
+      error: "Erro ao enviar notificações",
+      count: 0,
     };
   }
 }

@@ -12,6 +12,9 @@ interface AppointmentsPageProps {
     search?: string;
     collaborator?: string;
     timeFilter?: string;
+    sort?: string;
+    dir?: string;
+    filterColumn?: string;
   }>;
 }
 
@@ -21,6 +24,9 @@ export default async function AppointmentsPage({ searchParams }: AppointmentsPag
   const search = sParams.search || "";
   const collaborator = Number(sParams.collaborator) || null;
   const timeFilter = sParams.timeFilter || "past";
+  const sortField = sParams.sort || "startTime";
+  const sortDirection = (sParams.dir || (timeFilter === "past" ? "desc" : "asc")) as "asc" | "desc";
+  const filterColumn = sParams.filterColumn || "all";
   const limit = 10;
 
   // Buscar dados
@@ -48,8 +54,9 @@ export default async function AppointmentsPage({ searchParams }: AppointmentsPag
         ],
       },
       {
-        startTime: timeFilter === "past" ? "desc" : "asc",
-      }
+        [sortField]: sortDirection,
+      },
+      filterColumn
     ),
     getCollaborators(),
   ]);

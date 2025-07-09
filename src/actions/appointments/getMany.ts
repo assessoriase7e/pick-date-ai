@@ -10,7 +10,8 @@ export async function getAppointments(
   collaboratorId?: number,
   searchTerm?: string,
   where?: Prisma.AppointmentWhereInput,
-  orderBy?: Prisma.AppointmentOrderByWithRelationInput
+  orderBy?: Prisma.AppointmentOrderByWithRelationInput,
+  filterColumn: string = "all"
 ) {
   try {
     const { userId } = await auth();
@@ -28,28 +29,43 @@ export async function getAppointments(
       ...where,
       userId,
       ...(collaboratorId && collaboratorId !== null ? { collaboratorId } : {}),
-      ...(searchTerm
-        ? {
-            OR: [
-              {
-                client: {
-                  fullName: { contains: searchTerm, mode: "insensitive" },
-                },
-              },
-              {
-                service: {
-                  name: { contains: searchTerm, mode: "insensitive" },
-                },
-              },
-              {
-                collaborator: {
-                  name: { contains: searchTerm, mode: "insensitive" },
-                },
-              },
-            ],
-          }
-        : {}),
     };
+
+    // Aplicar filtro de busca baseado na coluna selecionada
+    if (searchTerm) {
+      if (filterColumn === "all" || !filterColumn) {
+        // Busca em todos os campos
+        baseQuery.OR = [
+          {
+            client: {
+              fullName: { contains: searchTerm, mode: "insensitive" },
+            },
+          },
+          {
+            service: {
+              name: { contains: searchTerm, mode: "insensitive" },
+            },
+          },
+          {
+            collaborator: {
+              name: { contains: searchTerm, mode: "insensitive" },
+            },
+          },
+        ];
+      } else if (filterColumn === "client.fullName") {
+        baseQuery.client = {
+          fullName: { contains: searchTerm, mode: "insensitive" },
+        };
+      } else if (filterColumn === "service.name") {
+        baseQuery.service = {
+          name: { contains: searchTerm, mode: "insensitive" },
+        };
+      } else if (filterColumn === "collaborator.name") {
+        baseQuery.collaborator = {
+          name: { contains: searchTerm, mode: "insensitive" },
+        };
+      }
+    }
 
     // Buscar total de registros para paginação
     const totalAppointments = await prisma.appointment.count({
