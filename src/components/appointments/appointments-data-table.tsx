@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
+import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface AppointmentsDataTableProps {
   columns: ColumnDef<any>[];
@@ -247,14 +248,19 @@ export function AppointmentsDataTable({
             </Button>
           </>
         )}
-        <Button
-          onClick={handleNotificationClick}
-          className="flex items-center gap-2 w-full md:w-min text-primary"
-          variant="outline"
+        <SubscriptionBlocker
+          buttonText="Emitir aviso"
+          modalDescription="Para enviar avisos aos clientes, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
         >
-          <MessageCircle className="h-4 w-4" />
-          Emitir aviso
-        </Button>
+          <Button
+            onClick={handleNotificationClick}
+            className="flex items-center gap-2 w-full md:w-min text-primary"
+            variant="outline"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Emitir aviso
+          </Button>
+        </SubscriptionBlocker>
       </div>
 
       <Toggle

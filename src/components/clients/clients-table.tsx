@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { saveClient } from "@/actions/clients/save-client";
 import { ClientFormValues } from "@/validators/client";
 import { createClientColumns } from "@/table-columns/clients";
+import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -127,10 +128,15 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   });
 
   const headerContent = (
-    <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:max-w-xs">
-      <Users className="mr-2 h-4 w-4" />
-      Novo Cliente
-    </Button>
+    <SubscriptionBlocker
+      buttonText="Novo Cliente"
+      modalDescription="Para adicionar novos clientes, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+    >
+      <Button onClick={() => setIsNewClientDialogOpen(true)} className="w-full lg:max-w-xs">
+        <Users className="mr-2 h-4 w-4" />
+        Novo Cliente
+      </Button>
+    </SubscriptionBlocker>
   );
 
   // Função para executar busca manual

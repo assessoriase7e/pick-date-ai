@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { createCalendar } from "@/actions/calendars/create";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
+import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface CalendarModalsProps {
   open: boolean;
@@ -71,10 +72,9 @@ export function CalendarModals({
 
   useEffect(() => {
     if (selectedCalendar && editOpen) {
-      editForm.reset({ name: selectedcalendar?.name });
+      editForm.reset({ name: selectedCalendar?.name });
     }
   }, [selectedCalendar, editOpen, editForm]);
-
   return (
     <>
       {/* Modal de Criação */}
@@ -152,7 +152,12 @@ export function CreateCalendarModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Criar Calendário</Button>
+        <SubscriptionBlocker
+          buttonText="Criar Calendário"
+          modalDescription="Para criar novos calendários, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+        >
+          <Button>Criar Calendário</Button>
+        </SubscriptionBlocker>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

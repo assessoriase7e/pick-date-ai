@@ -14,6 +14,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { revalidatePathAction } from "@/actions/revalidate-path";
 import { DataTable } from "@/components/ui/data-table";
 import { createCollaboratorColumns } from "@/table-columns/collaborators";
+import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface CollaboratorsSectionProps {
   collaborators: CollaboratorFullData[];
@@ -157,10 +158,15 @@ export function CollaboratorsSection({
         onSearch={handleSearch}
         isloading={isPageChanging}
         headerContent={
-          <Button onClick={() => setIsModalOpen(true)} className="w-full lg:w-min">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Novo Profissional
-          </Button>
+          <SubscriptionBlocker
+            buttonText="Novo Profissional"
+            modalDescription="Para adicionar novos profissionais, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+          >
+            <Button onClick={() => setIsModalOpen(true)} className="w-full lg:w-min">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Novo Profissional
+            </Button>
+          </SubscriptionBlocker>
         }
       />
 

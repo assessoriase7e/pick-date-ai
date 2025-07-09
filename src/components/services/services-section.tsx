@@ -24,6 +24,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { DataTable } from "@/components/ui/data-table";
 import { createServiceColumns } from "@/table-columns/services";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
+import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface ServicesSectionProps {
   services: ServiceFullData[];
@@ -172,9 +173,14 @@ export function ServicesSection({
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-min">
-        <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
-      </Button>
+      <SubscriptionBlocker
+        buttonText="Novo Serviço"
+        modalDescription="Para adicionar novos serviços, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+      >
+        <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-min">
+          <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
+        </Button>
+      </SubscriptionBlocker>
     </div>
   );
 
