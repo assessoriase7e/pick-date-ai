@@ -47,7 +47,7 @@ export default function RootLayout({
         <body className={montserrat.className}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
-            <Toaster />
+            <Toaster position="top-center" />
           </ThemeProvider>
         </body>
       </ClerkProvider>
