@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { FileRecord, Client } from "@prisma/client";
 import { FilesDataTable } from "@/components/files/files-data-table";
 import { createFileColumns } from "@/table-columns/files";
@@ -91,10 +91,7 @@ export function FilesPageContent({ files, totalPages, currentPage, initialClient
               Enviar Selecionados ({selectedFileIds.length})
             </Button>
           )}
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Arquivo
-          </Button>
+          {/* Removemos o botão de criação daqui */}
         </div>
       </div>
 
@@ -104,9 +101,10 @@ export function FilesPageContent({ files, totalPages, currentPage, initialClient
         totalPages={totalPages}
         currentPage={currentPage}
         onSelectionChange={handleSelectionChange}
+        onCreateClick={() => setIsCreateDialogOpen(true)} // Passando o evento de clique
       />
 
-      {/* Modais */}
+      {/* Modais permanecem fora da tabela */}
       <CreateFileDialog
         isOpen={isCreateDialogOpen}
         onClose={() => {

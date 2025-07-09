@@ -4,7 +4,9 @@ import { FileRecord } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface FilesDataTableProps {
   data: FileRecord[];
@@ -12,45 +14,62 @@ interface FilesDataTableProps {
   totalPages: number;
   currentPage: number;
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
+  onCreateClick?: () => void;
 }
 
-export function FilesDataTable({ data, columns, totalPages, currentPage, onSelectionChange }: FilesDataTableProps) {
+export function FilesDataTable({
+  data,
+  columns,
+  totalPages,
+  currentPage,
+  onSelectionChange,
+  onCreateClick,
+}: FilesDataTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const selectedRowsRef = useRef<any[]>([]);
 
-  const handleSearch = useCallback(
-    (searchTerm: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+  // Função para lidar com a mudança de seleção de linhas
+  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
+    if (onSelectionChange) {
+      const selectedIds = Object.keys(selection).filter((id) => selection[id]);
+      onSelectionChange(selectedIds);
+    }
+  };
 
-      if (searchTerm) {
-        params.set("search", searchTerm);
-      } else {
-        params.delete("search");
-      }
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-      params.delete("page");
-
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [router, pathname, searchParams]
-  );
+  // Botão de criação que será passado para o DataTable
+  const createButton = onCreateClick ? (
+    <Button onClick={onCreateClick}>
+      <Plus className="h-4 w-4 mr-2" />
+      Novo Arquivo
+    </Button>
+  ) : undefined;
 
   return (
     <DataTable
       columns={columns}
       data={data}
-      sortableColumns={["fileName", "fileType", "createdAt"]}
-      searchPlaceholder="Buscar arquivos..."
-      enableSearch={true}
-      onSearch={handleSearch}
-      pagination={{
-        totalPages,
-        currentPage,
-      }}
-      enableSelection={true}
-      onSelectionChange={onSelectionChange}
-      getRowId={(row) => row.id.toString()}
+      enableSorting={true}
+      enableFiltering={true}
+      filterPlaceholder="Buscar arquivos..."
+      enableRowSelection={true}
+      onRowSelectionChange={handleRowSelectionChange}
+      initialSorting={[{ id: "createdAt", desc: true }]}
+      emptyMessage="Nenhum arquivo encontrado."
+      syncWithQueryParams={true}
+      selectedRowsRef={selectedRowsRef}
+      totalPages={totalPages}
+      currentPage={currentPage}
+      onPageChange={handlePageChange}
+      createButton={createButton}
     />
   );
 }

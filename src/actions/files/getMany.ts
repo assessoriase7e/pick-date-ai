@@ -21,7 +21,9 @@ type ListFilesError = {
 export async function listFiles(
   page: number = 1,
   limit: number = 10,
-  search?: string
+  search?: string,
+  sortField: string = "createdAt",
+  sortDirection: "asc" | "desc" = "desc"
 ): Promise<ListFilesSuccess | ListFilesError> {
   try {
     const skip = (page - 1) * limit;
@@ -59,11 +61,15 @@ export async function listFiles(
         : {}),
     };
 
+    // Configurar ordenação dinâmica
+    const orderBy: any = {};
+    orderBy[sortField] = sortDirection;
+
     const [files, total] = await Promise.all([
       prisma.fileRecord.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy,
         where: whereClause,
       }),
       prisma.fileRecord.count({

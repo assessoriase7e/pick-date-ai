@@ -1,320 +1,376 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import * as React from "react";
 import {
   ColumnDef,
+  SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  getFilteredRowModel,
   getSortedRowModel,
-  SortingState,
+  useReactTable,
   RowSelectionState,
+  Row,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import IsTableLoading from "@/components/isTableLoading";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { ChevronLeft, ChevronRight, Columns } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "./button";
+import { Input } from "./input";
 
-interface DataTableProps<TData> {
-  columns: ColumnDef<TData>[];
+// Componentes Table básicos
+const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
+  ({ className, ...props }, ref) => (
+    <div className="relative w-full overflow-auto">
+      <table ref={ref} className={`w-full caption-bottom text-sm ${className || ""}`} {...props} />
+    </div>
+  )
+);
+Table.displayName = "Table";
+
+const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => <thead ref={ref} className={`[&_tr]:border-b ${className || ""}`} {...props} />
+);
+TableHeader.displayName = "TableHeader";
+
+const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => (
+    <tbody ref={ref} className={`[&_tr:last-child]:border-0 ${className || ""}`} {...props} />
+  )
+);
+TableBody.displayName = "TableBody";
+
+const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+  ({ className, ...props }, ref) => (
+    <tr
+      ref={ref}
+      className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${className || ""}`}
+      {...props}
+    />
+  )
+);
+TableRow.displayName = "TableRow";
+
+const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <th
+      ref={ref}
+      className={`h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 ${
+        className || ""
+      }`}
+      {...props}
+    />
+  )
+);
+TableHead.displayName = "TableHead";
+
+const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <td ref={ref} className={`p-4 align-middle [&:has([role=checkbox])]:pr-0 ${className || ""}`} {...props} />
+  )
+);
+TableCell.displayName = "TableCell";
+
+// Interface para o componente DataTable reutilizável
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  sortableColumns?: string[];
-  headerContent?: React.ReactNode;
-  enableSearch?: boolean;
-  searchPlaceholder?: string;
-  pagination?: {
-    totalPages: number;
-    currentPage: number;
-  };
-  onSearch?: (value: string) => void;
-  setIsLoading?: (loading: boolean) => void;
-  isloading?: boolean;
-  // Novas props para seleção
-  enableSelection?: boolean;
-  selectedIds?: (string | number)[];
-  onSelectionChange?: (selectedIds: (string | number)[]) => void;
-  getRowId?: (row: TData) => string | number;
-  // Novas props para ordenação
-  initialSorting?: SortingState;
+  enableSorting?: boolean;
+  enableFiltering?: boolean;
+  enableColumnVisibility?: boolean;
+  enableRowSelection?: boolean;
+  filterColumn?: string;
+  filterPlaceholder?: string;
+  onRowSelectionChange?: (selection: RowSelectionState) => void;
   onSortingChange?: (sorting: SortingState) => void;
+  initialSorting?: SortingState;
+  initialColumnVisibility?: VisibilityState;
+  initialRowSelection?: RowSelectionState;
+  emptyMessage?: string;
+  className?: string;
+  syncWithQueryParams?: boolean;
+  selectedRowsRef?: React.MutableRefObject<Row<TData>[]>;
+  totalPages?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  createButton?: React.ReactNode;
 }
 
-export function DataTable<TData>({
+export function DataTable<TData, TValue>({
   columns,
   data,
-  sortableColumns = [],
-  headerContent,
-  enableSearch = true,
-  searchPlaceholder = "Buscar...",
-  pagination,
-  onSearch,
-  isloading,
-  setIsLoading,
-  enableSelection = false,
-  selectedIds = [],
-  onSelectionChange,
-  getRowId,
-  initialSorting = [],
+  enableSorting = true,
+  enableFiltering = true,
+  enableColumnVisibility = true,
+  enableRowSelection = true,
+  filterColumn,
+  filterPlaceholder = "Filtro...",
+  onRowSelectionChange,
   onSortingChange,
-}: DataTableProps<TData>) {
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>(initialSorting);
-  const [isPageChanging, setIsPageChanging] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
+  initialSorting = [],
+  initialColumnVisibility = {},
+  initialRowSelection = {},
+  emptyMessage = "Sem resultados.",
+  className,
+  syncWithQueryParams = false,
+  selectedRowsRef,
+  totalPages = 1,
+  currentPage = 1,
+  onPageChange,
+  createButton,
+}: DataTableProps<TData, TValue>) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
-  const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
 
-  // Sincronizar rowSelection com selectedIds
-  useEffect(() => {
-    if (enableSelection && getRowId) {
-      const newRowSelection: RowSelectionState = {};
-      const selectedIdsSet = new Set(selectedIds.map((id) => String(id)));
+  // Inicializar estados com valores das query params se syncWithQueryParams estiver ativado
+  const getInitialStateFromQueryParams = () => {
+    if (!syncWithQueryParams) return {};
 
-      data.forEach((row, index) => {
-        const rowId = String(getRowId(row));
-        if (selectedIdsSet.has(rowId)) {
-          newRowSelection[index] = true;
-        }
-      });
+    const params = new URLSearchParams(searchParams);
+    const stateFromParams: any = {};
 
-      const hasChanged =
-        Object.keys(newRowSelection).length !== Object.keys(rowSelection).length ||
-        Object.keys(newRowSelection).some((key) => newRowSelection[key] !== rowSelection[key]);
-
-      if (hasChanged) {
-        setRowSelection(newRowSelection);
+    // Recuperar ordenação
+    if (params.has("sort")) {
+      const sortParam = params.get("sort");
+      const sortDir = params.get("dir") || "asc";
+      if (sortParam) {
+        stateFromParams.sorting = [
+          {
+            id: sortParam,
+            desc: sortDir === "desc",
+          },
+        ];
       }
     }
-  }, [selectedIds, data, enableSelection, getRowId, rowSelection]);
 
-  // Desativa o loading quando o componente é remontado (dados atualizados)
-  useEffect(() => {
-    if (isPageChanging) {
-      setIsPageChanging(false);
-    }
-  }, [data]);
+    return stateFromParams;
+  };
 
-  // Modificar o hook useEffect para chamar onSortingChange quando o sorting mudar
-  useEffect(() => {
-    if (onSortingChange) {
-      onSortingChange(sorting);
+  const initialState = getInitialStateFromQueryParams();
+
+  const [sorting, setSorting] = React.useState<SortingState>(initialState.sorting || initialSorting);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(initialRowSelection);
+  
+  // Estado local para o valor do input de pesquisa
+  const [searchValue, setSearchValue] = React.useState<string>(
+    syncWithQueryParams ? (searchParams.get("search") || "") : ""
+  );
+
+  // Função para atualizar a URL com o termo de pesquisa
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    
+    if (syncWithQueryParams) {
+      const params = new URLSearchParams(searchParams);
+      
+      if (value) {
+        params.set("search", value);
+      } else {
+        params.delete("search");
+      }
+      
+      // Resetar para a primeira página ao pesquisar
+      params.delete("page");
+      
+      // Atualizar a URL com os novos parâmetros
+      const newUrl = `${pathname}?${params.toString()}`;
+      router.push(newUrl, { scroll: false });
     }
-  }, [sorting, onSortingChange]);
+  };
+
+  // Atualizar query params quando os estados mudarem
+  React.useEffect(() => {
+    if (!syncWithQueryParams) return;
+
+    const params = new URLSearchParams(searchParams);
+
+    // Atualizar ordenação nas query params
+    if (sorting.length > 0) {
+      params.set("sort", sorting[0].id);
+      params.set("dir", sorting[0].desc ? "desc" : "asc");
+    } else {
+      params.delete("sort");
+      params.delete("dir");
+    }
+
+    // Atualizar a URL com os novos parâmetros
+    const newUrl = `${pathname}?${params.toString()}`;
+    router.push(newUrl, { scroll: false });
+  }, [sorting, searchParams, pathname, router, syncWithQueryParams]);
+
+  // Atualizar o valor do input quando as query params mudarem
+  React.useEffect(() => {
+    if (syncWithQueryParams) {
+      const params = new URLSearchParams(searchParams);
+      const searchValue = params.get("search") || "";
+      setSearchValue(searchValue);
+    }
+  }, [searchParams, syncWithQueryParams]);
 
   const table = useReactTable({
     data,
     columns,
+    onSortingChange: (updater) => {
+      const newSorting = typeof updater === "function" ? updater(sorting) : updater;
+      setSorting(newSorting);
+      onSortingChange?.(newSorting);
+    },
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    onRowSelectionChange: (updater) => {
-      if (!enableSelection) return;
-
-      const newRowSelection = typeof updater === "function" ? updater(rowSelection) : updater;
-      setRowSelection(newRowSelection);
-
-      if (onSelectionChange && getRowId) {
-        // Extrair os IDs das linhas selecionadas
-        const newSelectedIds = Object.keys(newRowSelection)
-          .filter((key) => newRowSelection[key])
-          .map((key) => {
-            const rowIndex = parseInt(key);
-            const row = data[rowIndex];
-            return row ? getRowId(row) : null;
-          })
-          .filter((id) => id !== null);
-
-        // Garantir que o callback seja chamado com os IDs corretos
-        onSelectionChange(newSelectedIds);
-      }
-    },
+    ...(enableSorting && { getSortedRowModel: getSortedRowModel() }),
     state: {
-      globalFilter,
-      sorting,
-      ...(enableSelection && { rowSelection }),
+      ...(enableSorting && { sorting }),
+      ...(enableColumnVisibility && { columnVisibility }),
+      ...(enableRowSelection && { rowSelection }),
     },
-    onGlobalFilterChange: setGlobalFilter,
-    enableRowSelection: true, // Sempre habilitar seleção de linha
-    enableMultiRowSelection: true, // Esta linha permite seleção múltipla
-    getRowId: getRowId
-      ? (row, index) => {
-          if (!row) return index.toString();
-          const id = getRowId(row);
-          return id ? id.toString() : index.toString();
-        }
-      : (row, index) => index.toString(), // Fallback para usar índice
   });
 
-  // Função para navegar entre páginas usando query params
-  const navigateToPage = (pageNumber: number) => {
-    if (!pagination) return;
-
-    // Ativa o loading antes de mudar de página
-    setIsPageChanging(true);
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", pageNumber.toString());
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  // Função para lidar com a mudança no campo de busca
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setGlobalFilter(value);
-    setIsSearching(true);
-
-    if (onSearch) {
-      onSearch(value);
+  // Externalizar as linhas selecionadas através da ref
+  React.useEffect(() => {
+    if (selectedRowsRef) {
+      selectedRowsRef.current = table.getFilteredSelectedRowModel().rows;
     }
-  };
+  }, [table, rowSelection, selectedRowsRef]);
 
-  useEffect(() => {
-    setIsSearching(false);
-  }, [data]);
-
-  // Renderiza os cards para visualização mobile
-  const renderMobileCards = () => {
-    if (table.getRowModel().rows?.length) {
-      return (
-        <div className="space-y-4">
-          {table.getRowModel().rows.map((row) => (
-            <div key={row.id} className="p-4 rounded-md border bg-card shadow-sm">
-              {row.getVisibleCells().map((cell) => {
-                // Obtém o cabeçalho da coluna para exibir junto com o valor
-                const header = columns.find((col) => (col as any).id === cell.column.id)?.header as string;
-
-                return (
-                  <div key={cell.id} className="py-2 border-b last:border-0">
-                    <div className="font-medium text-sm text-muted-foreground">{header}</div>
-                    <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      );
-    } else {
-      return <div className="text-center p-4 border rounded-md">Nenhum resultado encontrado.</div>;
+  // Função para mudar de página
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else if (syncWithQueryParams) {
+      const params = new URLSearchParams(searchParams);
+      params.set("page", String(newPage));
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }
   };
 
   return (
-    <div className="space-y-4 relative">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-2 w-full">
-        {enableSearch && (
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={globalFilter}
-              onChange={handleSearchChange}
-              className="pl-8"
-            />
+    <div className={`w-full space-y-4 ${className || ""}`}>
+      {/* Header com filtros e controles */}
+      {(enableFiltering || enableColumnVisibility || createButton) && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 w-full">
+            {enableFiltering && syncWithQueryParams && (
+              <Input
+                placeholder={filterPlaceholder}
+                value={searchValue}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                className="w-full lg:max-w-lg px-3 py-2 border border-input rounded-md text-sm"
+              />
+            )}
           </div>
-        )}
-        {headerContent}
-      </div>
 
-      <div className="relative">
-        <IsTableLoading isPageChanging={isPageChanging || isSearching || isloading} />
-
-        {isMobile ? (
-          // Visualização mobile (cards)
-          renderMobileCards()
-        ) : (
-          // Visualização desktop (tabela)
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : (
-                          <div
-                            className={sortableColumns.includes(header.column.id) ? "cursor-pointer select-none" : ""}
-                            onClick={
-                              sortableColumns.includes(header.column.id)
-                                ? header.column.getToggleSortingHandler()
-                                : undefined
-                            }
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </div>
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => {
-                    // Forçar a avaliação do estado de seleção como booleano
-                    const isSelected = row.getIsSelected() === true;
-                    return (
-                      <TableRow
-                        key={row.id}
-                        data-state={isSelected ? "selected" : undefined}
-                        // Adicionar classe personalizada para debug
-                        className={isSelected ? "bg-muted" : ""}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      Nenhum resultado encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+          <div className="flex items-center space-x-2">
+            {createButton && createButton}
+            
+            {enableColumnVisibility && (
+              <div className="relative">
+                <Button
+                  className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => {
+                    const dropdown = document.getElementById("column-visibility-dropdown");
+                    if (dropdown) {
+                      dropdown.classList.toggle("hidden");
+                    }
+                  }}
+                >
+                  <Columns className="h-4 w-4" />
+                </Button>
+                <div
+                  id="column-visibility-dropdown"
+                  className="absolute right-0 z-50 mt-1 w-48 bg-popover border border-border rounded-md shadow-lg hidden"
+                >
+                  <div className="p-1">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => (
+                        <label
+                          key={column.id}
+                          className="flex items-center space-x-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={column.getIsVisible()}
+                            onChange={(e) => column.toggleVisibility(e.target.checked)}
+                            className="rounded border-border"
+                          />
+                          <span className="capitalize">{column.id}</span>
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-end space-x-2 mx-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full lg:w-auto"
-            onClick={() => navigateToPage(pagination.currentPage - 1)}
-            disabled={pagination.currentPage <= 1 || isPageChanging}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-          </Button>
-          <span className="text-sm w-full lg:w-auto text-center">
-            {pagination.currentPage} de {pagination.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full lg:w-auto"
-            onClick={() => navigateToPage(pagination.currentPage + 1)}
-            disabled={pagination.currentPage >= pagination.totalPages || isPageChanging}
-          >
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
         </div>
       )}
+
+      {/* Tabela */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Footer com seleção e paginação */}
+      <div className="flex items-center justify-between space-x-2">
+        {enableRowSelection && (
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} linha(s)
+            selecionada(s).
+          </div>
+        )}
+
+        <div className="flex items-center space-x-2">
+          <Button
+            className="px-3 py-2 text-sm border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft />
+          </Button>
+          <div className="flex items-center space-x-1 text-sm">
+            <span>Página</span>
+            <strong>
+              {currentPage} de {totalPages}
+            </strong>
+          </div>
+          <Button
+            className="px-3 py-2 text-sm border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
