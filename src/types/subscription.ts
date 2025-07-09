@@ -37,7 +37,6 @@ export interface SubscriptionData {
   isSubscriptionActive: boolean;
   canAccessPremiumFeatures: boolean;
   trialDaysRemaining: number;
-  hasRemainingCredits: boolean;
   additionalCalendars: {
     id: string;
     active: boolean;

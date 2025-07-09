@@ -35,7 +35,9 @@ export function SubscriptionBlocker({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Verifica se o usuário tem acesso às funcionalidades premium
-  const hasAccess = data?.isSubscriptionActive || data?.isTrialActive;
+  // Adicionar verificação explícita para usuários lifetime
+  const isLifetimeUser = data?.isSubscriptionActive && !data?.subscription;
+  const hasAccess = data?.isSubscriptionActive || data?.isTrialActive || isLifetimeUser;
 
   // Se o usuário tem acesso, renderiza o children normalmente
   if (hasAccess) {

@@ -16,7 +16,8 @@ export async function isLifetimeUser(): Promise<boolean> {
 
     // Verifica nos metadados privados primeiro
     const privateMetadata = user.privateMetadata as any;
-    if (privateMetadata?.lifetime === true) {
+
+    if (Boolean(privateMetadata?.lifetime) === true) {
       return true;
     }
 
