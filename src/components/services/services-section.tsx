@@ -183,7 +183,7 @@ export function ServicesSection({
   );
 
   return (
-    <div className="space-y-4 relative">
+    <div className="lg:space-y-6 pb-20 lg:pb-0">
       <div className="flex flex-col lg:!flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">Gerenciamento de Serviços</h1>
