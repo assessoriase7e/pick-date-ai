@@ -12,6 +12,7 @@ import { Link } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
 import { createLinkColumns } from "@/table-columns/links";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 type LinksContentProps = {
   links: Link[];
@@ -25,6 +26,9 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [deletingLink, setDeletingLink] = useState<Link | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   async function handleCreateLink(data: Link) {
     try {
@@ -91,32 +95,61 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  // Função para lidar com a mudança de seleção de linhas
+  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
+    const selectedIds = Object.keys(selection).filter((id) => selection[id]);
+    // Você pode adicionar lógica adicional aqui se necessário
+  };
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "title", title: "Título", prismaField: "title" },
+    { id: "url", title: "URL", prismaField: "url" },
+    { id: "description", title: "Descrição", prismaField: "description" },
+  ];
+
   const columns = createLinkColumns({
     onEdit: setEditingLink,
     onDelete: setDeletingLink,
     onOpenExternal: openExternalLink,
   });
 
+  // Botão de criação que será passado para o DataTable
+  const createButton = (
+    <Button onClick={() => setIsCreateModalOpen(true)} className="w-full md:w-min">
+      <LinkIcon className="mr-2 h-4 w-4 " /> Novo link
+    </Button>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full md:w-min">
-          <LinkIcon className="mr-2 h-4 w-4 " /> Novo link
-        </Button>
-      </div>
-
       {/* Desktop View usando DataTable */}
       <div className="hidden md:block">
         <DataTable
           columns={columns}
           data={links}
-          enableSearch={true}
-          searchPlaceholder="Buscar links..."
-          sortableColumns={["title", "url", "description"]}
-          pagination={{
-            totalPages,
-            currentPage,
-          }}
+          enableSorting={true}
+          enableFiltering={true}
+          filterPlaceholder="Buscar links..."
+          enableRowSelection={true}
+          onRowSelectionChange={handleRowSelectionChange}
+          initialSorting={[{ id: "title", desc: false }]}
+          emptyMessage="Nenhum link encontrado."
+          syncWithQueryParams={true}
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          createButton={createButton}
+          enableColumnFilter={true}
+          filterableColumns={filterableColumns}
         />
       </div>
 
