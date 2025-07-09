@@ -2,7 +2,6 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { PlanType } from "@/types/subscription";
-import { deactivateAllAIAgents } from "@/lib/agent-utils";
 
 export async function handleSubscriptionCreated(subscription: Stripe.Subscription, userId: string) {
   const price = subscription.items.data[0]?.price;
@@ -106,11 +105,6 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
 
   const isNowBasicPlan = newPriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!;
 
-  // Se mudou de plano IA para plano base, desativar agentes
-  if (wasAIPlan && isNowBasicPlan) {
-    await deactivateAllAIAgents(existingSubscription.userId);
-  }
-
   // Atualizar a assinatura no banco
   await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
@@ -173,12 +167,6 @@ function getPlanNameFallback(productId: string): string {
   switch (productId) {
     case process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC:
       return "Plano Base";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100:
-      return "100 Atendimentos IA";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200:
-      return "200 Atendimentos IA";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300:
-      return "300 Atendimentos IA";
     default:
       return "Plano Desconhecido";
   }
@@ -189,12 +177,6 @@ function getPlanType(priceId: string): PlanType {
   switch (priceId) {
     case process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC:
       return "basic";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100:
-      return "ai100";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200:
-      return "ai200";
-    case process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300:
-      return "ai300";
     default:
       return "basic";
   }

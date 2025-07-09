@@ -1,5 +1,5 @@
-export type PlanType = "basic" | "ai100" | "ai200" | "ai300" | "addon";
-export type AddonType = "calendar" | "ai";
+export type PlanType = "basic" | "addon";
+export type AddonType = "calendar";
 
 export type SubscriptionStatus =
   | "active"
@@ -38,22 +38,10 @@ export interface SubscriptionData {
   canAccessPremiumFeatures: boolean;
   trialDaysRemaining: number;
   hasRemainingCredits: boolean;
-  aiCreditsInfo?: {
-    used: number;
-    limit: number;
-    remaining: number;
-  };
   additionalCalendars: {
     id: string;
     active: boolean;
     expiresAt: string;
-  }[];
-  additionalAICredits: {
-    id: string;
-    quantity: number;
-    used: number;
-    remaining: number;
-    expiresAt?: string;
   }[];
 }
 

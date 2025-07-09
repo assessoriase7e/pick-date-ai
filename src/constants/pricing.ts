@@ -1,10 +1,6 @@
 export const STRIPE_PRICE_IDS = {
   basic: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!,
-  ai100: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
-  ai200: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
-  ai300: process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
   addCalendar: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_CALENDAR!,
-  addAi: process.env.NEXT_PUBLIC_STRIPE_PRICE_ADD_AI!,
 };
 
 // Remover 'as const' para permitir mutabilidade
@@ -12,7 +8,7 @@ export const PLANS = [
   {
     id: "basic",
     name: "Agenda Base",
-    description: "Agendamento simples sem IA",
+    description: "Agendamento simples",
     price: "R$ 60",
     period: "/mês",
     priceId: STRIPE_PRICE_IDS.basic,
@@ -26,60 +22,6 @@ export const PLANS = [
       "Demais funções básicas",
     ],
     isBasic: true,
-  },
-  {
-    id: "ai100",
-    name: "100 Atendimentos IA",
-    description: "Ideal para pequenos negócios",
-    price: "R$ 190",
-    period: "/mês",
-    priceId: STRIPE_PRICE_IDS.ai100,
-    planType: "ai100" as const,
-    features: [
-      "100 atendimentos mensais",
-      "Reset a cada 24 horas",
-      "Suporte via Whatsapp",
-      "IA com regras customizadas",
-      "Atendimento humanizado",
-      "Operação IA 24/7",
-    ],
-  },
-  {
-    id: "ai200",
-    name: "200 Atendimentos IA",
-    description: "Para negócios em crescimento",
-    price: "R$ 329",
-    period: "/mês",
-    priceId: STRIPE_PRICE_IDS.ai200,
-    planType: "ai200" as const,
-    features: [
-      "200 atendimentos mensais",
-      "Reset a cada 24 horas",
-      "Suporte via Whatsapp",
-      "IA com regras customizadas",
-      "Atendimento humanizado",
-      "Operação IA 24/7",
-    ],
-    recommended: true,
-    discount: "10% Off",
-  },
-  {
-    id: "ai300",
-    name: "300 Atendimentos IA",
-    description: "Para negócios estabelecidos",
-    price: "R$ 467",
-    period: "/mês",
-    priceId: STRIPE_PRICE_IDS.ai300,
-    planType: "ai300" as const,
-    features: [
-      "300 atendimentos mensais",
-      "Reset a cada 24 horas",
-      "Suporte via Whatsapp",
-      "IA com regras customizadas",
-      "Atendimento humanizado",
-      "Operação IA 24/7",
-    ],
-    discount: "15% Off",
   },
 ]; // Remover 'as const'
 
@@ -96,24 +38,6 @@ export const ADDITIONAL_PLANS = [
     addonType: "calendar" as const,
     requiresBasePlan: true,
   },
-  {
-    id: "add-ai",
-    name: "Atendimentos Adicionais",
-    description: "Adicione mais atendimentos IA ao seu plano",
-    price: "R$ 25",
-    period: " (Único)",
-    priceId: STRIPE_PRICE_IDS.addAi,
-    planType: "addon" as const,
-    features: [
-      "+10 atendimentos IA", 
-      "Compatível com planos IA", 
-      "Faturamento separado", 
-      "Sem data de expiração",
-      "Créditos permanentes"
-    ],
-    addonType: "ai" as const,
-    requiresAiPlan: true,
-  },
 ]; // Remover 'as const'
 
 export const PRICING_TEXTS = {
@@ -123,7 +47,6 @@ export const PRICING_TEXTS = {
   trialHighlight: "💡 Teste todas as funcionalidades sem compromisso durante o período gratuito",
   additionalPlansTitle: "Produtos Adicionais",
   additionalPlansSubtitle: "Expanda seu plano com recursos extras",
-  aiCreditsNote: "Os créditos adicionais de IA não expiram e ficam disponíveis até serem utilizados.",
 
   // Adicionar propriedades que a landing page espera
   plans: PLANS,
@@ -135,19 +58,9 @@ export const PRICING_TEXTS = {
       period: "/Mês",
       comingSoon: false,
     },
-    {
-      name: "Atendimentos Adicionais",
-      description: "Adicione mais atendimentos IA caso necessário para terminar o mês",
-      price: "R$ 25",
-      period: "(Único)",
-      comingSoon: false,
-      note: "Os créditos adicionais de IA não expiram e ficam disponíveis até serem utilizados."
-    },
   ],
   includedFeatures: [
-    "Agendamento inteligente com IA",
-    "Integração com WhatsApp",
-    "Calendários ilimitados",
+    "Agendamento profissional",
     "Histórico completo de atendimentos",
     "Relatórios detalhados",
     "Suporte prioritário",

@@ -5,78 +5,6 @@ import { isLifetimeUser } from "./lifetime-user";
 import { Subscription } from "@prisma/client";
 
 /**
- * Obtém o limite de créditos de IA baseado na assinatura do usuário
- * @param subscription Objeto de assinatura do usuário
- * @param checkLifetime Se true, verifica se o usuário é lifetime
- * @param userId ID do usuário para verificar créditos adicionais
- * @returns Número de créditos permitidos (Infinity para usuários lifetime)
- */
-export async function getAICreditsLimit(
-  subscription: Subscription | null | undefined,
-  checkLifetime: boolean = true,
-  userId?: string
-): Promise<number> {
-  // Verificar se é usuário lifetime primeiro
-  if (checkLifetime && (await isLifetimeUser())) {
-    return Infinity;
-  }
-
-  // Verificar se o usuário está em período de teste
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (user) {
-      const trialEndDate = new Date(user.createdAt);
-      trialEndDate.setDate(trialEndDate.getDate() + 3);
-      const now = new Date();
-      const isTrialActive = now < trialEndDate;
-
-      if (isTrialActive) {
-        return Infinity; // Créditos ilimitados durante o período de teste
-      }
-    }
-  }
-
-  let baseCredits = 0;
-
-  if (subscription && subscription.status === "active") {
-    const { stripePriceId } = subscription;
-
-    // Verificar pelos IDs dos produtos de IA
-    if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!) {
-      baseCredits = 100;
-    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!) {
-      baseCredits = 200;
-    } else if (stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!) {
-      baseCredits = 300;
-    }
-  }
-
-  // Se não tiver userId, retorna apenas os créditos base
-  if (!userId) {
-    return baseCredits;
-  }
-
-  // Buscar créditos adicionais ativos e não totalmente utilizados
-  const additionalCredits = await prisma.additionalAICredit.findMany({
-    where: {
-      userId,
-      active: true,
-      used: { lt: prisma.additionalAICredit.fields.quantity },
-    },
-  });
-
-  // Calcular total de créditos adicionais disponíveis
-  const totalAdditionalCredits = additionalCredits.reduce((total, credit) => {
-    return total + (credit.quantity - credit.used);
-  }, 0);
-
-  return baseCredits + totalAdditionalCredits;
-}
-
-/**
  * Obtém o limite de calendários baseado na assinatura do usuário
  * @param subscription Objeto de assinatura do usuário
  * @param checkLifetime Se true, verifica se o usuário é lifetime
@@ -114,18 +42,7 @@ export async function getCalendarLimit(
   let baseLimit = 3;
 
   if (subscription && subscription.status === "active") {
-    const { stripePriceId } = subscription;
-
-    // Planos com IA não têm limite
-    if (
-      [
-        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
-        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
-        process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
-      ].includes(stripePriceId)
-    ) {
-      return Infinity;
-    }
+    // Todos os planos têm o mesmo limite base
   }
 
   // Se não tiver userId, retorna apenas o limite base

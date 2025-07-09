@@ -11,7 +11,7 @@ import { Collaborator } from "@prisma/client";
 import { DataTable } from "@/components/ui/data-table";
 import { Toggle } from "@/components/ui/toggle";
 import { CalendarClock, History, MessageCircle, Printer } from "lucide-react";
-import { checkConnectedInstances } from "@/actions/agents/evolution/check-connected-instances";
+import { checkConnectedInstances } from "@/actions/evolution/check-connected-instances";
 import { toast } from "sonner";
 import { useBatchPrint } from "@/hooks/use-batch-print";
 import { createColumns } from "./columns";

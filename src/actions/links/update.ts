@@ -1,8 +1,6 @@
 "use server";
-
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { triggerProfileRagUpdate } from "../agents/rag/trigger-profile-rag-update";
 
 export async function updateLink(linkId: number, userId: string, data: any) {
   try {
@@ -10,8 +8,6 @@ export async function updateLink(linkId: number, userId: string, data: any) {
       where: { id: linkId },
       data,
     });
-
-    await triggerProfileRagUpdate(userId);
 
     revalidatePath("/links");
     return { success: true, data: updatedLink };

@@ -15,33 +15,18 @@ model User {
   imageUrl           String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
-  agentPrompts       AgentPrompt[]
-  agentRagFiles      AgentRagFile[]
-  agentRedisKeys     AgentRedisKey[]
-  agentWhatsapp      AgentWhatsapp[]
-  prompts            Prompt[]
-  ragFiles           RagFile[]
   apiKey             ApiKey[]
   appointments       Appointment[]
-  attendantPrompts   AttendantPrompt?
-  blackList          BlackList?
   calendars          Calendar[]
   client             Client[]
   collaborator       Collaborator[]
   evolutionInstances EvolutionInstance[]
   files              FileRecord[]
-  followUpPrompts    FollowUpPrompt?
   links              Link[]
   profile            Profile?
-  redisKeys          RedisKey[]
-  sdrPrompts         SdrPrompt?
   services           Service[]
-  whatsapp           Whatsapp?
-  aiUsages           AIUsage[]           
-  questionTexts      QuestionText[]
   subscription       Subscription?
   paymentHistory     PaymentHistory[]
-  additionalAICredits AdditionalAICredit[]
   additionalCalendars AdditionalCalendar[]
 
   @@map("user")
@@ -85,162 +70,6 @@ model ApiKey {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("apikey")
-}
-
-model Prompt {
-  id                       Int      @id @default(autoincrement())
-  type                     String
-  content                  String
-  isActive                 Boolean  @default(false)
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-  presentation             String?
-  speechStyle              String?
-  expressionInterpretation String?
-  schedulingScript         String?
-  rules                    String?
-  formattedContent         String?
-  userId                   String
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model AttendantPrompt {
-  id                       Int      @id @default(autoincrement())
-  content                  String
-  isActive                 Boolean  @default(false)
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-  presentation             String
-  speechStyle              String
-  expressionInterpretation String
-  schedulingScript         String
-  rules                    String
-  formattedContent         String
-  suportPhone              String?
-  userId                   String   @unique
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("attendantprompt")
-}
-
-model SdrPrompt {
-  id        Int      @id @default(autoincrement())
-  content   String
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sdrprompt")
-}
-
-model FollowUpPrompt {
-  id        Int      @id @default(autoincrement())
-  content   String
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("followupprompt")
-}
-
-model RagFile {
-  id        Int      @id @default(autoincrement())
-  name      String
-  content   String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model RagConfig {
-  id          Int      @id @default(autoincrement())
-  userId      String   @unique
-  webhookUrl  String?
-  metadataKey String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model RedisKey {
-  id        Int      @id @default(autoincrement())
-  key       String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("rediskey")
-}
-
-model Whatsapp {
-  id          Int      @id @default(autoincrement())
-  phoneNumber String
-  userId      String   @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("whatsapp")
-}
-
-model AgentPrompt {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  attendant Boolean  @default(false)
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model AgentRagFile {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  name      String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model AgentRedisKey {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  key       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model AgentWhatsapp {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  phone     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model EvolutionInstance {
-  id         Int      @id @default(autoincrement())
-  name       String
-  number     String
-  qrCode     String?
-  webhookUrl String?
-  apiKey     String?
-  status     String   @default("close")
-  type       String   @default("attendant")
-  userId     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("evolutioninstance")
 }
 
 model Service {
@@ -391,62 +220,6 @@ model FileRecord {
   @@map("filerecord")
 }
 
-model BlackList {
-  id        Int              @id @default(autoincrement())
-  userId    String           @unique
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phones    BlackListPhone[]
-
-  @@map("blacklist")
-}
-
-model BlackListPhone {
-  id          Int       @id @default(autoincrement())
-  number      String
-  name        String?
-  blackListId Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  blackList   BlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
-
-  @@map("blacklistphone")
-}
-
-model AIUsage {
-  id                Int      @id @default(autoincrement())
-  userId            String
-  date              DateTime @default(now())
-  clientPhone       String
-  conversationId    String   @unique
-  serviceType       String   // Tipo de serviço (atendimento, agendamento, etc)
-  status            String   // Concluído, abandonado, etc
-  tokensUsed        Int?     // Opcional: para rastrear uso de tokens se necessário
-  responseTime      Int?     // Opcional: tempo de resposta em ms
-  source            String   // whatsapp, n8n, etc
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, date]) // Índice para consultas por usuário e data
-  @@index([clientPhone])  // Índice para consultas por telefone do cliente
-  @@map("aiusage")
-}
-
-model QuestionText {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  content     String   @db.Text
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("questiontext")
-}
-
 model Subscription {
   id                    String   @id @default(cuid())
   userId                String   @unique
@@ -455,7 +228,7 @@ model Subscription {
   stripePriceId         String
   stripeProductId       String
   planName              String
-  planType              String   // "basic", "ai100", "ai200", "ai300"
+  planType              String   // "basic"
   status                String   // active, canceled, incomplete, past_due, etc.
   currentPeriodStart    DateTime
   currentPeriodEnd      DateTime
@@ -484,24 +257,6 @@ model PaymentHistory {
   @@map("paymenthistory")
 }
 
-model AdditionalAICredit {
-  id                Int       @id @default(autoincrement())
-  userId            String
-  quantity          Int      @default(10) // Quantidade de créditos (padrão: 10)
-  used              Int      @default(0)  // Quantidade já utilizada
-  active            Boolean  @default(true)
-  purchaseDate      DateTime @default(now())
-  stripePaymentId   String?
-  stripeInvoiceId   String?
-  // expiresAt removido
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("additionalAICredit")
-}
-
 model AdditionalCalendar {
   id                   Int       @id @default(autoincrement())
   userId               String
@@ -517,4 +272,21 @@ model AdditionalCalendar {
 
   @@index([userId])
   @@map("additionalCalendar")
+}
+
+model EvolutionInstance {
+  id         Int      @id @default(autoincrement())
+  name       String
+  number     String
+  qrCode     String?
+  webhookUrl String?
+  apiKey     String?
+  status     String   @default("close")
+  type       String   @default("attendant")
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("evolutioninstance")
 }
