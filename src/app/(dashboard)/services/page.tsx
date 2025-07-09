@@ -1,53 +1,38 @@
-"use server";
 import { getServices } from "@/actions/services/get-services";
 import { ServicesSection } from "@/components/services/services-section";
 import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 
 interface ServicesPageProps {
-  searchParams: Promise<{
+  searchParams: {
     page?: string;
     search?: string;
     collaborator?: string;
     sortField?: string;
     sortDirection?: string;
-  }>;
+    filterColumn?: string;
+  };
 }
 
-export default async function ServicesPage({
-  searchParams,
-}: ServicesPageProps) {
-  const { page, search, collaborator, sortField, sortDirection } =
-    await searchParams;
-  const pageParam = Number(page) || 1;
+export default async function ServicesPage({ searchParams }: ServicesPageProps) {
+  const page = Number(searchParams.page) || 1;
+  const search = searchParams.search;
+  const sortField = searchParams.sortField || "name";
+  const sortDirection = (searchParams.sortDirection || "asc") as "asc" | "desc";
+  const collaboratorFilter = searchParams.collaborator || "all";
+  const filterColumn = searchParams.filterColumn || "all";
 
-  const where: any = {};
-
-  if (search) {
-    where.name = {
-      contains: search,
-      mode: "insensitive",
-    };
-  }
-
-  const sort = sortField
-    ? {
-        field: sortField,
-        direction: (sortDirection === "desc" ? "desc" : "asc") as
-          | "desc"
-          | "asc",
-      }
-    : undefined;
-
+  // Buscar serviços e colaboradores no servidor
   const [servicesResult, collaboratorsResult] = await Promise.all([
     getServices({
-      page: pageParam,
-      limit: 20,
-      where,
-      sort,
-      collaboratorId:
-        collaborator && collaborator !== null
-          ? Number(collaborator)
-          : undefined,
+      page,
+      limit: 10,
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+      collaboratorId: collaboratorFilter !== "all" ? Number(collaboratorFilter) : undefined,
+      search,
+      filterColumn,
     }),
     getCollaborators({
       page: 1,
@@ -56,37 +41,27 @@ export default async function ServicesPage({
   ]);
 
   const pagination =
-    servicesResult.success && servicesResult.pagination
-      ? servicesResult.pagination
-      : { totalPages: 1, currentPage: 1 };
+    servicesResult.success && servicesResult.pagination ? servicesResult.pagination : { totalPages: 1, currentPage: 1 };
 
-  const collaborators = collaboratorsResult.success
-    ? collaboratorsResult.data
-    : [];
+  const collaborators = collaboratorsResult.success ? collaboratorsResult.data : [];
   const services = servicesResult.success ? servicesResult.data : [];
 
   return (
-    <div className="container">
-      <div>
-        <h1 className="text-3xl font-bold">Serviços</h1>
-        <p className="text-muted-foreground">
-          Gerencie os serviços cadastrados no sistema.
-        </p>
-      </div>
-
-      <div className="space-y-8">
-        <ServicesSection
-          services={services}
-          collaborators={collaborators}
-          pagination={pagination}
-          initialFilters={{
-            searchTerm: search || "",
-            collaboratorFilter: collaborator || "all",
-            sortField: (sortField as any) || "name",
-            sortDirection: (sortDirection as any) || "asc",
-          }}
-        />
-      </div>
+    <div className="container mx-auto py-6 space-y-6">
+      <ServicesSection
+        services={services}
+        collaborators={collaborators}
+        pagination={{
+          totalPages: pagination.totalPages,
+          currentPage: pagination.currentPage,
+        }}
+        initialFilters={{
+          searchTerm: search || "",
+          collaboratorFilter,
+          sortField: sortField as any,
+          sortDirection,
+        }}
+      />
     </div>
   );
 }

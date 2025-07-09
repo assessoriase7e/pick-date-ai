@@ -19,11 +19,13 @@ type SortOptions = {
 };
 
 type GetServicesProps = {
-  where?: Prisma.ServiceWhereInput;
   page?: number;
   limit?: number;
   sort?: SortOptions;
+  where?: Prisma.ServiceWhereInput;
   collaboratorId?: number;
+  search?: string;
+  filterColumn?: string;
 };
 
 export async function getServices({
@@ -32,6 +34,8 @@ export async function getServices({
   sort,
   where,
   collaboratorId,
+  search,
+  filterColumn = "all",
 }: GetServicesProps): Promise<GetServicesResponse> {
   const { userId } = await auth();
   if (!userId) {
@@ -53,14 +57,39 @@ export async function getServices({
     }
 
     // Construir a query where
-    const finalWhere: Prisma.ServiceWhereInput = { ...where, userId };
+    let finalWhere: Prisma.ServiceWhereInput = { ...where, userId };
 
-    // Se tiver query de nome com contains
-    if (where?.name && typeof where.name === "string") {
-      finalWhere.name = {
-        contains: where.name,
-        mode: "insensitive",
-      };
+    // Aplicar filtro de busca baseado na coluna selecionada
+    if (search) {
+      if (filterColumn === "all" || !filterColumn) {
+        // Busca em todos os campos
+        finalWhere = {
+          ...finalWhere,
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+            {
+              notes: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+          ],
+        };
+      } else {
+        // Busca em um campo específico
+        finalWhere = {
+          ...finalWhere,
+          [filterColumn]: {
+            contains: search,
+            mode: "insensitive" as Prisma.QueryMode,
+          },
+        };
+      }
     }
 
     let whereCondition: Prisma.ServiceWhereInput = finalWhere;

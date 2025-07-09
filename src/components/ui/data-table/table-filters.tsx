@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Filter } from "lucide-react";
 import { Button } from "../button";
 import { Input } from "../input";
@@ -39,9 +38,7 @@ export function TableFilters({
         placeholder={filterPlaceholder}
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
-        className={`w-full px-3 py-2 border border-input text-sm ${
-          enableColumnFilter ? "rounded-l-none" : ""
-        }`}
+        className={`w-full py-2 border border-input text-sm ${enableColumnFilter ? "rounded-r-none" : ""}`}
       />
 
       {enableColumnFilter && filterableColumns.length > 0 && (
@@ -49,7 +46,7 @@ export function TableFilters({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="rounded-r-none border-r-0 px-3 focus-visible:ring-0 focus-visible:ring-offset-0 ml-2"
+              className="rounded-l-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Filter className="h-4 w-4" />
             </Button>

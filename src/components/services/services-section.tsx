@@ -8,7 +8,6 @@ import { ServiceModal } from "./service-modal";
 import { deleteService } from "@/actions/services/delete-service";
 import { Collaborator, Service } from "@prisma/client";
 import { ServiceFullData } from "@/types/service";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +23,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { DataTable } from "@/components/ui/data-table";
 import { createServiceColumns } from "@/table-columns/services";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
-import { SubscriptionBlocker } from "@/components/subscription-blocker";
 
 interface ServicesSectionProps {
   services: ServiceFullData[];
@@ -151,61 +149,64 @@ export function ServicesSection({
     setSearchTerm(value);
   };
 
+  // Função para lidar com a mudança de seleção de linhas
+  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
+    const selectedIds = Object.keys(selection).filter((id) => selection[id]);
+    // Você pode adicionar lógica adicional aqui se necessário
+  };
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    updateUrl(page);
+  };
+
+  // Definir as colunas filtráveis
+  const filterableColumns = [
+    { id: "all", title: "Todos os campos", prismaField: "" },
+    { id: "name", title: "Nome do Serviço", prismaField: "name" },
+    { id: "price", title: "Preço", prismaField: "price" },
+    { id: "durationMinutes", title: "Duração", prismaField: "durationMinutes" },
+    { id: "commission", title: "Comissão", prismaField: "commission" },
+  ];
+
   // Criar colunas para o DataTable
   const columns = createServiceColumns({
     onEdit: handleEdit,
     onDelete: (service) => setDeletingService(service),
   });
 
-  // Conteúdo do cabeçalho da tabela (filtro de colaboradores e botão de novo serviço)
-  const headerContent = (
-    <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-min">
-      <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
-        <SelectTrigger className="w-full md:max-w-[250px]">
-          <SelectValue placeholder="Filtrar por profissional" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos os profissionais</SelectItem>
-          {collaborators.map((collaborator) => (
-            <SelectItem key={collaborator.id} value={String(collaborator.id)}>
-              {collaborator.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <SubscriptionBlocker
-        buttonText="Novo Serviço"
-        modalDescription="Para adicionar novos serviços, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
-      >
-        <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-min">
-          <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
-        </Button>
-      </SubscriptionBlocker>
-    </div>
+  // Botão de criação que será passado para o DataTable
+  const createButton = (
+    <Button onClick={() => setIsModalOpen(true)} className="w-full md:w-min">
+      <Scissors className="mr-2 h-4 w-4" /> Novo Serviço
+    </Button>
   );
 
   return (
     <div className="space-y-4 relative">
+      <div className="flex flex-col lg:!flex-row items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Gerenciamento de Serviços</h1>
+          <p className="text-muted-foreground">Gerencie os serviços cadastrados</p>
+        </div>
+      </div>
       <DataTable
         columns={columns}
         data={services}
-        sortableColumns={["name", "price", "durationMinutes", "commission"]}
-        headerContent={headerContent}
-        enableSearch={true}
-        searchPlaceholder="Buscar serviços..."
-        pagination={pagination}
-        onSearch={handleSearch}
-        // Adicionar estas propriedades para implementar a ordenação
+        enableSorting={true}
+        enableFiltering={true}
+        filterPlaceholder="Buscar serviços..."
+        enableRowSelection={true}
+        onRowSelectionChange={handleRowSelectionChange}
         initialSorting={[{ id: sortField, desc: sortDirection === "desc" }]}
-        onSortingChange={(sorting) => {
-          if (sorting.length > 0) {
-            setSortField(sorting[0].id as SortField);
-            setSortDirection(sorting[0].desc ? "desc" : "asc");
-          } else {
-            setSortField("name");
-            setSortDirection("asc");
-          }
-        }}
+        emptyMessage="Nenhum serviço encontrado."
+        syncWithQueryParams={true}
+        totalPages={pagination.totalPages}
+        currentPage={pagination.currentPage}
+        onPageChange={handlePageChange}
+        createButton={createButton}
+        enableColumnFilter={true}
+        filterableColumns={filterableColumns}
       />
 
       <ServiceModal
