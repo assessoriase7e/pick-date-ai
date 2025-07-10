@@ -94,12 +94,6 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  // Função para lidar com a mudança de seleção de linhas
-  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
-    const selectedIds = Object.keys(selection).filter((id) => selection[id]);
-    // Você pode adicionar lógica adicional aqui se necessário
-  };
-
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -139,7 +133,6 @@ export function LinksContent({ links, totalPages, currentPage, userId }: LinksCo
         enableFiltering={true}
         filterPlaceholder="Buscar links..."
         enableRowSelection={true}
-        onRowSelectionChange={handleRowSelectionChange}
         initialSorting={[{ id: "title", desc: false }]}
         emptyMessage="Nenhum link encontrado."
         syncWithQueryParams={true}
