@@ -6,22 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { NumericFormat } from "react-number-format";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,28 +25,14 @@ interface ServiceFormProps {
   collaborators: Collaborator[];
 }
 
-const daysOfWeek = [
-  "Segunda-feira",
-  "Terça-feira",
-  "Quarta-feira",
-  "Quinta-feira",
-  "Sexta-feira",
-  "Sábado",
-  "Domingo",
-];
+const daysOfWeek = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
 
-export function ServiceForm({
-  initialData,
-  onSuccess,
-  collaborators,
-}: ServiceFormProps) {
+export function ServiceForm({ initialData, onSuccess, collaborators }: ServiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCollaborators, setSelectedCollaborators] = useState<
-    Collaborator[]
-  >(initialData?.serviceCollaborators?.map((sc: any) => sc.collaborator) || []);
-  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<
-    number | null
-  >(null);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<Collaborator[]>(
+    initialData?.serviceCollaborators?.map((sc: any) => sc.collaborator) || []
+  );
+  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<number | null>(null);
   const isEditing = !!initialData;
 
   const form = useForm<ServiceFormValues>({
@@ -70,23 +42,17 @@ export function ServiceForm({
       price: initialData?.price || null,
       availableDays: initialData?.availableDays || [],
       notes: initialData?.notes || "",
-      collaboratorIds:
-        initialData?.serviceCollaborators?.map(
-          (sc: any) => sc.collaboratorId
-        ) || [],
+      collaboratorIds: initialData?.serviceCollaborators?.map((sc: any) => sc.collaboratorId) || [],
       durationMinutes: initialData?.durationMinutes || 30,
       commission: initialData?.commission,
-      isActive:
-        initialData?.isActive !== undefined ? initialData.isActive : true,
+      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
   const handleAddCollaborator = () => {
     if (selectedCollaboratorId === null) return;
 
-    const collaborator = collaborators.find(
-      (c) => c.id === selectedCollaboratorId
-    );
+    const collaborator = collaborators.find((c) => c.id === selectedCollaboratorId);
     if (!collaborator) return;
 
     if (selectedCollaborators.some((c) => c.id === collaborator.id)) {
@@ -132,14 +98,10 @@ export function ServiceForm({
         : await createService(submissionValues);
 
       if (result.success) {
-        toast.success(
-          `Serviço ${isEditing ? "atualizado" : "criado"} com sucesso`
-        );
+        toast.success(`Serviço ${isEditing ? "atualizado" : "criado"} com sucesso`);
         onSuccess();
       } else {
-        toast.error(
-          result.error || `Erro ao ${isEditing ? "atualizar" : "criar"} serviço`
-        );
+        toast.error(result.error || `Erro ao ${isEditing ? "atualizar" : "criar"} serviço`);
       }
     } catch {
       toast.error("Ocorreu um erro ao processar a solicitação");
@@ -200,15 +162,10 @@ export function ServiceForm({
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
               <div className="space-y-0.5">
                 <FormLabel>Status do Serviço</FormLabel>
-                <FormDescription>
-                  Defina se este serviço está ativo ou inativo
-                </FormDescription>
+                <FormDescription>Defina se este serviço está ativo ou inativo</FormDescription>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
             </FormItem>
           )}
@@ -230,21 +187,14 @@ export function ServiceForm({
                     name="availableDays"
                     render={({ field }) => {
                       return (
-                        <FormItem
-                          key={day}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
+                        <FormItem key={day} className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(day)}
                               onCheckedChange={(checked) => {
                                 return checked
                                   ? field.onChange([...field.value, day])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== day
-                                      )
-                                    );
+                                  : field.onChange(field.value?.filter((value) => value !== day));
                               }}
                             />
                           </FormControl>
@@ -264,18 +214,14 @@ export function ServiceForm({
         <div className="border rounded-md p-2">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold">Profissionais</h4>
-            <div className="text-xs bg-muted px-2 py-1 rounded-full">
-              {selectedCollaborators.length} selecionados
-            </div>
+            <div className="text-xs bg-muted px-2 py-1 rounded-full">{selectedCollaborators.length} selecionados</div>
           </div>
 
           <div className="space-y-4">
             <div className="flex gap-2">
               <Select
                 value={String(selectedCollaboratorId)}
-                onValueChange={(value) =>
-                  setSelectedCollaboratorId(Number(value))
-                }
+                onValueChange={(value) => setSelectedCollaboratorId(Number(value))}
               >
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Selecione um profissional" />
@@ -284,15 +230,9 @@ export function ServiceForm({
                   <SelectItem value="none">Selecione...</SelectItem>
                   {availableCollaborators.length > 0 ? (
                     availableCollaborators
-                      .filter(
-                        (c) =>
-                          !selectedCollaborators.some((sc) => sc.id === c.id)
-                      )
+                      .filter((c) => !selectedCollaborators.some((sc) => sc.id === c.id))
                       .map((collaborator) => (
-                        <SelectItem
-                          key={collaborator.id}
-                          value={String(collaborator.id)}
-                        >
+                        <SelectItem key={collaborator.id} value={String(collaborator.id)}>
                           {collaborator.name}
                         </SelectItem>
                       ))
@@ -303,11 +243,7 @@ export function ServiceForm({
                   )}
                 </SelectContent>
               </Select>
-              <Button
-                type="button"
-                onClick={handleAddCollaborator}
-                disabled={selectedCollaboratorId === null}
-              >
+              <Button type="button" onClick={handleAddCollaborator} disabled={selectedCollaboratorId === null}>
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
             </div>
@@ -325,9 +261,7 @@ export function ServiceForm({
                   >
                     <div>
                       <p className="font-medium">{collaborator.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {collaborator.profession}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{collaborator.profession}</p>
                     </div>
                     <Button
                       type="button"
@@ -342,9 +276,7 @@ export function ServiceForm({
               </AnimatePresence>
 
               {selectedCollaborators.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-2">
-                  Nenhum profissional adicionado
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-2">Nenhum profissional adicionado</p>
               )}
             </div>
           </div>
@@ -387,9 +319,7 @@ export function ServiceForm({
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
-              <FormDescription>
-                Porcentagem de comissão para o profissional
-              </FormDescription>
+              <FormDescription>Porcentagem de comissão para o profissional</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -415,7 +345,7 @@ export function ServiceForm({
         />
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full lg:w-min">
             {isLoading ? "Processando..." : isEditing ? "Atualizar" : "Criar"}
           </Button>
         </div>

@@ -23,7 +23,7 @@ export function ServiceModal({ isOpen, onClose, initialData, collaborators }: Se
       showFooter={false}
       onConfirm={() => {}}
     >
-      <p className="text-sm text-muted-foreground mb-6">{description}</p>
+      <p className="text-sm text-muted-foreground mb-6 text-center lg:text-start">{description}</p>
 
       <ServiceForm initialData={initialData} onSuccess={onClose} collaborators={collaborators} />
     </ConfirmationDialog>

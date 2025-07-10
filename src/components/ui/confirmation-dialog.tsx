@@ -52,7 +52,7 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size], "max-h-[80svh] overflow-y-auto")}>
+      <DialogContent className={cn(sizeClasses[size], "h-[100svh] lg:max-h-[80svh] overflow-y-auto")}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
@@ -67,7 +67,7 @@ export function ConfirmationDialog({
                 {cancelText}
               </Button>
             )}
-            <Button variant={variant} onClick={handleConfirm}>
+            <Button variant={variant} onClick={handleConfirm} className="w-full">
               {confirmText}
             </Button>
           </DialogFooter>
