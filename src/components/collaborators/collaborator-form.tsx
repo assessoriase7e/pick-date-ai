@@ -286,7 +286,7 @@ export function CollaboratorForm({ initialData, onSuccess }: CollaboratorFormPro
                 <FormLabel>Profissão</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione uma profissão" />
                     </SelectTrigger>
                   </FormControl>

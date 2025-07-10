@@ -196,8 +196,6 @@ export function ServicesSection({
         enableSorting={true}
         enableFiltering={true}
         filterPlaceholder="Buscar serviços..."
-        enableRowSelection={true}
-        onRowSelectionChange={handleRowSelectionChange}
         initialSorting={[{ id: sortField, desc: sortDirection === "desc" }]}
         emptyMessage="Nenhum serviço encontrado."
         syncWithQueryParams={true}

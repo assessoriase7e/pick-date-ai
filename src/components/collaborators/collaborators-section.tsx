@@ -192,12 +192,10 @@ export function CollaboratorsSection({
         enableSorting={true}
         enableFiltering={true}
         filterPlaceholder="Buscar profissionais..."
-        enableRowSelection={true}
         onRowSelectionChange={handleRowSelectionChange}
         initialSorting={[{ id: sortField, desc: sortDirection === "desc" }]}
         emptyMessage="Nenhum profissional encontrado."
         syncWithQueryParams={true}
-        selectedRowsRef={selectedRowsRef}
         totalPages={pagination.totalPages}
         currentPage={pagination.currentPage}
         onPageChange={handlePageChange}

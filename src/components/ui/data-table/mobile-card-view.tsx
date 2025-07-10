@@ -35,12 +35,12 @@ export function MobileCardView<TData>({
             data-state={isSelected && "selected"}
             onClick={enableRowSelection ? () => row.toggleSelected(!isSelected) : undefined}
           >
-            <CardContent className="space-y-2">
+            <CardContent className="py-5 mt-0 space-y-5">
               {row
                 .getVisibleCells()
-                .slice(1)
+                // Aplicar slice(1) apenas quando enableRowSelection for true
+                .filter((_, index) => !enableRowSelection || index > 0)
                 .map((cell) => {
-                  // Pular a primeira coluna, pois já está no título
                   const column = cell.column;
                   const header = table
                     .getHeaderGroups()
