@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { getCalendarLimits } from "./get-calendar-limits";
 import { isLifetimeUser } from "@/lib/lifetime-user";
+import { revalidatePath } from "next/cache";
 
 // Função para gerar código de acesso aleatório
 function generateAccessCode(): string {
@@ -111,6 +112,10 @@ export async function createCalendar({
         isActive: true,
       },
     });
+
+    // Adicionar revalidação aqui
+    revalidatePath("/calendar");
+    revalidatePath("/");
 
     return {
       success: true,

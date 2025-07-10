@@ -124,10 +124,12 @@ export function CreateCalendarModal({
   externalOpen,
   setExternalOpen,
   collaborators,
+  onSuccess,
 }: {
   externalOpen?: boolean;
   setExternalOpen?: (open: boolean) => void;
   collaborators: CollaboratorFullData[];
+  onSuccess?: () => void;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -140,6 +142,8 @@ export function CreateCalendarModal({
       if (response.success) {
         toast.success("Calendário criado com sucesso!");
         setOpen(false);
+        // Chamar callback de sucesso se fornecido
+        onSuccess?.();
       } else {
         toast.error(response.error || "Erro ao criar calendário");
       }
@@ -150,24 +154,24 @@ export function CreateCalendarModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <SubscriptionBlocker
-          buttonText="Criar Calendário"
-          modalDescription="Para criar novos calendários, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
-        >
+    <SubscriptionBlocker
+      buttonText="Criar Calendário"
+      modalDescription="Para criar novos calendários, você precisa ter uma assinatura ativa, ser um usuário vitalício ou estar em período de teste."
+    >
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
           <Button>Criar Calendário</Button>
-        </SubscriptionBlocker>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Criar Novo Calendário</DialogTitle>
-          <DialogDescription>Preencha as informações para criar um novo calendário.</DialogDescription>
-        </DialogHeader>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar Novo Calendário</DialogTitle>
+            <DialogDescription>Preencha as informações para criar um novo calendário.</DialogDescription>
+          </DialogHeader>
 
-        <CalendarForm onSubmit={handleSubmit} collaborators={collaborators} />
-      </DialogContent>
-    </Dialog>
+          <CalendarForm onSubmit={handleSubmit} collaborators={collaborators} />
+        </DialogContent>
+      </Dialog>
+    </SubscriptionBlocker>
   );
 }
 
