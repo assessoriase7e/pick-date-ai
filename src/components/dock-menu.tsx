@@ -49,14 +49,14 @@ export function DockMenu() {
 
   const MobileMenu = () => (
     <Drawer>
-      <DrawerTrigger asChild className="fixed bottom-5 right-5 w-12 h-12 z-[100]">
+      <DrawerTrigger asChild className="fixed bottom-5 right-5 w-12 h-12">
         <Button size="icon" className="md:hidden rounded-full">
           <Menu />
           <span className="sr-only">Menu</span>
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="w-full">
+      <DrawerContent className="w-full z-[100]">
         <DrawerHeader className="flex justify-center items-center py-4">
           <Logo className="h-12 w-12" />
         </DrawerHeader>
