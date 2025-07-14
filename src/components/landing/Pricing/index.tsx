@@ -38,7 +38,8 @@ const Pricing = () => {
           width="665px"
         />
 
-        <div className="w-full">
+        {/* Toggle Mensal Anual */}
+        {/* <div className="w-full">
           <div className="wow fadeInUp mb-8 flex justify-center md:mb-12 lg:mb-16" data-wow-delay=".1s">
             <span
               onClick={() => setIsMonthly(true)}
@@ -69,7 +70,7 @@ const Pricing = () => {
               Anual
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Plano Principal - Layout Horizontal no Desktop */}
         <div className="mb-8">
