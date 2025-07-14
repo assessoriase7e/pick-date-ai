@@ -179,7 +179,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     }));
 
   return (
-    <div className="space-y-6 border border-border border-dashed p-5 rounded-lg bg-card">
+    <div className="space-y-6 border border-border border-dashed p-5 rounded-lg bg-card my-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
         <p className="text-muted-foreground">Visualize os dados e métricas do seu negócio.</p>

@@ -33,7 +33,7 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
   const initialClients = clientsResult.clients || [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 py-8">
       <FilesPageContent
         files={files}
         totalPages={totalPages}

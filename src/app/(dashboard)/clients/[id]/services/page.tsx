@@ -16,27 +16,23 @@ interface ClientServicesPageProps {
   }>;
 }
 
-export default async function ClientServicesPage({
-  params,
-  searchParams,
-}: ClientServicesPageProps) {
+export default async function ClientServicesPage({ params, searchParams }: ClientServicesPageProps) {
   const { id } = await params;
   const sParams = await searchParams;
   const page = sParams.page ? parseInt(sParams.page) : 1;
 
-  const [clientResult, clientServicesResult, servicesResult] =
-    await Promise.all([
-      getClient(Number(id)),
-      getClientServices(Number(id), page),
-      getServices({}),
-    ]);
+  const [clientResult, clientServicesResult, servicesResult] = await Promise.all([
+    getClient(Number(id)),
+    getClientServices(Number(id), page),
+    getServices({}),
+  ]);
 
   if (!clientResult.success || !clientResult.data?.client) {
     notFound();
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto py-8">
       <div className="flex items-center gap-2">
         <Link href="/clients">
           <Button variant="outline">
@@ -44,15 +40,11 @@ export default async function ClientServicesPage({
           </Button>
         </Link>
 
-        <h1 className="text-2xl font-bold my-4 text-end">
-          Serviços do Cliente: {clientResult.data.client.fullName}
-        </h1>
+        <h1 className="text-2xl font-bold my-4 text-end">Serviços do Cliente: {clientResult.data.client.fullName}</h1>
       </div>
 
       {!clientServicesResult.success ? (
-        <div className="p-4 bg-red-50 text-red-500 rounded-md">
-          Erro ao carregar serviços
-        </div>
+        <div className="p-4 bg-red-50 text-red-500 rounded-md">Erro ao carregar serviços</div>
       ) : (
         <ClientServicesTable
           clientServices={clientServicesResult.data?.clientServices || []}

@@ -71,7 +71,7 @@ export default async function AppointmentsPage({ searchParams }: AppointmentsPag
   const collaborators = collaboratorsResult.success ? collaboratorsResult.data : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Agendamentos</h1>
         <p className="text-muted-foreground">Visualize e gerencie todos os agendamentos do sistema.</p>

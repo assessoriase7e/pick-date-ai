@@ -35,7 +35,7 @@ export default async function CollaboratorServicesPage({ params, searchParams }:
   const pagination = appointmentsResult.success ? appointmentsResult.pagination : { totalPages: 0, currentPage: 1 };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 py-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" asChild>

@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const subscriptionData = await getSubscriptionStatus();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">Gerencie as configurações da sua conta.</p>

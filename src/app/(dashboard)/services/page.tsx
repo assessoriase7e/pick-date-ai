@@ -47,7 +47,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
   const services = servicesResult.success ? servicesResult.data : [];
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-8 space-y-6">
       <ServicesSection
         services={services}
         collaborators={collaborators}

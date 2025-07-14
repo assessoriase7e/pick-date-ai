@@ -23,7 +23,7 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
   const { id: userId } = await currentUser();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Links</h1>
         <p className="text-muted-foreground">Gerencie os links cadastrados no sistema.</p>

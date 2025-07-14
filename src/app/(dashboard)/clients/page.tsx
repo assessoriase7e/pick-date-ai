@@ -49,17 +49,13 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
   });
 
   const clients = clientsResult.success ? clientsResult.data : [];
-  const pagination = clientsResult.success
-    ? clientsResult.pagination
-    : { totalPages: 1, currentPage: 1 };
+  const pagination = clientsResult.success ? clientsResult.pagination : { totalPages: 1, currentPage: 1 };
 
   return (
-    <div className="container">
+    <div className="container py-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
-        <p className="text-muted-foreground">
-          Gerencie os clientes cadastrados no sistema.
-        </p>
+        <p className="text-muted-foreground">Gerencie os clientes cadastrados no sistema.</p>
       </div>
 
       <div className="space-y-8">
