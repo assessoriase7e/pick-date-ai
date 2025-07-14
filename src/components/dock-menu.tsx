@@ -11,7 +11,6 @@ import { Dock, DockIcon } from "./magicui/dock";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DockDropdownMenu, useDropdownMenuItems } from "./dock-dropdown-menu";
-import { useRouter } from "next/navigation";
 import SubscriptionStatus from "./SubscriptionStatus";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "./ui/drawer";
 
@@ -19,7 +18,6 @@ export function DockMenu() {
   const { user } = useUser();
   const { routes } = useSidebarRoutes();
   const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -74,9 +72,19 @@ export function DockMenu() {
 
           <Separator className="my-4" />
 
-          <Button variant="ghost" className="w-full justify-start mb-2">
+          <Button variant="ghost" className="w-full justify-start mb-3 pl-2">
             {subscriptionStatusComponent}
             <span>Assinatura</span>
+          </Button>
+
+          <div className="w-full justify-start mb-3 ml-1">
+            <ThemeToggle variant="icon" />
+            <span className="ml-2">Tema</span>
+          </div>
+
+          <Button variant="ghost" className="w-full justify-start mb-3 pl-2">
+            <UserButton />
+            <span className="ml-1">Usuário</span>
           </Button>
         </div>
       </DrawerContent>
