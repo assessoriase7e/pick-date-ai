@@ -1,5 +1,3 @@
-"use client";
-
 import { create } from "zustand";
 import { SubscriptionData } from "@/types/subscription";
 import { getSubscriptionStatus } from "@/actions/subscription/get-subscription-status";
@@ -75,6 +73,12 @@ export const cancelSubscription = async () => {
   const result = await cancelSubscriptionAction();
   // Refresh subscription data after cancellation
   useSubscription.getState().fetchSubscription();
+  // Revalidate the cache
+  try {
+    await fetch("/api/revalidate-subscription", { method: "POST" });
+  } catch (error) {
+    console.error("Erro ao revalidar cache:", error);
+  }
   return result;
 };
 
@@ -82,6 +86,12 @@ export const cancelBasePlan = async () => {
   const result = await cancelBasePlanAction();
   // Refresh subscription data after cancellation
   useSubscription.getState().fetchSubscription();
+  // Revalidate the cache
+  try {
+    await fetch("/api/revalidate-subscription", { method: "POST" });
+  } catch (error) {
+    console.error("Erro ao revalidar cache:", error);
+  }
   return result;
 };
 

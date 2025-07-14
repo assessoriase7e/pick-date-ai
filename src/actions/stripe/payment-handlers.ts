@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
+import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-subscription";
 
 export async function handlePaymentSucceeded(invoice: any) {
   if (!invoice.subscription) {
@@ -30,20 +31,13 @@ export async function handlePaymentSucceeded(invoice: any) {
         description: invoice.description || "Pagamento de assinatura",
       },
     });
+  }
 
-    // Verificar se é um pacote adicional de IA
-    if (subscription.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!) {
-      await prisma.additionalAICredit.create({
-        data: {
-          userId: subscription.userId,
-          quantity: 10,
-          used: 0,
-          active: true,
-          stripePaymentId: paymentIntentId,
-          stripeInvoiceId: invoice.id,
-        },
-      });
-    }
+  // Código existente para processar pagamento bem-sucedido
+
+  // Revalidar o cache da assinatura se for relacionado a uma assinatura
+  if (invoice.subscription) {
+    await revalidateSubscriptionCache();
   }
 }
 
@@ -76,12 +70,19 @@ export async function handlePaymentFailed(invoice: any) {
       },
     });
   }
+
+  // Código existente para processar falha de pagamento
+
+  // Revalidar o cache da assinatura se for relacionado a uma assinatura
+  if (invoice.subscription) {
+    await revalidateSubscriptionCache();
+  }
 }
 
 export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const metadata = paymentIntent.metadata;
 
-  if (metadata.type === "one_time_payment" && metadata.productType === "ai_credits") {
+  if (metadata.type === "one_time_payment") {
     const userId = metadata.userId;
 
     if (!userId) {
@@ -108,30 +109,13 @@ export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.Payment
         description: "Créditos adicionais de IA - 10 atendimentos",
       },
     });
-
-    // Adicionar 10 créditos de IA usando o modelo correto
-    await prisma.additionalAICredit.create({
-      data: {
-        userId,
-        quantity: 10,
-        used: 0,
-        active: true,
-        stripePaymentId: paymentIntent.id,
-        // Removida a expiração dos créditos
-      },
-    });
   }
 }
 
 // Nova função para processar checkout.session.completed para pagamentos únicos
 export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   // Verificar se é um pagamento único para créditos de IA
-  if (
-    session.mode === "payment" &&
-    session.metadata?.type === "one_time_payment" &&
-    session.metadata?.productType === "ai_credits" &&
-    session.metadata?.userId
-  ) {
+  if (session.mode === "payment" && session.metadata?.type === "one_time_payment" && session.metadata?.userId) {
     const paymentIntent = session.payment_intent;
     if (paymentIntent) {
       const pi = await stripe.paymentIntents.retrieve(
@@ -156,18 +140,6 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
           currency: pi.currency,
           status: "succeeded",
           description: "Créditos adicionais de IA - 10 atendimentos",
-        },
-      });
-
-      // Adicionar créditos de IA
-      await prisma.additionalAICredit.create({
-        data: {
-          userId: session.metadata.userId,
-          quantity: 10,
-          used: 0,
-          active: true,
-          stripePaymentId: pi.id,
-          // Removida a expiração dos créditos
         },
       });
     }

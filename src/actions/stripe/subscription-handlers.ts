@@ -2,6 +2,7 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { PlanType } from "@/types/subscription";
+import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-subscription";
 
 export async function handleSubscriptionCreated(subscription: Stripe.Subscription, userId: string) {
   const price = subscription.items.data[0]?.price;
@@ -74,6 +75,11 @@ export async function handleSubscriptionCreated(subscription: Stripe.Subscriptio
       },
     });
   }
+  
+  // Código existente para criar/atualizar assinatura
+  
+  // Revalidar o cache da assinatura
+  await revalidateSubscriptionCache();
 }
 
 export async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -116,6 +122,11 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   });
+  
+  // Código existente para atualizar assinatura
+  
+  // Revalidar o cache da assinatura
+  await revalidateSubscriptionCache();
 }
 
 export async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -144,6 +155,11 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
       });
     }
   }
+  
+  // Código existente para marcar assinatura como cancelada
+  
+  // Revalidar o cache da assinatura
+  await revalidateSubscriptionCache();
 }
 
 // Função auxiliar para obter informações do produto
