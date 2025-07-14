@@ -206,7 +206,7 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   return (
     <div className="hidden md:block">
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="w-full max-w-6xl">
+        <DialogContent className="w-full max-w-6xl z-[100]">
           <DialogHeader className="flex-row items-center justify-between pr-10">
             <DialogTitle className="sr-only">Detalhes do Dia - {formattedDate}</DialogTitle>
             <div className="p-3 px-4 bg-primary rounded-lg text-foreground">

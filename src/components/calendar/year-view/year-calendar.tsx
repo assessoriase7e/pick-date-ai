@@ -58,7 +58,6 @@ function YearCalendarComponent({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
-  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<number | null>(initialCollaboratorId || null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Verificar se é mobile
@@ -87,14 +86,14 @@ function YearCalendarComponent({
 
   // Filtrar calendários com base no colaborador selecionado
   const filteredCalendars = useMemo(() => {
-    if (!selectedCollaboratorId) return calendars;
+    if (!initialCollaboratorId) return calendars;
 
-    const filtered = calendars.filter((calendar) => calendar.collaboratorId === selectedCollaboratorId);
+    const filtered = calendars.filter((calendar) => calendar.collaboratorId === initialCollaboratorId);
 
     // Se não houver calendários para o colaborador selecionado, retorne todos os calendários
     // em vez de um array vazio
     return filtered.length > 0 ? filtered : calendars;
-  }, [calendars, selectedCollaboratorId]);
+  }, [calendars, initialCollaboratorId]);
 
   // Obter o calendário selecionado com base no ID
   const selectedCalendarData = useMemo(() => {
@@ -109,8 +108,14 @@ function YearCalendarComponent({
       return filteredCalendars[0];
     }
 
-    return foundCalendar;
-  }, [filteredCalendars, calendarId]);
+    // Se ainda não tiver um calendário válido e houver calendários disponíveis, use o primeiro
+    if (!foundCalendar && calendars.length > 0) {
+      return calendars[0];
+    }
+
+    // Se mesmo assim não encontrar nenhum calendário, retorne null em vez de undefined
+    return foundCalendar || null;
+  }, [filteredCalendars, calendarId, calendars]);
 
   // Efeito para definir isLoading como false quando a página carregar
   useEffect(() => {
@@ -121,7 +126,7 @@ function YearCalendarComponent({
   const handleCollaboratorChange = (collaboratorId: number | string) => {
     // Define o estado de carregamento como true ao clicar no select
     setIsLoading(true);
-    setSelectedCollaboratorId(collaboratorId as number);
+    // Removendo a linha que atualiza o estado
 
     // Criar novos query params incluindo o collaboratorId
     const params = new URLSearchParams();
@@ -267,7 +272,7 @@ function YearCalendarComponent({
       )}
     </div>
   ));
-  
+
   // Memoizar os botões mobile também
   const MobileActionButtons = memo(() => (
     <div className="flex flex-col gap-2 p-4">
@@ -296,38 +301,42 @@ function YearCalendarComponent({
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full h-full z-[49]">
-        <IsTableLoading isPageChanging={isLoading} />
-      </div>
+      {isLoading && (
+        <div className="fixed top-0 left-0 w-full h-full z-[49]">
+          <IsTableLoading isPageChanging={isLoading} />
+        </div>
+      )}
       <div className="sticky top-0 z-[100] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
-          {/* Seletor de Colaborador */}
-          <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
-            <SelectWithScroll
-              placeholder="Todos os colaboradores"
-              options={collaborators}
-              value={selectedCollaboratorId || ""}
-              onChange={handleCollaboratorChange}
-              getOptionLabel={(option) => option?.name}
-              getOptionValue={(option) => option.id}
-            />
+          {/* Seletor de Colaborador - só exibir se houver calendários */}
+          {calendars.length > 0 && (
+            <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
+              <SelectWithScroll
+                placeholder="Todos os colaboradores"
+                options={collaborators}
+                value={initialCollaboratorId || ""}
+                onChange={handleCollaboratorChange}
+                getOptionLabel={(option) => option?.name}
+                getOptionValue={(option) => option.id}
+              />
 
-            {isMobile && (
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader className="text-center">
-                    <h2 className="text-lg font-semibold">Ações do Calendário</h2>
-                  </DrawerHeader>
-                  <MobileActionButtons />
-                </DrawerContent>
-              </Drawer>
-            )}
-          </div>
+              {isMobile && (
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent>
+                    <DrawerHeader className="text-center">
+                      <h2 className="text-lg font-semibold">Ações do Calendário</h2>
+                    </DrawerHeader>
+                    <MobileActionButtons />
+                  </DrawerContent>
+                </Drawer>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Botões de ação - desktop ou mobile */}
@@ -364,10 +373,10 @@ function YearCalendarComponent({
           onClose={() => setDayModalOpen(false)}
           date={selectedDate}
           calendarId={calendarId}
-          calendar={calendars.find((cal) => cal.id === calendarId)}
+          calendar={selectedCalendarData}
           clients={allClients[calendarId] || []}
           services={allServices[calendarId] || []}
-          collaborator={allCollaborators[calendarId] || null}
+          collaborator={selectedCalendarData?.collaborator || null}
           appointments={appointments}
         />
 

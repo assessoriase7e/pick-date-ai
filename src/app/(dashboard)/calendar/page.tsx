@@ -1,6 +1,6 @@
 "use server";
 import { listCalendars } from "@/actions/calendars/getMany";
-import { YearCalendar } from "../../../components/calendar/year-view/year-calendar";
+
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
 import { getCollaborators } from "@/actions/collaborators/get-collaborators";
@@ -10,6 +10,7 @@ import { getServicesByCalendar } from "@/actions/services/get-services-by-calend
 import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
 import { checkExcessCalendars } from "@/actions/calendars/check-excess-calendars";
 import { redirect } from "next/navigation";
+import { YearCalendar } from "@/components/calendar/year-view/year-calendar";
 
 export default async function CalendarPage({
   searchParams,
