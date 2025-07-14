@@ -5,6 +5,7 @@ import SectionTitle from "../Common/SectionTitle";
 import OfferList from "./OfferList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import Link from "next/link";
 
 const Pricing = () => {
   const [isMonthly, setIsMonthly] = useState(true);
@@ -131,9 +132,11 @@ const Pricing = () => {
 
                 {/* Botão com Seta */}
                 <div className="flex-shrink-0 ml-8">
-                  <Button className="h-12 w-12 rounded-full p-0">
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
+                  <Link href="/sign-up">
+                    <Button className="h-12 w-12 rounded-full p-0">
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>
