@@ -9,8 +9,6 @@ import { DayScheduleGrid } from "../common/day-schedule-grid";
 import { AppointmentForm } from "../../appointment/appointment-form";
 
 import { toast } from "sonner";
-import { updateAppointment } from "@/actions/appointments/update";
-import { createAppointment } from "@/actions/appointments/create";
 import { useSubscription } from "@/store/subscription-store";
 import { Button } from "@/components/ui/button";
 
@@ -124,37 +122,6 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
       setStartTime(null);
       setEndTime(null);
       onClose();
-    }
-  };
-
-  const handleFormSubmit = async (appointmentData: any) => {
-    // Verificar novamente se o usuário tem um plano ativo antes de salvar o agendamento
-    if (!hasActiveSubscription) {
-      toast.error("Você precisa ter um plano ativo para salvar agendamentos. Por favor, assine um plano.");
-      return;
-    }
-
-    try {
-      const result = selectedAppointment
-        ? await updateAppointment(selectedAppointment.id, appointmentData)
-        : await createAppointment(appointmentData);
-
-      if (!result.success) {
-        toast.error(result.error || "Ocorreu um erro ao salvar o agendamento");
-        return;
-      }
-
-      // Apenas resetar o formulário sem fechar o modal
-      setShowForm(false);
-      setSelectedAppointment(null);
-      setSelectedHour(null);
-      setStartTime(null);
-      setEndTime(null);
-      
-      // Não chamar onClose() aqui para manter o modal aberto
-    } catch (error) {
-      console.error(error);
-      toast.error("Ocorreu um erro ao salvar o agendamento");
     }
   };
 

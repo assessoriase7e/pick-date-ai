@@ -68,12 +68,9 @@ function YearCalendarComponent({
   
   // Efeito para rolar até o mês atual apenas no primeiro carregamento
   useEffect(() => {
-    // Verificar se já rolou anteriormente usando localStorage
-    const hasScrolledBefore = localStorage.getItem('hasScrolledToMonth') === 'true';
-    
-    if (monthRefs.current[currentMonth] && !hasScrolledBefore) {
+    if (monthRefs.current[currentMonth] && hasScrolledRef.current === false) {
       monthRefs.current[currentMonth]?.scrollIntoView({ behavior: "smooth", block: "center" });
-      localStorage.setItem('hasScrolledToMonth', 'true');
+      hasScrolledRef.current = true;
     }
   }, []);
 
