@@ -45,6 +45,9 @@ export function DockMenu() {
 
   // Removemos a função handleSubscriptionClick que redirecionava para /pricing
 
+  // Criar uma única instância do SubscriptionStatus
+  const subscriptionStatusComponent = <SubscriptionStatus />;
+
   const MobileMenu = () => (
     <Drawer>
       <DrawerTrigger asChild className="fixed bottom-5 right-5 w-12 h-12">
@@ -72,7 +75,7 @@ export function DockMenu() {
           <Separator className="my-4" />
 
           <Button variant="ghost" className="w-full justify-start mb-2">
-            <SubscriptionStatus />
+            {subscriptionStatusComponent}
             <span>Assinatura</span>
           </Button>
         </div>
@@ -109,7 +112,7 @@ export function DockMenu() {
 
         {/* Componente de Status da Assinatura */}
         <DockIcon>
-          <SubscriptionStatus />
+          {subscriptionStatusComponent}
         </DockIcon>
 
         {/* Dropdown Menu para Configurações */}

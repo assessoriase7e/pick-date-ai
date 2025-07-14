@@ -12,9 +12,13 @@ export default function SubscriptionStatus() {
   const router = useRouter();
   const { data, isLoading, fetchSubscription } = useSubscription();
 
+  // Modificar o useEffect para evitar requisições desnecessárias
   useEffect(() => {
-    fetchSubscription();
-  }, [fetchSubscription]);
+    // Verificar se já temos dados antes de fazer a requisição
+    if (!data && !isLoading) {
+      fetchSubscription();
+    }
+  }, [fetchSubscription, data, isLoading]);
 
   const handleClick = async () => {
     // Se o usuário já tem uma assinatura ativa, redirecionar para configurações
