@@ -2,7 +2,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { revalidatePath } from "next/cache";
+// Remover a importação de revalidatePath
+// import { revalidatePath } from "next/cache";
+// Adicionar a importação da função correta
+import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-subscription";
 
 /**
  * Cria uma nova assinatura
@@ -72,8 +75,8 @@ export async function createSubscription(priceId: string): Promise<{ success: bo
       metadata: { userId: user.id },
     });
 
-    // Revalidar o cache
-    revalidatePath("/api/subscription/status");
+    // Substituir a revalidação de caminho pela revalidação de tag
+    await revalidateSubscriptionCache();
 
     return { success: true, url: session.url || undefined };
   } catch (error) {

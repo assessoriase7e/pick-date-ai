@@ -1,45 +1,43 @@
 "use server";
+
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { isLifetimeUser } from "@/lib/lifetime-user";
+
 import { SubscriptionData, SubscriptionStatus } from "@/types/subscription";
 import { unstable_cache } from "next/cache";
+import { isLifetimeUser } from "@/lib/lifetime-user";
 
 /**
- * Busca o status da assinatura do usuário atual
+ * Busca o status da assinatura do usuário atual.
  */
 export async function getSubscriptionStatus(): Promise<SubscriptionData | null> {
   const user = await currentUser();
   if (!user?.id) return null;
 
-  // Usar unstable_cache para armazenar o resultado em cache por 1 hora
-  return getSubscriptionStatusCached(user.id);
+  const isLifetime = await isLifetimeUser();
+
+  return getSubscriptionStatusCached(user.id, isLifetime);
 }
 
-// Função com cache que será revalidada a cada hora
+// Função cacheada, revalidada a cada 1 hora
 const getSubscriptionStatusCached = unstable_cache(
-  async (userId: string): Promise<SubscriptionData | null> => {
+  async (userId: string, isLifetime: boolean): Promise<SubscriptionData | null> => {
     try {
-      // Buscar usuário do banco de dados com a assinatura
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
         include: {
           subscription: true,
-          additionalCalendars: {
-            where: { active: true },
-          },
+          additionalCalendars: { where: { active: true } },
         },
       });
 
       if (!dbUser) return null;
 
-      // Verificar se é usuário lifetime
-      const isLifetime = await isLifetimeUser();
-
+      // Caso usuário seja vitalício
       if (isLifetime) {
         return {
-          subscription: dbUser?.subscription
+          subscription: dbUser.subscription
             ? {
                 id: dbUser.subscription.id,
                 userId: dbUser.subscription.userId,
@@ -48,7 +46,7 @@ const getSubscriptionStatusCached = unstable_cache(
                 status: dbUser.subscription.status as SubscriptionStatus,
                 stripePriceId: dbUser.subscription.stripePriceId,
                 stripeProductId: dbUser.subscription.stripeProductId,
-                planType: (dbUser.subscription.planType || "basic") as any,
+                planType: (dbUser.subscription.planType || "basic") as SubscriptionData["subscription"]["planType"],
                 planName: dbUser.subscription.planName,
                 cancelAtPeriodEnd: dbUser.subscription.cancelAtPeriodEnd,
                 currentPeriodStart: dbUser.subscription.currentPeriodStart,
@@ -71,12 +69,13 @@ const getSubscriptionStatusCached = unstable_cache(
         };
       }
 
-      // Cálculo do trial
+      // Verificação de período de trial
       const trialEndDate = new Date(dbUser.createdAt);
       trialEndDate.setDate(trialEndDate.getDate() + 3);
+
       const now = new Date();
-      let isTrialActive = now < trialEndDate;
-      let trialDaysRemaining = isTrialActive
+      const isTrialActive = now < trialEndDate;
+      const trialDaysRemaining = isTrialActive
         ? Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         : 0;
 
@@ -86,13 +85,12 @@ const getSubscriptionStatusCached = unstable_cache(
 
       if (subscription) {
         try {
-          // Verificar assinatura no Stripe
           const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
 
-          // Atualizar status se necessário
-          if (stripeSubscription.status !== subscription.status) {
-            const item = stripeSubscription.items.data[0];
-            if (item) {
+          const item = stripeSubscription.items.data[0];
+          if (item) {
+            // Atualiza dados se houver divergência
+            if (stripeSubscription.status !== subscription.status) {
               subscription = await prisma.subscription.update({
                 where: { id: subscription.id },
                 data: {
@@ -103,20 +101,14 @@ const getSubscriptionStatusCached = unstable_cache(
                 },
               });
             }
+
+            const activeStatuses = ["active", "trialing", "past_due"];
+            isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
+
+            if (isSubscriptionActive) {
+              canAccessPremiumFeatures = true;
+            }
           }
-
-          // Status ativos conforme documentação do Stripe
-          const activeStatuses = ["active", "trialing", "past_due"];
-          isSubscriptionActive = activeStatuses.includes(stripeSubscription.status);
-
-          // Se a assinatura estiver ativa, priorizar ela sobre o trial
-          if (isSubscriptionActive) {
-            canAccessPremiumFeatures = true;
-            isTrialActive = false;
-            trialDaysRemaining = 0;
-          }
-
-          canAccessPremiumFeatures = isTrialActive || isSubscriptionActive;
         } catch (error) {
           console.error("Erro ao verificar assinatura no Stripe:", error);
         }
@@ -132,7 +124,7 @@ const getSubscriptionStatusCached = unstable_cache(
               status: subscription.status as SubscriptionStatus,
               stripePriceId: subscription.stripePriceId,
               stripeProductId: subscription.stripeProductId,
-              planType: (subscription.planType || "basic") as any,
+              planType: (subscription.planType || "basic") as SubscriptionData["subscription"]["planType"],
               planName: subscription.planName,
               cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
               currentPeriodStart: subscription.currentPeriodStart,
@@ -158,6 +150,6 @@ const getSubscriptionStatusCached = unstable_cache(
       return null;
     }
   },
-  ["subscription-status"],  // Cache key
-  { revalidate: 3600 }  // Revalidar a cada 1 hora (3600 segundos)
+  ["subscription-status"],
+  { revalidate: 3600 } // 1 hora em segundos
 );

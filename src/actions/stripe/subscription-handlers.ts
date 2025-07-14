@@ -75,9 +75,9 @@ export async function handleSubscriptionCreated(subscription: Stripe.Subscriptio
       },
     });
   }
-  
+
   // Código existente para criar/atualizar assinatura
-  
+
   // Revalidar o cache da assinatura
   await revalidateSubscriptionCache();
 }
@@ -100,16 +100,6 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
   }
 
   const newPriceId = item.price.id;
-  const oldPriceId = existingSubscription.stripePriceId;
-
-  // Verificar se houve mudança de plano IA para plano base
-  const wasAIPlan = [
-    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
-    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
-    process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
-  ].includes(oldPriceId);
-
-  const isNowBasicPlan = newPriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC!;
 
   // Atualizar a assinatura no banco
   await prisma.subscription.update({
@@ -122,9 +112,9 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   });
-  
+
   // Código existente para atualizar assinatura
-  
+
   // Revalidar o cache da assinatura
   await revalidateSubscriptionCache();
 }
@@ -155,9 +145,9 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
       });
     }
   }
-  
+
   // Código existente para marcar assinatura como cancelada
-  
+
   // Revalidar o cache da assinatura
   await revalidateSubscriptionCache();
 }
