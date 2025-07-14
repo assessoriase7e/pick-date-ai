@@ -36,15 +36,9 @@ export function useCalendarLimits() {
   useEffect(() => {
     if (user?.id) {
       fetchData();
-      fetchSubscription(); // Buscar dados da assinatura
-      const intervalId = setInterval(() => {
-        fetchData();
-        fetchSubscription(); // Atualizar dados da assinatura periodicamente
-      }, 30000);
-
-      return () => clearInterval(intervalId);
+      fetchSubscription();
     }
-  }, [user?.id, fetchSubscription]);
+  }, [user?.id]);
 
   return {
     limit: data?.limit ?? 3,

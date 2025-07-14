@@ -55,7 +55,7 @@ export function DockMenu() {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="w-full z-[100]">
+      <DrawerContent className="w-full z-[100] overflow-x-hidden">
         <DrawerHeader className="flex justify-center items-center py-4">
           <Logo className="h-12 w-12" />
         </DrawerHeader>

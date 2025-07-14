@@ -242,8 +242,8 @@ function YearCalendarComponent({
     setShareOpen(true);
   };
 
-  // Componente de botões de ação para desktop
-  const ActionButtons = () => (
+  // Memoizar os componentes de botões para evitar re-renderizações
+  const ActionButtons = memo(() => (
     <div className="flex gap-2">
       <Button variant="outline" size="sm" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
         <Plus className="h-4 w-4 mr-2" />
@@ -266,10 +266,10 @@ function YearCalendarComponent({
         </>
       )}
     </div>
-  );
-
-  // Componente de botões de ação para mobile (dentro do drawer)
-  const MobileActionButtons = () => (
+  ));
+  
+  // Memoizar os botões mobile também
+  const MobileActionButtons = memo(() => (
     <div className="flex flex-col gap-2 p-4">
       <Button variant="outline" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
         <Plus className="h-4 w-4 mr-2" />
@@ -292,7 +292,7 @@ function YearCalendarComponent({
         </>
       )}
     </div>
-  );
+  ));
 
   return (
     <>
