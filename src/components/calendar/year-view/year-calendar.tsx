@@ -23,6 +23,7 @@ import { CalendarUnifiedModal } from "../modals/calendar-unified-modal";
 import { SelectWithScroll } from "../common/select-with-scroll";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import IsTableLoading from "@/components/isTableLoading";
 
 interface YearCalendarProps {
   calendars: CalendarFullData[];
@@ -58,6 +59,7 @@ function YearCalendarComponent({
   const [shareOpen, setShareOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<number | null>(initialCollaboratorId || null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Verificar se é mobile
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -110,8 +112,15 @@ function YearCalendarComponent({
     return foundCalendar;
   }, [filteredCalendars, calendarId]);
 
+  // Efeito para definir isLoading como false quando a página carregar
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
   // Função para lidar com a mudança de colaborador
   const handleCollaboratorChange = (collaboratorId: number | string) => {
+    // Define o estado de carregamento como true ao clicar no select
+    setIsLoading(true);
     setSelectedCollaboratorId(collaboratorId as number);
 
     // Criar novos query params incluindo o collaboratorId
@@ -287,6 +296,9 @@ function YearCalendarComponent({
 
   return (
     <>
+      <div className="fixed top-0 left-0 w-full h-full z-[49]">
+        <IsTableLoading isPageChanging={isLoading} />
+      </div>
       <div className="sticky top-0 z-[100] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
           {/* Seletor de Colaborador */}
@@ -322,7 +334,7 @@ function YearCalendarComponent({
 
         {!isMobile && <ActionButtons />}
       </div>
-      <div className="flex flex-col h-full overflow-auto">
+      <div className="flex flex-col h-full overflow-auto relative">
         {/* Header com botões de ação - sticky no desktop */}
 
         {/* Conteúdo do calendário - lista vertical de meses */}

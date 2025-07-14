@@ -111,9 +111,7 @@ export function DockMenu() {
         <Separator orientation="vertical" className="h-8" />
 
         {/* Componente de Status da Assinatura */}
-        <DockIcon>
-          {subscriptionStatusComponent}
-        </DockIcon>
+        <DockIcon>{subscriptionStatusComponent}</DockIcon>
 
         {/* Dropdown Menu para Configurações */}
         <DockIcon>
