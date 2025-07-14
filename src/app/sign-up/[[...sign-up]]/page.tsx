@@ -8,16 +8,7 @@ export default function SignUpPage() {
           <h1 className="text-2xl font-bold">Pick Date AI</h1>
           <p className="text-muted-foreground">Crie uma conta para acessar o sistema</p>
         </div>
-        <SignUp
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg",
-            },
-          }}
-          routing="path"
-          path="/sign-up"
-        />
+        <SignUp path="/sign-up" routing="path" />
       </div>
     </div>
   );
