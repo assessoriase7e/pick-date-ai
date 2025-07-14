@@ -36,39 +36,13 @@ export function CalendarGrid({
   const today = moment();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
-  const isSharedCalendar = pathname.includes("shared-calendar");
 
   const [selectedYear, setSelectedYear] = useState(moment(currentDate).year());
   const [isLoading, setIsLoading] = useState(false);
-  const [prevSearchParams, setPrevSearchParams] = useState("");
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     setSelectedYear(moment(currentDate).year());
   }, [currentDate]);
-
-  useEffect(() => {
-    const currentParams = searchParams.toString();
-
-    if (isInitialLoad) {
-      setPrevSearchParams(currentParams);
-      setIsInitialLoad(false);
-      return;
-    }
-
-    if (currentParams !== prevSearchParams) {
-      setIsLoading(true);
-      setPrevSearchParams(currentParams);
-
-      // Usar timeout para evitar setState imediato
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams, prevSearchParams, isInitialLoad]);
 
   const calendarDays = useMemo(() => {
     const startOfMonth = moment(currentDate).startOf("month");
