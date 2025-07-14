@@ -43,9 +43,7 @@ export function DockMenu() {
   // Páginas que ficam diretamente na dock
   const mainRoutes = routes.filter((route) => !configDropdownPaths.includes(route.href));
 
-  const handleSubscriptionClick = () => {
-    router.push("/pricing");
-  };
+  // Removemos a função handleSubscriptionClick que redirecionava para /pricing
 
   const MobileMenu = () => (
     <Drawer>
@@ -73,7 +71,7 @@ export function DockMenu() {
 
           <Separator className="my-4" />
 
-          <Button onClick={handleSubscriptionClick} variant="ghost" className="w-full justify-start mb-2">
+          <Button variant="ghost" className="w-full justify-start mb-2">
             <SubscriptionStatus />
             <span>Assinatura</span>
           </Button>

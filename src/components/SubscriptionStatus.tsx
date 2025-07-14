@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Bot, Star } from "lucide-react";
-import { useSubscription } from "@/store/subscription-store";
+import { useSubscription, createSubscription } from "@/store/subscription-store";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
+import { STRIPE_PRICE_IDS } from "@/constants/pricing";
 
 export default function SubscriptionStatus() {
   const router = useRouter();
@@ -15,8 +16,18 @@ export default function SubscriptionStatus() {
     fetchSubscription();
   }, [fetchSubscription]);
 
-  const handleClick = () => {
-    router.push("/pricing");
+  const handleClick = async () => {
+    // Se o usuário já tem uma assinatura ativa, redirecionar para configurações
+    if (data?.isSubscriptionActive) {
+      router.push("/config");
+    } else {
+      // Se não tem assinatura, redirecionar diretamente para o checkout do Stripe
+      try {
+        await createSubscription(STRIPE_PRICE_IDS.basic);
+      } catch (error) {
+        console.error("Erro ao criar assinatura:", error);
+      }
+    }
   };
 
   if (isLoading) {
