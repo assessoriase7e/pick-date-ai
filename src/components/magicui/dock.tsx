@@ -1,17 +1,9 @@
 "use client";
 
-import { cva, type VariantProps } from "class-variance-authority";
-import {
-  motion,
-  MotionProps,
-  MotionValue,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "motion/react";
-import React, { PropsWithChildren, useRef } from "react";
-
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import { motion, MotionProps, MotionValue, useMotionValue, useSpring, useTransform } from "motion/react";
+import React, { PropsWithChildren, useRef } from "react";
 
 export interface DockProps extends VariantProps<typeof dockVariants> {
   className?: string;
@@ -47,7 +39,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
 
     const renderChildren = () => {
       return React.Children.map(children, (child) => {
-        if (React.isValidElement(child) && child.type === DockIcon) {
+        if (React.isValidElement<DockIconProps>(child) && child.type === DockIcon) {
           return React.cloneElement(child, {
             ...child.props,
             mouseX: mouseX,
@@ -80,8 +72,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
 
 Dock.displayName = "Dock";
 
-export interface DockIconProps
-  extends Omit<MotionProps & React.HTMLAttributes<HTMLDivElement>, "children"> {
+export interface DockIconProps extends Omit<MotionProps & React.HTMLAttributes<HTMLDivElement>, "children"> {
   size?: number;
   magnification?: number;
   distance?: number;
@@ -109,11 +100,7 @@ const DockIcon = ({
     return val - bounds.x - bounds.width / 2;
   });
 
-  const sizeTransform = useTransform(
-    distanceCalc,
-    [-distance, 0, distance],
-    [size, magnification, size]
-  );
+  const sizeTransform = useTransform(distanceCalc, [-distance, 0, distance], [size, magnification, size]);
 
   const scaleSize = useSpring(sizeTransform, {
     mass: 0.1,
@@ -125,10 +112,7 @@ const DockIcon = ({
     <motion.div
       ref={ref}
       style={{ width: scaleSize, height: scaleSize, padding }}
-      className={cn(
-        "flex aspect-square cursor-pointer items-center justify-center rounded-full",
-        className
-      )}
+      className={cn("flex aspect-square cursor-pointer items-center justify-center rounded-full", className)}
       {...props}
     >
       {children}
