@@ -14,8 +14,7 @@ const Hero = () => {
                   Simplifique seu agendamento com o Pick Date
                 </h1>
                 <p className="dark:text-body-color-dark mb-12 text-base !leading-relaxed text-body-color sm:text-lg md:text-xl">
-                  Gerencie múltiplos calendários, cadastre clientes e acompanhe o histórico de serviços em uma única
-                  plataforma. Comece com 7 dias grátis e transforme a maneira como você organiza sua agenda.
+                  Experimente <span className="font-bold">7 dias grátis</span> com 1 calendário e transforme a maneira como você organiza sua agenda. Gerencie seus clientes e acompanhe o histórico de serviços em uma única plataforma.
                 </p>
                 <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                   <Link href="/sign-up">

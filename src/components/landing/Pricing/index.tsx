@@ -10,7 +10,7 @@ const Pricing = () => {
   const [isMonthly, setIsMonthly] = useState(true);
 
   const features = [
-    "Múltiplos calendários",
+    "Múltiplos calendários", // Mantemos esta linha, pois o plano pago ainda oferece múltiplos calendários
     "Colaboradores ilimitados",
     "Serviços ilimitados",
     "Serviços ligados a colaboradores",

@@ -21,17 +21,17 @@ async function getCalendarLimit(subscription: any, userId: string): Promise<numb
 
   if (user) {
     const trialEndDate = new Date(user.createdAt);
-    trialEndDate.setDate(trialEndDate.getDate() + 3);
+    trialEndDate.setDate(trialEndDate.getDate() + 7); // Alterado de 3 para 7 dias
     const now = new Date();
     const isTrialActive = now < trialEndDate;
 
     if (isTrialActive) {
-      return 20; // Limite de 20 calendários durante o período de teste
+      return 1; // Limite de 1 calendário durante o período de teste (alterado de 20 para 1)
     }
   }
 
   if (!subscription || subscription.status !== "active") {
-    return 3; // Plano base: 3 calendários
+    return 1; // Plano base: 1 calendário (alterado de 3 para 1)
   }
 
   const { stripePriceId } = subscription;
@@ -131,7 +131,7 @@ export async function getCalendarLimits(): Promise<CalendarLimitsData> {
 
     // Fallback em caso de erro
     return {
-      limit: 3,
+      limit: 1, // Alterado de 3 para 1
       current: 0,
       canCreateMore: true,
       isAiPlan: false,

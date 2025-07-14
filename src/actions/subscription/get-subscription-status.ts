@@ -71,7 +71,7 @@ const getSubscriptionStatusCached = unstable_cache(
 
       // Verificação de período de trial
       const trialEndDate = new Date(dbUser.createdAt);
-      trialEndDate.setDate(trialEndDate.getDate() + 3);
+      trialEndDate.setDate(trialEndDate.getDate() + 7); // Alterado de 3 para 7 dias
 
       const now = new Date();
       const isTrialActive = now < trialEndDate;

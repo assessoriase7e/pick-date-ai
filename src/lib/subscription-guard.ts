@@ -75,9 +75,9 @@ export async function checkSubscriptionAccess(pathname: string) {
     return redirect("/sign-in");
   }
 
-  // Verificar período de teste (3 dias)
-  const trialEndDate = new Date(user.createdAt);
-  trialEndDate.setDate(trialEndDate.getDate() + 3);
+    // Verificar período de teste (7 dias)
+    const trialEndDate = new Date(user.createdAt);
+    trialEndDate.setDate(trialEndDate.getDate() + 7); // Alterado de 3 para 7 dias
   const isTrialActive = new Date() < trialEndDate;
 
   if (isTrialActive) {
