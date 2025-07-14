@@ -1,22 +1,11 @@
 import { useState, useMemo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface SelectFieldProps<T> {
-  label: string;
+  label?: string;
   placeholder: string;
   options: T[];
   value: string | number | undefined;
@@ -51,15 +40,13 @@ export function SelectWithScroll<T>({
 
   return (
     <div className="flex flex-col">
-      <label className="mb-1 font-medium">{label}</label>
+      {label && <label className="mb-1 font-medium">{label}</label>}
 
       {/* Desktop Select */}
       <div className="hidden md:block">
         <Select
           value={value !== undefined ? String(value) : undefined}
-          onValueChange={(val) =>
-            onChange(isNaN(Number(val)) ? val : Number(val))
-          }
+          onValueChange={(val) => onChange(isNaN(Number(val)) ? val : Number(val))}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={placeholder} />
@@ -78,18 +65,13 @@ export function SelectWithScroll<T>({
               filteredOptions.map((option) => {
                 const optionValue = getOptionValue(option);
                 return (
-                  <SelectItem
-                    key={String(optionValue)}
-                    value={String(optionValue)}
-                  >
+                  <SelectItem key={String(optionValue)} value={String(optionValue)}>
                     {getOptionLabel(option)}
                   </SelectItem>
                 );
               })
             ) : (
-              <div className="p-2 text-sm text-muted-foreground">
-                Nenhum resultado encontrado.
-              </div>
+              <div className="p-2 text-sm text-muted-foreground">Nenhum resultado encontrado.</div>
             )}
           </SelectContent>
         </Select>
@@ -101,19 +83,13 @@ export function SelectWithScroll<T>({
           <DrawerTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
               {value !== undefined
-                ? getOptionLabel(
-                    options.find(
-                      (opt) => String(getOptionValue(opt)) === String(value)
-                    )!
-                  )
+                ? getOptionLabel(options.find((opt) => String(getOptionValue(opt)) === String(value))!)
                 : placeholder}
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <div className="p-4">
-              <DrawerTitle className="mb-4 text-lg font-medium">
-                {label}
-              </DrawerTitle>
+              <DrawerTitle className="mb-4 text-lg font-medium">{label}</DrawerTitle>
               <Input
                 placeholder="Buscar..."
                 value={searchTerm}
@@ -129,11 +105,7 @@ export function SelectWithScroll<T>({
                     return (
                       <Button
                         key={String(optionValue)}
-                        variant={
-                          String(optionValue) === String(value)
-                            ? "default"
-                            : "ghost"
-                        }
+                        variant={String(optionValue) === String(value) ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => {
                           onChange(isNaN(Number(optionValue)) ? optionValue : Number(optionValue));
@@ -145,9 +117,7 @@ export function SelectWithScroll<T>({
                     );
                   })
                 ) : (
-                  <div className="text-sm text-muted-foreground text-center">
-                    Nenhum resultado encontrado.
-                  </div>
+                  <div className="text-sm text-muted-foreground text-center">Nenhum resultado encontrado.</div>
                 )}
               </div>
             </div>

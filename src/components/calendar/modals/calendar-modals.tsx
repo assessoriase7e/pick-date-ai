@@ -22,33 +22,41 @@ import { createCalendar } from "@/actions/calendars/create";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { SubscriptionBlocker } from "@/components/subscription-blocker";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
+// Adicione a propriedade shareOpen e setShareOpen à interface de props
 interface CalendarModalsProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
   editOpen: boolean;
-  setEditOpen: (open: boolean) => void;
   deleteOpen: boolean;
+  shareOpen: boolean; // Adicionar esta propriedade
+  setOpen: (open: boolean) => void;
+  setEditOpen: (open: boolean) => void;
   setDeleteOpen: (open: boolean) => void;
-  selectedCalendar: any;
-  handleCreateCalendar: (values: CalendarFormValues) => Promise<void>;
-  handleEditCalendar: (values: CalendarFormValues) => Promise<void>;
-  handleDeleteCalendar: () => Promise<void>;
+  setShareOpen: (open: boolean) => void; // Adicionar esta propriedade
+  handleCreateCalendar: (values: CalendarFormValues) => void;
+  handleEditCalendar: (values: CalendarFormValues) => void;
+  handleDeleteCalendar: () => void;
   collaborators: CollaboratorFullData[];
+  selectedCalendar: Calendar | null;
 }
 
+// No componente, adicione o modal de compartilhamento
 export function CalendarModals({
   open,
-  setOpen,
   editOpen,
-  setEditOpen,
   deleteOpen,
+  shareOpen,
+  setOpen,
+  setEditOpen,
   setDeleteOpen,
-  selectedCalendar,
+  setShareOpen,
   handleCreateCalendar,
   handleEditCalendar,
   handleDeleteCalendar,
   collaborators,
+  selectedCalendar,
 }: CalendarModalsProps) {
   const form = useForm<CalendarFormValues>({
     resolver: zodResolver(calendarSchema),
@@ -112,6 +120,75 @@ export function CalendarModals({
             </Button>
             <Button variant="destructive" onClick={handleDeleteCalendar} type="button">
               Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Compartilhamento */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Compartilhar Calendário</DialogTitle>
+            <DialogDescription>Compartilhe o link do seu calendário com clientes ou colaboradores.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="shareLink">Link de compartilhamento</Label>
+              <div className="flex">
+                <Input
+                  id="shareLink"
+                  readOnly
+                  value={`${window.location.origin}/shared-calendar/${selectedCalendar?.id}`}
+                  className="flex-1 rounded-r-none"
+                />
+                <Button
+                  type="button"
+                  className="rounded-l-none"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/shared-calendar/${selectedCalendar?.id}`);
+                    toast.success("Link copiado para a área de transferência");
+                  }}
+                >
+                  Copiar
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="accessCode">Código de acesso</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="accessCode"
+                  readOnly
+                  value={selectedCalendar?.accessCode || "Sem código de acesso"}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (selectedCalendar?.accessCode) {
+                      navigator.clipboard.writeText(selectedCalendar.accessCode);
+                      toast.success("Código copiado para a área de transferência");
+                    }
+                  }}
+                  disabled={!selectedCalendar?.accessCode}
+                >
+                  Copiar
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {selectedCalendar?.accessCode
+                  ? "Este código é necessário para acessar o calendário compartilhado."
+                  : "Este calendário não possui código de acesso e pode ser visualizado por qualquer pessoa com o link."}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareOpen(false)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>

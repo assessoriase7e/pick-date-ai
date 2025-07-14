@@ -17,6 +17,7 @@ export default async function CalendarPage({
   searchParams: Promise<{
     calendarId?: string;
     date?: string;
+    collaboratorId?: string;
   }>;
 }) {
   // Verificar se há excesso de calendários e redirecionar para a página de gerenciamento
@@ -27,10 +28,36 @@ export default async function CalendarPage({
 
   const sParams = await searchParams;
 
+  // Buscar calendários e colaboradores
   const [response, collaboratorsResponse] = await Promise.all([listCalendars(), getCollaborators({ limit: 100 })]);
 
   const calendars = response.success && response.data ? response.data : [];
   const collaborators = collaboratorsResponse.success ? collaboratorsResponse.data : [];
+
+  // Determinar o collaboratorId a ser usado
+  let collaboratorId: number | undefined;
+
+  if (sParams.collaboratorId) {
+    // Se houver um collaboratorId nas query params, use-o
+    collaboratorId = Number(sParams.collaboratorId);
+  } else if (collaborators.length > 0) {
+    // Se não houver collaboratorId nas query params, use o primeiro colaborador da lista
+    collaboratorId = collaborators[0].id;
+
+    // Se não houver calendarId nas query params, redirecione para a URL com o primeiro colaborador
+    if (!sParams.calendarId) {
+      const params = new URLSearchParams();
+      params.set("collaboratorId", String(collaboratorId));
+
+      // Manter a data atual se existir
+      if (sParams.date) {
+        params.set("date", sParams.date);
+      }
+
+      // Redirecionar para a URL com o collaboratorId
+      redirect(`/calendar?${params.toString()}`);
+    }
+  }
 
   const initialCalendarId = calendars.length > 0 ? calendars[0].id : 0;
   const requestedCalendarId = Number(sParams.calendarId);
@@ -44,27 +71,37 @@ export default async function CalendarPage({
   // Carregar todos os agendamentos do ano atual
   const startOfYear = moment(currentDate).startOf("year").toDate();
   const endOfYear = moment(currentDate).endOf("year").toDate();
-  
+
   // Função para carregar agendamentos de um mês específico
   const loadAppointmentsForMonth = async (date: Date) => {
-    const res = await getAppointmentsByMonth(date, Number(calendarId));
+    const res = await getAppointmentsByMonth(date, Number(calendarId), true, false, {
+      status: "scheduled",
+      // Adicionar filtro por collaboratorId se estiver definido
+      ...(collaboratorId
+        ? {
+            calendar: {
+              collaboratorId: collaboratorId,
+            },
+          }
+        : {}),
+    });
     return res?.success && res?.data ? res.data : [];
   };
-  
+
   // Carregar agendamentos para todos os meses do ano
   const appointmentPromises = [];
   for (let month = 0; month < 12; month++) {
     const monthDate = moment(currentDate).month(month).date(1).toDate();
     appointmentPromises.push(loadAppointmentsForMonth(monthDate));
   }
-  
+
   const allMonthsAppointments = await Promise.all(appointmentPromises);
-  
+
   // Organizar agendamentos por data
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   allMonthsAppointments.flat().forEach((appointment: any) => {
     if (appointment.status === "canceled") return;
-    
+
     const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
     if (!appointmentsByDate[dateKey]) {
       appointmentsByDate[dateKey] = [];
@@ -99,6 +136,7 @@ export default async function CalendarPage({
       allClients={allClients}
       allServices={allServices}
       allCollaborators={allCollaborators}
+      selectedCollaboratorId={collaboratorId}
     />
   );
 }

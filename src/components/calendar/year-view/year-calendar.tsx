@@ -1,11 +1,11 @@
 "use client";
-import { memo, useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { MonthCalendar } from "./month-calendar";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Share, Pencil, Trash } from "lucide-react";
+import { Plus, Share, Pencil, Trash, Menu } from "lucide-react";
 import { DayDetailsModal } from "../modals/day-details-modal";
 import { CalendarModals } from "../modals/calendar-modals";
 import { revalidatePathAction } from "@/actions/revalidate-path";
@@ -20,6 +20,9 @@ import { useCalendarStore } from "@/store/calendar-store";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { CalendarUnifiedModal } from "../modals/calendar-unified-modal";
+import { SelectWithScroll } from "../common/select-with-scroll";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface YearCalendarProps {
   calendars: CalendarFullData[];
@@ -30,6 +33,7 @@ interface YearCalendarProps {
   allClients: Record<number, any[]>;
   allServices: Record<number, any[]>;
   allCollaborators: Record<number, any>;
+  selectedCollaboratorId?: number;
 }
 
 // Ref para controlar se o scroll já foi feito (movido para fora do componente)
@@ -44,6 +48,7 @@ function YearCalendarComponent({
   allClients,
   allServices,
   allCollaborators,
+  selectedCollaboratorId: initialCollaboratorId,
 }: YearCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayModalOpen, setDayModalOpen] = useState(false);
@@ -52,6 +57,10 @@ function YearCalendarComponent({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [selectedCalendar, setSelectedCalendar] = useState<Calendar | null>(null);
+  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<number | null>(initialCollaboratorId || null);
+
+  // Verificar se é mobile
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const router = useRouter();
 
@@ -65,7 +74,7 @@ function YearCalendarComponent({
 
   // Referências para cada mês
   const monthRefs = useRef<(HTMLDivElement | null)[]>(Array(12).fill(null));
-  
+
   // Efeito para rolar até o mês atual apenas no primeiro carregamento
   useEffect(() => {
     if (monthRefs.current[currentMonth] && hasScrolledRef.current === false) {
@@ -73,6 +82,64 @@ function YearCalendarComponent({
       hasScrolledRef.current = true;
     }
   }, []);
+
+  // Filtrar calendários com base no colaborador selecionado
+  const filteredCalendars = useMemo(() => {
+    if (!selectedCollaboratorId) return calendars;
+
+    const filtered = calendars.filter((calendar) => calendar.collaboratorId === selectedCollaboratorId);
+
+    // Se não houver calendários para o colaborador selecionado, retorne todos os calendários
+    // em vez de um array vazio
+    return filtered.length > 0 ? filtered : calendars;
+  }, [calendars, selectedCollaboratorId]);
+
+  // Obter o calendário selecionado com base no ID
+  const selectedCalendarData = useMemo(() => {
+    // Converter calendarId para número para garantir comparação correta
+    const calendarIdNumber = Number(calendarId);
+
+    // Primeiro tenta encontrar o calendário pelo ID
+    const foundCalendar = filteredCalendars.find((cal) => cal.id === calendarIdNumber);
+
+    // Se não encontrar e houver calendários filtrados, use o primeiro
+    if (!foundCalendar && filteredCalendars.length > 0) {
+      return filteredCalendars[0];
+    }
+
+    return foundCalendar;
+  }, [filteredCalendars, calendarId]);
+
+  // Função para lidar com a mudança de colaborador
+  const handleCollaboratorChange = (collaboratorId: number | string) => {
+    setSelectedCollaboratorId(collaboratorId as number);
+
+    // Criar novos query params incluindo o collaboratorId
+    const params = new URLSearchParams();
+    params.set("calendarId", String(calendarId));
+
+    // Adicionar o collaboratorId aos query params se não for nulo ou vazio
+    if (collaboratorId) {
+      params.set("collaboratorId", String(collaboratorId));
+    } else {
+      // Se não houver collaboratorId, não incluir no URL
+      params.delete("collaboratorId");
+    }
+
+    // Manter a data atual nos query params
+    params.set("date", currentDate.toISOString());
+
+    // Se o calendário atual não pertencer ao colaborador selecionado, selecione o primeiro calendário do colaborador
+    if (collaboratorId) {
+      const collaboratorCalendars = calendars.filter((cal) => cal.collaboratorId === collaboratorId);
+      if (collaboratorCalendars.length > 0 && !collaboratorCalendars.some((cal) => cal.id === calendarId)) {
+        params.set("calendarId", String(collaboratorCalendars[0].id));
+      }
+    }
+
+    // Navegar para a nova URL com os query params atualizados
+    router.push(`/calendar?${params.toString()}`);
+  };
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
@@ -161,94 +228,164 @@ function YearCalendarComponent({
     setDeleteOpen(true);
   };
 
-  const selectedCalendarData = calendars.find((cal) => cal.id === calendarId);
+  const openShareModal = (calendar: Calendar) => {
+    setSelectedCalendar(calendar);
+    setShareOpen(true);
+  };
 
-  return (
-    <div className="flex flex-col h-full overflow-auto">
-      {/* Header com botões de ação */}
-      <div className="sticky top-0 z-10 bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
-        <h1 className="text-2xl font-bold w-full">
-          {selectedCalendarData?.name || selectedCalendarData?.collaborator?.name || "Calendário"} - {currentYear}
-        </h1>
-
-        <div className="flex flex-col lg:flex-row gap-2 w-full">
-          <Button variant="outline" size="sm" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Calendário
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+  // Componente de botões de ação para desktop
+  const ActionButtons = () => (
+    <div className="flex gap-2">
+      <Button variant="outline" size="sm" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
+        <Plus className="h-4 w-4 mr-2" />
+        Novo Calendário
+      </Button>
+      {selectedCalendarData && (
+        <>
+          <Button variant="outline" size="sm" onClick={() => openShareModal(selectedCalendarData)}>
             <Share className="h-4 w-4 mr-2" />
             Compartilhar
           </Button>
-          {selectedCalendarData && (
-            <>
-              <Button variant="outline" size="sm" onClick={() => openEditModal(selectedCalendarData)}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => openDeleteModal(selectedCalendarData)}>
-                <Trash className="h-4 w-4 mr-2" />
-                Apagar
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Conteúdo do calendário - lista vertical de meses */}
-      <div className="flex-1 p-4 overflow-auto">
-        <div className="max-w-4xl mx-auto">
-          {months.map((month) => (
-            <motion.div
-              key={month}
-              ref={(el) => {
-                monthRefs.current[month] = el;
-              }}
-              // Removido o evento onViewportEnter que atualizava a URL
-            >
-              <MonthCalendar month={month} year={currentYear} appointments={appointments} onDayClick={handleDayClick} />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Modais */}
-      <DayDetailsModal
-        isOpen={dayModalOpen}
-        onClose={() => setDayModalOpen(false)}
-        date={selectedDate}
-        calendarId={calendarId}
-        calendar={calendars.find((cal) => cal.id === calendarId)}
-        clients={allClients[calendarId] || []}
-        services={allServices[calendarId] || []}
-        collaborator={allCollaborators[calendarId] || null}
-        appointments={appointments}
-      />
-
-      <CalendarModals
-        open={open}
-        editOpen={editOpen}
-        deleteOpen={deleteOpen}
-        setOpen={setOpen}
-        setEditOpen={setEditOpen}
-        setDeleteOpen={setDeleteOpen}
-        handleCreateCalendar={handleCreateCalendar}
-        handleEditCalendar={handleEditCalendar}
-        handleDeleteCalendar={handleDeleteCalendar}
-        collaborators={collaborators}
-        selectedCalendar={selectedCalendar}
-      />
-
-      {/* Modal de Limite de Calendários */}
-      <CalendarUnifiedModal
-        type="limit"
-        open={limitModalOpen}
-        onOpenChange={setLimitModalOpen}
-        currentCount={current}
-        limit={limit}
-        onUpgrade={() => router.push("/payment")}
-      />
+          <Button variant="outline" size="sm" onClick={() => openEditModal(selectedCalendarData)}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Editar
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => openDeleteModal(selectedCalendarData)}>
+            <Trash className="h-4 w-4 mr-2" />
+            Apagar
+          </Button>
+        </>
+      )}
     </div>
+  );
+
+  // Componente de botões de ação para mobile (dentro do drawer)
+  const MobileActionButtons = () => (
+    <div className="flex flex-col gap-2 p-4">
+      <Button variant="outline" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
+        <Plus className="h-4 w-4 mr-2" />
+        Novo Calendário
+      </Button>
+      {selectedCalendarData && (
+        <>
+          <Button variant="outline" onClick={() => openShareModal(selectedCalendarData)}>
+            <Share className="h-4 w-4 mr-2" />
+            Compartilhar
+          </Button>
+          <Button variant="outline" onClick={() => openEditModal(selectedCalendarData)}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Editar
+          </Button>
+          <Button variant="outline" onClick={() => openDeleteModal(selectedCalendarData)}>
+            <Trash className="h-4 w-4 mr-2" />
+            Apagar
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="sticky top-0 z-[100] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
+          {/* Seletor de Colaborador */}
+          <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
+            <SelectWithScroll
+              placeholder="Todos os colaboradores"
+              options={collaborators}
+              value={selectedCollaboratorId || ""}
+              onChange={handleCollaboratorChange}
+              getOptionLabel={(option) => option?.name}
+              getOptionValue={(option) => option.id}
+            />
+
+            {isMobile && (
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader className="text-center">
+                    <h2 className="text-lg font-semibold">Ações do Calendário</h2>
+                  </DrawerHeader>
+                  <MobileActionButtons />
+                </DrawerContent>
+              </Drawer>
+            )}
+          </div>
+        </div>
+
+        {/* Botões de ação - desktop ou mobile */}
+
+        {!isMobile && <ActionButtons />}
+      </div>
+      <div className="flex flex-col h-full overflow-auto">
+        {/* Header com botões de ação - sticky no desktop */}
+
+        {/* Conteúdo do calendário - lista vertical de meses */}
+        <div className="flex-1 p-4 overflow-auto">
+          <div className="max-w-4xl mx-auto">
+            {months.map((month) => (
+              <motion.div
+                key={month}
+                ref={(el) => {
+                  monthRefs.current[month] = el;
+                }}
+              >
+                <MonthCalendar
+                  month={month}
+                  year={currentYear}
+                  appointments={appointments}
+                  onDayClick={handleDayClick}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Modais */}
+        <DayDetailsModal
+          isOpen={dayModalOpen}
+          onClose={() => setDayModalOpen(false)}
+          date={selectedDate}
+          calendarId={calendarId}
+          calendar={calendars.find((cal) => cal.id === calendarId)}
+          clients={allClients[calendarId] || []}
+          services={allServices[calendarId] || []}
+          collaborator={allCollaborators[calendarId] || null}
+          appointments={appointments}
+        />
+
+        <CalendarModals
+          open={open}
+          editOpen={editOpen}
+          deleteOpen={deleteOpen}
+          shareOpen={shareOpen} // Adicionar o estado do modal de compartilhamento
+          setOpen={setOpen}
+          setEditOpen={setEditOpen}
+          setDeleteOpen={setDeleteOpen}
+          setShareOpen={setShareOpen} // Adicionar o setter do estado do modal de compartilhamento
+          handleCreateCalendar={handleCreateCalendar}
+          handleEditCalendar={handleEditCalendar}
+          handleDeleteCalendar={handleDeleteCalendar}
+          collaborators={collaborators}
+          selectedCalendar={selectedCalendar}
+        />
+
+        {/* Modal de Limite de Calendários */}
+        <CalendarUnifiedModal
+          type="limit"
+          open={limitModalOpen}
+          onOpenChange={setLimitModalOpen}
+          currentCount={current}
+          limit={limit}
+          onUpgrade={() => router.push("/payment")}
+        />
+      </div>
+    </>
   );
 }
 
