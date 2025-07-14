@@ -33,20 +33,6 @@ export async function createSubscription(priceId: string): Promise<{ success: bo
       }
     }
 
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300) {
-      if (
-        !dbUser.subscription ||
-        dbUser.subscription.status !== "active" ||
-        ![
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100,
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200,
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300,
-        ].includes(dbUser.subscription.stripePriceId)
-      ) {
-        throw new Error("É necessário ter um plano de IA ativo para contratar créditos adicionais");
-      }
-    }
-
     // Obter ou criar customer ID
     let customerId = dbUser.subscription?.stripeCustomerId;
     if (!customerId) {

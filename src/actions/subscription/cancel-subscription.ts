@@ -2,7 +2,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { revalidatePath } from "next/cache";
+// Remover a importação de revalidatePath
+// import { revalidatePath } from "next/cache";
+// Adicionar a importação da função correta
+import { revalidateSubscriptionCache } from "@/actions/subscription/revalidate-subscription";
 
 /**
  * Cancela a assinatura do usuário
@@ -51,8 +54,8 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
       data: { cancelAtPeriodEnd: true },
     });
 
-    // Revalidar cache
-    revalidatePath("/api/subscription/status");
+    // Revalidar cache usando a função correta
+    await revalidateSubscriptionCache();
 
     return {
       success: true,
