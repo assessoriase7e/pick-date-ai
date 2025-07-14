@@ -50,7 +50,7 @@ export function DockMenu() {
 
   const MobileMenu = () => (
     <Drawer>
-      <DrawerTrigger asChild className="fixed bottom-5 right-5 w-12 h-12">
+      <DrawerTrigger asChild className="fixed bottom-5 right-5 w-12 h-12 z-[50]">
         <Button size="icon" className="md:hidden rounded-full">
           <Menu />
           <span className="sr-only">Menu</span>
