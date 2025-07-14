@@ -1,9 +1,8 @@
 "use server";
 import { listCalendars } from "@/actions/calendars/getMany";
-import { CalendarContent } from "../../../components/calendar/common/calendar-content";
+import { YearCalendar } from "../../../components/calendar/year-view/year-calendar";
 import { getAppointmentsByMonth } from "@/actions/appointments/get-by-month";
 import { AppointmentFullData } from "@/types/calendar";
-import { getAppointmentsByCalendarAndDate } from "@/actions/appointments/getByCalendarAndDate";
 import { getCollaborators } from "@/actions/collaborators/get-collaborators";
 import moment from "moment";
 import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
@@ -18,7 +17,6 @@ export default async function CalendarPage({
   searchParams: Promise<{
     calendarId?: string;
     date?: string;
-    selectedDay?: string;
   }>;
 }) {
   // Verificar se há excesso de calendários e redirecionar para a página de gerenciamento
@@ -43,43 +41,42 @@ export default async function CalendarPage({
 
   const currentDate = sParams.date ? moment(sParams.date).toDate() : moment().startOf("day").toDate();
 
+  // Carregar todos os agendamentos do ano atual
+  const startOfYear = moment(currentDate).startOf("year").toDate();
+  const endOfYear = moment(currentDate).endOf("year").toDate();
+  
+  // Função para carregar agendamentos de um mês específico
+  const loadAppointmentsForMonth = async (date: Date) => {
+    const res = await getAppointmentsByMonth(date, Number(calendarId));
+    return res?.success && res?.data ? res.data : [];
+  };
+  
+  // Carregar agendamentos para todos os meses do ano
+  const appointmentPromises = [];
+  for (let month = 0; month < 12; month++) {
+    const monthDate = moment(currentDate).month(month).date(1).toDate();
+    appointmentPromises.push(loadAppointmentsForMonth(monthDate));
+  }
+  
+  const allMonthsAppointments = await Promise.all(appointmentPromises);
+  
+  // Organizar agendamentos por data
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
-  const res = await getAppointmentsByMonth(currentDate, Number(calendarId));
-
-  if (res?.success && res?.data) {
-    res.data.forEach((appointment: any) => {
-      if (appointment.status === "canceled") {
-        return;
-      }
-
-      const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
-
-      if (!appointmentsByDate[dateKey]) {
-        appointmentsByDate[dateKey] = [];
-      }
-
-      appointmentsByDate[dateKey].push(appointment as AppointmentFullData);
-    });
-  }
-
-  let selectedDayAppointments: AppointmentFullData[] = [];
-  let selectedDayDate: Date | null = null;
-
-  if (sParams.selectedDay) {
-    selectedDayDate = moment(sParams.selectedDay).toDate();
-    const dayResponse = await getAppointmentsByCalendarAndDate(calendarId, selectedDayDate);
-
-    if (dayResponse.success && dayResponse.data) {
-      selectedDayAppointments = dayResponse.data.filter((appointment) => appointment.status !== "canceled");
+  allMonthsAppointments.flat().forEach((appointment: any) => {
+    if (appointment.status === "canceled") return;
+    
+    const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
+    if (!appointmentsByDate[dateKey]) {
+      appointmentsByDate[dateKey] = [];
     }
-  }
+    appointmentsByDate[dateKey].push(appointment as AppointmentFullData);
+  });
 
-  // Antes do return, adicione:
+  // Carregar dados para todos os calendários
   const allClients: Record<number, any[]> = {};
   const allServices: Record<number, any[]> = {};
   const allCollaborators: Record<number, any> = {};
 
-  // Carregar dados para todos os calendários
   for (const calendar of calendars) {
     const [clientsRes, servicesRes, collaboratorRes] = await Promise.all([
       getClientsByCalendar(calendar.id),
@@ -93,15 +90,12 @@ export default async function CalendarPage({
   }
 
   return (
-    <CalendarContent
+    <YearCalendar
       calendars={calendars}
       calendarId={calendarId}
       appointments={appointmentsByDate}
       currentDate={currentDate}
-      selectedDay={selectedDayDate}
-      selectedDayAppointments={selectedDayAppointments}
       collaborators={collaborators}
-      // Adicionar estas propriedades
       allClients={allClients}
       allServices={allServices}
       allCollaborators={allCollaborators}

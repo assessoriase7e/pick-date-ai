@@ -96,7 +96,7 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
     setSelectedHour(null);
     setStartTime(null);
     setEndTime(null);
-    onClose();
+    // Removido o onClose() para que o modal não feche automaticamente
   };
 
   const checkTimeConflict = (startTime: Date, endTime: Date, excludeId?: number): boolean => {
@@ -114,13 +114,17 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
     });
   };
 
-  const handleClose = () => {
-    setShowForm(false);
-    setSelectedAppointment(null);
-    setSelectedHour(null);
-    setStartTime(null);
-    setEndTime(null);
-    onClose();
+  // Modificar o handleClose para verificar se deve realmente fechar o modal
+  const handleClose = (isOpen: boolean) => {
+    // Se isOpen for false, significa que o usuário está tentando fechar o modal
+    if (!isOpen) {
+      setShowForm(false);
+      setSelectedAppointment(null);
+      setSelectedHour(null);
+      setStartTime(null);
+      setEndTime(null);
+      onClose();
+    }
   };
 
   const handleFormSubmit = async (appointmentData: any) => {
@@ -140,7 +144,14 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
         return;
       }
 
-      handleFormSuccess();
+      // Apenas resetar o formulário sem fechar o modal
+      setShowForm(false);
+      setSelectedAppointment(null);
+      setSelectedHour(null);
+      setStartTime(null);
+      setEndTime(null);
+      
+      // Não chamar onClose() aqui para manter o modal aberto
     } catch (error) {
       console.error(error);
       toast.error("Ocorreu um erro ao salvar o agendamento");
