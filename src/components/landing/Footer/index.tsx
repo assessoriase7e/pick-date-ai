@@ -29,7 +29,7 @@ const footerLinks = {
 const Footer = () => {
   return (
     <>
-      <footer className="mx-auto p-5" data-wow-delay=".1s">
+      <footer className="mx-auto p-5 border-t border-border">
         <div className="container mx-auto">
           <div className="-mx-4 flex flex-wrap">
             {/* Links Úteis */}

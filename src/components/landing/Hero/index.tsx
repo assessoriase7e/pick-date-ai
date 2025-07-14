@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import Image from "next/image";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -18,14 +18,14 @@ const Hero = () => {
                   plataforma. Comece com 7 dias grátis e transforme a maneira como você organiza sua agenda.
                 </p>
                 <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-                  <SignUpButton mode="modal" forceRedirectUrl="/calendar">
+                  <Link href="/sign-in">
                     <Button size="lg">🔥 Começar Agora</Button>
-                  </SignUpButton>
-                  <SignInButton mode="modal" forceRedirectUrl="/calendar">
+                  </Link>
+                  <Link href="/sign-up">
                     <Button variant="outline" size="lg">
                       Já tenho uma conta
                     </Button>
-                  </SignInButton>
+                  </Link>
                 </div>
               </div>
             </div>
