@@ -6,14 +6,9 @@ export default function SignInPage() {
       <div className="p-4">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold">Pick Date AI</h1>
-          <p className="text-muted-foreground">
-            Faça login para acessar o sistema
-          </p>
+          <p className="text-muted-foreground">Faça login para acessar o sistema</p>
         </div>
         <SignIn
-          forceRedirectUrl={`https://${
-            process.env.VERCEL_URL || "localhost:3000"
-          }/calendar`}
           appearance={{
             elements: {
               rootBox: "mx-auto",

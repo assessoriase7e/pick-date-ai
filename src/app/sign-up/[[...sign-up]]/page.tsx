@@ -6,14 +6,9 @@ export default function SignUpPage() {
       <div className="p-4">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold">Pick Date AI</h1>
-          <p className="text-muted-foreground">
-            Crie uma conta para acessar o sistema
-          </p>
+          <p className="text-muted-foreground">Crie uma conta para acessar o sistema</p>
         </div>
         <SignUp
-          forceRedirectUrl={`https://${
-            process.env.VERCEL_URL || "localhost:3000"
-          }/calendar`}
           appearance={{
             elements: {
               rootBox: "mx-auto",

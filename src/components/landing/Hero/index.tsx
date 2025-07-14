@@ -18,10 +18,10 @@ const Hero = () => {
                   plataforma. Comece com 7 dias grátis e transforme a maneira como você organiza sua agenda.
                 </p>
                 <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-                  <Link href="/sign-in">
+                  <Link href="/sign-up">
                     <Button size="lg">🔥 Começar Agora</Button>
                   </Link>
-                  <Link href="/sign-up">
+                  <Link href="/sign-in">
                     <Button variant="outline" size="lg">
                       Já tenho uma conta
                     </Button>
