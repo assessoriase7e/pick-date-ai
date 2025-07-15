@@ -52,6 +52,9 @@ export async function getServicesByCalendar(
         },
         isActive: true,
       },
+      include: {
+        serviceCollaborators: true, // Incluir a relação serviceCollaborators
+      },
       orderBy: {
         name: "asc",
       },

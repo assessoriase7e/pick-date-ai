@@ -10,6 +10,7 @@ import {
   File,
   ListCollapse,
   Wrench,
+  Package, // Novo ícone para combos
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -58,6 +59,13 @@ export const useSidebarRoutes = (): UseSidebarRoutesResult => {
       href: "/services",
       color: "text-emerald-500",
       isActive: pathname === "/services",
+    },
+    {
+      label: "Pacotes",
+      icon: Package,
+      href: "/combos",
+      color: "text-orange-500",
+      isActive: pathname === "/combos",
     },
     {
       label: "Profissionais",

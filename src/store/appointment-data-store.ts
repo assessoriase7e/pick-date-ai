@@ -1,8 +1,7 @@
 import { create } from "zustand";
-import { getClients } from "@/actions/clients/get-clients";
+import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
+import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
 import { Client, Service } from "@prisma/client";
-import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
-import { getServicesByCollaborator } from "@/actions/services/get-services-by-collaborator";
 
 interface AppointmentDataState {
   clients: Client[];
@@ -10,8 +9,8 @@ interface AppointmentDataState {
   isLoadingClients: boolean;
   isLoadingServices: boolean;
   error: string | null;
-  fetchClients: () => Promise<void>;
-  fetchServices: (calendarId?: number) => Promise<void>;
+  fetchClients: (calendarId: number) => Promise<void>;
+  fetchServices: (calendarId: number) => Promise<void>;
   reset: () => void;
 }
 
@@ -22,10 +21,10 @@ export const useAppointmentDataStore = create<AppointmentDataState>((set) => ({
   isLoadingServices: false,
   error: null,
 
-  fetchClients: async () => {
+  fetchClients: async (calendarId: number) => {
     set({ isLoadingClients: true, error: null });
     try {
-      const response = await getClients({ limit: 1000, page: 1 });
+      const response = await getClientsByCalendar(calendarId);
 
       if (response.success && response.data) {
         set({ clients: response.data, isLoadingClients: false });
@@ -44,21 +43,10 @@ export const useAppointmentDataStore = create<AppointmentDataState>((set) => ({
     }
   },
 
-  fetchServices: async (calendarId) => {
+  fetchServices: async (calendarId: number) => {
     set({ isLoadingServices: true, error: null });
     try {
-      if (!calendarId) return;
-      const { data: collab } = await getCalendarCollaborator(calendarId);
-
-      if (!collab?.collaboratorId) {
-        set({
-          error: "Profissional não encontrado para este calendário",
-          isLoadingServices: false,
-        });
-        return;
-      }
-
-      const response = await getServicesByCollaborator(collab.collaboratorId);
+      const response = await getServicesByCalendar(calendarId);
 
       if (response.success && response.data) {
         set({ services: response.data, isLoadingServices: false });

@@ -6,11 +6,11 @@ import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calen
 import { Client, Collaborator, Service } from "@prisma/client";
 import React from "react";
 import { DayScheduleGrid } from "../common/day-schedule-grid";
-import { AppointmentForm } from "../../appointment/appointment-form";
 
 import { toast } from "sonner";
 import { useSubscription } from "@/store/subscription-store";
 import { Button } from "@/components/ui/button";
+import { AppointmentForm } from "@/components/appointment/appointment-form";
 
 interface DayDetailsModalProps {
   isOpen: boolean;
@@ -150,7 +150,7 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
   const modalContent = (
     <div className="flex flex-col max-w-[95vw]">
       <div className="md:hidden flex-1 overflow-hidden">
-        <div className="border rounded-lg h-[80svh] overflow-auto w-full">
+        <div className="border rounded-lg h-[80svh] overflow-y-auto w-full">
           <DayScheduleGrid
             appointments={filteredAppointments}
             onHourClick={handleHourClick}
@@ -173,7 +173,7 @@ export const DayDetailsModal = React.memo(function DayDetailsModal({
             </div>
           </div>
 
-          <div className="border rounded-lg p-4">
+          <div className="border rounded-lg p-4 h-[78svh] overflow-y-auto">
             {!hasActiveSubscription ? (
               subscriptionMessage
             ) : showForm ? (
