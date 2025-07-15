@@ -28,7 +28,6 @@ export default async function CalendarPage({
   }
 
   const sParams = await searchParams;
-  console.log(sParams.calendarId);
 
   // Buscar calendários e colaboradores
   const [response, collaboratorsResponse] = await Promise.all([listCalendars(), getCollaborators({ limit: 100 })]);
@@ -104,9 +103,18 @@ export default async function CalendarPage({
   const allMonthsAppointments = await Promise.all(appointmentPromises);
 
   // Organizar agendamentos por data
+  // Organizar agendamentos por data
   const appointmentsByDate: Record<string, AppointmentFullData[]> = {};
   allMonthsAppointments.flat().forEach((appointment: any) => {
     if (appointment.status === "canceled") return;
+
+    // Converter string para Date se necessário
+    if (typeof appointment.startTime === "string") {
+      appointment.startTime = new Date(appointment.startTime);
+    }
+    if (typeof appointment.endTime === "string") {
+      appointment.endTime = new Date(appointment.endTime);
+    }
 
     const dateKey = moment(appointment.startTime).format("YYYY-MM-DD");
     if (!appointmentsByDate[dateKey]) {
@@ -128,8 +136,6 @@ export default async function CalendarPage({
 
   allClients[calendarId] = clientsRes.success ? clientsRes.data : [];
   allServices[calendarId] = servicesRes.success ? servicesRes.data : [];
-
-  console.log(allServices);
 
   return (
     <YearCalendar

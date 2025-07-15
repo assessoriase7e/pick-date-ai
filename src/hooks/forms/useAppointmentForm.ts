@@ -59,9 +59,6 @@ export function useAppointmentForm({
   const clients = clientsList || storeClients;
   const services = servicesList || storeServices;
 
-  // Log temporário para debug
-  console.log("Clientes no hook:", clients);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedServiceDuration, setSelectedServiceDuration] = useState<number | null>(null);
@@ -118,7 +115,6 @@ export function useAppointmentForm({
 
   const isServiceAvailableOnDay = (service: Service): boolean => {
     if (!service.availableDays || service.availableDays.length === 0) {
-      console.log("Serviço sem dias disponíveis, retornando true:", service.name);
       return true;
     }
 

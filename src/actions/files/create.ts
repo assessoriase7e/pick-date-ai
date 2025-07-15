@@ -18,8 +18,6 @@ export async function createFile(data: FileFormValues) {
       data,
     });
 
-    console.log(file);
-
     revalidatePath("/files");
     return { success: true, data: file };
   } catch (error) {

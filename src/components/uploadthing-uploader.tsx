@@ -8,11 +8,7 @@ const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 
 interface UploadthingUploaderProps {
   onUploadBegin?: () => void;
-  onUploadComplete: (data: {
-    fileUrl: string;
-    fileName: string;
-    fileType: string;
-  }) => void;
+  onUploadComplete: (data: { fileUrl: string; fileName: string; fileType: string }) => void;
   onUploadError?: (error: Error) => void;
   endpoint?: keyof OurFileRouter;
   className?: string;
@@ -33,12 +29,10 @@ export function UploadthingUploader({
       onClientUploadComplete={(res) => {
         if (res && res.length > 0) {
           const file = res[0];
-          // Verifique se todos os campos necessários estão presentes
-          console.log("Resposta do upload:", file);
-          
+
           // Limpar a URL removendo espaços e caracteres de backtick
-          const cleanUrl = file.ufsUrl.trim().replace(/`/g, '');
-          
+          const cleanUrl = file.ufsUrl.trim().replace(/`/g, "");
+
           onUploadComplete({
             fileUrl: cleanUrl,
             fileName: file.name,
@@ -59,9 +53,7 @@ export function UploadthingUploader({
         label: "Arraste e solte o arquivo aqui ou clique para selecionar",
         allowedContent: "Audio, imagem, texto ou PDF",
       }}
-      className={`ut-button:bg-primary ut-label:text-muted-foreground ${
-        className || ""
-      }`}
+      className={`ut-button:bg-primary ut-label:text-muted-foreground ${className || ""}`}
     />
   );
 }

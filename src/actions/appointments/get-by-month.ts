@@ -70,9 +70,11 @@ export async function getAppointmentsByMonth(
       orderBy: { startTime: "asc" },
     });
 
-    // Mapeia para garantir o campo collaborator no formato esperado
+    // Mapeia para garantir o campo collaborator no formato esperado e converter datas
     const formattedAppointments = appointments.map((appointment) => ({
       ...appointment,
+      startTime: new Date(appointment.startTime),
+      endTime: new Date(appointment.endTime),
       collaborator: appointment.calendar?.collaborator || null,
     }));
 
