@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { MonthCalendar } from "./month-calendar";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Share, Pencil, Trash, Menu } from "lucide-react";
+import { Plus, Share, Pencil, Trash, Menu, CalendarIcon } from "lucide-react";
 import { DayDetailsModal } from "../modals/day-details-modal";
 import { CalendarModals } from "../modals/calendar-modals";
 import { revalidatePathAction } from "@/actions/revalidate-path";
@@ -247,6 +247,12 @@ function YearCalendarComponent({
     setShareOpen(true);
   };
 
+  // Verificar se o colaborador selecionado possui um calendário
+  const collaboratorHasCalendar = useMemo(() => {
+    if (!initialCollaboratorId) return true; // Se não houver colaborador selecionado, consideramos que tem calendário
+    return calendars.some((calendar) => calendar.collaboratorId === initialCollaboratorId);
+  }, [calendars, initialCollaboratorId]);
+
   // Memoizar os componentes de botões para evitar re-renderizações
   const ActionButtons = memo(() => (
     <div className="flex gap-2">
@@ -254,7 +260,7 @@ function YearCalendarComponent({
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>
-      {selectedCalendarData && (
+      {selectedCalendarData && collaboratorHasCalendar && (
         <>
           <Button variant="outline" size="sm" onClick={() => openShareModal(selectedCalendarData)}>
             <Share className="h-4 w-4 mr-2" />
@@ -280,7 +286,7 @@ function YearCalendarComponent({
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>
-      {selectedCalendarData && (
+      {selectedCalendarData && collaboratorHasCalendar && (
         <>
           <Button variant="outline" onClick={() => openShareModal(selectedCalendarData)}>
             <Share className="h-4 w-4 mr-2" />
@@ -308,35 +314,33 @@ function YearCalendarComponent({
       )}
       <div className="sticky top-0 z-[100] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
-          {/* Seletor de Colaborador - só exibir se houver calendários */}
-          {calendars.length > 0 && (
-            <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
-              <SelectWithScroll
-                placeholder="Todos os colaboradores"
-                options={collaborators}
-                value={initialCollaboratorId || ""}
-                onChange={handleCollaboratorChange}
-                getOptionLabel={(option) => option?.name}
-                getOptionValue={(option) => option.id}
-              />
+          {/* Seletor de Colaborador - sempre exibir, independente de haver calendários */}
+          <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
+            <SelectWithScroll
+              placeholder="Todos os colaboradores"
+              options={collaborators}
+              value={initialCollaboratorId || ""}
+              onChange={handleCollaboratorChange}
+              getOptionLabel={(option) => option?.name}
+              getOptionValue={(option) => option.id}
+            />
 
-              {isMobile && (
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Menu className="h-4 w-4" />
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent>
-                    <DrawerHeader className="text-center">
-                      <h2 className="text-lg font-semibold">Ações do Calendário</h2>
-                    </DrawerHeader>
-                    <MobileActionButtons />
-                  </DrawerContent>
-                </Drawer>
-              )}
-            </div>
-          )}
+            {isMobile && (
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader className="text-center">
+                    <h2 className="text-lg font-semibold">Ações do Calendário</h2>
+                  </DrawerHeader>
+                  <MobileActionButtons />
+                </DrawerContent>
+              </Drawer>
+            )}
+          </div>
         </div>
 
         {/* Botões de ação - desktop ou mobile */}
@@ -344,51 +348,63 @@ function YearCalendarComponent({
         {!isMobile && <ActionButtons />}
       </div>
       <div className="flex flex-col h-full overflow-auto relative">
-        {/* Header com botões de ação - sticky no desktop */}
-
         {/* Conteúdo do calendário - lista vertical de meses */}
-        <div className="flex-1 p-4 overflow-auto">
-          <div className="max-w-4xl mx-auto">
-            {months.map((month) => (
-              <motion.div
-                key={month}
-                ref={(el) => {
-                  monthRefs.current[month] = el;
-                }}
-              >
-                <MonthCalendar
-                  month={month}
-                  year={currentYear}
-                  appointments={appointments}
-                  onDayClick={handleDayClick}
-                />
-              </motion.div>
-            ))}
+        {collaboratorHasCalendar ? (
+          <div className="flex-1 p-4 overflow-auto">
+            <div className="max-w-4xl mx-auto">
+              {months.map((month) => (
+                <motion.div
+                  key={month}
+                  ref={(el) => {
+                    monthRefs.current[month] = el;
+                  }}
+                >
+                  <MonthCalendar
+                    month={month}
+                    year={currentYear}
+                    appointments={appointments}
+                    onDayClick={handleDayClick}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex-1 p-4 overflow-auto">
+            <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg max-w-4xl mx-auto">
+              <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Nenhum calendário encontrado</h3>
+              <p className="text-muted-foreground mb-4 text-center">
+                O colaborador selecionado não possui calendário. Clique no botão "Novo Calendário" para criar um.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Modais */}
-        <DayDetailsModal
-          isOpen={dayModalOpen}
-          onClose={() => setDayModalOpen(false)}
-          date={selectedDate}
-          calendarId={calendarId}
-          calendar={selectedCalendarData}
-          clients={allClients[calendarId] || []}
-          services={allServices[calendarId] || []}
-          collaborator={selectedCalendarData?.collaborator || null}
-          appointments={appointments}
-        />
+        {collaboratorHasCalendar && (
+          <DayDetailsModal
+            isOpen={dayModalOpen}
+            onClose={() => setDayModalOpen(false)}
+            date={selectedDate}
+            calendarId={calendarId}
+            calendar={selectedCalendarData}
+            clients={allClients[calendarId] || []}
+            services={allServices[calendarId] || []}
+            collaborator={selectedCalendarData?.collaborator || null}
+            appointments={appointments}
+          />
+        )}
 
         <CalendarModals
           open={open}
           editOpen={editOpen}
           deleteOpen={deleteOpen}
-          shareOpen={shareOpen} // Adicionar o estado do modal de compartilhamento
+          shareOpen={shareOpen}
           setOpen={setOpen}
           setEditOpen={setEditOpen}
           setDeleteOpen={setDeleteOpen}
-          setShareOpen={setShareOpen} // Adicionar o setter do estado do modal de compartilhamento
+          setShareOpen={setShareOpen}
           handleCreateCalendar={handleCreateCalendar}
           handleEditCalendar={handleEditCalendar}
           handleDeleteCalendar={handleDeleteCalendar}
