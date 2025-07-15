@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "../ui/drawer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { AppointmentFullData } from "@/types/calendar";
+import { AppointmentFullData, CalendarWithFullCollaborator } from "@/types/calendar";
 import { updateAppointment } from "@/actions/appointments/update";
 
 const publicAppointmentSchema = z.object({
@@ -40,6 +40,8 @@ interface PublicAppointmentFormProps {
   onCancel: (appointmentId: number, isPublic?: boolean) => Promise<void>;
   appointment?: AppointmentFullData;
   collaboratorId: number;
+  calendar: CalendarWithFullCollaborator; // Adicionado para compatibilidade com o hook
+  checkTimeConflict: (startTime: Date, endTime: Date, excludeId?: number) => boolean; // Adicionado para compatibilidade com o hook
 }
 
 export function PublicAppointmentForm({
@@ -52,6 +54,8 @@ export function PublicAppointmentForm({
   appointment,
   clients,
   collaboratorId,
+  calendar,
+  checkTimeConflict,
 }: PublicAppointmentFormProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);

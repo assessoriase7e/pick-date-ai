@@ -6,28 +6,17 @@ import { Button } from "../ui/button";
 import { SelectWithScroll } from "../calendar/common/select-with-scroll";
 import { AppointmentFormProps } from "@/validators/appointment";
 import { NumericFormat } from "react-number-format";
-import { useEffect, useState } from "react";
 import moment from "moment";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createAppointmentSchema } from "@/validators/calendar";
-import { toast } from "sonner";
-import { createAppointment } from "@/actions/appointments/create";
-import { updateAppointment } from "@/actions/appointments/update";
-import { deleteAppointment } from "@/actions/appointments/delete";
-import { z } from "zod";
 import { Client, Service } from "@prisma/client";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarIcon, Clock, DollarSign, FileText, User } from "lucide-react";
+import { CalendarIcon, Clock, DollarSign, FileText, PackageIcon, User } from "lucide-react";
 // Substituir a importação do useAutoPrint (linha 31)
 import { useAutoPrint } from "@/hooks/use-auto-print";
-
-type FormValues = z.infer<typeof createAppointmentSchema>;
-
-import { isCollaboratorAvailable } from "@/utils/checkCollaboratorAvailability";
+import { useAppointmentForm } from "@/hooks/forms/useAppointmentForm";
 import { cn } from "@/lib/utils";
 import { CalendarWithFullCollaborator } from "@/types/calendar";
+import { ComboSelector } from "../combos/combo-selector";
 
 interface ExtendedAppointmentFormProps extends AppointmentFormProps {
   clients: Client[];
@@ -46,179 +35,39 @@ export function AppointmentForm({
   services,
   calendar,
 }: ExtendedAppointmentFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedServiceDuration, setSelectedServiceDuration] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>(appointment ? "resumo" : "editar");
-
   // Usando o hook simplificado
   const { printAppointment, isPrinting } = useAutoPrint();
 
-  const isEditing = !!appointment;
-
-  const calculateDefaultEndTime = (startTime: string): string => {
-    return moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
-  };
-
-  const defaultStartTime = appointment ? moment(appointment.startTime).format("HH:mm") : initialStartTime ?? "09:00";
-
-  const defaultEndTime = appointment
-    ? moment(appointment.endTime).format("HH:mm")
-    : initialEndTime ?? calculateDefaultEndTime(defaultStartTime);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(createAppointmentSchema),
-    defaultValues: appointment
-      ? {
-          clientId: appointment?.clientId || null,
-          serviceId: appointment.serviceId,
-          startTime: moment(appointment.startTime).format("HH:mm"),
-          endTime: moment(appointment.endTime).format("HH:mm"),
-          notes: appointment.notes || "",
-          calendarId: calendar.id,
-          servicePrice: appointment.servicePrice || null,
-          finalPrice: appointment.finalPrice || appointment.servicePrice || null,
-          collaboratorId: appointment.collaboratorId || calendar.collaboratorId,
-        }
-      : {
-          startTime: defaultStartTime,
-          endTime: defaultEndTime,
-          notes: "",
-          calendarId: calendar.id,
-          servicePrice: null,
-          finalPrice: null,
-          collaboratorId: calendar.collaboratorId,
-        },
+  // Usando o hook useAppointmentForm
+  const {
+    form,
+    isLoading,
+    isDeleting,
+    isEditing,
+    isServiceAvailableOnDay,
+    activeTab,
+    setActiveTab,
+    onSubmit,
+    handleDelete,
+    updatePriceFromService,
+    formatCurrency,
+    clientData,
+    serviceData,
+    getAvailableServicesForCombo,
+    selectedCombo,
+    isUsingCombo,
+    setIsUsingCombo,
+    selectCombo,
+    getAvailableServices,
+  } = useAppointmentForm({
+    date,
+    appointment,
+    onSuccess,
+    checkTimeConflict,
+    calendar,
+    initialStartTime,
+    initialEndTime,
   });
-
-  const updatePriceFromService = (serviceId: number) => {
-    const service = services.find((s) => s.id === serviceId);
-    if (service) {
-      form.setValue("servicePrice", service.price);
-      // Só atualiza o preço final se não estiver editando ou se o preço final for nulo
-      if (!isEditing || !form.getValues("finalPrice")) {
-        form.setValue("finalPrice", service.price);
-      }
-    }
-  };
-
-  // Atualiza o preço quando o serviço é selecionado
-  useEffect(() => {
-    const serviceId = form.watch("serviceId");
-    if (serviceId) {
-      updatePriceFromService(serviceId);
-    }
-  }, [form.watch("serviceId")]);
-
-  // Atualiza a duração do serviço quando o serviço é selecionado
-  useEffect(() => {
-    const serviceId = form.watch("serviceId");
-    const service = services.find((s) => s.id === serviceId);
-    setSelectedServiceDuration(service?.durationMinutes ?? null);
-  }, [form.watch("serviceId"), services]);
-
-  // Atualiza o horário de término baseado na duração do serviço
-  useEffect(() => {
-    const startTime = form.watch("startTime");
-    // Só atualiza automaticamente se NÃO estiver editando (ou seja, criando novo)
-    if (!isEditing && selectedServiceDuration && startTime) {
-      const newEndTime = moment(startTime, "HH:mm").add(selectedServiceDuration, "minutes").format("HH:mm");
-      form.setValue("endTime", newEndTime);
-    }
-  }, [selectedServiceDuration, form.watch("startTime")]);
-
-  // Reseta o formulário quando o appointment ou os tempos iniciais mudam
-  useEffect(() => {
-    form.reset({
-      clientId: appointment?.clientId || null,
-      serviceId: appointment?.serviceId || null,
-      startTime: appointment?.startTime ? moment(appointment.startTime).format("HH:mm") : initialStartTime || "09:00",
-      endTime: appointment?.endTime ? moment(appointment.endTime).format("HH:mm") : initialEndTime || "10:00",
-      notes: appointment?.notes || "",
-      calendarId: calendar.id || null,
-      servicePrice: appointment?.servicePrice || null,
-      finalPrice: appointment?.finalPrice || appointment?.servicePrice || null,
-      collaboratorId: appointment?.collaboratorId || calendar.collaboratorId,
-    });
-  }, [appointment]);
-
-  const onSubmit = async (values: FormValues) => {
-    try {
-      if (!calendar?.isActive) {
-        toast.error("Esta agenda está inativa e não permite novos agendamentos");
-        return;
-      }
-
-      const [startHour, startMinute] = values.startTime.split(":").map(Number);
-      const [endHour, endMinute] = values.endTime.split(":").map(Number);
-
-      const startTime = new Date(date);
-      startTime.setHours(startHour, startMinute, 0, 0);
-
-      const endTime = new Date(date);
-      endTime.setHours(endHour, endMinute, 0, 0);
-
-      if (endTime <= startTime) {
-        toast.error("O horário de término deve ser depois do horário de início");
-        return;
-      }
-
-      // Verificar disponibilidade do colaborador
-      const collaborator = calendar.collaborator;
-      if (!isCollaboratorAvailable(collaborator, startTime, endTime)) {
-        toast.error("Horário do profissional indisponível");
-        return;
-      }
-
-      const hasConflict = checkTimeConflict(startTime, endTime, appointment?.id);
-      if (hasConflict) {
-        toast.error("Já existe um agendamento nesse horário");
-        return;
-      }
-
-      setIsLoading(true);
-
-      const appointmentData = {
-        clientId: values.clientId,
-        serviceId: values.serviceId,
-        calendarId: calendar.id,
-        startTime,
-        endTime,
-        notes: values.notes || null,
-        status: "scheduled",
-        servicePrice: values.servicePrice ?? null,
-        finalPrice: values.finalPrice ?? null,
-        collaboratorId: calendar.collaboratorId,
-      };
-
-      // Verificar se o colaborador existe
-      if (!calendar.collaboratorId) {
-        toast.error("Este calendário não possui um colaborador associado");
-        return;
-      }
-      let result;
-
-      if (isEditing && appointment) {
-        result = await updateAppointment(appointment.id!, {
-          ...appointmentData,
-          status: appointment.status || "scheduled",
-        });
-        if (!result.success) throw new Error(result.error);
-        toast.success("Agendamento atualizado com sucesso!");
-      } else {
-        result = await createAppointment(appointmentData);
-        if (!result.success) throw new Error(result.error);
-        toast.success("Agendamento criado com sucesso!");
-      }
-
-      onSuccess();
-    } catch (error) {
-      console.error("Erro ao salvar agendamento:", error);
-      toast.error("Ocorreu um erro ao salvar o agendamento");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!calendar?.isActive && !isEditing) {
     return (
@@ -237,36 +86,6 @@ export function AppointmentForm({
       </Dialog>
     );
   }
-
-  const handleDelete = async () => {
-    if (!appointment?.id) return;
-
-    try {
-      setIsDeleting(true);
-      const result = await deleteAppointment(appointment.id);
-      if (!result.success) throw new Error(result.error);
-      toast.success("Agendamento excluído com sucesso!");
-      onSuccess();
-    } catch (error) {
-      console.error("Erro ao excluir agendamento:", error);
-      toast.error("Ocorreu um erro ao excluir o agendamento");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // Busca os dados do cliente e serviço para exibir no resumo
-  const clientData = clients.find((c) => c.id === form.getValues("clientId"));
-  const serviceData = services.find((s) => s.id === form.getValues("serviceId"));
-
-  // Formata o preço para exibição
-  const formatCurrency = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return "R$ 0,00";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   return (
     <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -364,7 +183,6 @@ export function AppointmentForm({
           )}
         </div>
       </TabsContent>
-
       <TabsContent value="editar">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col justify-between h-full">
@@ -397,32 +215,7 @@ export function AppointmentForm({
                           }
                         }}
                         error={form.formState.errors.clientId?.message}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="serviceId"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel></FormLabel>
-                      <SelectWithScroll
-                        getOptionLabel={(option) => option?.name}
-                        getOptionValue={(option) => String(option?.id)}
-                        label="Serviço"
-                        placeholder="Selecione um serviço"
-                        options={services}
-                        value={String(field.value)}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          if (value) {
-                            updatePriceFromService(Number(value));
-                          }
-                        }}
-                        error={form.formState.errors.clientId?.message}
+                        disabled={isEditing} // Desabilitar seleção de cliente na edição
                       />
                       <FormMessage />
                     </FormItem>
@@ -430,32 +223,129 @@ export function AppointmentForm({
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="finalPrice"
-                render={({ field: { onChange, value, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Preço</FormLabel>
-                    <FormControl>
-                      <NumericFormat
-                        customInput={Input}
-                        prefix="R$"
-                        placeholder="R$ 0,00"
-                        thousandSeparator="."
-                        decimalSeparator=","
-                        decimalScale={2}
-                        allowNegative={false}
-                        value={value}
-                        onValueChange={(values) => {
-                          onChange(values.floatValue);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Exibir informações do combo quando estiver editando um agendamento com combo */}
+              {isEditing && appointment?.comboId && (
+                <div className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <PackageIcon className="h-5 w-5 text-primary" />
+                    <h3 className="font-medium">Pacote utilizado</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{appointment.comboName}</p>
+                </div>
+              )}
 
+              {/* Exibir o seletor de combo apenas quando estiver criando um novo agendamento */}
+              {form.getValues("clientId") && !isEditing ? (
+                <ComboSelector
+                  clientId={form.getValues("clientId")}
+                  isUsingCombo={isUsingCombo}
+                  setIsUsingCombo={setIsUsingCombo}
+                  selectedCombo={selectedCombo}
+                  selectCombo={selectCombo}
+                />
+              ) : (
+                <></>
+              )}
+
+              {/* Exibir o seletor de serviço apenas se não estiver editando um agendamento com combo */}
+              {(!isEditing || (isEditing && !appointment?.comboId)) && (
+                <FormField
+                  control={form.control}
+                  name="serviceId"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <SelectWithScroll
+                        getOptionLabel={(option) => option?.name}
+                        getOptionValue={(option) => String(option?.id)}
+                        label="Serviço"
+                        placeholder="Selecione um serviço"
+                        options={
+                          isUsingCombo && !isEditing
+                            ? getAvailableServices()
+                            : services.filter((service) => isServiceAvailableOnDay(service))
+                        }
+                        value={String(field.value)}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          if (value && !isUsingCombo) {
+                            updatePriceFromService(Number(value));
+                          } else if (value && isUsingCombo) {
+                            // Se estiver usando combo, o preço é zero
+                            form.setValue("servicePrice", 0);
+                            form.setValue("finalPrice", 0);
+                          }
+                        }}
+                        error={form.formState.errors.serviceId?.message}
+                        disabled={isUsingCombo && getAvailableServices().length === 0}
+                      />
+                      {isUsingCombo && getAvailableServices().length === 0 && (
+                        <p className="text-sm text-destructive mt-2">
+                          Não há serviços disponíveis para este profissional neste pacote.
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Exibir o seletor de serviço para troca quando estiver editando um agendamento com combo */}
+              {isEditing && appointment?.comboId && (
+                <FormField
+                  control={form.control}
+                  name="newServiceId"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <SelectWithScroll
+                        getOptionLabel={(option) => option?.name}
+                        getOptionValue={(option) => String(option?.id)}
+                        label="Alterar serviço"
+                        placeholder="Selecione um novo serviço"
+                        options={getAvailableServicesForCombo(appointment.comboId)}
+                        value={field.value ? String(field.value) : ""}
+                        onChange={(value) => {
+                          field.onChange(value ? Number(value) : null);
+                        }}
+                        error={form.formState.errors.newServiceId?.message}
+                      />
+                      <FormMessage />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ao alterar o serviço, o crédito do serviço anterior será devolvido ao combo e um crédito do novo
+                        serviço será utilizado.
+                      </p>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Mostrar o campo de preço apenas se não estiver usando combo */}
+              {!isUsingCombo && (!isEditing || (isEditing && !appointment?.comboId)) && (
+                <FormField
+                  control={form.control}
+                  name="finalPrice"
+                  render={({ field: { onChange, value, ...field } }) => (
+                    <FormItem>
+                      <FormLabel>Preço</FormLabel>
+                      <FormControl>
+                        <NumericFormat
+                          customInput={Input}
+                          prefix="R$"
+                          placeholder="R$ 0,00"
+                          thousandSeparator="."
+                          decimalSeparator=","
+                          decimalScale={2}
+                          allowNegative={false}
+                          value={value}
+                          onValueChange={(values) => {
+                            onChange(values.floatValue);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -485,7 +375,6 @@ export function AppointmentForm({
                   )}
                 />
               </div>
-
               <FormField
                 control={form.control}
                 name="notes"

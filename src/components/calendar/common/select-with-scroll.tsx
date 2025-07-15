@@ -13,6 +13,7 @@ interface SelectFieldProps<T> {
   getOptionLabel: (option: T) => number | string;
   getOptionValue: (option: T) => number | string;
   error?: string;
+  disabled?: boolean; // Adicionando a propriedade disabled
 }
 
 export function SelectWithScroll<T>({
@@ -24,6 +25,7 @@ export function SelectWithScroll<T>({
   getOptionLabel,
   getOptionValue,
   error,
+  disabled = false, // Valor padrão para disabled
 }: SelectFieldProps<T>) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,15 +42,14 @@ export function SelectWithScroll<T>({
 
   return (
     <div className="flex flex-col">
-      {label && <label className="mb-1 font-medium">{label}</label>}
-
-      {/* Desktop Select */}
+      {label && <label className="mb-1 font-medium text-sm">{label}</label>}
 
       {/* Desktop Select */}
       <div className="hidden md:block">
         <Select
           value={value !== undefined ? String(value) : ""}
           onValueChange={(val) => onChange(isNaN(Number(val)) ? val : Number(val))}
+          disabled={disabled} // Adicionando disabled aqui
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={placeholder} />
@@ -83,7 +84,11 @@ export function SelectWithScroll<T>({
       <div className="block md:hidden">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
-            <Button variant="outline" className="w-full justify-start">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              disabled={disabled} // Adicionando disabled aqui
+            >
               {value !== undefined
                 ? getOptionLabel(options.find((opt) => String(getOptionValue(opt)) === String(value))!)
                 : placeholder}
