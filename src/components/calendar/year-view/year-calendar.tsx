@@ -109,9 +109,17 @@ function YearCalendarComponent({
     // Define o estado de carregamento como true ao clicar no select
     setIsLoading(true);
 
+    // Encontrar o calendário selecionado
+    const selectedCalendar = calendars.find((cal) => cal.id === Number(calendarId));
+
     // Criar novos query params incluindo o calendarId
     const params = new URLSearchParams();
     params.set("calendarId", String(calendarId));
+
+    // Incluir o collaboratorId se o calendário tiver um colaborador associado
+    if (selectedCalendar?.collaborator?.id) {
+      params.set("collaboratorId", String(selectedCalendar.collaborator.id));
+    }
 
     // Manter a data atual nos query params
     params.set("date", currentDate.toISOString());
@@ -383,7 +391,7 @@ function YearCalendarComponent({
           onOpenChange={setLimitModalOpen}
           currentCount={current}
           limit={limit}
-          onUpgrade={() => router.push("/payment")}
+          onUpgrade={() => router.push("/config")}
         />
       </div>
     </>

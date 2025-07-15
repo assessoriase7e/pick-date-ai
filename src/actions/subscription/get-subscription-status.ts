@@ -65,6 +65,7 @@ const getSubscriptionStatusCached = unstable_cache(
             id: cal.id.toString(),
             active: cal.active,
             expiresAt: cal.expiresAt.toISOString(),
+            purchaseDate: cal.createdAt.toISOString(), // Assuming createdAt can be used as purchaseDate
           })),
         };
       }
@@ -151,5 +152,5 @@ const getSubscriptionStatusCached = unstable_cache(
     }
   },
   ["subscription-status"],
-  { revalidate: 3600 } // 1 hora em segundos
+  { revalidate: 100 } // 1 hora em segundos
 );

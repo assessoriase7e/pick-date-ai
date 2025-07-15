@@ -85,8 +85,16 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
                         {calendar.active ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{format(new Date(calendar.purchaseDate), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
-                    <TableCell>{format(new Date(calendar.expiresAt), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                    <TableCell>
+                      {calendar.purchaseDate 
+                        ? format(new Date(calendar.purchaseDate), "dd/MM/yyyy", { locale: ptBR })
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {calendar.expiresAt
+                        ? format(new Date(calendar.expiresAt), "dd/MM/yyyy", { locale: ptBR })
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
