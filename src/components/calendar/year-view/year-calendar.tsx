@@ -20,7 +20,7 @@ import { useCalendarStore } from "@/store/calendar-store";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { CalendarUnifiedModal } from "../modals/calendar-unified-modal";
-import { SelectWithScroll } from "../common/select-with-scroll";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import IsTableLoading from "@/components/isTableLoading";
@@ -34,7 +34,6 @@ interface YearCalendarProps {
   allClients: Record<number, any[]>;
   allServices: Record<number, any[]>;
   allCollaborators: Record<number, any>;
-  selectedCollaboratorId?: number;
 }
 
 // Ref para controlar se o scroll já foi feito (movido para fora do componente)
@@ -49,7 +48,6 @@ function YearCalendarComponent({
   allClients,
   allServices,
   allCollaborators,
-  selectedCollaboratorId: initialCollaboratorId,
 }: YearCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayModalOpen, setDayModalOpen] = useState(false);
@@ -84,72 +82,39 @@ function YearCalendarComponent({
     }
   }, []);
 
-  // Filtrar calendários com base no colaborador selecionado
-  const filteredCalendars = useMemo(() => {
-    if (!initialCollaboratorId) return calendars;
-
-    const filtered = calendars.filter((calendar) => calendar.collaboratorId === initialCollaboratorId);
-
-    // Se não houver calendários para o colaborador selecionado, retorne todos os calendários
-    // em vez de um array vazio
-    return filtered.length > 0 ? filtered : calendars;
-  }, [calendars, initialCollaboratorId]);
-
   // Obter o calendário selecionado com base no ID
   const selectedCalendarData = useMemo(() => {
     // Converter calendarId para número para garantir comparação correta
     const calendarIdNumber = Number(calendarId);
 
     // Primeiro tenta encontrar o calendário pelo ID
-    const foundCalendar = filteredCalendars.find((cal) => cal.id === calendarIdNumber);
+    const foundCalendar = calendars.find((cal) => cal.id === calendarIdNumber);
 
-    // Se não encontrar e houver calendários filtrados, use o primeiro
-    if (!foundCalendar && filteredCalendars.length > 0) {
-      return filteredCalendars[0];
-    }
-
-    // Se ainda não tiver um calendário válido e houver calendários disponíveis, use o primeiro
+    // Se não encontrar e houver calendários disponíveis, use o primeiro
     if (!foundCalendar && calendars.length > 0) {
       return calendars[0];
     }
 
     // Se mesmo assim não encontrar nenhum calendário, retorne null em vez de undefined
     return foundCalendar || null;
-  }, [filteredCalendars, calendarId, calendars]);
+  }, [calendars, calendarId]);
 
   // Efeito para definir isLoading como false quando a página carregar
   useEffect(() => {
     setIsLoading(false);
   }, []);
 
-  // Função para lidar com a mudança de colaborador
-  const handleCollaboratorChange = (collaboratorId: number | string) => {
+  // Função para lidar com a mudança de calendário
+  const handleCalendarChange = (calendarId: number | string) => {
     // Define o estado de carregamento como true ao clicar no select
     setIsLoading(true);
-    // Removendo a linha que atualiza o estado
 
-    // Criar novos query params incluindo o collaboratorId
+    // Criar novos query params incluindo o calendarId
     const params = new URLSearchParams();
     params.set("calendarId", String(calendarId));
 
-    // Adicionar o collaboratorId aos query params se não for nulo ou vazio
-    if (collaboratorId) {
-      params.set("collaboratorId", String(collaboratorId));
-    } else {
-      // Se não houver collaboratorId, não incluir no URL
-      params.delete("collaboratorId");
-    }
-
     // Manter a data atual nos query params
     params.set("date", currentDate.toISOString());
-
-    // Se o calendário atual não pertencer ao colaborador selecionado, selecione o primeiro calendário do colaborador
-    if (collaboratorId) {
-      const collaboratorCalendars = calendars.filter((cal) => cal.collaboratorId === collaboratorId);
-      if (collaboratorCalendars.length > 0 && !collaboratorCalendars.some((cal) => cal.id === calendarId)) {
-        params.set("calendarId", String(collaboratorCalendars[0].id));
-      }
-    }
 
     // Navegar para a nova URL com os query params atualizados
     router.push(`/calendar?${params.toString()}`);
@@ -247,12 +212,6 @@ function YearCalendarComponent({
     setShareOpen(true);
   };
 
-  // Verificar se o colaborador selecionado possui um calendário
-  const collaboratorHasCalendar = useMemo(() => {
-    if (!initialCollaboratorId) return true; // Se não houver colaborador selecionado, consideramos que tem calendário
-    return calendars.some((calendar) => calendar.collaboratorId === initialCollaboratorId);
-  }, [calendars, initialCollaboratorId]);
-
   // Memoizar os componentes de botões para evitar re-renderizações
   const ActionButtons = memo(() => (
     <div className="flex gap-2">
@@ -260,7 +219,7 @@ function YearCalendarComponent({
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>
-      {selectedCalendarData && collaboratorHasCalendar && (
+      {selectedCalendarData && (
         <>
           <Button variant="outline" size="sm" onClick={() => openShareModal(selectedCalendarData)}>
             <Share className="h-4 w-4 mr-2" />
@@ -286,7 +245,7 @@ function YearCalendarComponent({
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>
-      {selectedCalendarData && collaboratorHasCalendar && (
+      {selectedCalendarData && (
         <>
           <Button variant="outline" onClick={() => openShareModal(selectedCalendarData)}>
             <Share className="h-4 w-4 mr-2" />
@@ -312,18 +271,24 @@ function YearCalendarComponent({
           <IsTableLoading isPageChanging={isLoading} />
         </div>
       )}
-      <div className="sticky top-0 z-[100] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
+      <div className="sticky top-0 z-[50] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
-          {/* Seletor de Colaborador - sempre exibir, independente de haver calendários */}
+          {/* Seletor de Calendário */}
           <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
-            <SelectWithScroll
-              placeholder="Todos os colaboradores"
-              options={collaborators}
-              value={initialCollaboratorId || ""}
-              onChange={handleCollaboratorChange}
-              getOptionLabel={(option) => option?.name}
-              getOptionValue={(option) => option.id}
-            />
+            <Select value={String(calendarId)} onValueChange={handleCalendarChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um calendário" />
+              </SelectTrigger>
+              <SelectContent>
+                {calendars.map((calendar: CalendarFullData) => (
+                  <SelectItem key={calendar.id} value={String(calendar.id)}>
+                    {calendar?.name
+                      ? `${calendar?.name} | ${calendar.collaborator?.name}`
+                      : calendar.collaborator?.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {isMobile && (
               <Drawer>
@@ -344,12 +309,11 @@ function YearCalendarComponent({
         </div>
 
         {/* Botões de ação - desktop ou mobile */}
-
         {!isMobile && <ActionButtons />}
       </div>
       <div className="flex flex-col h-full overflow-auto relative">
         {/* Conteúdo do calendário - lista vertical de meses */}
-        {collaboratorHasCalendar ? (
+        {calendars.length > 0 ? (
           <div className="flex-1 p-4 overflow-auto">
             <div className="max-w-4xl mx-auto">
               {months.map((month) => (
@@ -375,14 +339,14 @@ function YearCalendarComponent({
               <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">Nenhum calendário encontrado</h3>
               <p className="text-muted-foreground mb-4 text-center">
-                O colaborador selecionado não possui calendário. Clique no botão "Novo Calendário" para criar um.
+                Você ainda não possui calendários. Clique no botão "Novo Calendário" para criar um.
               </p>
             </div>
           </div>
         )}
 
         {/* Modais */}
-        {collaboratorHasCalendar && (
+        {selectedCalendarData && (
           <DayDetailsModal
             isOpen={dayModalOpen}
             onClose={() => setDayModalOpen(false)}
