@@ -224,19 +224,17 @@ export function useAppointmentForm({
     if (!isUsingCombo || !selectedCombo) {
       return services.filter((service) => isServiceAvailableOnDay(service));
     }
-  
+
     // Filtrar serviços que estão no combo e ainda têm sessões disponíveis
     // E também verificar se o serviço está associado ao colaborador do calendário
     return selectedCombo.sessions
       .filter(
         (session) =>
-          session.usedSessions < session.totalSessions && 
-          session.service && 
+          session.usedSessions < session.totalSessions &&
+          session.service &&
           isServiceAvailableOnDay(session.service) &&
           // Verificar se o serviço está associado ao colaborador do calendário
-          session.service.serviceCollaborators?.some(
-            (sc) => sc.collaboratorId === calendar.collaboratorId
-          )
+          session.service.serviceCollaborators?.some((sc) => sc.collaboratorId === calendar.collaboratorId)
       )
       .map((session) => session.service);
   };
@@ -244,22 +242,20 @@ export function useAppointmentForm({
   // Função para obter serviços disponíveis para um combo específico
   const getAvailableServicesForCombo = (comboId: number) => {
     // Encontrar o combo pelo ID
-    const combo = clientCombos.find(c => c.id === comboId);
-    
+    const combo = clientCombos.find((c) => c.id === comboId);
+
     if (!combo) return [];
-    
+
     // Filtrar serviços que estão no combo e ainda têm sessões disponíveis
     // E também verificar se o serviço está associado ao colaborador do calendário
     return combo.sessions
       .filter(
         (session) =>
-          session.usedSessions < session.totalSessions && 
-          session.service && 
+          session.usedSessions < session.totalSessions &&
+          session.service &&
           isServiceAvailableOnDay(session.service) &&
           // Verificar se o serviço está associado ao colaborador do calendário
-          session.service.serviceCollaborators?.some(
-            (sc) => sc.collaboratorId === calendar.collaboratorId
-          )
+          session.service.serviceCollaborators?.some((sc) => sc.collaboratorId === calendar.collaboratorId)
       )
       .map((session) => session.service);
   };
@@ -341,7 +337,21 @@ export function useAppointmentForm({
         if (!result.success) throw new Error(result.error);
         toast.success("Agendamento atualizado com sucesso!");
       } else {
-        result = await createAppointment(appointment);
+        // Criar objeto com os dados do formulário
+        const appointmentData = {
+          clientId: values.clientId,
+          serviceId: values.serviceId,
+          calendarId: calendar.id,
+          startTime,
+          endTime,
+          notes: values.notes || null,
+          status: "scheduled",
+          servicePrice: values.servicePrice,
+          finalPrice: values.finalPrice,
+          collaboratorId: values.collaboratorId || calendar.collaboratorId,
+        };
+
+        result = await createAppointment(appointmentData);
         if (!result.success) throw new Error(result.error);
         toast.success("Agendamento criado com sucesso!");
       }
