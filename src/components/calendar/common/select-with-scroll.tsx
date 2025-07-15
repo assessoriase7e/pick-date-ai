@@ -43,15 +43,17 @@ export function SelectWithScroll<T>({
       {label && <label className="mb-1 font-medium">{label}</label>}
 
       {/* Desktop Select */}
+
+      {/* Desktop Select */}
       <div className="hidden md:block">
         <Select
-          value={value !== undefined ? String(value) : undefined}
+          value={value !== undefined ? String(value) : ""}
           onValueChange={(val) => onChange(isNaN(Number(val)) ? val : Number(val))}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-y-auto">
+          <SelectContent className="max-h-60 overflow-y-auto z-[9999]">
             <div className="p-2">
               <Input
                 placeholder="Buscar..."
