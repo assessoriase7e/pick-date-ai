@@ -28,6 +28,7 @@ export default async function CalendarPage({
   }
 
   const sParams = await searchParams;
+  console.log(sParams.calendarId);
 
   // Buscar calendários e colaboradores
   const [response, collaboratorsResponse] = await Promise.all([listCalendars(), getCollaborators({ limit: 100 })]);
@@ -50,12 +51,20 @@ export default async function CalendarPage({
       const params = new URLSearchParams();
       params.set("collaboratorId", String(collaboratorId));
 
+      // Encontrar o calendário associado ao colaborador padrão
+      const collaboratorCalendar = calendars.find((cal) => cal.collaboratorId === collaboratorId);
+
+      // Se encontrar um calendário para o colaborador, incluir seu ID na URL
+      if (collaboratorCalendar) {
+        params.set("calendarId", String(collaboratorCalendar.id));
+      }
+
       // Manter a data atual se existir
       if (sParams.date) {
         params.set("date", sParams.date);
       }
 
-      // Redirecionar para a URL com o collaboratorId
+      // Redirecionar para a URL com o collaboratorId e calendarId
       redirect(`/calendar?${params.toString()}`);
     }
   }
@@ -68,10 +77,6 @@ export default async function CalendarPage({
   const calendarId = calendarExists ? requestedCalendarId : initialCalendarId;
 
   const currentDate = sParams.date ? moment(sParams.date).toDate() : moment().startOf("day").toDate();
-
-  // Carregar todos os agendamentos do ano atual
-  const startOfYear = moment(currentDate).startOf("year").toDate();
-  const endOfYear = moment(currentDate).endOf("year").toDate();
 
   // Função para carregar agendamentos de um mês específico
   const loadAppointmentsForMonth = async (date: Date) => {
@@ -115,17 +120,16 @@ export default async function CalendarPage({
   const allServices: Record<number, any[]> = {};
   const allCollaborators: Record<number, any> = {};
 
-  for (const calendar of calendars) {
-    const [clientsRes, servicesRes, collaboratorRes] = await Promise.all([
-      getClientsByCalendar(calendar.id),
-      getServicesByCalendar(calendar.id),
-      getCalendarCollaborator(calendar.id),
-    ]);
+  const [clientsRes, servicesRes] = await Promise.all([
+    getClientsByCalendar(calendarId),
+    getServicesByCalendar(calendarId),
+    getCalendarCollaborator(calendarId),
+  ]);
 
-    allClients[calendar.id] = clientsRes.success ? clientsRes.data : [];
-    allServices[calendar.id] = servicesRes.success ? servicesRes.data : [];
-    allCollaborators[calendar.id] = collaboratorRes.success ? collaboratorRes.data?.collaborator || null : null;
-  }
+  allClients[calendarId] = clientsRes.success ? clientsRes.data : [];
+  allServices[calendarId] = servicesRes.success ? servicesRes.data : [];
+
+  console.log(allServices);
 
   return (
     <YearCalendar
@@ -137,7 +141,6 @@ export default async function CalendarPage({
       allClients={allClients}
       allServices={allServices}
       allCollaborators={allCollaborators}
-      selectedCollaboratorId={collaboratorId}
     />
   );
 }
