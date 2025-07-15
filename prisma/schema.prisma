@@ -28,6 +28,7 @@ model User {
   subscription       Subscription?
   paymentHistory     PaymentHistory[]
   additionalCalendars AdditionalCalendar[]
+  combos             Combo[]
 
   @@map("user")
 }
@@ -72,6 +73,77 @@ model ApiKey {
   @@map("apikey")
 }
 
+// Modelo para os pacotes/combos
+model Combo {
+  id              Int              @id @default(autoincrement())
+  name            String
+  description     String?
+  discountType    String           // "percentage" ou "fixed"
+  discountValue   Float            @default(0)
+  totalPrice      Float            // Preço total sem desconto
+  finalPrice      Float            // Preço final com desconto
+  isActive        Boolean          @default(true)
+  userId          String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comboServices   ComboService[]
+  clientCombos    ClientCombo[]
+
+  @@map("combo")
+}
+
+// Serviços inclusos no pacote
+model ComboService {
+  id           Int      @id @default(autoincrement())
+  comboId      Int
+  serviceId    Int?
+  serviceName  String   // Nome do serviço para histórico
+  servicePrice Float    // Preço do serviço para cálculos
+  quantity     Int      // Quantidade de sessões incluídas
+  createdAt    DateTime @default(now())
+  combo        Combo    @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  service      Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("comboService")
+}
+
+// Pacotes atribuídos aos clientes
+model ClientCombo {
+  id           Int                    @id @default(autoincrement())
+  clientId     Int
+  comboId      Int?
+  comboName    String                 // Nome do combo para histórico
+  purchaseDate DateTime               @default(now())
+  expiresAt    DateTime?
+  amountPaid   Float?                 // Para suporte futuro a parcelamento
+  status       String                 @default("active") // "active", "completed", "expired"
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  client       Client                 @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  combo        Combo?                 @relation(fields: [comboId], references: [id], onDelete: SetNull)
+  sessions     ClientComboSession[]
+  appointments Appointment[]
+
+  @@map("clientCombo")
+}
+
+// Controle de sessões por serviço no pacote do cliente
+model ClientComboSession {
+  id              Int         @id @default(autoincrement())
+  clientComboId   Int
+  serviceId       Int?
+  serviceName     String      // Nome do serviço para histórico
+  totalSessions   Int         // Total de sessões incluídas
+  usedSessions    Int         @default(0) // Sessões já utilizadas
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  clientCombo     ClientCombo @relation(fields: [clientComboId], references: [id], onDelete: Cascade)
+  service         Service?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("clientComboSession")
+}
+
 model Service {
   id                   Int                   @id @default(autoincrement())
   name                 String
@@ -88,6 +160,8 @@ model Service {
   clientServices       ClientService[]
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   serviceCollaborators ServiceCollaborator[]
+  comboServices        ComboService[]
+  clientComboSessions  ClientComboSession[]
 
   @@map("service")
 }
@@ -116,6 +190,7 @@ model Client {
   appointments   Appointment[]
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientServices ClientService[]
+  clientCombos   ClientCombo[]
 
   @@map("client")
 }
@@ -143,7 +218,7 @@ model Calendar {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   appointments   Appointment[]
-  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id], onDelete: SetNull)
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("calendar")
@@ -183,25 +258,30 @@ model WorkHour {
 }
 
 model Appointment {
-  id             Int           @id @default(autoincrement())
-  startTime      DateTime
-  endTime        DateTime
-  status         String        @default("scheduled")
-  notes          String?
-  servicePrice   Float?
-  finalPrice     Float?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  userId         String
-  clientId       Int?
-  serviceId      Int
-  calendarId     Int
-  collaboratorId Int?
-  calendar       Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  client         Client?       @relation(fields: [clientId], references: [id])
-  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
-  service        Service       @relation(fields: [serviceId], references: [id])
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               Int           @id @default(autoincrement())
+  startTime        DateTime
+  endTime          DateTime
+  status           String        @default("scheduled")
+  notes            String?
+  servicePrice     Float?
+  finalPrice       Float?
+  serviceName      String?       // Nome do serviço no momento do agendamento
+  collaboratorName String?       // Nome do colaborador no momento do agendamento
+  comboName        String?       // Nome do combo no momento do agendamento
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  userId           String
+  clientId         Int?
+  serviceId        Int
+  calendarId       Int
+  collaboratorId   Int?
+  comboId          Int?
+  calendar         Calendar      @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  client           Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  collaborator     Collaborator? @relation(fields: [collaboratorId], references: [id], onDelete: SetNull)
+  service          Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientCombo      ClientCombo?  @relation(fields: [comboId], references: [id], onDelete: SetNull)
 
   @@map("appointment")
 }
