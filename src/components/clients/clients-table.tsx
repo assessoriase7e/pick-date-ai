@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { deleteClient } from "@/actions/clients/delete-client";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import ClientForm from "./client-form";
@@ -13,6 +13,7 @@ import { saveClient } from "@/actions/clients/save-client";
 import { ClientFormValues } from "@/validators/client";
 import { createClientColumns } from "@/table-columns/clients";
 import { SubscriptionBlocker } from "@/components/subscription-blocker";
+import { hasClientCombos } from "@/actions/combos/get-client-combos";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -33,7 +34,30 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [clientsWithCombos, setClientsWithCombos] = useState<Set<number>>(new Set());
   const selectedRowsRef = useRef<any[]>([]);
+
+  // Verificar quais clientes possuem combos
+  useEffect(() => {
+    const checkClientCombos = async () => {
+      const clientsWithCombosSet = new Set<number>();
+      
+      await Promise.all(
+        clients.map(async (client) => {
+          const hasCombos = await hasClientCombos(client.id);
+          if (hasCombos) {
+            clientsWithCombosSet.add(client.id);
+          }
+        })
+      );
+      
+      setClientsWithCombos(clientsWithCombosSet);
+    };
+
+    if (clients.length > 0) {
+      checkClientCombos();
+    }
+  }, [clients]);
 
   const handleDeleteClick = (id: number) => {
     setClientToDelete(id);
@@ -88,6 +112,8 @@ export default function ClientsTable({ clients, pagination = { totalPages: 1, cu
     onEdit: handleEditClick,
     onDelete: handleDeleteClick,
     formatDate,
+    enableSelection: false,
+    clientsWithCombos,
   });
 
   // Botão de criação que será passado para o DataTable
