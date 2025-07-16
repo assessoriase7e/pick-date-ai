@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { MonthCalendar } from "./month-calendar";
 import { AppointmentFullData, CalendarFullData } from "@/types/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Share, Pencil, Trash, Menu, CalendarIcon } from "lucide-react";
+import { Plus, Share, Pencil, Trash, CalendarIcon } from "lucide-react";
 import { DayDetailsModal } from "../modals/day-details-modal";
 import { CalendarModals } from "../modals/calendar-modals";
 import { revalidatePathAction } from "@/actions/revalidate-path";
@@ -19,10 +19,9 @@ import { useCalendarStore } from "@/store/calendar-store";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
 import { CalendarUnifiedModal } from "../modals/calendar-unified-modal";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import IsTableLoading from "@/components/isTableLoading";
+import { CalendarHeader } from "./calendar-header";
 
 interface YearCalendarProps {
   calendars: CalendarFullData[];
@@ -284,46 +283,17 @@ function YearCalendarComponent({
           <IsTableLoading isPageChanging={isLoading} />
         </div>
       )}
-      <div className="sticky top-0 z-[50] bg-background p-4 border-b flex flex-col lg:flex-row items-center justify-between">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 w-full">
-          {/* Seletor de Calendário */}
-          <div className="w-full lg:w-64 mt-2 lg:mt-0 lg:ml-4 flex gap-5 justify-between">
-            <Select value={String(calendarId)} onValueChange={handleCalendarChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um calendário" />
-              </SelectTrigger>
-              <SelectContent>
-                {calendars.map((calendar: CalendarFullData) => (
-                  <SelectItem key={calendar.id} value={String(calendar.id)}>
-                    {calendar?.name
-                      ? `${calendar?.name} | ${calendar.collaborator?.name}`
-                      : calendar.collaborator?.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {isMobile && (
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader className="text-center">
-                    <h2 className="text-lg font-semibold">Ações do Calendário</h2>
-                  </DrawerHeader>
-                  <MobileActionButtons />
-                </DrawerContent>
-              </Drawer>
-            )}
-          </div>
-        </div>
-
-        {/* Botões de ação - desktop ou mobile */}
-        {!isMobile && <ActionButtons />}
-      </div>
+      <CalendarHeader
+        calendarId={calendarId}
+        calendars={calendars}
+        isMobile={isMobile}
+        handleCalendarChange={handleCalendarChange}
+        setOpen={setOpen}
+        openShareModal={openShareModal}
+        openEditModal={openEditModal}
+        openDeleteModal={openDeleteModal}
+        selectedCalendarData={selectedCalendarData}
+      />
       <div className="flex flex-col h-full overflow-auto relative">
         {/* Conteúdo do calendário - lista vertical de meses */}
         {calendars.length > 0 ? (
