@@ -1,10 +1,10 @@
 // Arquivo principal da página - Server Component
-import { checkExcessCalendars } from "@/actions/calendars/check-excess-calendars";
+import { checkCalendarLimits } from "@/actions/calendars/check-calendar-limits";
 import { redirect } from "next/navigation";
 import { ManageCalendarsClient } from "./manage-calendars-client";
 
 export default async function ManageCalendarsPage() {
-  const data = await checkExcessCalendars();
+  const data = await checkCalendarLimits();
 
   if (!data.hasExcess) {
     redirect("/calendar");

@@ -8,9 +8,9 @@ import moment from "moment";
 import { getClientsByCalendar } from "@/actions/clients/get-clients-by-calendar";
 import { getServicesByCalendar } from "@/actions/services/get-services-by-calendar";
 import { getCalendarCollaborator } from "@/actions/calendars/get-calendar-collaborator";
-import { checkExcessCalendars } from "@/actions/calendars/check-excess-calendars";
 import { redirect } from "next/navigation";
 import { YearCalendar } from "@/components/calendar/year-view/year-calendar";
+import { checkCalendarLimits } from "@/actions/calendars/check-calendar-limits";
 
 export default async function CalendarPage({
   searchParams,
@@ -22,8 +22,8 @@ export default async function CalendarPage({
   }>;
 }) {
   // Verificar se há excesso de calendários e redirecionar para a página de gerenciamento
-  const excessData = await checkExcessCalendars();
-  if (excessData.hasExcess) {
+  const limitsData = await checkCalendarLimits();
+  if (limitsData.hasExcess) {
     redirect("/manage-calendars");
   }
 
@@ -147,6 +147,8 @@ export default async function CalendarPage({
       allClients={allClients}
       allServices={allServices}
       allCollaborators={allCollaborators}
+      calendarLimit={limitsData.currentLimit}
+      activeCalendarsCount={limitsData.activeCalendars.length}
     />
   );
 }

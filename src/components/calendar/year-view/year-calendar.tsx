@@ -15,7 +15,6 @@ import { updateCalendar } from "@/actions/calendars/update";
 import { deleteCalendar } from "@/actions/calendars/delete";
 import { deleteManyAppointments } from "@/actions/appointments/deleteMany";
 import { CalendarFormValues } from "@/validators/calendar";
-import { useCalendarLimits } from "@/hooks/use-calendar-limits";
 import { useCalendarStore } from "@/store/calendar-store";
 import { Calendar } from "@prisma/client";
 import { CollaboratorFullData } from "@/types/collaborator";
@@ -34,6 +33,8 @@ interface YearCalendarProps {
   allClients: Record<number, any[]>;
   allServices: Record<number, any[]>;
   allCollaborators: Record<number, any>;
+  calendarLimit?: number; // Limite de calendários do usuário
+  activeCalendarsCount?: number; // Quantidade atual de calendários ativos
 }
 
 // Ref para controlar se o scroll já foi feito (movido para fora do componente)
@@ -48,6 +49,8 @@ function YearCalendarComponent({
   allClients,
   allServices,
   allCollaborators,
+  calendarLimit = 1, // Valor padrão
+  activeCalendarsCount = 0, // Valor padrão
 }: YearCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayModalOpen, setDayModalOpen] = useState(false);
@@ -63,9 +66,11 @@ function YearCalendarComponent({
 
   const router = useRouter();
 
-  const { limit, current } = useCalendarLimits();
   const { limitModalOpen, setLimitModalOpen } = useCalendarStore();
-  const canCreateMore = current < limit;
+
+  // Definir as variáveis current e limit para o modal de limite
+  const current = activeCalendarsCount;
+  const limit = calendarLimit === -1 ? Infinity : calendarLimit; // -1 representa infinito
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -223,7 +228,7 @@ function YearCalendarComponent({
   // Memoizar os componentes de botões para evitar re-renderizações
   const ActionButtons = memo(() => (
     <div className="flex gap-2">
-      <Button variant="outline" size="sm" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>
@@ -249,7 +254,7 @@ function YearCalendarComponent({
   // Memoizar os botões mobile também
   const MobileActionButtons = memo(() => (
     <div className="flex flex-col gap-2 p-4">
-      <Button variant="outline" onClick={() => (canCreateMore ? setOpen(true) : setLimitModalOpen(true))}>
+      <Button variant="outline" onClick={() => setOpen(true)}>
         <Plus className="h-4 w-4 mr-2" />
         Novo Calendário
       </Button>

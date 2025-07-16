@@ -31,6 +31,7 @@ export interface SubscriptionInfo {
   updatedAt: Date;
 }
 
+// In the SubscriptionData interface
 export interface SubscriptionData {
   subscription: SubscriptionInfo | null;
   isTrialActive: boolean;
@@ -42,6 +43,13 @@ export interface SubscriptionData {
     active: boolean;
     expiresAt: string;
   }[];
+}
+
+export interface AdditionalCalendarInfo {
+  id: string;
+  active: boolean;
+  expiresAt: string;
+  purchaseDate?: string; // Add this field
 }
 
 export interface BasePlan {

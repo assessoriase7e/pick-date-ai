@@ -2,7 +2,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { getCalendarLimits } from "./get-calendar-limits";
+import { canActivateMoreCalendars } from "@/lib/calendar-limit";
 
 export async function updateCalendar({
   id,
@@ -41,11 +41,27 @@ export async function updateCalendar({
       };
     }
 
-    // Se está tentando ativar um calendário, verificar limites
-    // Sempre permitir desativar calendários
+    // Verificar se está tentando ativar um calendário
     if (isActive === true && !existingCalendar.isActive) {
-      const limits = await getCalendarLimits();
-      if (!limits.canCreateMore) {
+      // Buscar informações do usuário e assinatura
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          subscription: true,
+        },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          error: "Usuário não encontrado",
+        };
+      }
+
+      // Verificar se o usuário pode ativar mais calendários
+      const canActivate = await canActivateMoreCalendars(userId, user.subscription);
+
+      if (!canActivate) {
         return {
           success: false,
           error: "CALENDAR_LIMIT_EXCEEDED",

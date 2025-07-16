@@ -17,10 +17,10 @@ export type FullCollaborator = Collaborator & {
 };
 
 export type CalendarWithFullCollaborator = Calendar & {
-  collaborator: FUllCollaborator | null;
+  collaborator: FullCollaborator | null;
 };
 
-export type CalendarFullData = CalendarWithCollaborator & {
+export type CalendarFullData = CalendarWithFullCollaborator & {
   appointments: AppointmentFullData[];
 };
 

@@ -2,48 +2,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { getCalendarLimits } from "./get-calendar-limits";
-import { isLifetimeUser } from "@/lib/lifetime-user";
+import { getCalendarLimit } from "@/lib/calendar-limit";
 import { revalidatePath } from "next/cache";
 
 // Função para gerar código de acesso aleatório
 function generateAccessCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-// Função para determinar o limite de calendários baseado no plano
-async function getCalendarLimit(subscription: any, userId: string): Promise<number> {
-  // Verificar se é usuário lifetime primeiro
-  if (await isLifetimeUser()) {
-    return Infinity;
-  }
-
-  if (!subscription || subscription.status !== "active") {
-    return 3; // Plano base: 3 calendários
-  }
-
-  const { stripePriceId } = subscription;
-
-  // Planos com IA não têm limite
-  if (
-    [
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_100!,
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_200!,
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_AI_300!,
-    ].includes(stripePriceId)
-  ) {
-    return Infinity;
-  }
-
-  // Buscar calendários adicionais ativos
-  const additionalCalendars = await prisma.additionalCalendar.count({
-    where: {
-      userId,
-      active: true,
-    },
-  });
-
-  return 3 + additionalCalendars; // 3 base + calendários adicionais
 }
 
 export async function createCalendar({
@@ -83,18 +47,9 @@ export async function createCalendar({
       };
     }
 
-    // VERIFICAÇÃO DE LIMITE - ADICIONAR ESTA PARTE
+    // VERIFICAÇÃO DE LIMITE
     const currentActiveCalendars = user.calendars.length;
     const calendarLimit = await getCalendarLimit(user.subscription, userId);
-
-    // Verificar limites antes de criar
-    const limits = await getCalendarLimits();
-    if (!limits.canCreateMore) {
-      return {
-        success: false,
-        error: "CALENDAR_LIMIT_EXCEEDED",
-      };
-    }
 
     if (currentActiveCalendars >= calendarLimit) {
       return {

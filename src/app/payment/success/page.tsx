@@ -21,6 +21,10 @@ export default function PaymentSuccessPage() {
       });
     }, 1000);
 
+    fetch("/api/revalidate-subscription", { method: "POST" }).catch((error) =>
+      console.error("Erro ao revalidar cache:", error)
+    );
+
     return () => clearInterval(timer);
   }, [router]);
 

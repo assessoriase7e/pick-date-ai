@@ -86,7 +86,7 @@ export function AdditionalCalendarManagement({ additionalCalendars }: Additional
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {calendar.purchaseDate 
+                      {calendar.purchaseDate
                         ? format(new Date(calendar.purchaseDate), "dd/MM/yyyy", { locale: ptBR })
                         : "N/A"}
                     </TableCell>
