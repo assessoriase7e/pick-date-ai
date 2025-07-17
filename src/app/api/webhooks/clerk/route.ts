@@ -79,30 +79,55 @@ export async function POST(req: Request) {
         },
       });
 
-      return NextResponse.json(
-        { success: true, user: newUser },
-        { status: 201 }
-      );
+      return NextResponse.json({ success: true, user: newUser }, { status: 201 });
     } catch (error) {
-      if (
-        (error as any).code === "P2002" &&
-        (error as any).meta?.target?.includes("email")
-      ) {
-        return NextResponse.json(
-          { success: true, message: "User already exists" },
-          { status: 200 }
-        );
+      if ((error as any).code === "P2002" && (error as any).meta?.target?.includes("email")) {
+        return NextResponse.json({ success: true, message: "User already exists" }, { status: 200 });
       }
-      if (
-        (error as any).code === "P2002" &&
-        (error as any).meta?.target?.includes("id")
-      ) {
-        return NextResponse.json(
-          { success: true, message: "User already exists" },
-          { status: 200 }
-        );
+      if ((error as any).code === "P2002" && (error as any).meta?.target?.includes("id")) {
+        return NextResponse.json({ success: true, message: "User already exists" }, { status: 200 });
       }
       return new Response("Error occured while creating user in DB", {
+        status: 500,
+      });
+    }
+  }
+
+  if (eventType === "user.deleted") {
+    const { id } = evt.data;
+
+    try {
+      // Verificar se o usuário existe no banco
+      const existingUser = await prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (!existingUser) {
+        return NextResponse.json(
+          {
+            success: true,
+            message: "User not found in database",
+          },
+          { status: 200 }
+        );
+      }
+
+      // Excluir o usuário do banco
+      await prisma.user.delete({
+        where: { id },
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "User deleted successfully",
+          deletedUserId: id,
+        },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return new Response("Error occured while deleting user from DB", {
         status: 500,
       });
     }
